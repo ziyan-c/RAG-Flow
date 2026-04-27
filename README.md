@@ -259,6 +259,7 @@ commands inherit the working source.
 For Python environments, use the split setup under `scripts/env/`:
 
 ```bash
+rag-flow env install-uv
 rag-flow env create-core
 rag-flow env create-mineru
 rag-flow env create-gpu
@@ -270,6 +271,7 @@ environment, then check MinerU:
 
 ```bash
 rag-flow init china-all
+rag-flow env install-uv
 rag-flow env create-mineru
 rag-flow mineru doctor
 rag-flow mineru run --dry-run
@@ -277,7 +279,8 @@ rag-flow mineru run --dry-run
 
 The default environment strategy is `RAG_FLOW_ENV_MANAGER=auto`:
 prefer micromamba/conda for isolated path-based environments under
-`RAG_FLOW_ENV_ROOT`, and use uv for fast package installs. Keep
+`RAG_FLOW_ENV_ROOT`, and use uv for fast package installs after
+`rag-flow env install-uv` has made it available. Keep
 `RAG_FLOW_ENV_ROOT`, pip/uv caches, conda package caches, Hugging Face cache,
 ModelScope cache, and Torch cache under `~/autodl-tmp` on rented GPU machines.
 The GPU setup uses the PyTorch CUDA 12.8 wheel index by default, which fits

@@ -64,6 +64,7 @@ INIT_SCRIPTS: dict[str, tuple[str, ...]] = {
 }
 
 ENV_SCRIPTS = (
+    "install-uv",
     "create-core",
     "create-mineru",
     "create-gpu",

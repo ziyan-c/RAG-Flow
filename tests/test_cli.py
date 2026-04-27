@@ -48,6 +48,13 @@ def test_env_create_mineru_dry_run(capsys):
     assert "scripts/env/create-mineru.sh" in output
 
 
+def test_env_install_uv_dry_run(capsys):
+    cli.main(["env", "install-uv", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert "scripts/env/install-uv.sh" in output
+
+
 def test_retriever_help_is_local_to_unified_cli(capsys):
     cli.main(["retriever", "--help"])
 
