@@ -9,7 +9,7 @@ testclient = pytest.importorskip("fastapi.testclient")
 TestClient = testclient.TestClient
 
 from rag_flow.api import create_app
-from rag_flow.config import AppConfig, ModelConfig, PathsConfig, RetrievalConfig, ServerConfig
+from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PathsConfig, RetrievalConfig, ServerConfig
 from rag_flow.retrieval import RetrievalResult
 
 
@@ -51,6 +51,20 @@ def make_config(tmp_path: Path, *, api_key: str = "", max_query_chars: int = 400
             retriever_url="http://127.0.0.1:8000/retrieve",
             retriever_api_key=api_key,
             max_query_chars=max_query_chars,
+        ),
+        mineru=MinerUConfig(
+            command="mineru",
+            input_path=tmp_path / "manual.pdf",
+            output_dir=tmp_path / "mineru-output",
+            backend="",
+            model_source="",
+            lang="",
+            extra_args="",
+            package="mineru",
+            version="3.0.9",
+            extra="all",
+            python="",
+            auto_install=False,
         ),
     )
 

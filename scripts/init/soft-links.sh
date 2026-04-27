@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${RAG_FLOW_DATA_DISK:=/root/autodl-tmp}"
+: "${RAG_FLOW_RUNTIME_ROOT:=/root/autodl-tmp}"
+: "${RAG_FLOW_DATA_DISK:=$RAG_FLOW_RUNTIME_ROOT}"
 
 move_and_link() {
   local src=$1

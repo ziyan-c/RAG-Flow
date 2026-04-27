@@ -28,9 +28,9 @@ def _join(value: Any) -> str:
     return str(value or "")
 
 
-def build_page_text_map(mineru_data: list[dict[str, Any]]) -> dict[int, list[str]]:
+def build_page_text_map(content_data: list[dict[str, Any]]) -> dict[int, list[str]]:
     page_text_map: dict[int, list[str]] = defaultdict(list)
-    for block in mineru_data:
+    for block in content_data:
         page_idx = int(block.get("page_idx", 0))
         block_texts = []
         for key in TEXT_KEYS:
@@ -71,9 +71,9 @@ def add_image_descriptions(
 
     base_path = Path(base_dir)
     with Path(input_json).open("r", encoding="utf-8") as f:
-        mineru_data: list[dict[str, Any]] = json.load(f)
+        content_data: list[dict[str, Any]] = json.load(f)
 
-    page_text_map = build_page_text_map(mineru_data)
+    page_text_map = build_page_text_map(content_data)
     device = get_torch_device(feature="Image-description VLM preprocessing")
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
     require_trusted_remote_code_model(model_name, allowed_models=trusted_remote_code_models)
@@ -143,7 +143,7 @@ def add_image_descriptions(
             if "</think>" in output:
                 output = output.split("</think>")[-1].strip()
             if output:
-                mineru_data[req["idx"]]["image_description_vlm"] = output
+                content_data[req["idx"]]["image_description_vlm"] = output
                 captioned_count += 1
 
         del inputs
@@ -154,8 +154,8 @@ def add_image_descriptions(
             torch.cuda.empty_cache()
 
     batch: list[dict[str, Any]] = []
-    for idx in tqdm(range(len(mineru_data)), desc="Processing images"):
-        block = mineru_data[idx]
+    for idx in tqdm(range(len(content_data)), desc="Processing images"):
+        block = content_data[idx]
         if block.get("type") != "image" or not block.get("img_path"):
             continue
         image_path = base_path / block["img_path"]
@@ -189,7 +189,7 @@ def add_image_descriptions(
         process_batch(batch)
 
     with Path(output_json).open("w", encoding="utf-8") as f:
-        json.dump(mineru_data, f, ensure_ascii=False, indent=2)
+        json.dump(content_data, f, ensure_ascii=False, indent=2)
     print(f"Generated {captioned_count} image descriptions at {output_json}")
 
 

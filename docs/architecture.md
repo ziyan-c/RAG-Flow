@@ -40,6 +40,6 @@ helps recover table continuation pages that had no MinerU text block.
 
 ## Runtime Services
 
-- Retriever service: `rag-flow-retriever` on `127.0.0.1:8000`
+- Retriever service: `rag-flow retriever` on `127.0.0.1:8000`
 - LLM service: OpenAI-compatible SGLang endpoint on `127.0.0.1:8080`
-- Chat client: `rag-flow-chat`
+- Chat client: `rag-flow chat`

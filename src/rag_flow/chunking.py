@@ -20,12 +20,12 @@ def create_page_level_chunks(
     source_name: str,
 ) -> list[dict[str, Any]]:
     with Path(json_path).open("r", encoding="utf-8") as f:
-        mineru_data = json.load(f)
+        content_data = json.load(f)
 
     page_contents: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
 
-    for block in mineru_data:
+    for block in content_data:
         page_idx = int(block.get("page_idx", 0))
         block_type = block.get("type")
 

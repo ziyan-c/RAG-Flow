@@ -11,7 +11,7 @@ DEFAULT_BASE_DIR = Path(
     "example-technical-manual/hybrid_auto"
 )
 DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
-DEFAULT_LOCAL_ENV_FILE = Path(".secrets/rag-flow.env")
+DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
 
 
 def find_upwards(relative_path: str | Path, start: Path | None = None) -> Path | None:
@@ -35,7 +35,7 @@ def env_path_base(env_file: str | os.PathLike[str] | None) -> Path | None:
     if not env_file:
         return None
     env_path = Path(env_file).expanduser().resolve()
-    if env_path.parent.name == ".secrets":
+    if env_path.parent.name == ".local":
         return env_path.parent.parent
     return env_path.parent
 
@@ -71,6 +71,10 @@ class EnvView:
 
     def float(self, key: str, default: float) -> float:
         return float(self.get(key, str(default)))
+
+    def bool(self, key: str, default: bool) -> bool:
+        value = self.get(key, "1" if default else "0").strip().lower()
+        return value not in {"0", "false", "no", "off"}
 
     def csv(self, key: str, default: str) -> tuple[str, ...]:
         return tuple(item.strip() for item in self.get(key, default).split(",") if item.strip())
@@ -138,11 +142,28 @@ class ServerConfig:
 
 
 @dataclass(frozen=True)
+class MinerUConfig:
+    command: str
+    input_path: Path
+    output_dir: Path
+    backend: str
+    model_source: str
+    lang: str
+    extra_args: str
+    package: str
+    version: str
+    extra: str
+    python: str
+    auto_install: bool
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
     retrieval: RetrievalConfig
     server: ServerConfig
+    mineru: MinerUConfig
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -209,4 +230,19 @@ class AppConfig:
             max_query_chars=env.int("RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS", 4000),
         )
 
-        return cls(paths=paths, models=models, retrieval=retrieval, server=server)
+        mineru = MinerUConfig(
+            command=env.get("RAG_FLOW_MINERU_COMMAND", "mineru"),
+            input_path=env.path("RAG_FLOW_MINERU_INPUT_PATH", paths.source_pdf),
+            output_dir=env.path("RAG_FLOW_MINERU_OUTPUT_DIR", base_dir.parent),
+            backend=env.get("RAG_FLOW_MINERU_BACKEND", ""),
+            model_source=env.get("RAG_FLOW_MINERU_MODEL_SOURCE", ""),
+            lang=env.get("RAG_FLOW_MINERU_LANG", ""),
+            extra_args=env.get("RAG_FLOW_MINERU_EXTRA_ARGS", ""),
+            package=env.get("RAG_FLOW_MINERU_PACKAGE", "mineru"),
+            version=env.get("RAG_FLOW_MINERU_VERSION", "3.0.9"),
+            extra=env.get("RAG_FLOW_MINERU_EXTRA", "all"),
+            python=env.get("RAG_FLOW_MINERU_PYTHON", ""),
+            auto_install=env.bool("RAG_FLOW_AUTO_INSTALL_MINERU", False),
+        )
+
+        return cls(paths=paths, models=models, retrieval=retrieval, server=server, mineru=mineru)

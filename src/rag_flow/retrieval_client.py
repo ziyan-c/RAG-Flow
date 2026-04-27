@@ -61,7 +61,7 @@ def interactive(api_url: str, *, print_context: bool, timeout: int, api_key: str
                 test_query(api_url, query, print_context=print_context, timeout=timeout, api_key=api_key)
             except Exception as exc:
                 if exc.__class__.__name__ == "ConnectionError":
-                    print(f"Cannot connect to {api_url}. Is rag-flow-retriever running?")
+                    print(f"Cannot connect to {api_url}. Is `rag-flow retriever` running?")
                 else:
                     print(f"Request failed: {exc}")
 

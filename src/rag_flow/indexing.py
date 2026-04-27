@@ -144,6 +144,7 @@ def upsert_colpali_vectors(
     config: AppConfig,
     *,
     pdf_path: str | Path | None = None,
+    source_name: str | None = None,
     batch_size: int = 8,
     dpi: int = 200,
 ) -> None:
@@ -157,6 +158,7 @@ def upsert_colpali_vectors(
     client = QdrantClient(path=str(config.paths.db_path))
     device = get_torch_device(feature="ColPali visual indexing")
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    resolved_source_name = source_name or config.paths.source_name
 
     processor = ColPaliProcessor.from_pretrained(config.models.colpali_model)
     model = ColPali.from_pretrained(
@@ -185,7 +187,7 @@ def upsert_colpali_vectors(
         for page_idx, embedding in zip(batch_page_indices, embeddings):
             points_to_update.append(
                 models.PointVectors(
-                    id=point_id(config.paths.source_name, page_idx),
+                    id=point_id(resolved_source_name, page_idx),
                     vector={"page-colpali": embedding.cpu().float().tolist()},
                 )
             )
@@ -203,9 +205,9 @@ def upsert_colpali_vectors(
                         collection_name=config.paths.collection_name,
                         points=[
                             models.PointStruct(
-                                id=point_id(config.paths.source_name, current_page_idx),
+                                id=point_id(resolved_source_name, current_page_idx),
                                 payload={
-                                    "source": config.paths.source_name,
+                                    "source": resolved_source_name,
                                     "page_idx": current_page_idx,
                                     "parent_page_idx": last_valid_page_idx,
                                     "is_table_continuation": True,

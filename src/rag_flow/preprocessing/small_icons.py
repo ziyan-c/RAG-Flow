@@ -72,16 +72,16 @@ def concat_images_vertically(images: list[Any]) -> Any | None:
 
 def build_table_footnote_crop(
     *,
-    mineru_data: list[dict[str, Any]],
+    content_data: list[dict[str, Any]],
     pdf_images: list[Any],
     block_idx: int,
 ) -> Any | None:
-    block = mineru_data[block_idx]
+    block = content_data[block_idx]
     last_idx = block_idx
     lookahead_idx = block_idx + 1
 
-    while lookahead_idx < len(mineru_data):
-        next_block = mineru_data[lookahead_idx]
+    while lookahead_idx < len(content_data):
+        next_block = content_data[lookahead_idx]
         next_type = next_block.get("type")
         if next_type in IGNORE_TYPES:
             lookahead_idx += 1
@@ -94,7 +94,7 @@ def build_table_footnote_crop(
         last_idx = lookahead_idx
         lookahead_idx += 1
 
-    last_block = mineru_data[last_idx]
+    last_block = content_data[last_idx]
     page_idx = int(last_block.get("page_idx", 0))
     if page_idx >= len(pdf_images) or "bbox" not in last_block:
         return None
@@ -103,8 +103,8 @@ def build_table_footnote_crop(
     y0_norm = last_block["bbox"][3]
     y1_norm = 1000
 
-    for idx in range(last_idx + 1, len(mineru_data)):
-        next_block = mineru_data[idx]
+    for idx in range(last_idx + 1, len(content_data)):
+        next_block = content_data[idx]
         if next_block.get("page_idx") != page_idx:
             break
         if next_block.get("type") not in {"header", "footer", "page_number"} and "bbox" in next_block:
@@ -162,7 +162,7 @@ def add_small_icon_text(
     model.generation_config.pad_token_id = processor.tokenizer.eos_token_id
 
     with Path(input_json).open("r", encoding="utf-8") as f:
-        mineru_data: list[dict[str, Any]] = json.load(f)
+        content_data: list[dict[str, Any]] = json.load(f)
     pdf_images = convert_from_path(str(pdf_path), dpi=dpi)
 
     patched_count = 0
@@ -223,8 +223,8 @@ def add_small_icon_text(
             if "No missing" not in output and "[Icon:" in output:
                 idx = req["idx"]
                 key = req["key"]
-                mineru_data[idx][key] = output.split("\n") if req["is_list"] else output
-                mineru_data[idx]["vlm-small-icon-patched"] = True
+                content_data[idx][key] = output.split("\n") if req["is_list"] else output
+                content_data[idx]["vlm-small-icon-patched"] = True
                 patched_count += 1
 
         del inputs
@@ -235,8 +235,8 @@ def add_small_icon_text(
             torch.cuda.empty_cache()
 
     batch: list[dict[str, Any]] = []
-    for idx in tqdm(range(len(mineru_data)), desc="Scanning bboxes"):
-        block = mineru_data[idx]
+    for idx in tqdm(range(len(content_data)), desc="Scanning bboxes"):
+        block = content_data[idx]
         block_type = block.get("type")
         if block_type in IGNORE_TYPES or block_type not in TEXT_FIELD_MAP or "bbox" not in block:
             continue
@@ -252,7 +252,7 @@ def add_small_icon_text(
             final_image = None
             if key == "table_footnote":
                 final_image = build_table_footnote_crop(
-                    mineru_data=mineru_data,
+                    content_data=content_data,
                     pdf_images=pdf_images,
                     block_idx=idx,
                 )
@@ -263,8 +263,8 @@ def add_small_icon_text(
                     crops.append(base_image)
 
                 lookahead_idx = idx + 1
-                while lookahead_idx < len(mineru_data):
-                    next_block = mineru_data[lookahead_idx]
+                while lookahead_idx < len(content_data):
+                    next_block = content_data[lookahead_idx]
                     next_type = next_block.get("type")
                     if next_type in IGNORE_TYPES:
                         lookahead_idx += 1
@@ -314,7 +314,7 @@ def add_small_icon_text(
         process_batch(batch)
 
     with Path(output_json).open("w", encoding="utf-8") as f:
-        json.dump(mineru_data, f, ensure_ascii=False, indent=2)
+        json.dump(content_data, f, ensure_ascii=False, indent=2)
     print(f"Patched {patched_count} missing icon texts at {output_json}")
 
 

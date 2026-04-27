@@ -19,5 +19,7 @@ models/
 # Generated manual artifacts
 *_content_list*.json
 *_page_level_chunks.json
-# Local secrets
-.secrets/
+# Local private files
+.local
+.local/
+.local.backup-*/

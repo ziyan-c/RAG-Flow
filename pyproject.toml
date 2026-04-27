@@ -33,20 +33,15 @@ preprocess = [
   "qwen-vl-utils",
   "tqdm",
 ]
+"mineru" = [
+  "mineru[all]==3.0.9; python_version < '3.14'",
+]
 dev = [
   "pytest>=8",
 ]
 
 [project.scripts]
-rag-flow-patch-icons = "rag_flow.preprocessing.small_icons:main"
-rag-flow-caption-images = "rag_flow.preprocessing.image_descriptions:main"
-rag-flow-highlight-bbox = "rag_flow.preprocessing.bbox:main"
-rag-flow-chunk = "rag_flow.chunking:main"
-rag-flow-index = "rag_flow.indexing:main"
-rag-flow-retriever = "rag_flow.api:main"
-rag-flow-test-retriever = "rag_flow.retrieval_client:main"
-rag-flow-chat = "rag_flow.chat_cli:main"
-rag-flow-agent-demo = "rag_flow.agentic:main"
+rag-flow = "rag_flow.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import logging
 
 from fastapi import FastAPI, Header, HTTPException, status
@@ -80,11 +81,16 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
 app = create_app()
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     import uvicorn
 
     config = AppConfig.from_env()
-    uvicorn.run("rag_flow.api:app", host=config.server.host, port=config.server.port)
+    parser = argparse.ArgumentParser(description="Start the RAG Flow retrieval API.")
+    parser.add_argument("--host", default=config.server.host)
+    parser.add_argument("--port", type=int, default=config.server.port)
+    parser.add_argument("--reload", action="store_true")
+    args = parser.parse_args(argv)
+    uvicorn.run("rag_flow.api:app", host=args.host, port=args.port, reload=args.reload)
 
 
 if __name__ == "__main__":

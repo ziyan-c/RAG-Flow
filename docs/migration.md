@@ -2,7 +2,7 @@
 
 The original workspace was a collection of focused scripts:
 
-- `post-mineru...` became `src/rag_flow/preprocessing/`
+- legacy PDF post-processing scripts became `src/rag_flow/preprocessing/`
 - `content-list-json-chunking/chunking.py` became `src/rag_flow/chunking.py`
 - `qdrant/*.py` became `src/rag_flow/indexing.py` and `src/rag_flow/retrieval.py`
 - `qdrant/qdrant-test-retrieval-server.py` became `src/rag_flow/retrieval_client.py`
@@ -13,6 +13,10 @@ The original workspace was a collection of focused scripts:
 
 Hard-coded paths are now environment variables. Hard-coded credentials were
 removed rather than migrated.
+
+Workflows use the unified `rag-flow` command, for example
+`rag-flow init china-all`, `rag-flow env create-mineru`, and
+`rag-flow ingest`.
 
 ## Compatibility Notes
 
