@@ -80,9 +80,19 @@ mkdir -p \
 
 if truthy "$RAG_FLOW_INIT_REWRITE_APT"; then
   if [[ -f /etc/apt/sources.list ]]; then
-    cp /etc/apt/sources.list "/etc/apt/sources.list.bak.$(date +%Y%m%d%H%M%S)"
-    sed -i -E "s#archive.ubuntu.com|security.ubuntu.com|ports.ubuntu.com|mirrors.tuna.tsinghua.edu.cn|repo.huaweicloud.com#$RAG_FLOW_INIT_APT_MIRROR#g" /etc/apt/sources.list
-    if truthy "$RAG_FLOW_INIT_APT_UPDATE"; then
+    apt_sources_changed=0
+    tmp_sources="$(mktemp)"
+    sed -E "s#archive.ubuntu.com|security.ubuntu.com|ports.ubuntu.com|mirrors.tuna.tsinghua.edu.cn|repo.huaweicloud.com#$RAG_FLOW_INIT_APT_MIRROR#g" /etc/apt/sources.list > "$tmp_sources"
+    if cmp -s "$tmp_sources" /etc/apt/sources.list; then
+      echo "Apt sources already configured."
+      rm -f "$tmp_sources"
+    else
+      apt_sources_changed=1
+      cp /etc/apt/sources.list "/etc/apt/sources.list.bak.$(date +%Y%m%d%H%M%S)"
+      cat "$tmp_sources" > /etc/apt/sources.list
+      rm -f "$tmp_sources"
+    fi
+    if truthy "$RAG_FLOW_INIT_APT_UPDATE" && [[ "$apt_sources_changed" == "1" ]]; then
       apt-get update -y
     fi
   else
@@ -100,8 +110,8 @@ if truthy "$RAG_FLOW_INIT_CONFIGURE_LOCALE"; then
 fi
 
 if truthy "$RAG_FLOW_INIT_WRITE_BASHRC"; then
-  if ! grep -q "RAG Flow AutoDL Environment" "$RAG_FLOW_INIT_BASHRC" 2>/dev/null; then
-    cat >> "$RAG_FLOW_INIT_BASHRC" <<EOF
+  write_bashrc_block() {
+    cat <<EOF
 
 # --- RAG Flow AutoDL Environment ---
 export LC_ALL=$RAG_FLOW_INIT_LOCALE
@@ -120,7 +130,17 @@ export UV_CACHE_DIR=$RAG_FLOW_INIT_UV_CACHE_DIR
 export CONDA_PKGS_DIRS=$RAG_FLOW_INIT_CONDA_PKGS_DIRS
 # -----------------------------------
 EOF
-  fi
+  }
+  tmp_bashrc="$(mktemp)"
+  mkdir -p "$(dirname "$RAG_FLOW_INIT_BASHRC")"
+  touch "$RAG_FLOW_INIT_BASHRC"
+  awk '
+    /# --- RAG Flow AutoDL Environment ---/ { skip = 1; next }
+    /# -----------------------------------/ && skip { skip = 0; next }
+    !skip { print }
+  ' "$RAG_FLOW_INIT_BASHRC" > "$tmp_bashrc"
+  write_bashrc_block >> "$tmp_bashrc"
+  mv "$tmp_bashrc" "$RAG_FLOW_INIT_BASHRC"
 fi
 
 if truthy "$RAG_FLOW_INIT_WRITE_CONDARC"; then

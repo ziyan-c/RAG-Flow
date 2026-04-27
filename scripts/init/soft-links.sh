@@ -9,19 +9,36 @@ move_and_link() {
   local target_parent=$2
   local dir_name
   local target_path
+  local current_target
   dir_name=$(basename "$src")
   target_path="$target_parent/$dir_name"
 
   mkdir -p "$target_parent"
-  if [ ! -d "$target_path" ]; then
-    if [ -d "$src" ] && [ ! -L "$src" ]; then
-      mv "$src" "$target_parent/"
-    else
-      mkdir -p "$target_path"
+
+  if [ -L "$src" ]; then
+    current_target="$(readlink "$src")"
+    mkdir -p "$target_path"
+    if [ "$current_target" = "$target_path" ]; then
+      echo "$src -> $target_path"
+      return
     fi
+    rm "$src"
+  elif [ -d "$src" ]; then
+    if [ -d "$target_path" ]; then
+      if [[ -n "$(find "$src" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+        echo "Refuse to replace non-empty $src because $target_path already exists." >&2
+        echo "Move or merge $src into $target_path, then rerun." >&2
+        exit 1
+      fi
+      rmdir "$src"
+    else
+      mv "$src" "$target_parent/"
+    fi
+  else
+    rm -rf "$src"
+    mkdir -p "$target_path"
   fi
 
-  rm -rf "$src"
   ln -s "$target_path" "$src"
   echo "$src -> $target_path"
 }
