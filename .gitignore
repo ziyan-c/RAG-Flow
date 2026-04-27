@@ -19,3 +19,5 @@ models/
 # Generated manual artifacts
 *_content_list*.json
 *_page_level_chunks.json
+# Local secrets
+.secrets/

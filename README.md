@@ -52,13 +52,13 @@ SGLang package compatibility is sensitive.
 Patch small icons:
 
 ```bash
-python -m rag_flow.preprocessing.small_icons
+rag-flow-patch-icons
 ```
 
 Generate image descriptions:
 
 ```bash
-python -m rag_flow.preprocessing.image_descriptions
+rag-flow-caption-images
 ```
 
 Build page chunks:
@@ -83,6 +83,12 @@ Inspect the Qdrant collection:
 
 ```bash
 rag-flow-index inspect
+```
+
+Test the retrieval API:
+
+```bash
+rag-flow-test-retriever "How do I configure alarms?"
 ```
 
 Start the retriever API:

@@ -5,6 +5,7 @@ The original workspace was a collection of focused scripts:
 - `post-mineru...` became `src/rag_flow/preprocessing/`
 - `content-list-json-chunking/chunking.py` became `src/rag_flow/chunking.py`
 - `qdrant/*.py` became `src/rag_flow/indexing.py` and `src/rag_flow/retrieval.py`
+- `qdrant/qdrant-test-retrieval-server.py` became `src/rag_flow/retrieval_client.py`
 - `chatbot/qwen3.5.py` became `src/rag_flow/chat_cli.py`
 - `chatbot/qwen3.5-sglang.sh` became `scripts/serve-llm-sglang.sh`
 - `chatbot/ssh-tunnel.sh` became `scripts/ssh-tunnel.example.sh`
