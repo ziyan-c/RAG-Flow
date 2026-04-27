@@ -3,7 +3,7 @@ from __future__ import annotations
 from rag_flow.config import AppConfig, resolve_env_file
 
 
-def test_resolve_env_file_finds_secrets_env_from_child_directory(tmp_path, monkeypatch):
+def test_resolve_env_file_finds_local_env_from_child_directory(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
     env_file.write_text("RAG_FLOW_COLLECTION=test\n", encoding="utf-8")
@@ -23,7 +23,7 @@ def test_resolve_env_file_prefers_explicit_env_var(tmp_path, monkeypatch):
     assert resolve_env_file() == str(explicit)
 
 
-def test_relative_paths_in_secrets_env_resolve_from_repo_root(tmp_path, monkeypatch):
+def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
     env_file.write_text(
