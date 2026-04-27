@@ -12,6 +12,7 @@ DEFAULT_BASE_DIR = Path(
 )
 DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
 DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
+DEFAULT_RUNTIME_ENV_FILE = Path("autodl-tmp/.local/rag-flow.env")
 
 
 def find_upwards(relative_path: str | Path, start: Path | None = None) -> Path | None:
@@ -28,7 +29,18 @@ def resolve_env_file(env_file: str | os.PathLike[str] | None = None) -> str | os
         return env_file
     if os.environ.get("RAG_FLOW_ENV_FILE"):
         return os.environ["RAG_FLOW_ENV_FILE"]
-    return find_upwards(DEFAULT_LOCAL_ENV_FILE)
+    local_env = find_upwards(DEFAULT_LOCAL_ENV_FILE)
+    if local_env:
+        return local_env
+    runtime_root = os.environ.get("RAG_FLOW_RUNTIME_ROOT")
+    runtime_candidates = []
+    if runtime_root:
+        runtime_candidates.append(Path(runtime_root).expanduser() / ".local" / "rag-flow.env")
+    runtime_candidates.append(Path.home() / DEFAULT_RUNTIME_ENV_FILE)
+    for candidate in runtime_candidates:
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def env_path_base(env_file: str | os.PathLike[str] | None) -> Path | None:

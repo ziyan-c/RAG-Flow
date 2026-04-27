@@ -81,6 +81,34 @@ def test_china_source_rewrites_single_bashrc_block(tmp_path):
     assert "export HF_ENDPOINT=https://mirror-a.example" not in text
 
 
+def test_china_source_repairs_unusable_env_parent_with_symlink(tmp_path):
+    broken_parent = tmp_path / "repo-local"
+    broken_parent.symlink_to(tmp_path / "missing-target", target_is_directory=True)
+    runtime_root = tmp_path / "runtime"
+    env = os.environ.copy()
+    env.update(
+        {
+            "HOME": str(tmp_path / "home"),
+            "RAG_FLOW_ENV_FILE": str(broken_parent / "rag-flow.env"),
+            "RAG_FLOW_RUNTIME_ROOT": str(runtime_root),
+            "RAG_FLOW_INIT_REWRITE_APT": "0",
+            "RAG_FLOW_INIT_CONFIGURE_LOCALE": "0",
+            "RAG_FLOW_INIT_WRITE_BASHRC": "0",
+            "RAG_FLOW_INIT_WRITE_CONDARC": "0",
+            "RAG_FLOW_INIT_CONDA_CLEAN_INDEX": "0",
+            "RAG_FLOW_INIT_MIRROR_PROBE": "0",
+        }
+    )
+
+    subprocess.run(["bash", str(ROOT / "scripts/init/china-source.sh")], check=True, env=env)
+
+    fallback_env = runtime_root / ".local" / "rag-flow.env"
+    assert broken_parent.is_symlink()
+    assert broken_parent.resolve() == runtime_root / ".local"
+    assert fallback_env.exists()
+    assert "RAG_FLOW_INIT_APT_MIRROR=mirrors.aliyun.com" in fallback_env.read_text(encoding="utf-8")
+
+
 def test_china_source_falls_back_to_tencent_for_managed_defaults(tmp_path):
     env_file = tmp_path / "rag-flow.env"
     condarc = tmp_path / ".condarc"

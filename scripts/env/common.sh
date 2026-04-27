@@ -3,7 +3,34 @@ set -euo pipefail
 
 RAG_FLOW_ENV_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RAG_FLOW_REPO_ROOT="$(cd "$RAG_FLOW_ENV_SCRIPT_DIR/../.." && pwd)"
-RAG_FLOW_ENV_FILE="${RAG_FLOW_ENV_FILE:-$RAG_FLOW_REPO_ROOT/.local/rag-flow.env}"
+
+resolve_env_file() {
+  local preferred="${RAG_FLOW_ENV_FILE:-$RAG_FLOW_REPO_ROOT/.local/rag-flow.env}"
+  local parent
+  local fallback_dir
+  local backup_path
+  parent="$(dirname "$preferred")"
+  if [[ -d "$parent" || ( ! -e "$parent" && ! -L "$parent" ) ]]; then
+    echo "$preferred"
+    return
+  fi
+  fallback_dir="${RAG_FLOW_RUNTIME_ROOT:-$HOME/autodl-tmp}/.local"
+  mkdir -p "$fallback_dir"
+  if [[ -L "$parent" ]]; then
+    rm "$parent"
+    ln -s "$fallback_dir" "$parent"
+    echo "Repaired env directory symlink: $parent -> $fallback_dir" >&2
+  else
+    backup_path="$parent.bak.$(date +%Y%m%d%H%M%S)"
+    mv "$parent" "$backup_path"
+    ln -s "$fallback_dir" "$parent"
+    echo "Moved unusable env directory path to: $backup_path" >&2
+    echo "Created env directory symlink: $parent -> $fallback_dir" >&2
+  fi
+  echo "$preferred"
+}
+
+RAG_FLOW_ENV_FILE="$(resolve_env_file)"
 
 load_env_file() {
   local file="$1"

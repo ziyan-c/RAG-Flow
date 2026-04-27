@@ -23,6 +23,21 @@ def test_resolve_env_file_prefers_explicit_env_var(tmp_path, monkeypatch):
     assert resolve_env_file() == str(explicit)
 
 
+def test_resolve_env_file_uses_runtime_fallback(tmp_path, monkeypatch):
+    runtime_root = tmp_path / "runtime"
+    env_file = runtime_root / ".local" / "rag-flow.env"
+    env_file.parent.mkdir(parents=True)
+    env_file.write_text("RAG_FLOW_COLLECTION=test\n", encoding="utf-8")
+    child = tmp_path / "nested" / "workdir"
+    child.mkdir(parents=True)
+
+    monkeypatch.chdir(child)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.setenv("RAG_FLOW_RUNTIME_ROOT", str(runtime_root))
+
+    assert resolve_env_file() == env_file
+
+
 def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
