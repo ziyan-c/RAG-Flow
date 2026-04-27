@@ -250,6 +250,12 @@ channels without editing the script. The individual helpers remain available
 as `rag-flow init soft-links`, `rag-flow init cpu-cores`, and
 `rag-flow init china-sources`.
 
+For China mirrors, `RAG_FLOW_INIT_MIRROR_ORDER=aliyun,tencent,tuna` is the
+default. `china-sources` probes apt, pip/uv, and conda mirrors independently,
+uses the first reachable profile for each category, and writes the selected
+managed defaults back to `.local/rag-flow.env` so later `rag-flow env ...`
+commands inherit the working source.
+
 For Python environments, use the split setup under `scripts/env/`:
 
 ```bash

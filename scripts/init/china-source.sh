@@ -39,6 +39,219 @@ truthy() {
   esac
 }
 
+set_env_var() {
+  local key="$1"
+  local value="$2"
+  local file="${3:-$ENV_FILE}"
+  local tmp_file
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
+  tmp_file="$(mktemp)"
+  awk -v key="$key" -v value="$value" '
+    BEGIN { replaced = 0 }
+    $0 ~ "^" key "=" {
+      print key "=" value
+      replaced = 1
+      next
+    }
+    { print }
+    END {
+      if (!replaced) {
+        print key "=" value
+      }
+    }
+  ' "$file" > "$tmp_file"
+  mv "$tmp_file" "$file"
+}
+
+normalize_mirror_profile() {
+  case "${1:-}" in
+    ali|aliyun|alicloud) echo "aliyun" ;;
+    qq|qcloud|tencent|tencentyun) echo "tencent" ;;
+    qinghua|tsinghua|tuna) echo "tuna" ;;
+    bfsu) echo "bfsu" ;;
+    sjtu|sjtug) echo "sjtug" ;;
+    *) echo "${1:-}" ;;
+  esac
+}
+
+profile_apt_mirror() {
+  case "$(normalize_mirror_profile "$1")" in
+    aliyun) echo "mirrors.aliyun.com" ;;
+    tencent) echo "mirrors.cloud.tencent.com" ;;
+    tuna) echo "mirrors.tuna.tsinghua.edu.cn" ;;
+    bfsu) echo "mirrors.bfsu.edu.cn" ;;
+    sjtug) echo "mirror.sjtu.edu.cn" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+profile_pip_index() {
+  case "$(normalize_mirror_profile "$1")" in
+    aliyun) echo "https://mirrors.aliyun.com/pypi/simple/" ;;
+    tencent) echo "https://mirrors.cloud.tencent.com/pypi/simple/" ;;
+    tuna) echo "https://pypi.tuna.tsinghua.edu.cn/simple/" ;;
+    bfsu) echo "https://mirrors.bfsu.edu.cn/pypi/web/simple/" ;;
+    sjtug) echo "https://mirror.sjtu.edu.cn/pypi/web/simple/" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+profile_conda_base() {
+  case "$(normalize_mirror_profile "$1")" in
+    aliyun) echo "https://mirrors.aliyun.com/anaconda" ;;
+    tencent) echo "https://mirrors.cloud.tencent.com/anaconda" ;;
+    tuna) echo "https://mirrors.tuna.tsinghua.edu.cn/anaconda" ;;
+    bfsu) echo "https://mirrors.bfsu.edu.cn/anaconda" ;;
+    sjtug) echo "https://mirror.sjtu.edu.cn/anaconda" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+profile_probe_url() {
+  local kind="$1"
+  local profile="$2"
+  case "$kind" in
+    apt) echo "https://$(profile_apt_mirror "$profile")/ubuntu/" ;;
+    pip) echo "$(profile_pip_index "$profile")" ;;
+    conda) echo "$(profile_conda_base "$profile")/pkgs/main/linux-64/repodata.json" ;;
+    *) return 1 ;;
+  esac
+}
+
+probe_url() {
+  local url="$1"
+  local timeout="$2"
+  local python_bin
+  python_bin="$(command -v python3 || command -v python || true)"
+  if [[ -z "$python_bin" ]]; then
+    return 0
+  fi
+  "$python_bin" - "$url" "$timeout" <<'PY'
+import sys
+import urllib.error
+import urllib.request
+
+url = sys.argv[1]
+timeout = float(sys.argv[2])
+
+def request(method):
+    req = urllib.request.Request(url, method=method, headers={"Range": "bytes=0-0"})
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return 200 <= response.status < 400
+
+try:
+    ok = request("HEAD")
+except urllib.error.HTTPError as exc:
+    if exc.code not in {403, 405}:
+        raise SystemExit(1)
+    try:
+        ok = request("GET")
+    except Exception:
+        raise SystemExit(1)
+except Exception:
+    raise SystemExit(1)
+
+raise SystemExit(0 if ok else 1)
+PY
+}
+
+profile_forced_bad() {
+  local profile="$1"
+  local -a raw=()
+  local candidate
+  [[ -z "${RAG_FLOW_INIT_MIRROR_FAIL_PROFILES:-}" ]] && return 1
+  IFS=', ' read -r -a raw <<< "${RAG_FLOW_INIT_MIRROR_FAIL_PROFILES:-}"
+  for candidate in "${raw[@]}"; do
+    [[ -z "$candidate" ]] && continue
+    if [[ "$(normalize_mirror_profile "$candidate")" == "$profile" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+profile_available() {
+  local kind="$1"
+  local profile="$2"
+  local url
+  if profile_forced_bad "$profile"; then
+    echo "Mirror profile disabled for $kind: $profile" >&2
+    return 1
+  fi
+  if ! truthy "$RAG_FLOW_INIT_MIRROR_PROBE"; then
+    return 0
+  fi
+  url="$(profile_probe_url "$kind" "$profile")"
+  if probe_url "$url" "$RAG_FLOW_INIT_MIRROR_PROBE_TIMEOUT"; then
+    return 0
+  fi
+  echo "Mirror probe failed for $kind profile '$profile': $url" >&2
+  return 1
+}
+
+select_mirror_profile() {
+  local kind="$1"
+  local fallback=""
+  local raw
+  local profile
+  local -a candidates=()
+  IFS=', ' read -r -a candidates <<< "$RAG_FLOW_INIT_MIRROR_ORDER"
+  for raw in "${candidates[@]}"; do
+    [[ -z "$raw" ]] && continue
+    profile="$(normalize_mirror_profile "$raw")"
+    fallback="$profile"
+    if profile_available "$kind" "$profile"; then
+      echo "$profile"
+      return 0
+    fi
+  done
+  echo "${fallback:-aliyun}"
+}
+
+managed_mirror_value() {
+  local kind="$1"
+  local value="${2:-}"
+  [[ -z "$value" ]] && return 0
+  case "$kind:$value" in
+    apt:mirrors.aliyun.com|apt:mirrors.cloud.tencent.com|apt:mirrors.tencent.com|apt:mirrors.tuna.tsinghua.edu.cn|apt:mirrors.bfsu.edu.cn|apt:mirror.sjtu.edu.cn)
+      return 0
+      ;;
+  esac
+  case "$kind" in
+    pip)
+      case "$value" in
+        https://mirrors.aliyun.com/pypi/simple*|https://mirrors.cloud.tencent.com/pypi/simple*|https://mirrors.tencent.com/pypi/simple*|https://pypi.tuna.tsinghua.edu.cn/simple*|https://mirrors.bfsu.edu.cn/pypi/web/simple*|https://mirror.sjtu.edu.cn/pypi/web/simple*)
+          return 0
+          ;;
+      esac
+      ;;
+    conda)
+      case "$value" in
+        https://mirrors.aliyun.com/anaconda*|https://mirrors.cloud.tencent.com/anaconda*|https://mirrors.tencent.com/anaconda*|https://mirrors.tuna.tsinghua.edu.cn/anaconda*|https://mirrors.bfsu.edu.cn/anaconda*|https://mirror.sjtu.edu.cn/anaconda*)
+          return 0
+          ;;
+      esac
+      ;;
+  esac
+  return 1
+}
+
+choose_managed_value() {
+  local kind="$1"
+  local current="$2"
+  local selected="$3"
+  if managed_mirror_value "$kind" "$current"; then
+    echo "$selected"
+    return
+  fi
+  echo "$current"
+}
+
+: "${RAG_FLOW_INIT_MIRROR_ORDER:=aliyun,tencent,tuna}"
+: "${RAG_FLOW_INIT_MIRROR_PROBE:=1}"
+: "${RAG_FLOW_INIT_MIRROR_PROBE_TIMEOUT:=5}"
+: "${RAG_FLOW_INIT_UPDATE_ENV_FILE:=1}"
 : "${RAG_FLOW_INIT_REWRITE_APT:=1}"
 : "${RAG_FLOW_INIT_APT_MIRROR:=mirrors.aliyun.com}"
 : "${RAG_FLOW_INIT_APT_UPDATE:=1}"
@@ -67,8 +280,25 @@ truthy() {
 : "${RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL:=https://mirrors.aliyun.com/anaconda/cloud}"
 : "${RAG_FLOW_INIT_CONDA_CLEAN_INDEX:=1}"
 
+apt_mirror_profile="$(select_mirror_profile apt)"
+pip_mirror_profile="$(select_mirror_profile pip)"
+conda_mirror_profile="$(select_mirror_profile conda)"
+selected_apt_mirror="$(profile_apt_mirror "$apt_mirror_profile")"
+selected_pip_index="$(profile_pip_index "$pip_mirror_profile")"
+selected_conda_base="$(profile_conda_base "$conda_mirror_profile")"
+
+RAG_FLOW_INIT_APT_MIRROR="$(choose_managed_value apt "$RAG_FLOW_INIT_APT_MIRROR" "$selected_apt_mirror")"
+RAG_FLOW_INIT_PIP_INDEX_URL="$(choose_managed_value pip "$RAG_FLOW_INIT_PIP_INDEX_URL" "$selected_pip_index")"
+RAG_FLOW_INIT_UV_INDEX_URL="$(choose_managed_value pip "$RAG_FLOW_INIT_UV_INDEX_URL" "$selected_pip_index")"
+RAG_FLOW_INIT_CONDA_MAIN_CHANNEL="$(choose_managed_value conda "$RAG_FLOW_INIT_CONDA_MAIN_CHANNEL" "$selected_conda_base/pkgs/main")"
+RAG_FLOW_INIT_CONDA_R_CHANNEL="$(choose_managed_value conda "$RAG_FLOW_INIT_CONDA_R_CHANNEL" "$selected_conda_base/pkgs/r")"
+RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL="$(choose_managed_value conda "$RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL" "$selected_conda_base/pkgs/msys2")"
+RAG_FLOW_INIT_CONDA_FORGE_CHANNEL="$(choose_managed_value conda "$RAG_FLOW_INIT_CONDA_FORGE_CHANNEL" "$selected_conda_base/cloud")"
+RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL="$(choose_managed_value conda "$RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL" "$selected_conda_base/cloud")"
+
 echo "Configure local mirrors and runtime environment."
 echo "Using env file: $ENV_FILE"
+echo "Mirror profiles: apt=$apt_mirror_profile pip=$pip_mirror_profile conda=$conda_mirror_profile"
 mkdir -p \
   "$RAG_FLOW_RUNTIME_ROOT" \
   "$RAG_FLOW_INIT_HF_HOME" \
@@ -158,6 +388,21 @@ custom_channels:
   conda-forge: $RAG_FLOW_INIT_CONDA_FORGE_CHANNEL
   pytorch: $RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL
 EOF
+fi
+
+if truthy "$RAG_FLOW_INIT_UPDATE_ENV_FILE"; then
+  set_env_var "RAG_FLOW_INIT_APT_MIRROR" "$RAG_FLOW_INIT_APT_MIRROR"
+  set_env_var "RAG_FLOW_INIT_PIP_INDEX_URL" "$RAG_FLOW_INIT_PIP_INDEX_URL"
+  set_env_var "RAG_FLOW_INIT_UV_INDEX_URL" "$RAG_FLOW_INIT_UV_INDEX_URL"
+  set_env_var "RAG_FLOW_INIT_CONDA_MAIN_CHANNEL" "$RAG_FLOW_INIT_CONDA_MAIN_CHANNEL"
+  set_env_var "RAG_FLOW_INIT_CONDA_R_CHANNEL" "$RAG_FLOW_INIT_CONDA_R_CHANNEL"
+  set_env_var "RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL" "$RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL"
+  set_env_var "RAG_FLOW_INIT_CONDA_FORGE_CHANNEL" "$RAG_FLOW_INIT_CONDA_FORGE_CHANNEL"
+  set_env_var "RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL" "$RAG_FLOW_INIT_CONDA_PYTORCH_CHANNEL"
+  set_env_var "RAG_FLOW_PIP_INDEX_URL" "$RAG_FLOW_INIT_PIP_INDEX_URL"
+  set_env_var "RAG_FLOW_UV_INDEX_URL" "$RAG_FLOW_INIT_UV_INDEX_URL"
+  set_env_var "RAG_FLOW_CONDA_PKGS_DIRS" "$RAG_FLOW_INIT_CONDA_PKGS_DIRS"
+  set_env_var "RAG_FLOW_MINERU_MODEL_SOURCE" "$RAG_FLOW_INIT_MINERU_MODEL_SOURCE"
 fi
 
 if truthy "$RAG_FLOW_INIT_CONDA_CLEAN_INDEX" && command -v conda >/dev/null 2>&1; then
