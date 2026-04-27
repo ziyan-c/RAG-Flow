@@ -8,9 +8,36 @@ from typing import Mapping
 
 DEFAULT_BASE_DIR = Path(
     "/root/autodl-tmp/manuals/public/"
-    "Dahua-DSS-Professional_User-Manual_V8.7.0/hybrid_auto"
+    "example-technical-manual/hybrid_auto"
 )
-DEFAULT_SOURCE_NAME = "Dahua-DSS-Professional_User-Manual_V8.7.0.pdf"
+DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
+DEFAULT_LOCAL_ENV_FILE = Path(".secrets/rag-flow.env")
+
+
+def find_upwards(relative_path: str | Path, start: Path | None = None) -> Path | None:
+    base = (start or Path.cwd()).resolve()
+    for directory in (base, *base.parents):
+        candidate = directory / relative_path
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def resolve_env_file(env_file: str | os.PathLike[str] | None = None) -> str | os.PathLike[str] | None:
+    if env_file:
+        return env_file
+    if os.environ.get("RAG_FLOW_ENV_FILE"):
+        return os.environ["RAG_FLOW_ENV_FILE"]
+    return find_upwards(DEFAULT_LOCAL_ENV_FILE)
+
+
+def env_path_base(env_file: str | os.PathLike[str] | None) -> Path | None:
+    if not env_file:
+        return None
+    env_path = Path(env_file).expanduser().resolve()
+    if env_path.parent.name == ".secrets":
+        return env_path.parent.parent
+    return env_path.parent
 
 
 def load_env_file(path: str | os.PathLike[str] | None) -> dict[str, str]:
@@ -32,8 +59,9 @@ def load_env_file(path: str | os.PathLike[str] | None) -> dict[str, str]:
 
 
 class EnvView:
-    def __init__(self, file_values: Mapping[str, str]):
+    def __init__(self, file_values: Mapping[str, str], *, path_base: Path | None = None):
         self.file_values = file_values
+        self.path_base = path_base
 
     def get(self, key: str, default: str) -> str:
         return os.environ.get(key, self.file_values.get(key, default))
@@ -44,8 +72,24 @@ class EnvView:
     def float(self, key: str, default: float) -> float:
         return float(self.get(key, str(default)))
 
+    def csv(self, key: str, default: str) -> tuple[str, ...]:
+        return tuple(item.strip() for item in self.get(key, default).split(",") if item.strip())
+
     def path(self, key: str, default: str | Path) -> Path:
-        return Path(self.get(key, str(default))).expanduser()
+        if key in os.environ:
+            value = os.environ[key]
+            base = None
+        elif key in self.file_values:
+            value = self.file_values[key]
+            base = self.path_base
+        else:
+            value = str(default)
+            base = None
+
+        path = Path(value).expanduser()
+        if base is not None and not path.is_absolute():
+            return base / path
+        return path
 
 
 @dataclass(frozen=True)
@@ -67,6 +111,8 @@ class ModelConfig:
     sparse_model: str
     colpali_model: str
     vlm_model: str
+    vlm_model_revision: str
+    trusted_remote_code_models: tuple[str, ...]
     llm_base_url: str
     llm_api_key: str
     llm_model: str
@@ -87,6 +133,8 @@ class ServerConfig:
     host: str
     port: int
     retriever_url: str
+    retriever_api_key: str
+    max_query_chars: int
 
 
 @dataclass(frozen=True)
@@ -98,8 +146,9 @@ class AppConfig:
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
-        file_values = load_env_file(env_file or os.environ.get("RAG_FLOW_ENV_FILE"))
-        env = EnvView(file_values)
+        resolved_env_file = resolve_env_file(env_file)
+        file_values = load_env_file(resolved_env_file)
+        env = EnvView(file_values, path_base=env_path_base(resolved_env_file))
 
         base_dir = env.path("RAG_FLOW_BASE_DIR", DEFAULT_BASE_DIR)
         source_name = env.get("RAG_FLOW_SOURCE_NAME", DEFAULT_SOURCE_NAME)
@@ -109,26 +158,26 @@ class AppConfig:
             source_name=source_name,
             source_pdf=env.path(
                 "RAG_FLOW_SOURCE_PDF",
-                base_dir / "Dahua-DSS-Professional_User-Manual_V8.7.0_origin.pdf",
+                base_dir / "example-technical-manual_origin.pdf",
             ),
             content_json=env.path(
                 "RAG_FLOW_CONTENT_JSON",
-                base_dir / "Dahua-DSS-Professional_User-Manual_V8.7.0_content_list.json",
+                base_dir / "example-technical-manual_content_list.json",
             ),
             small_icon_json=env.path(
                 "RAG_FLOW_SMALL_ICON_JSON",
-                base_dir / "Dahua-DSS-Professional_User-Manual_V8.7.0_content_list_small-icon-fixed.json",
+                base_dir / "example-technical-manual_content_list_small-icon-fixed.json",
             ),
             captioned_json=env.path(
                 "RAG_FLOW_CAPTIONED_JSON",
-                base_dir / "Dahua-DSS-Professional_User-Manual_V8.7.0_content_list_small-icon-fixed_image-with-captions.json",
+                base_dir / "example-technical-manual_content_list_small-icon-fixed_image-with-captions.json",
             ),
             chunks_json=env.path(
                 "RAG_FLOW_CHUNKS_JSON",
-                base_dir / "Dahua-DSS-Professional_User-Manual_V8.7.0_page_level_chunks.json",
+                base_dir / "example-technical-manual_page_level_chunks.json",
             ),
-            db_path=env.path("RAG_FLOW_DB_PATH", "/root/qdrant-dbs/dahua-db"),
-            collection_name=env.get("RAG_FLOW_COLLECTION", "dahua-manuals"),
+            db_path=env.path("RAG_FLOW_DB_PATH", "/root/qdrant-dbs/manual-db"),
+            collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),
         )
 
         models = ModelConfig(
@@ -136,6 +185,8 @@ class AppConfig:
             sparse_model=env.get("RAG_FLOW_SPARSE_MODEL", "Qdrant/bm25"),
             colpali_model=env.get("RAG_FLOW_COLPALI_MODEL", "vidore/colpali-v1.3-merged"),
             vlm_model=env.get("RAG_FLOW_VLM_MODEL", "Qwen/Qwen3.5-9B"),
+            vlm_model_revision=env.get("RAG_FLOW_VLM_MODEL_REVISION", ""),
+            trusted_remote_code_models=env.csv("RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS", "Qwen/Qwen3.5-9B"),
             llm_base_url=env.get("RAG_FLOW_LLM_BASE_URL", "http://localhost:8080/v1"),
             llm_api_key=env.get("RAG_FLOW_LLM_API_KEY", "EMPTY"),
             llm_model=env.get("RAG_FLOW_LLM_MODEL", "/root/autodl-tmp/models/Qwen3.5-35B-A3B-GPTQ-Int4"),
@@ -154,6 +205,8 @@ class AppConfig:
             host=env.get("RAG_FLOW_RETRIEVER_HOST", "127.0.0.1"),
             port=env.int("RAG_FLOW_RETRIEVER_PORT", 8000),
             retriever_url=env.get("RAG_FLOW_RETRIEVER_URL", "http://127.0.0.1:8000/retrieve"),
+            retriever_api_key=env.get("RAG_FLOW_RETRIEVER_API_KEY", ""),
+            max_query_chars=env.int("RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS", 4000),
         )
 
         return cls(paths=paths, models=models, retrieval=retrieval, server=server)

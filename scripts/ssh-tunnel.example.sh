@@ -7,7 +7,7 @@ set -euo pipefail
 : "${RAG_FLOW_LOCAL_BIND:=127.0.0.1}"
 
 ssh \
-  -o StrictHostKeyChecking=no \
+  -o StrictHostKeyChecking=accept-new \
   -L "${RAG_FLOW_LOCAL_BIND}:8000:localhost:8000" \
   -L "${RAG_FLOW_LOCAL_BIND}:8080:localhost:8080" \
   "${RAG_FLOW_REMOTE_USER}@${RAG_FLOW_REMOTE_HOST}" \

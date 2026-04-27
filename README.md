@@ -1,9 +1,8 @@
 # RAG Flow
 
 RAG Flow is a multimodal retrieval augmented generation pipeline for technical
-manuals. The current profile targets the Dahua DSS Professional manual, but the
-code is structured so paths, model names, and collection names can be changed
-through environment variables.
+manuals. The default profile uses generic example names, and paths, model names,
+and collection names can be changed through environment variables.
 
 ## What It Does
 
@@ -38,10 +37,14 @@ configs/                    Per-manual env templates
 ## Setup
 
 ```bash
-cp .env.example .env
-export RAG_FLOW_ENV_FILE="$PWD/.env"
+mkdir -p .secrets
+cp .env.example .secrets/rag-flow.env
 pip install -e ".[retrieval,preprocess]"
 ```
+
+The app automatically loads `.secrets/rag-flow.env` when commands are run from
+this repository. You can still point to another local env file with
+`RAG_FLOW_ENV_FILE=/path/to/file`.
 
 For the original AutoDL-style environment, the exported conda YAML files are in
 `envs/`. They are intentionally preserved because CUDA, ColPali, MinerU, and
@@ -111,9 +114,21 @@ rag-flow-chat
 
 ## Security Notes
 
-The old workspace had hard-coded API keys and SSH credentials. They were not
-carried over. Put secrets in a local `.env` file or your shell environment, and
-rotate any keys/passwords that were previously committed or shared in plaintext.
+Keep credentials and private source documents under `.secrets/`. The whole
+directory is ignored by Git and is meant for API keys, SSH details, private env
+files, and raw technical documents such as source PDFs or manual folders.
+
+Tracked files should only contain templates, placeholders, or public defaults.
+For local configuration, copy `.env.example` to `.secrets/rag-flow.env` and put
+real values there. Runtime artifacts such as Qdrant databases, downloaded
+models, and conda environments can stay on the machine paths configured in that
+private env file.
+
+If the retriever is exposed beyond localhost, set `RAG_FLOW_RETRIEVER_API_KEY`
+and send it as `Authorization: Bearer <token>`. VLM preprocessing executes
+model-provided Python code for trusted repositories only; keep
+`RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS` narrow and set `RAG_FLOW_VLM_MODEL_REVISION`
+when pinning a model snapshot.
 
 ## Configuration
 
@@ -128,5 +143,9 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_COLLECTION`
 - `RAG_FLOW_LLM_BASE_URL`
 - `RAG_FLOW_LLM_MODEL`
+- `RAG_FLOW_RETRIEVER_API_KEY`
+- `RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS`
+- `RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS`
+- `RAG_FLOW_VLM_MODEL_REVISION`
 
 See `.env.example` for the full list.

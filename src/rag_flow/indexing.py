@@ -7,10 +7,59 @@ from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
+from .runtime import get_torch_device
+
+DENSE_VECTOR_SIZE = 1024
+COLPALI_VECTOR_SIZE = 128
 
 
 def point_id(source_name: str, page_idx: int) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{source_name}_{page_idx}"))
+
+
+def validate_collection_schema(config: AppConfig) -> None:
+    from qdrant_client import QdrantClient, models
+
+    def enum_value(value: Any) -> Any:
+        return getattr(value, "value", value)
+
+    client = QdrantClient(path=str(config.paths.db_path))
+    info = client.get_collection(config.paths.collection_name)
+    vectors = info.config.params.vectors
+    sparse_vectors = getattr(info.config.params, "sparse_vectors", {}) or {}
+    errors = []
+
+    if not isinstance(vectors, dict):
+        errors.append("collection must use named vectors")
+    else:
+        dense = vectors.get("page-dense")
+        colpali = vectors.get("page-colpali")
+        if dense is None:
+            errors.append("missing page-dense vector")
+        elif dense.size != DENSE_VECTOR_SIZE or enum_value(dense.distance) != enum_value(models.Distance.COSINE):
+            errors.append(f"page-dense must be {DENSE_VECTOR_SIZE} cosine dimensions")
+
+        if colpali is None:
+            errors.append("missing page-colpali vector")
+        elif colpali.size != COLPALI_VECTOR_SIZE or enum_value(colpali.distance) != enum_value(models.Distance.COSINE):
+            errors.append(f"page-colpali must be {COLPALI_VECTOR_SIZE} cosine dimensions")
+        else:
+            multivector_config = getattr(colpali, "multivector_config", None)
+            if (
+                not multivector_config
+                or enum_value(multivector_config.comparator) != enum_value(models.MultiVectorComparator.MAX_SIM)
+            ):
+                errors.append("page-colpali must use MAX_SIM multivector comparison")
+
+    if not isinstance(sparse_vectors, dict) or "page-sparse" not in sparse_vectors:
+        errors.append("missing page-sparse sparse vector")
+
+    if errors:
+        details = "; ".join(errors)
+        raise RuntimeError(
+            f"Existing Qdrant collection {config.paths.collection_name!r} has an incompatible schema: "
+            f"{details}. Recreate or migrate the collection before indexing."
+        )
 
 
 def ensure_collection(config: AppConfig) -> None:
@@ -19,14 +68,15 @@ def ensure_collection(config: AppConfig) -> None:
     client = QdrantClient(path=str(config.paths.db_path))
     collection = config.paths.collection_name
     if client.collection_exists(collection):
+        validate_collection_schema(config)
         return
 
     client.create_collection(
         collection_name=collection,
         vectors_config={
-            "page-dense": models.VectorParams(size=1024, distance=models.Distance.COSINE),
+            "page-dense": models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
             "page-colpali": models.VectorParams(
-                size=128,
+                size=COLPALI_VECTOR_SIZE,
                 distance=models.Distance.COSINE,
                 multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
                 quantization_config=models.BinaryQuantization(
@@ -105,13 +155,14 @@ def upsert_colpali_vectors(
 
     ensure_collection(config)
     client = QdrantClient(path=str(config.paths.db_path))
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_torch_device(feature="ColPali visual indexing")
+    dtype = torch.bfloat16 if device == "cuda" else torch.float32
 
     processor = ColPaliProcessor.from_pretrained(config.models.colpali_model)
     model = ColPali.from_pretrained(
         config.models.colpali_model,
-        torch_dtype=torch.bfloat16,
-        device_map="cuda",
+        torch_dtype=dtype,
+        device_map=device,
     ).eval()
 
     images = convert_from_path(str(pdf_path or config.paths.source_pdf), dpi=dpi)
@@ -125,7 +176,7 @@ def upsert_colpali_vectors(
         with torch.no_grad():
             batch_inputs = processor.process_images(batch_images).to(device)
             batch_inputs = {
-                key: value.to(torch.bfloat16) if value.is_floating_point() else value
+                key: value.to(dtype) if value.is_floating_point() else value
                 for key, value in batch_inputs.items()
             }
             embeddings = model(**batch_inputs)

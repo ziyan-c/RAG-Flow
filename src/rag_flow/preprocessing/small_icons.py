@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from rag_flow.config import AppConfig
+from rag_flow.runtime import get_torch_device, require_trusted_remote_code_model
 
 
 IGNORE_TYPES = {
@@ -134,6 +135,8 @@ def add_small_icon_text(
     dpi: int = 200,
     batch_size: int = 6,
     max_new_tokens: int = 5000,
+    model_revision: str = "",
+    trusted_remote_code_models: tuple[str, ...] = ("Qwen/Qwen3.5-9B",),
 ) -> None:
     import torch
     from modelscope import snapshot_download
@@ -142,13 +145,17 @@ def add_small_icon_text(
     from tqdm import tqdm
     from transformers import AutoModelForImageTextToText, AutoProcessor
 
-    model_dir = snapshot_download(model_name)
+    device = get_torch_device(feature="Small-icon VLM preprocessing")
+    dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    require_trusted_remote_code_model(model_name, allowed_models=trusted_remote_code_models)
+    snapshot_kwargs = {"revision": model_revision} if model_revision else {}
+    model_dir = snapshot_download(model_name, **snapshot_kwargs)
     processor = AutoProcessor.from_pretrained(model_dir, trust_remote_code=True, padding_side="left")
     processor.tokenizer.pad_token_id = processor.tokenizer.eos_token_id
     model = AutoModelForImageTextToText.from_pretrained(
         model_dir,
         device_map="auto",
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         trust_remote_code=True,
         attn_implementation="sdpa",
     )
@@ -190,7 +197,7 @@ def add_small_icon_text(
             videos=flat_videos if flat_videos else None,
             padding=True,
             return_tensors="pt",
-        ).to("cuda")
+        ).to(device)
 
         with torch.no_grad():
             generated_ids = model.generate(
@@ -318,6 +325,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--output", default=str(config.paths.small_icon_json))
     parser.add_argument("--pdf", default=str(config.paths.source_pdf))
     parser.add_argument("--model", default=config.models.vlm_model)
+    parser.add_argument("--model-revision", default=config.models.vlm_model_revision)
     parser.add_argument("--dpi", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=6)
     parser.add_argument("--max-new-tokens", type=int, default=5000)
@@ -331,6 +339,8 @@ def main(argv: list[str] | None = None) -> None:
         dpi=args.dpi,
         batch_size=args.batch_size,
         max_new_tokens=args.max_new_tokens,
+        model_revision=args.model_revision,
+        trusted_remote_code_models=config.models.trusted_remote_code_models,
     )
 
 

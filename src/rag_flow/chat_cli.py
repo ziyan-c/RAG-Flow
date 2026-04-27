@@ -13,6 +13,7 @@ def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Chat with the manual through the retrieval API and an OpenAI-compatible LLM.")
     parser.add_argument("--retriever-url", default=config.server.retriever_url)
+    parser.add_argument("--retriever-api-key", default=config.server.retriever_api_key)
     parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
     parser.add_argument("--llm-model", default=config.models.llm_model)
     parser.add_argument("--api-key", default=config.models.llm_api_key)
@@ -32,7 +33,8 @@ def main(argv: list[str] | None = None) -> None:
             continue
 
         try:
-            response = requests.post(args.retriever_url, json={"query": user_query}, timeout=120)
+            headers = {"Authorization": f"Bearer {args.retriever_api_key}"} if args.retriever_api_key else None
+            response = requests.post(args.retriever_url, json={"query": user_query}, headers=headers, timeout=120)
             response.raise_for_status()
             data = response.json()
             context = data["context"]

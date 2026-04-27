@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from rag_flow.config import AppConfig
+from rag_flow.runtime import get_torch_device, require_trusted_remote_code_model
 
 
 TEXT_KEYS = [
@@ -58,6 +59,8 @@ def add_image_descriptions(
     model_name: str,
     max_new_tokens: int = 10000,
     batch_size: int = 4,
+    model_revision: str = "",
+    trusted_remote_code_models: tuple[str, ...] = ("Qwen/Qwen3.5-9B",),
 ) -> None:
     import torch
     from modelscope import snapshot_download
@@ -71,13 +74,17 @@ def add_image_descriptions(
         mineru_data: list[dict[str, Any]] = json.load(f)
 
     page_text_map = build_page_text_map(mineru_data)
-    model_dir = snapshot_download(model_name)
+    device = get_torch_device(feature="Image-description VLM preprocessing")
+    dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    require_trusted_remote_code_model(model_name, allowed_models=trusted_remote_code_models)
+    snapshot_kwargs = {"revision": model_revision} if model_revision else {}
+    model_dir = snapshot_download(model_name, **snapshot_kwargs)
     processor = AutoProcessor.from_pretrained(model_dir, trust_remote_code=True, padding_side="left")
     processor.tokenizer.pad_token_id = processor.tokenizer.eos_token_id
     model = AutoModelForImageTextToText.from_pretrained(
         model_dir,
         device_map="auto",
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         trust_remote_code=True,
     )
     model.generation_config.pad_token_id = processor.tokenizer.eos_token_id
@@ -113,7 +120,7 @@ def add_image_descriptions(
             videos=flat_videos if flat_videos else None,
             padding=True,
             return_tensors="pt",
-        ).to("cuda")
+        ).to(device)
 
         with torch.no_grad():
             generated_ids = model.generate(
@@ -193,6 +200,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--input", default=str(config.paths.small_icon_json))
     parser.add_argument("--output", default=str(config.paths.captioned_json))
     parser.add_argument("--model", default=config.models.vlm_model)
+    parser.add_argument("--model-revision", default=config.models.vlm_model_revision)
     parser.add_argument("--max-new-tokens", type=int, default=10000)
     parser.add_argument("--batch-size", type=int, default=4)
     args = parser.parse_args(argv)
@@ -204,6 +212,8 @@ def main(argv: list[str] | None = None) -> None:
         model_name=args.model,
         max_new_tokens=args.max_new_tokens,
         batch_size=args.batch_size,
+        model_revision=args.model_revision,
+        trusted_remote_code_models=config.models.trusted_remote_code_models,
     )
 
 

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .config import AppConfig
+from .runtime import get_torch_device
 
 
 @dataclass(frozen=True)
@@ -39,17 +40,20 @@ class RetrievalEngine:
         from qdrant_client import QdrantClient
         from transformers import BitsAndBytesConfig
 
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = get_torch_device(
+            require_cuda=self.config.retrieval.quantized_colpali,
+            feature="Quantized ColPali retrieval",
+        )
         self.client = QdrantClient(path=str(self.config.paths.db_path))
         self.dense_model = TextEmbedding(self.config.models.dense_model)
         self.sparse_model = SparseTextEmbedding(self.config.models.sparse_model)
         self.colpali_processor = ColPaliProcessor.from_pretrained(self.config.models.colpali_model)
 
-        kwargs: dict[str, Any] = {"device_map": "cuda"}
+        kwargs: dict[str, Any] = {"device_map": self.device}
         if self.config.retrieval.quantized_colpali:
             kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
         else:
-            kwargs["torch_dtype"] = torch.bfloat16
+            kwargs["torch_dtype"] = torch.bfloat16 if self.device == "cuda" else torch.float32
         self.colpali_model = ColPali.from_pretrained(self.config.models.colpali_model, **kwargs).eval()
 
     def retrieve(self, query_text: str) -> RetrievalResult:
@@ -74,8 +78,9 @@ class RetrievalEngine:
 
         with torch.no_grad():
             batch_query = self.colpali_processor.process_queries([query_text]).to(self.device)
+            dtype = torch.bfloat16 if self.device == "cuda" else torch.float32
             batch_query = {
-                key: value.to(torch.bfloat16) if value.is_floating_point() else value
+                key: value.to(dtype) if value.is_floating_point() else value
                 for key, value in batch_query.items()
             }
             visual_query = self.colpali_model(**batch_query)[0].cpu().float().tolist()

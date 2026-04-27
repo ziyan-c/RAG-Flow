@@ -7,11 +7,19 @@ from typing import Any
 from .config import AppConfig
 
 
-def test_query(api_url: str, query_text: str, *, print_context: bool = True, timeout: int = 120) -> None:
+def test_query(
+    api_url: str,
+    query_text: str,
+    *,
+    print_context: bool = True,
+    timeout: int = 120,
+    api_key: str = "",
+) -> None:
     import requests
 
     start = time.time()
-    response = requests.post(api_url, json={"query": query_text}, timeout=timeout)
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else None
+    response = requests.post(api_url, json={"query": query_text}, headers=headers, timeout=timeout)
     response.raise_for_status()
     elapsed = time.time() - start
     result: dict[str, Any] = response.json()
@@ -38,7 +46,7 @@ def test_query(api_url: str, query_text: str, *, print_context: bool = True, tim
         print(result.get("context", ""))
 
 
-def interactive(api_url: str, *, print_context: bool, timeout: int) -> None:
+def interactive(api_url: str, *, print_context: bool, timeout: int, api_key: str) -> None:
     print("RAG Flow retrieval tester. Type exit or quit to stop.")
     while True:
         try:
@@ -50,7 +58,7 @@ def interactive(api_url: str, *, print_context: bool, timeout: int) -> None:
             break
         if query:
             try:
-                test_query(api_url, query, print_context=print_context, timeout=timeout)
+                test_query(api_url, query, print_context=print_context, timeout=timeout, api_key=api_key)
             except Exception as exc:
                 if exc.__class__.__name__ == "ConnectionError":
                     print(f"Cannot connect to {api_url}. Is rag-flow-retriever running?")
@@ -63,15 +71,16 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Test the retrieval API from the terminal.")
     parser.add_argument("query", nargs="*", help="Query text. If omitted, starts interactive mode.")
     parser.add_argument("--url", default=config.server.retriever_url, help="Retriever /retrieve URL.")
+    parser.add_argument("--api-key", default=config.server.retriever_api_key, help="Bearer token for /retrieve.")
     parser.add_argument("--no-context", action="store_true", help="Only print hit metadata.")
     parser.add_argument("--timeout", type=int, default=120)
     args = parser.parse_args(argv)
 
     query = " ".join(args.query).strip()
     if query:
-        test_query(args.url, query, print_context=not args.no_context, timeout=args.timeout)
+        test_query(args.url, query, print_context=not args.no_context, timeout=args.timeout, api_key=args.api_key)
     else:
-        interactive(args.url, print_context=not args.no_context, timeout=args.timeout)
+        interactive(args.url, print_context=not args.no_context, timeout=args.timeout, api_key=args.api_key)
 
 
 if __name__ == "__main__":
