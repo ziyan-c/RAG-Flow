@@ -1,0 +1,21 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Local data and model caches
+data/
+outputs/
+qdrant-dbs/
+models/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# Generated manual artifacts
+*_content_list*.json
+*_page_level_chunks.json

@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-flow"
+version = "0.1.0"
+description = "Multimodal RAG pipeline for technical manuals."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "openai>=1.0",
+  "pydantic>=2",
+  "qdrant-client>=1.10",
+  "requests>=2.31",
+  "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+retrieval = [
+  "bitsandbytes",
+  "colpali-engine",
+  "fastembed",
+  "torch",
+  "transformers",
+]
+preprocess = [
+  "modelscope",
+  "pdf2image",
+  "pillow",
+  "pymupdf",
+  "qwen-vl-utils",
+  "tqdm",
+]
+dev = [
+  "pytest>=8",
+]
+
+[project.scripts]
+rag-flow-chunk = "rag_flow.chunking:main"
+rag-flow-index = "rag_flow.indexing:main"
+rag-flow-retriever = "rag_flow.api:main"
+rag-flow-chat = "rag_flow.chat_cli:main"
+rag-flow-agent-demo = "rag_flow.agentic:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
