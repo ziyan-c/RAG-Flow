@@ -36,6 +36,42 @@ def _join(value: Any) -> str:
     return str(value or "")
 
 
+def build_icon_patch_prompt(*, original_text: str, field_key: str) -> str:
+    if field_key == "table_body" and "<table" in original_text.lower():
+        return (
+            "Please inspect the image and determine whether any small icons "
+            "(for example plus sign, wrench, gear, arrow, save icon) are embedded "
+            "in the table but missing from the extracted HTML.\n"
+            f"Here is the extracted HTML table:\n{original_text}\n\n"
+            "If icons are missing, insert `[Icon: shape/name]` into the exact table cells "
+            "where they belong. Preserve the full HTML table structure, tags, rows, columns, "
+            "and all existing text. Return only the complete modified HTML table. "
+            "Do not convert the table to Markdown or prose. If no icons are missing, "
+            "return `No missing`."
+        )
+
+    return (
+        "Please inspect the image and determine whether any small icons "
+        "(for example plus sign, wrench, gear, arrow, save icon) are embedded "
+        "in or around the text.\n"
+        f'Here is the extracted text:\n"{original_text}"\n\n'
+        "If icons are missing from the text, insert `[Icon: shape/name]` at the exact "
+        "corresponding position and return only the modified complete text. "
+        "If no icons are missing, return `No missing`."
+    )
+
+
+def should_apply_icon_patch(*, original_text: str, patched_text: str, field_key: str) -> bool:
+    if "No missing" in patched_text or "[Icon:" not in patched_text:
+        return False
+
+    if field_key == "table_body" and "<table" in original_text.lower():
+        lowered = patched_text.lower()
+        return "<table" in lowered and "</table>" in lowered
+
+    return True
+
+
 def crop_image_from_block(block: dict[str, Any], pdf_images: list[Any]) -> Any | None:
     page_idx = int(block.get("page_idx", 0))
     if page_idx >= len(pdf_images) or "bbox" not in block:
@@ -220,7 +256,11 @@ def add_small_icon_text(
             if "</think>" in output:
                 output = output.split("</think>")[-1].strip()
 
-            if "No missing" not in output and "[Icon:" in output:
+            if should_apply_icon_patch(
+                original_text=req["original_text"],
+                patched_text=output,
+                field_key=req["key"],
+            ):
                 idx = req["idx"]
                 key = req["key"]
                 content_data[idx][key] = output.split("\n") if req["is_list"] else output
@@ -286,14 +326,7 @@ def add_small_icon_text(
             if final_image is None:
                 continue
 
-            prompt = (
-                "Please inspect the image and determine whether any small icons "
-                "(for example plus sign, wrench, gear, arrow, save icon) are embedded "
-                "in or around the text.\n"
-                f'Here is the extracted text:\n"{original_text}"\n\n'
-                "If icons are missing from the text, insert `[Icon: shape/name]` at the exact "
-                "corresponding position. Return only the modified complete text."
-            )
+            prompt = build_icon_patch_prompt(original_text=original_text, field_key=key)
             batch.append(
                 {
                     "idx": idx,
