@@ -88,6 +88,7 @@ require_command() {
 : "${RAG_FLOW_LLM_PYTHON:=3.12}"
 : "${RAG_FLOW_PIP_INDEX_URL:=${RAG_FLOW_INIT_PIP_INDEX_URL:-}}"
 : "${RAG_FLOW_UV_INDEX_URL:=${RAG_FLOW_INIT_UV_INDEX_URL:-$RAG_FLOW_PIP_INDEX_URL}}"
+: "${RAG_FLOW_USE_UV:=1}"
 : "${RAG_FLOW_PIP_CACHE_DIR:=$RAG_FLOW_RUNTIME_ROOT/.cache/pip}"
 : "${RAG_FLOW_UV_CACHE_DIR:=$RAG_FLOW_RUNTIME_ROOT/.cache/uv}"
 : "${RAG_FLOW_CONDA_PKGS_DIRS:=$RAG_FLOW_RUNTIME_ROOT/conda-pkgs}"
@@ -174,7 +175,7 @@ pip_install() {
   [[ -n "$RAG_FLOW_UV_INDEX_URL" ]] && package_env+=("UV_INDEX_URL=$RAG_FLOW_UV_INDEX_URL")
   [[ -n "$RAG_FLOW_PIP_CACHE_DIR" ]] && package_env+=("PIP_CACHE_DIR=$RAG_FLOW_PIP_CACHE_DIR")
   [[ -n "$RAG_FLOW_UV_CACHE_DIR" ]] && package_env+=("UV_CACHE_DIR=$RAG_FLOW_UV_CACHE_DIR")
-  if command -v uv >/dev/null 2>&1; then
+  if truthy "$RAG_FLOW_USE_UV" && command -v uv >/dev/null 2>&1; then
     env "${package_env[@]}" uv pip install --python "$RAG_FLOW_ENV_PYTHON" "$@"
   else
     env "${package_env[@]}" "$RAG_FLOW_ENV_PYTHON" -m pip install "$@"
@@ -187,7 +188,7 @@ pip_install_from_index() {
   local package_env=()
   [[ -n "$RAG_FLOW_PIP_CACHE_DIR" ]] && package_env+=("PIP_CACHE_DIR=$RAG_FLOW_PIP_CACHE_DIR")
   [[ -n "$RAG_FLOW_UV_CACHE_DIR" ]] && package_env+=("UV_CACHE_DIR=$RAG_FLOW_UV_CACHE_DIR")
-  if command -v uv >/dev/null 2>&1; then
+  if truthy "$RAG_FLOW_USE_UV" && command -v uv >/dev/null 2>&1; then
     env "${package_env[@]}" uv pip install --python "$RAG_FLOW_ENV_PYTHON" --index-url "$index_url" "$@"
   else
     env "${package_env[@]}" "$RAG_FLOW_ENV_PYTHON" -m pip install --index-url "$index_url" "$@"

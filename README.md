@@ -62,7 +62,7 @@ rag-flow init china-all
 rag-flow env create-mineru
 rag-flow mineru doctor
 rag-flow mineru run
-rag-flow ingest --to-stage chunks
+rag-flow ingest --to-stage chunking
 rag-flow preprocess icons
 rag-flow preprocess captions
 rag-flow chunk
@@ -103,7 +103,21 @@ rag-flow ingest --pdf .local/source-documents/example-technical-manual.pdf
 
 When `--pdf` is omitted, ingestion uses `RAG_FLOW_MINERU_INPUT_PATH`.
 `rag-flow mineru run` also uses that same input path and writes to
-`RAG_FLOW_MINERU_OUTPUT_DIR`.
+`RAG_FLOW_MINERU_OUTPUT_DIR`. `rag-flow mineru run` accepts either one PDF or
+a folder of PDFs. Folder input is recursive by default and mirrors the input
+folder layout into the output root before letting MinerU create each
+file-stem output folder:
+
+```bash
+rag-flow mineru run \
+  --input .local/source-documents \
+  --output-dir /root/autodl-tmp/manuals/public
+```
+
+For example, `.local/source-documents/network/admin.pdf` is parsed with
+`-o /root/autodl-tmp/manuals/public/network`, so MinerU can write its usual
+`admin/auto/...` files under that mirrored location. Add `--no-recursive` when
+you only want PDFs directly inside the input folder.
 
 Preview the command sequence without running heavy steps:
 
@@ -114,13 +128,13 @@ rag-flow ingest --dry-run
 Resume from a later stage:
 
 ```bash
-rag-flow ingest --from-stage captions --to-stage chunks
+rag-flow ingest --from-stage captioning --to-stage chunking
 ```
 
-Run through text indexing too:
+Run through indexing too:
 
 ```bash
-rag-flow ingest --to-stage index-text
+rag-flow ingest --to-stage indexing
 ```
 
 The individual steps are also available when you need manual control.
@@ -259,7 +273,6 @@ commands inherit the working source.
 For Python environments, use the split setup under `scripts/env/`:
 
 ```bash
-rag-flow env install-uv
 rag-flow env create-core
 rag-flow env create-mineru
 rag-flow env create-gpu
@@ -271,7 +284,6 @@ environment, then check MinerU:
 
 ```bash
 rag-flow init china-all
-rag-flow env install-uv
 rag-flow env create-mineru
 rag-flow mineru doctor
 rag-flow mineru run --dry-run
@@ -279,8 +291,10 @@ rag-flow mineru run --dry-run
 
 The default environment strategy is `RAG_FLOW_ENV_MANAGER=auto`:
 prefer micromamba/conda for isolated path-based environments under
-`RAG_FLOW_ENV_ROOT`, and use uv for fast package installs after
-`rag-flow env install-uv` has made it available. Keep
+`RAG_FLOW_ENV_ROOT`. `rag-flow env create-mineru` ensures `uv` is available
+by default and then uses it for fast pip installs. Set `RAG_FLOW_USE_UV=0`
+to skip installing and using uv, or set `RAG_FLOW_CREATE_MINERU_INSTALL_UV=0`
+to only skip the automatic install step. Keep
 `RAG_FLOW_ENV_ROOT`, pip/uv caches, conda package caches, Hugging Face cache,
 ModelScope cache, and Torch cache under `~/autodl-tmp` on rented GPU machines.
 The GPU setup uses the PyTorch CUDA 12.8 wheel index by default, which fits

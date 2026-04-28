@@ -4,7 +4,15 @@ import json
 from pathlib import Path
 
 from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PathsConfig, RetrievalConfig, ServerConfig
-from rag_flow.mineru import build_mineru_command, find_content_json, infer_artifacts, mineru_install_spec
+from rag_flow.mineru import (
+    build_mineru_command,
+    find_content_json,
+    infer_artifacts,
+    iter_input_pdfs,
+    mineru_batch_items,
+    mineru_install_spec,
+    run_mineru_batch,
+)
 from rag_flow.pipeline import run_ingest
 
 
@@ -111,6 +119,77 @@ def test_build_mineru_command_supports_templates(tmp_path):
     ]
 
 
+def test_iter_input_pdfs_recurses_and_sorts_case_insensitive(tmp_path):
+    docs = tmp_path / "docs"
+    (docs / "nested").mkdir(parents=True)
+    (docs / "b.PDF").write_text("b", encoding="utf-8")
+    (docs / "nested" / "a.pdf").write_text("a", encoding="utf-8")
+    (docs / "note.txt").write_text("ignore", encoding="utf-8")
+
+    assert [path.relative_to(docs) for path in iter_input_pdfs(docs)] == [
+        Path("b.PDF"),
+        Path("nested/a.pdf"),
+    ]
+
+
+def test_iter_input_pdfs_can_skip_nested_directories(tmp_path):
+    docs = tmp_path / "docs"
+    (docs / "nested").mkdir(parents=True)
+    (docs / "root.pdf").write_text("root", encoding="utf-8")
+    (docs / "nested" / "nested.pdf").write_text("nested", encoding="utf-8")
+
+    assert [path.relative_to(docs) for path in iter_input_pdfs(docs, recursive=False)] == [
+        Path("root.pdf"),
+    ]
+
+
+def test_mineru_batch_items_mirror_input_tree(tmp_path):
+    docs = tmp_path / "docs"
+    output = tmp_path / "mineru-output"
+    (docs / "product" / "network").mkdir(parents=True)
+    (docs / "quickstart.pdf").write_text("quickstart", encoding="utf-8")
+    (docs / "product" / "network" / "admin.pdf").write_text("admin", encoding="utf-8")
+
+    items = mineru_batch_items(docs, output)
+
+    assert [(item.input_pdf.relative_to(docs), item.output_dir.relative_to(output)) for item in items] == [
+        (Path("product/network/admin.pdf"), Path("product/network")),
+        (Path("quickstart.pdf"), Path(".")),
+    ]
+
+
+def test_run_mineru_batch_dry_run_uses_mirrored_output_dirs(tmp_path, monkeypatch, capsys):
+    config = make_config(tmp_path)
+    docs = tmp_path / "docs"
+    output = tmp_path / "mineru-output"
+    (docs / "nested").mkdir(parents=True)
+    (docs / "manual.pdf").write_text("manual", encoding="utf-8")
+    (docs / "nested" / "guide.pdf").write_text("guide", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "rag_flow.mineru.mineru_status",
+        lambda _config: type(
+            "Status",
+            (),
+            {"command_path": "/envs/mineru/bin/mineru", "command": "mineru"},
+        )(),
+    )
+
+    commands = run_mineru_batch(config, input_path=docs, output_dir=output, dry_run=True)
+
+    assert [command[2] for command in commands] == [
+        str(docs / "manual.pdf"),
+        str(docs / "nested" / "guide.pdf"),
+    ]
+    assert [command[4] for command in commands] == [
+        str(output),
+        str(output / "nested"),
+    ]
+    assert not output.exists()
+    printed = capsys.readouterr().out
+    assert f"MinerU output dir: {output / 'nested'}" in printed
+
+
 def test_infer_artifacts_from_discovered_content_list(tmp_path):
     config = make_config(tmp_path)
     content_json = tmp_path / "mineru-output" / "manual" / "auto" / "manual_content_list.json"
@@ -158,8 +237,8 @@ def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     artifacts = run_ingest(
         config,
         pdf_path=source_pdf,
-        from_stage="chunks",
-        to_stage="chunks",
+        from_stage="chunking",
+        to_stage="chunking",
         skip_existing=False,
     )
 

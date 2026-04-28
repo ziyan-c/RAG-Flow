@@ -41,6 +41,12 @@ class MinerUArtifacts:
     chunks_json: Path
 
 
+@dataclass(frozen=True)
+class MinerUBatchItem:
+    input_pdf: Path
+    output_dir: Path
+
+
 def mineru_python(config: AppConfig) -> str:
     return config.mineru.python or sys.executable
 
@@ -191,6 +197,41 @@ def build_mineru_command(
     return args
 
 
+def iter_input_pdfs(input_path: str | Path, *, recursive: bool = True) -> list[Path]:
+    path = Path(input_path).expanduser()
+    if path.is_file():
+        if path.suffix.lower() != ".pdf":
+            raise ValueError(f"MinerU input file must be a PDF: {path}")
+        return [path]
+    if not path.is_dir():
+        raise FileNotFoundError(f"MinerU input path does not exist: {path}")
+
+    candidates = path.rglob("*") if recursive else path.glob("*")
+    pdfs = [candidate for candidate in candidates if candidate.is_file() and candidate.suffix.lower() == ".pdf"]
+    if not pdfs:
+        raise FileNotFoundError(f"No PDF files found under MinerU input directory: {path}")
+    return sorted(pdfs, key=lambda item: str(item.relative_to(path)).lower())
+
+
+def mineru_batch_items(
+    input_path: str | Path,
+    output_dir: str | Path,
+    *,
+    recursive: bool = True,
+) -> list[MinerUBatchItem]:
+    input_root = Path(input_path).expanduser()
+    output_root = Path(output_dir).expanduser()
+    pdfs = iter_input_pdfs(input_root, recursive=recursive)
+    if input_root.is_file():
+        return [MinerUBatchItem(input_pdf=pdfs[0], output_dir=output_root)]
+
+    items = []
+    for pdf in pdfs:
+        relative_parent = pdf.relative_to(input_root).parent
+        items.append(MinerUBatchItem(input_pdf=pdf, output_dir=output_root / relative_parent))
+    return items
+
+
 def _subprocess_env(config: AppConfig) -> dict[str, str] | None:
     if not config.mineru.model_source:
         return None
@@ -255,6 +296,35 @@ def run_mineru(
         return command
     subprocess.run(command, check=True, env=_subprocess_env(config))
     return command
+
+
+def run_mineru_batch(
+    config: AppConfig,
+    *,
+    input_path: str | Path | None = None,
+    output_dir: str | Path | None = None,
+    recursive: bool = True,
+    dry_run: bool = False,
+) -> list[list[str]]:
+    source = Path(input_path or config.mineru.input_path)
+    output_root = Path(output_dir or config.mineru.output_dir)
+    items = mineru_batch_items(source, output_root, recursive=recursive)
+    commands = []
+    for item in items:
+        if not dry_run:
+            item.output_dir.mkdir(parents=True, exist_ok=True)
+        if len(items) > 1:
+            print(f"MinerU input: {item.input_pdf}")
+            print(f"MinerU output dir: {item.output_dir}")
+        commands.append(
+            run_mineru(
+                config,
+                pdf_path=item.input_pdf,
+                output_dir=item.output_dir,
+                dry_run=dry_run,
+            )
+        )
+    return commands
 
 
 def expected_content_json(config: AppConfig, *, source_pdf: str | Path | None = None) -> Path:
@@ -374,9 +444,14 @@ def main(argv: list[str] | None = None) -> None:
         "--pdf",
         dest="input_path",
         default=str(config.mineru.input_path),
-        help="Input PDF, image, or folder for MinerU.",
+        help="Input PDF or folder of PDFs for MinerU.",
     )
     run_parser.add_argument("--output-dir", default=str(config.mineru.output_dir))
+    run_parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="When input is a folder, only parse PDFs directly inside it.",
+    )
     run_parser.add_argument("--dry-run", action="store_true")
 
     locate_parser = subparsers.add_parser("locate", help="Locate MinerU output artifacts.")
@@ -388,7 +463,13 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "setup":
         install_mineru(config, dry_run=args.dry_run, force=args.force)
     elif args.command == "run":
-        run_mineru(config, pdf_path=args.input_path, output_dir=args.output_dir, dry_run=args.dry_run)
+        run_mineru_batch(
+            config,
+            input_path=args.input_path,
+            output_dir=args.output_dir,
+            recursive=not args.no_recursive,
+            dry_run=args.dry_run,
+        )
     elif args.command == "locate":
         artifacts = infer_artifacts(config, content_json=args.content_json)
         print(f"base_dir={artifacts.base_dir}")

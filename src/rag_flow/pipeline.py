@@ -12,7 +12,7 @@ from .mineru import MinerUArtifacts, expected_content_json, find_content_json, i
 from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
 
-STAGES = ("mineru", "icons", "captions", "chunks", "index-text", "index-visual")
+STAGES = ("parsing", "patching", "captioning", "chunking", "indexing")
 
 
 @dataclass(frozen=True)
@@ -46,8 +46,8 @@ def run_ingest(
     config: AppConfig,
     *,
     pdf_path: str | Path | None = None,
-    from_stage: str = "mineru",
-    to_stage: str = "chunks",
+    from_stage: str = "parsing",
+    to_stage: str = "chunking",
     skip_existing: bool = True,
     force: bool = False,
     dry_run: bool = False,
@@ -58,12 +58,12 @@ def run_ingest(
     mineru_ran = False
 
     content_json = None
-    if "mineru" not in selected_stages:
+    if "parsing" not in selected_stages:
         content_json = infer_artifacts(config, source_pdf=source_pdf).content_json
     elif skip_existing and not force:
         content_json = find_content_json(config, source_pdf=source_pdf)
 
-    if "mineru" in selected_stages and (force or not content_json):
+    if "parsing" in selected_stages and (force or not content_json):
         if dry_run:
             run_mineru(config, pdf_path=source_pdf, dry_run=True)
             content_json = expected_content_json(config, source_pdf=source_pdf)
@@ -100,19 +100,21 @@ def run_ingest(
         print(f"Created {len(chunks)} page-level chunks at {artifacts.chunks_json}")
 
     stages = {
-        "icons": Stage("icons", artifacts.small_icon_json, patch_icons),
-        "captions": Stage("captions", artifacts.captioned_json, caption_images),
-        "chunks": Stage("chunks", artifacts.chunks_json, chunk_pages),
-        "index-text": Stage("index-text", None, lambda: upsert_text_vectors(config, artifacts.chunks_json)),
-        "index-visual": Stage(
-            "index-visual",
+        "patching": Stage("patching", artifacts.small_icon_json, patch_icons),
+        "captioning": Stage("captioning", artifacts.captioned_json, caption_images),
+        "chunking": Stage("chunking", artifacts.chunks_json, chunk_pages),
+        "indexing": Stage(
+            "indexing",
             None,
-            lambda: upsert_colpali_vectors(config, pdf_path=source_pdf, source_name=source_name),
+            lambda: (
+                upsert_text_vectors(config, artifacts.chunks_json),
+                upsert_colpali_vectors(config, pdf_path=source_pdf, source_name=source_name),
+            ),
         ),
     }
 
     for name in selected_stages:
-        if name == "mineru":
+        if name == "parsing":
             skipped = bool(content_json) and not force and not mineru_ran and not dry_run
             _print_stage(name, artifacts.content_json, dry_run=dry_run, skipped=skipped)
             continue
@@ -131,8 +133,8 @@ def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Run the RAG Flow ingestion pipeline.")
     parser.add_argument("--pdf", default=str(config.mineru.input_path), help="Source PDF to parse and index.")
-    parser.add_argument("--from-stage", choices=STAGES, default="mineru")
-    parser.add_argument("--to-stage", choices=STAGES, default="chunks")
+    parser.add_argument("--from-stage", choices=STAGES, default="parsing")
+    parser.add_argument("--to-stage", choices=STAGES, default="chunking")
     parser.add_argument("--force", action="store_true", help="Re-run stages even when outputs already exist.")
     parser.add_argument("--no-skip-existing", action="store_true", help="Run stages even when outputs already exist.")
     parser.add_argument("--dry-run", action="store_true", help="Print the pipeline without running it.")

@@ -5,6 +5,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=common.sh
 source "$SCRIPT_DIR/common.sh"
 
+: "${RAG_FLOW_CREATE_MINERU_INSTALL_UV:=$RAG_FLOW_USE_UV}"
+
+if truthy "$RAG_FLOW_CREATE_MINERU_INSTALL_UV"; then
+  "$SCRIPT_DIR/install-uv.sh"
+fi
+
 create_python_env "$RAG_FLOW_MINERU_ENV" "$RAG_FLOW_MINERU_PYTHON_VERSION"
 pip_install -e "$RAG_FLOW_REPO_ROOT[mineru]"
 
