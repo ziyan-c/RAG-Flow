@@ -933,7 +933,7 @@ def add_small_icon_text(
     model_name: str,
     dpi: int = 200,
     batch_size: int = 6,
-    max_new_tokens: int = 5000,
+    max_new_tokens: int = 8000,
     model_revision: str = "",
     trusted_remote_code_models: tuple[str, ...] = ("Qwen/Qwen3.5-9B",),
     page_window_size: int = 200,
@@ -1232,7 +1232,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--model-revision", default=config.models.vlm_model_revision)
     parser.add_argument("--dpi", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=6)
-    parser.add_argument("--max-new-tokens", type=int, default=5000)
+    parser.add_argument("--max-new-tokens", type=int, default=config.patching.max_new_tokens)
     parser.add_argument("--page-window-size", type=int, default=200)
     parser.add_argument("--checkpoint-interval", type=int, default=1)
     parser.add_argument("--checkpoint-json")
@@ -1287,6 +1287,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  checkpoint_json: {args.checkpoint_json or checkpoint_path_for(artifacts.output_json)}")
             print(f"  page_window_size: {args.page_window_size}")
             print(f"  batch_size: {args.batch_size}")
+            print(f"  max_new_tokens: {args.max_new_tokens}")
         return
 
     for job_idx, artifacts in enumerate(artifacts_list, start=1):

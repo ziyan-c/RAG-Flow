@@ -194,13 +194,16 @@ regions sent to the VLM, and prints patching statistics at the end. Useful
 controls:
 
 - `--batch-size`: VLM request batch size, default `6`
-- `--max-new-tokens`: generation budget, default `5000`
+- `--max-new-tokens`: generation budget, default `8000`
 - `--page-window-size`: PDF render window size, default `200`
 - `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
 - `--no-recursive`: only patch the exact artifact folder
+
+The same `--max-new-tokens` override is available on `rag-flow ingest` when
+running through the patching stage.
 
 You can also regenerate the overlay without running the VLM:
 
@@ -215,6 +218,23 @@ Generate image descriptions:
 ```bash
 rag-flow caption
 ```
+
+After patching a MinerU artifact folder, you can also use the artifact-dir form:
+
+```bash
+rag-flow caption --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+```
+
+Captioning resumes from `*_PATCHED_CAPTIONED.checkpoint.json` when available,
+writes a checkpoint after each VLM batch by default, and skips image blocks that
+already have `image_description_vlm`. Useful controls:
+
+- `--dry-run`: print resolved paths and image counts without loading the VLM
+- `--max-context-chars`: cap previous/current/next page text sent with each image, default `12000`
+- `--max-new-tokens`: caption generation budget, default `2000`
+- `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--no-resume`: ignore an existing checkpoint
+- `--no-skip-existing`: regenerate descriptions even when `image_description_vlm` exists
 
 Build page chunks:
 
@@ -295,6 +315,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_MINERU_MODEL_SOURCE`
 - `RAG_FLOW_MINERU_VERSION`
 - `RAG_FLOW_MINERU_PYTHON`
+- `RAG_FLOW_PATCH_MAX_NEW_TOKENS`
 - `RAG_FLOW_CONTENT_JSON`
 - `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`

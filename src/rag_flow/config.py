@@ -170,12 +170,18 @@ class MinerUConfig:
 
 
 @dataclass(frozen=True)
+class PatchingConfig:
+    max_new_tokens: int
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
     retrieval: RetrievalConfig
     server: ServerConfig
     mineru: MinerUConfig
+    patching: PatchingConfig
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -260,4 +266,8 @@ class AppConfig:
             auto_install=env.bool("RAG_FLOW_AUTO_INSTALL_MINERU", False),
         )
 
-        return cls(paths=paths, models=models, retrieval=retrieval, server=server, mineru=mineru)
+        patching = PatchingConfig(
+            max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
+        )
+
+        return cls(paths=paths, models=models, retrieval=retrieval, server=server, mineru=mineru, patching=patching)

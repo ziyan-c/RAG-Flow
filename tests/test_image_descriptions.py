@@ -1,0 +1,99 @@
+import json
+
+from rag_flow.preprocessing.image_descriptions import (
+    captioned_json_path_for,
+    checkpoint_path_for,
+    collect_image_description_stats,
+    get_three_page_context,
+    resolve_image_description_artifacts,
+    should_caption_image_block,
+)
+
+
+def test_captioned_json_path_for_content_list_names():
+    assert captioned_json_path_for("/tmp/manual_content_list.json").name == (
+        "manual_content_list_PATCHED_CAPTIONED.json"
+    )
+    assert captioned_json_path_for("/tmp/manual_content_list_PATCHED.json").name == (
+        "manual_content_list_PATCHED_CAPTIONED.json"
+    )
+    assert captioned_json_path_for("/tmp/manual_content_list_PATCHED_CAPTIONED.json").name == (
+        "manual_content_list_PATCHED_CAPTIONED.json"
+    )
+
+
+def test_image_caption_checkpoint_path_uses_output_stem():
+    assert checkpoint_path_for("/tmp/manual_content_list_PATCHED_CAPTIONED.json").name == (
+        "manual_content_list_PATCHED_CAPTIONED.checkpoint.json"
+    )
+
+
+def test_resolve_image_description_artifacts_from_mineru_output_dir(tmp_path):
+    artifact_dir = tmp_path / "hybrid_auto"
+    artifact_dir.mkdir()
+    (artifact_dir / "manual_content_list.json").write_text("[]", encoding="utf-8")
+    (artifact_dir / "manual_origin.pdf").write_text("pdf", encoding="utf-8")
+
+    artifacts = resolve_image_description_artifacts(artifact_dir)
+
+    assert artifacts.artifact_dir == artifact_dir
+    assert artifacts.base_dir == artifact_dir
+    assert artifacts.input_json == artifact_dir / "manual_content_list_PATCHED.json"
+    assert artifacts.output_json == artifact_dir / "manual_content_list_PATCHED_CAPTIONED.json"
+
+
+def test_captioning_stats_count_inline_missing_and_existing_images(tmp_path):
+    (tmp_path / "images").mkdir()
+    (tmp_path / "images" / "figure.jpg").write_text("jpg", encoding="utf-8")
+    content = [
+        {"type": "image", "page_idx": 0, "img_path": "images/figure.jpg"},
+        {"type": "image", "page_idx": 0, "img_path": "images/missing.jpg"},
+        {"type": "image", "page_idx": 0, "img_path": "images/icon.jpg", "vlm-small-icon-inline-icon": True},
+        {"type": "image", "page_idx": 0},
+        {
+            "type": "image",
+            "page_idx": 0,
+            "img_path": "images/already.jpg",
+            "image_description_vlm": "Already captioned.",
+        },
+    ]
+
+    stats = collect_image_description_stats(content, base_dir=tmp_path)
+
+    assert stats.images_seen == 5
+    assert stats.caption_candidates == 2
+    assert stats.missing_image_files == 1
+    assert stats.skipped_inline_icons == 1
+    assert stats.skipped_without_img_path == 1
+    assert stats.skipped_existing == 1
+
+
+def test_should_caption_image_block_skips_inline_candidate():
+    assert not should_caption_image_block(
+        {"type": "image", "img_path": "images/icon.jpg", "vlm-small-icon-inline-candidate": True}
+    )
+    assert should_caption_image_block({"type": "image", "img_path": "images/figure.jpg"})
+
+
+def test_get_three_page_context_limits_length_and_keeps_current_page():
+    page_text_map = {
+        4: ["previous " * 100],
+        5: ["current-page-important " * 100],
+        6: ["next " * 100],
+    }
+
+    context = get_three_page_context(page_text_map, 5, max_context_chars=420)
+
+    assert len(context) <= 420
+    assert "current-page-important" in context
+
+
+def test_dry_run_stats_can_load_json(tmp_path):
+    content = [{"type": "image", "page_idx": 0, "img_path": "images/figure.jpg"}]
+    input_json = tmp_path / "manual_content_list_PATCHED.json"
+    input_json.write_text(json.dumps(content), encoding="utf-8")
+
+    loaded = json.loads(input_json.read_text(encoding="utf-8"))
+    stats = collect_image_description_stats(loaded, base_dir=tmp_path)
+
+    assert stats.caption_candidates == 1

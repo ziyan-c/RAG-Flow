@@ -9,7 +9,7 @@ testclient = pytest.importorskip("fastapi.testclient")
 TestClient = testclient.TestClient
 
 from rag_flow.api import create_app
-from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PathsConfig, RetrievalConfig, ServerConfig
+from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PatchingConfig, PathsConfig, RetrievalConfig, ServerConfig
 from rag_flow.retrieval import RetrievalResult
 
 
@@ -66,6 +66,7 @@ def make_config(tmp_path: Path, *, api_key: str = "", max_query_chars: int = 400
             python="",
             auto_install=False,
         ),
+        patching=PatchingConfig(max_new_tokens=8000),
     )
 
 

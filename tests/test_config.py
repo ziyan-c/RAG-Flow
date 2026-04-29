@@ -62,3 +62,20 @@ def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatc
     assert config.paths.source_pdf == tmp_path / ".local" / "source-documents" / "manual.pdf"
     assert config.mineru.input_path == tmp_path / ".local" / "source-documents" / "mineru-input.pdf"
     assert config.paths.base_dir == tmp_path / "runtime" / "manual"
+
+
+def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    assert AppConfig.from_env().patching.max_new_tokens == 8000
+
+
+def test_patch_max_new_tokens_reads_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_PATCH_MAX_NEW_TOKENS=4000\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    assert AppConfig.from_env().patching.max_new_tokens == 4000

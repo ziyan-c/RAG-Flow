@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PathsConfig, RetrievalConfig, ServerConfig
+from rag_flow.config import AppConfig, MinerUConfig, ModelConfig, PatchingConfig, PathsConfig, RetrievalConfig, ServerConfig
 from rag_flow.mineru import (
     build_mineru_command,
     find_content_json,
@@ -71,6 +71,7 @@ def make_config(tmp_path: Path, *, command: str = "mineru", input_path: Path | N
             python="/envs/mineru/bin/python",
             auto_install=False,
         ),
+        patching=PatchingConfig(max_new_tokens=8000),
     )
 
 

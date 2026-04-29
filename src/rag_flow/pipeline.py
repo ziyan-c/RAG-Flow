@@ -53,6 +53,7 @@ def run_ingest(
     dry_run: bool = False,
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
+    patch_max_new_tokens: int | None = None,
 ) -> MinerUArtifacts:
     selected_stages = _stage_slice(from_stage, to_stage)
     source_pdf = Path(pdf_path or config.mineru.input_path)
@@ -84,6 +85,7 @@ def run_ingest(
             model_name=config.models.vlm_model,
             model_revision=config.models.vlm_model_revision,
             trusted_remote_code_models=config.models.trusted_remote_code_models,
+            max_new_tokens=config.patching.max_new_tokens if patch_max_new_tokens is None else patch_max_new_tokens,
             write_patching_view=write_patching_view,
             patching_view_pdf=patching_view_pdf,
         )
@@ -141,6 +143,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--to-stage", choices=STAGES, default="chunking")
     parser.add_argument("--force", action="store_true", help="Re-run stages even when outputs already exist.")
     parser.add_argument("--no-skip-existing", action="store_true", help="Run stages even when outputs already exist.")
+    parser.add_argument(
+        "--max-new-tokens",
+        type=int,
+        default=config.patching.max_new_tokens,
+        help="Patching VLM generation budget.",
+    )
     parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes patching crop regions.")
     parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")
     parser.add_argument("--dry-run", action="store_true", help="Print the pipeline without running it.")
@@ -156,6 +164,7 @@ def main(argv: list[str] | None = None) -> None:
         dry_run=args.dry_run,
         write_patching_view=not args.no_patching_view,
         patching_view_pdf=args.patching_view_pdf,
+        patch_max_new_tokens=args.max_new_tokens,
     )
 
 
