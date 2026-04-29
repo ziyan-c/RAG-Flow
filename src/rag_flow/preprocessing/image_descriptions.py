@@ -21,6 +21,11 @@ TEXT_KEYS = [
     "image_footnote",
 ]
 
+INLINE_ICON_SKIP_KEYS = {
+    "vlm-small-icon-inline-icon",
+    "vlm-small-icon-inline-candidate",
+}
+
 
 def _join(value: Any) -> str:
     if isinstance(value, list):
@@ -49,6 +54,12 @@ def get_three_page_context(page_text_map: dict[int, list[str]], target_page_idx:
             context_lines.append(f"\n--- [Text from Page {page_idx}] ---")
             context_lines.append("\n\n".join(page_text_map[page_idx]))
     return "\n".join(context_lines)
+
+
+def should_caption_image_block(block: dict[str, Any]) -> bool:
+    if block.get("type") != "image" or not block.get("img_path"):
+        return False
+    return not any(block.get(key) for key in INLINE_ICON_SKIP_KEYS)
 
 
 def add_image_descriptions(
@@ -156,7 +167,7 @@ def add_image_descriptions(
     batch: list[dict[str, Any]] = []
     for idx in tqdm(range(len(content_data)), desc="Processing images"):
         block = content_data[idx]
-        if block.get("type") != "image" or not block.get("img_path"):
+        if not should_caption_image_block(block):
             continue
         image_path = base_path / block["img_path"]
         if not image_path.exists():

@@ -165,11 +165,14 @@ writes `*_content_list_PATCHED_CAPTIONED.json`.
 
 Patching focuses on content blocks instead of page furniture: text, lists, and
 tables are patched, while headers, footers, page numbers, and empty fields are
-skipped. MinerU represents cross-page table continuations as empty `table`
-blocks; those blocks are not copied into the JSON as duplicate text. Instead,
-their PDF crops are stacked onto the previous table crop so the VLM can patch
-the single complete `table_body` with visual evidence from every page of the
-same table.
+skipped. Small uncaptioned `image` blocks are treated as possible inline icons:
+patching links them to nearby text/list blocks or containing table cells, expands
+the visual crop to include them, marks them in the JSON, and keeps captioning
+from describing them as standalone figures. MinerU represents cross-page table
+continuations as empty `table` blocks; those blocks are not copied into the JSON
+as duplicate text. Instead, their PDF crops are stacked onto the previous table
+crop so the VLM can patch the single complete `table_body` with visual evidence
+from every page of the same table.
 
 The source PDF is rendered in page windows instead of loading the whole book at
 once; the default is 200 pages per window. When `--artifact-dir` points at a
@@ -186,14 +189,26 @@ rag-flow patch \
 The VLM prompt is intentionally strict: preserve all existing extracted text and
 only insert `[Icon: ...]` markers. The run writes a checkpoint after each VLM
 batch by default, resumes from that checkpoint on retry, deletes the checkpoint
-after success, and prints patching statistics at the end. Useful controls:
+after success, writes a `*_PATCHING_VIEW.pdf` overlay that shows the exact crop
+regions sent to the VLM, and prints patching statistics at the end. Useful
+controls:
 
 - `--batch-size`: VLM request batch size, default `6`
 - `--max-new-tokens`: generation budget, default `5000`
 - `--page-window-size`: PDF render window size, default `200`
 - `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--patching-view-pdf`: custom path for the overlay PDF
+- `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
 - `--no-recursive`: only patch the exact artifact folder
+
+You can also regenerate the overlay without running the VLM:
+
+```bash
+rag-flow patch-view \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_PATCHED.json \
+  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+```
 
 Generate image descriptions:
 

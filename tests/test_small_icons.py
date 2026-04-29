@@ -1,16 +1,23 @@
 import pytest
 
 from rag_flow.preprocessing.small_icons import (
+    INLINE_ICON_CANDIDATE_KEY,
+    INLINE_ICON_KEY,
+    InlineIconLink,
     _patch_field_keys,
     _window_visual_page_end,
     build_icon_patch_prompt,
+    build_inline_icon_links,
     build_table_continuation_map,
     checkpoint_path_for,
+    crop_image_from_block_with_inline_icons,
+    is_inline_icon_candidate,
     is_no_missing_response,
     resolve_icon_patch_batch,
     resolve_icon_patch_artifacts,
     should_apply_icon_patch,
 )
+from rag_flow.preprocessing.image_descriptions import should_caption_image_block
 
 
 def test_resolve_icon_patch_artifacts_from_mineru_output_dir(tmp_path):
@@ -94,6 +101,125 @@ def test_patch_field_keys_skips_empty_table_continuation_blocks():
     }
 
     assert _patch_field_keys(block) == []
+
+
+def test_inline_icon_candidate_requires_small_uncaptioned_image():
+    block = {
+        "type": "image",
+        "bbox": [590, 550, 616, 565],
+        "page_idx": 20,
+        "image_caption": [],
+        "image_footnote": [],
+    }
+
+    assert is_inline_icon_candidate(block)
+    assert not is_inline_icon_candidate({**block, "bbox": [100, 100, 500, 500]})
+    assert not is_inline_icon_candidate({**block, "image_caption": ["Figure 1"]})
+
+
+def test_inline_icon_links_to_nearby_missing_click_text():
+    content_data = [
+        {
+            "type": "image",
+            "bbox": [590, 550, 616, 565],
+            "page_idx": 20,
+            "image_caption": [],
+            "image_footnote": [],
+        },
+        {
+            "type": "text",
+            "bbox": [170, 540, 660, 575],
+            "page_idx": 20,
+            "text": "Press the Windows key, type dxdiag, and then click .",
+        },
+    ]
+
+    links = build_inline_icon_links(content_data, {})
+
+    assert links.by_icon[0].target_idx == 1
+    assert links.by_icon[0].target_field == "text"
+    assert content_data[0][INLINE_ICON_KEY] is True
+
+
+def test_inline_icon_inside_table_links_to_table_body():
+    content_data = [
+        {
+            "type": "table",
+            "bbox": [100, 100, 900, 900],
+            "page_idx": 0,
+            "table_body": "<table><tr><td>Mode</td></tr></table>",
+        },
+        {
+            "type": "image",
+            "bbox": [200, 300, 222, 322],
+            "page_idx": 0,
+            "image_caption": [],
+            "image_footnote": [],
+        },
+    ]
+
+    links = build_inline_icon_links(content_data, {})
+
+    assert links.by_icon[1].target_idx == 0
+    assert links.by_icon[1].target_field == "table_body"
+    assert content_data[1][INLINE_ICON_KEY] is True
+
+
+def test_unlinked_inline_icon_candidate_is_marked_for_caption_skip():
+    content_data = [
+        {
+            "type": "image",
+            "bbox": [20, 20, 40, 40],
+            "page_idx": 0,
+            "image_caption": [],
+            "image_footnote": [],
+        }
+    ]
+
+    links = build_inline_icon_links(content_data, {})
+
+    assert links.by_icon == {}
+    assert content_data[0][INLINE_ICON_CANDIDATE_KEY] is True
+
+
+def test_text_crop_expands_to_linked_inline_icon():
+    class FakePage:
+        width = 1000
+        height = 1000
+
+        def crop(self, box):
+            return box
+
+    content_data = [
+        {"type": "text", "bbox": [100, 100, 200, 120], "page_idx": 0, "text": "Click ."},
+        {"type": "image", "bbox": [240, 105, 260, 125], "page_idx": 0},
+    ]
+    image = crop_image_from_block_with_inline_icons(
+        block=content_data[0],
+        content_data=content_data,
+        inline_icon_links=[
+            InlineIconLink(
+                icon_idx=1,
+                target_idx=0,
+                target_field="text",
+                target_type="text",
+                score=0,
+            )
+        ],
+        pdf_images=[FakePage()],
+    )
+
+    assert image == (88.0, 88.0, 272.0, 137.0)
+
+
+def test_captioning_skips_inline_icon_blocks():
+    assert not should_caption_image_block(
+        {"type": "image", "img_path": "images/icon.jpg", INLINE_ICON_KEY: True}
+    )
+    assert not should_caption_image_block(
+        {"type": "image", "img_path": "images/icon.jpg", INLINE_ICON_CANDIDATE_KEY: True}
+    )
+    assert should_caption_image_block({"type": "image", "img_path": "images/screenshot.jpg"})
 
 
 def test_table_continuations_group_under_previous_body_table():

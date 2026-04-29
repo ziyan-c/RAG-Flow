@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
     "mineru": ("rag_flow.mineru", True),
     "patch": ("rag_flow.preprocessing.small_icons", True),
+    "patch-view": ("rag_flow.preprocessing.patching_view", True),
     "caption": ("rag_flow.preprocessing.image_descriptions", True),
     "ingest": ("rag_flow.pipeline", True),
     "chunk": ("rag_flow.chunking", True),
@@ -30,6 +31,7 @@ MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
 MODULE_HELP: dict[str, str] = {
     "mineru": "Check, install, locate, or run MinerU.",
     "patch": "Patch small icon text from a MinerU artifact directory.",
+    "patch-view": "Draw patching VLM crop regions over a source PDF.",
     "caption": "Generate image descriptions for patched MinerU output.",
     "ingest": "Run the staged ingestion pipeline.",
     "chunk": "Build page-level chunks from MinerU JSON.",

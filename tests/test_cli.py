@@ -39,6 +39,20 @@ def test_caption_command_delegates_to_image_description_main(monkeypatch):
     assert calls == [["--dry-run"]]
 
 
+def test_patch_view_command_delegates_to_patching_view_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.patching_view
+
+    monkeypatch.setattr(rag_flow.preprocessing.patching_view, "main", lambda argv: calls.append(argv))
+
+    cli.main(["patch-view", "--input-json", "manual_content_list_PATCHED.json", "--input-pdf", "manual.pdf", "--dry-run"])
+
+    assert calls == [
+        ["--input-json", "manual_content_list_PATCHED.json", "--input-pdf", "manual.pdf", "--dry-run"]
+    ]
+
+
 def test_module_help_is_forwarded(monkeypatch):
     calls: list[list[str]] = []
 

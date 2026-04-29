@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import math
 import re
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -44,6 +46,21 @@ TEXT_FIELD_KEYS = {
     "code_footnote",
 }
 
+INLINE_ICON_KEY = "vlm-small-icon-inline-icon"
+INLINE_ICON_CANDIDATE_KEY = "vlm-small-icon-inline-candidate"
+INLINE_ICON_TARGET_IDX_KEY = "vlm-small-icon-inline-target-idx"
+INLINE_ICON_TARGET_FIELD_KEY = "vlm-small-icon-inline-target-field"
+INLINE_ICON_TARGET_TYPE_KEY = "vlm-small-icon-inline-target-type"
+INLINE_ICON_SCORE_KEY = "vlm-small-icon-inline-score"
+INLINE_ICON_KEYS = {
+    INLINE_ICON_KEY,
+    INLINE_ICON_CANDIDATE_KEY,
+    INLINE_ICON_TARGET_IDX_KEY,
+    INLINE_ICON_TARGET_FIELD_KEY,
+    INLINE_ICON_TARGET_TYPE_KEY,
+    INLINE_ICON_SCORE_KEY,
+}
+
 METADATA_KEYS = {
     "type",
     "bbox",
@@ -51,6 +68,7 @@ METADATA_KEYS = {
     "text_level",
     "img_path",
     "sub_type",
+    *INLINE_ICON_KEYS,
 }
 
 CHECKED_FIELDS_KEY = "vlm-small-icon-checked-fields"
@@ -79,9 +97,28 @@ class IconPatchStats:
     skipped_empty_fields: int = 0
     table_continuation_blocks: int = 0
     table_continuation_crops: int = 0
+    inline_icon_candidates: int = 0
+    inline_icon_linked: int = 0
+    inline_icon_unlinked: int = 0
     windows_processed: int = 0
     batches_processed: int = 0
     checkpoints_written: int = 0
+
+
+@dataclass(frozen=True)
+class InlineIconLink:
+    icon_idx: int
+    target_idx: int
+    target_field: str
+    target_type: str
+    score: float
+
+
+@dataclass(frozen=True)
+class InlineIconLinks:
+    by_target: dict[int, list[InlineIconLink]]
+    by_icon: dict[int, InlineIconLink]
+    candidates: tuple[int, ...]
 
 
 def _single_candidate(candidates: list[Path], *, label: str, artifact_dir: Path) -> Path:
@@ -230,6 +267,325 @@ def _is_text_list(value: Any) -> bool:
     return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
+def is_inline_icon_block(block: dict[str, Any]) -> bool:
+    return bool(block.get(INLINE_ICON_KEY) or block.get(INLINE_ICON_CANDIDATE_KEY))
+
+
+def _clear_inline_icon_metadata(block: dict[str, Any]) -> None:
+    for key in INLINE_ICON_KEYS:
+        block.pop(key, None)
+
+
+def _block_page_idx(block: dict[str, Any], *, default: int = 0) -> int:
+    try:
+        return int(block.get("page_idx", default))
+    except (TypeError, ValueError):
+        return default
+
+
+def _block_bbox(block: dict[str, Any]) -> tuple[float, float, float, float] | None:
+    raw_bbox = block.get("bbox")
+    if not isinstance(raw_bbox, (list, tuple)) or len(raw_bbox) != 4:
+        return None
+    try:
+        x0, y0, x1, y1 = (float(value) for value in raw_bbox)
+    except (TypeError, ValueError):
+        return None
+    if x1 <= x0 or y1 <= y0:
+        return None
+    return x0, y0, x1, y1
+
+
+def _bbox_size(bbox: tuple[float, float, float, float]) -> tuple[float, float, float]:
+    width = bbox[2] - bbox[0]
+    height = bbox[3] - bbox[1]
+    return width, height, width * height
+
+
+def _bbox_center(bbox: tuple[float, float, float, float]) -> tuple[float, float]:
+    return (bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0
+
+
+def _bbox_contains_point(bbox: tuple[float, float, float, float], point: tuple[float, float]) -> bool:
+    return bbox[0] <= point[0] <= bbox[2] and bbox[1] <= point[1] <= bbox[3]
+
+
+def _bbox_overlap_area(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> float:
+    width = max(0.0, min(first[2], second[2]) - max(first[0], second[0]))
+    height = max(0.0, min(first[3], second[3]) - max(first[1], second[1]))
+    return width * height
+
+
+def _bbox_vertical_overlap_ratio(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> float:
+    overlap = max(0.0, min(first[3], second[3]) - max(first[1], second[1]))
+    shortest = max(1.0, min(first[3] - first[1], second[3] - second[1]))
+    return overlap / shortest
+
+
+def _bbox_horizontal_gap(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> float:
+    if first[2] < second[0]:
+        return second[0] - first[2]
+    if second[2] < first[0]:
+        return first[0] - second[2]
+    return 0.0
+
+
+def _bbox_distance(
+    first: tuple[float, float, float, float],
+    second: tuple[float, float, float, float],
+) -> float:
+    dx = _bbox_horizontal_gap(first, second)
+    if first[3] < second[1]:
+        dy = second[1] - first[3]
+    elif second[3] < first[1]:
+        dy = first[1] - second[3]
+    else:
+        dy = 0.0
+    return math.hypot(dx, dy)
+
+
+def _bbox_union(
+    boxes: list[tuple[float, float, float, float]],
+    *,
+    padding: float = 12.0,
+) -> tuple[float, float, float, float] | None:
+    if not boxes:
+        return None
+    return (
+        max(0.0, min(box[0] for box in boxes) - padding),
+        max(0.0, min(box[1] for box in boxes) - padding),
+        min(1000.0, max(box[2] for box in boxes) + padding),
+        min(1000.0, max(box[3] for box in boxes) + padding),
+    )
+
+
+def is_inline_icon_candidate(block: dict[str, Any]) -> bool:
+    if block.get("type") != "image":
+        return False
+    if _join(block.get("image_caption", "")).strip() or _join(block.get("image_footnote", "")).strip():
+        return False
+    bbox = _block_bbox(block)
+    if bbox is None:
+        return False
+    width, height, area = _bbox_size(bbox)
+    return (width <= 80 and height <= 80) or area <= 5000
+
+
+def _table_master_by_continuation(table_continuations: dict[int, list[int]]) -> dict[int, int]:
+    return {
+        continuation_idx: master_idx
+        for master_idx, continuation_indices in table_continuations.items()
+        for continuation_idx in continuation_indices
+    }
+
+
+def _primary_inline_target_field(block: dict[str, Any]) -> str | None:
+    block_type = block.get("type")
+    if block_type == "text" and _join(block.get("text", "")).strip():
+        return "text"
+    if block_type == "list" and _join(block.get("list_items", "")).strip():
+        return "list_items"
+    if block_type == "table" and _join(block.get("table_body", "")).strip():
+        return "table_body"
+    return None
+
+
+def _target_text_for_field(block: dict[str, Any], field: str) -> str:
+    return _join(block.get(field, "")).strip()
+
+
+def _has_missing_inline_icon_pattern(text: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(?:click|select|choose|tap|press|double-click|right-click)\s+(?:[.,;:]|and\b|or\b|to\b)",
+            text,
+            flags=re.IGNORECASE,
+        )
+        or re.search(
+            r"\b(?:click|select|choose|tap|press|double-click|right-click)\s*$",
+            text,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _score_inline_target(
+    *,
+    icon: dict[str, Any],
+    target: dict[str, Any],
+    target_field: str,
+) -> float | None:
+    icon_bbox = _block_bbox(icon)
+    target_bbox = _block_bbox(target)
+    if icon_bbox is None or target_bbox is None:
+        return None
+
+    score = _bbox_distance(icon_bbox, target_bbox)
+    icon_center = _bbox_center(icon_bbox)
+    target_center = _bbox_center(target_bbox)
+    score += abs(icon_center[1] - target_center[1]) * 0.10
+    vertical_overlap = _bbox_vertical_overlap_ratio(icon_bbox, target_bbox)
+    if _bbox_contains_point(target_bbox, icon_center):
+        score -= 220
+    if vertical_overlap > 0:
+        score -= 70
+    if vertical_overlap > 0 and _bbox_horizontal_gap(icon_bbox, target_bbox) <= 80:
+        score -= 90
+    if target.get("type") in {"text", "list"} and _has_missing_inline_icon_pattern(
+        _target_text_for_field(target, target_field)
+    ):
+        score -= 140
+    return score
+
+
+def _accept_inline_link(
+    *,
+    icon: dict[str, Any],
+    target: dict[str, Any],
+    target_field: str,
+    score: float,
+) -> bool:
+    icon_bbox = _block_bbox(icon)
+    target_bbox = _block_bbox(target)
+    if icon_bbox is None or target_bbox is None:
+        return False
+    distance = _bbox_distance(icon_bbox, target_bbox)
+    icon_center = _bbox_center(icon_bbox)
+    if _bbox_contains_point(target_bbox, icon_center):
+        return True
+    if target.get("type") in {"text", "list"} and _has_missing_inline_icon_pattern(
+        _target_text_for_field(target, target_field)
+    ):
+        return distance <= 260
+    if (
+        _bbox_vertical_overlap_ratio(icon_bbox, target_bbox) > 0
+        and _bbox_horizontal_gap(icon_bbox, target_bbox) <= 90
+    ):
+        return True
+    return score <= 130
+
+
+def _best_inline_icon_link(
+    *,
+    content_data: list[dict[str, Any]],
+    icon_idx: int,
+    continuation_to_master: dict[int, int],
+) -> InlineIconLink | None:
+    icon = content_data[icon_idx]
+    icon_bbox = _block_bbox(icon)
+    if icon_bbox is None:
+        return None
+    icon_page = _block_page_idx(icon)
+    icon_center = _bbox_center(icon_bbox)
+    _, _, icon_area = _bbox_size(icon_bbox)
+
+    for table_idx, table in enumerate(content_data):
+        if not isinstance(table, dict) or table.get("type") != "table":
+            continue
+        if _block_page_idx(table, default=-1) != icon_page:
+            continue
+        table_bbox = _block_bbox(table)
+        if table_bbox is None:
+            continue
+        overlap_ratio = _bbox_overlap_area(icon_bbox, table_bbox) / max(1.0, icon_area)
+        if _bbox_contains_point(table_bbox, icon_center) or overlap_ratio >= 0.5:
+            master_idx = continuation_to_master.get(table_idx, table_idx)
+            master = content_data[master_idx]
+            if _join(master.get("table_body", "")).strip():
+                return InlineIconLink(
+                    icon_idx=icon_idx,
+                    target_idx=master_idx,
+                    target_field="table_body",
+                    target_type="table",
+                    score=-1000 + _bbox_distance(icon_bbox, table_bbox),
+                )
+
+    best_link: InlineIconLink | None = None
+    for target_idx, target in enumerate(content_data):
+        if target_idx == icon_idx or not isinstance(target, dict):
+            continue
+        if _block_page_idx(target, default=-1) != icon_page:
+            continue
+        target_field = _primary_inline_target_field(target)
+        if not target_field:
+            continue
+        score = _score_inline_target(icon=icon, target=target, target_field=target_field)
+        if score is None:
+            continue
+        if best_link is None or score < best_link.score:
+            best_link = InlineIconLink(
+                icon_idx=icon_idx,
+                target_idx=target_idx,
+                target_field=target_field,
+                target_type=str(target.get("type", "")),
+                score=score,
+            )
+
+    if best_link is None:
+        return None
+    target = content_data[best_link.target_idx]
+    if not _accept_inline_link(
+        icon=icon,
+        target=target,
+        target_field=best_link.target_field,
+        score=best_link.score,
+    ):
+        return None
+    return best_link
+
+
+def build_inline_icon_links(
+    content_data: list[dict[str, Any]],
+    table_continuations: dict[int, list[int]],
+) -> InlineIconLinks:
+    for block in content_data:
+        if isinstance(block, dict):
+            _clear_inline_icon_metadata(block)
+
+    continuation_to_master = _table_master_by_continuation(table_continuations)
+    candidates = tuple(
+        idx
+        for idx, block in enumerate(content_data)
+        if isinstance(block, dict) and is_inline_icon_candidate(block)
+    )
+    by_target: dict[int, list[InlineIconLink]] = defaultdict(list)
+    by_icon: dict[int, InlineIconLink] = {}
+
+    for icon_idx in candidates:
+        icon = content_data[icon_idx]
+        link = _best_inline_icon_link(
+            content_data=content_data,
+            icon_idx=icon_idx,
+            continuation_to_master=continuation_to_master,
+        )
+        if link is None:
+            icon[INLINE_ICON_CANDIDATE_KEY] = True
+            continue
+
+        icon[INLINE_ICON_KEY] = True
+        icon[INLINE_ICON_TARGET_IDX_KEY] = link.target_idx
+        icon[INLINE_ICON_TARGET_FIELD_KEY] = link.target_field
+        icon[INLINE_ICON_TARGET_TYPE_KEY] = link.target_type
+        icon[INLINE_ICON_SCORE_KEY] = round(link.score, 3)
+        by_icon[icon_idx] = link
+        by_target[link.target_idx].append(link)
+
+    return InlineIconLinks(
+        by_target={target_idx: links for target_idx, links in by_target.items()},
+        by_icon=by_icon,
+        candidates=candidates,
+    )
+
+
 def _is_table_continuation_block(block: dict[str, Any]) -> bool:
     if block.get("type") != "table":
         return False
@@ -327,6 +683,9 @@ def _print_stats(stats: IconPatchStats, output_json: Path) -> None:
     print(f"  skipped empty fields: {stats.skipped_empty_fields}")
     print(f"  table continuation blocks: {stats.table_continuation_blocks}")
     print(f"  table continuation crops: {stats.table_continuation_crops}")
+    print(f"  inline icon candidates: {stats.inline_icon_candidates}")
+    print(f"  inline icons linked: {stats.inline_icon_linked}")
+    print(f"  inline icons unlinked: {stats.inline_icon_unlinked}")
     print(f"  page windows: {stats.windows_processed}")
     print(f"  VLM batches: {stats.batches_processed}")
     print(f"  checkpoints written: {stats.checkpoints_written}")
@@ -383,14 +742,19 @@ def should_apply_icon_patch(*, original_text: str, patched_text: str, field_key:
     return bool(re.search(r"\[icon\s*:", patched_text, flags=re.IGNORECASE))
 
 
-def crop_image_from_block(block: dict[str, Any], pdf_images: list[Any], *, page_offset: int = 0) -> Any | None:
-    page_idx = int(block.get("page_idx", 0))
+def crop_image_from_bbox(
+    *,
+    page_idx: int,
+    bbox: tuple[float, float, float, float],
+    pdf_images: list[Any],
+    page_offset: int = 0,
+) -> Any | None:
     local_page_idx = page_idx - page_offset
-    if local_page_idx < 0 or local_page_idx >= len(pdf_images) or "bbox" not in block:
+    if local_page_idx < 0 or local_page_idx >= len(pdf_images):
         return None
 
     image = pdf_images[local_page_idx]
-    norm_x0, norm_y0, norm_x1, norm_y1 = block["bbox"]
+    norm_x0, norm_y0, norm_x1, norm_y1 = bbox
     rx0 = (norm_x0 / 1000.0) * image.width
     ry0 = (norm_y0 / 1000.0) * image.height
     rx1 = (norm_x1 / 1000.0) * image.width
@@ -398,6 +762,49 @@ def crop_image_from_block(block: dict[str, Any], pdf_images: list[Any], *, page_
     rx0, ry0 = max(0, rx0), max(0, ry0)
     rx1, ry1 = min(image.width, rx1), min(image.height, ry1)
     return image.crop((rx0, ry0, rx1, ry1))
+
+
+def crop_image_from_block(block: dict[str, Any], pdf_images: list[Any], *, page_offset: int = 0) -> Any | None:
+    bbox = _block_bbox(block)
+    if bbox is None:
+        return None
+    return crop_image_from_bbox(
+        page_idx=_block_page_idx(block),
+        bbox=bbox,
+        pdf_images=pdf_images,
+        page_offset=page_offset,
+    )
+
+
+def crop_image_from_block_with_inline_icons(
+    *,
+    block: dict[str, Any],
+    content_data: list[dict[str, Any]],
+    inline_icon_links: list[InlineIconLink],
+    pdf_images: list[Any],
+    page_offset: int = 0,
+) -> Any | None:
+    block_bbox = _block_bbox(block)
+    if block_bbox is None:
+        return None
+    page_idx = _block_page_idx(block)
+    boxes = [block_bbox]
+    for link in inline_icon_links:
+        icon = content_data[link.icon_idx]
+        if _block_page_idx(icon, default=-1) != page_idx:
+            continue
+        icon_bbox = _block_bbox(icon)
+        if icon_bbox is not None:
+            boxes.append(icon_bbox)
+    union_bbox = _bbox_union(boxes)
+    if union_bbox is None:
+        return None
+    return crop_image_from_bbox(
+        page_idx=page_idx,
+        bbox=union_bbox,
+        pdf_images=pdf_images,
+        page_offset=page_offset,
+    )
 
 
 def concat_images_vertically(images: list[Any]) -> Any | None:
@@ -482,17 +889,30 @@ def build_table_body_crop(
     pdf_images: list[Any],
     block_idx: int,
     continuation_indices: list[int],
+    inline_icon_links: list[InlineIconLink] | None = None,
     page_offset: int = 0,
 ) -> Any | None:
     crops = []
     block = content_data[block_idx]
-    block_crop = crop_image_from_block(block, pdf_images, page_offset=page_offset)
+    block_crop = crop_image_from_block_with_inline_icons(
+        block=block,
+        content_data=content_data,
+        inline_icon_links=inline_icon_links or [],
+        pdf_images=pdf_images,
+        page_offset=page_offset,
+    )
     if block_crop is not None:
         crops.append(block_crop)
 
     for continuation_idx in continuation_indices:
         continuation = content_data[continuation_idx]
-        continuation_crop = crop_image_from_block(continuation, pdf_images, page_offset=page_offset)
+        continuation_crop = crop_image_from_block_with_inline_icons(
+            block=continuation,
+            content_data=content_data,
+            inline_icon_links=inline_icon_links or [],
+            pdf_images=pdf_images,
+            page_offset=page_offset,
+        )
         if continuation_crop is not None:
             crops.append(continuation_crop)
 
@@ -514,6 +934,8 @@ def add_small_icon_text(
     checkpoint_interval: int = 1,
     checkpoint_json: str | Path | None = None,
     resume: bool = True,
+    write_patching_view: bool = True,
+    patching_view_pdf: str | Path | None = None,
 ) -> None:
     import torch
     from modelscope import snapshot_download
@@ -558,6 +980,10 @@ def add_small_icon_text(
     table_continuations = build_table_continuation_map(content_data)
     table_continuation_indices = _table_continuation_indices(table_continuations)
     stats.table_continuation_blocks = len(table_continuation_indices)
+    inline_icon_links = build_inline_icon_links(content_data, table_continuations)
+    stats.inline_icon_candidates = len(inline_icon_links.candidates)
+    stats.inline_icon_linked = len(inline_icon_links.by_icon)
+    stats.inline_icon_unlinked = stats.inline_icon_candidates - stats.inline_icon_linked
 
     def write_checkpoint() -> None:
         _write_json(checkpoint_path, content_data)
@@ -708,6 +1134,7 @@ def add_small_icon_text(
                             pdf_images=pdf_images,
                             block_idx=idx,
                             continuation_indices=continuation_indices,
+                            inline_icon_links=inline_icon_links.by_target.get(idx, []),
                             page_offset=page_start,
                         )
                         stats.table_continuation_crops += len(continuation_indices)
@@ -719,7 +1146,17 @@ def add_small_icon_text(
                             page_offset=page_start,
                         )
                     else:
-                        final_image = crop_image_from_block(block, pdf_images, page_offset=page_start)
+                        final_image = crop_image_from_block_with_inline_icons(
+                            block=block,
+                            content_data=content_data,
+                            inline_icon_links=[
+                                link
+                                for link in inline_icon_links.by_target.get(idx, [])
+                                if link.target_field == key
+                            ],
+                            pdf_images=pdf_images,
+                            page_offset=page_start,
+                        )
                     if final_image is None:
                         continue
 
@@ -764,6 +1201,17 @@ def add_small_icon_text(
     _write_json(output_path, content_data)
     if checkpoint_path.exists():
         checkpoint_path.unlink()
+    if write_patching_view:
+        from rag_flow.preprocessing.patching_view import write_patching_view_pdf
+
+        view_stats = write_patching_view_pdf(
+            content_json=output_path,
+            pdf_path=pdf_path,
+            output_pdf=patching_view_pdf,
+        )
+        print(f"Generated patching view PDF at {view_stats.output_pdf}")
+        print(f"  overlays: {view_stats.region_count}")
+        print(f"  inline icons linked: {view_stats.inline_icons_linked}/{view_stats.inline_icon_candidates}")
     _print_stats(stats, output_path)
 
 
@@ -784,6 +1232,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--no-recursive", action="store_true")
+    parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes VLM patching crop regions.")
+    parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")
     parser.add_argument("--dry-run", action="store_true", help="Print resolved inputs without loading the VLM.")
     args = parser.parse_args(argv)
 
@@ -811,8 +1261,12 @@ def main(argv: list[str] | None = None) -> None:
 
     if len(artifacts_list) > 1 and args.checkpoint_json:
         parser.error("--checkpoint-json can only be used with a single patching job.")
+    if len(artifacts_list) > 1 and args.patching_view_pdf:
+        parser.error("--patching-view-pdf can only be used with a single patching job.")
 
     if args.dry_run:
+        from rag_flow.preprocessing.patching_view import patching_view_path_for
+
         print(f"Icon patching jobs: {len(artifacts_list)}")
         for artifacts in artifacts_list:
             print("Icon patching inputs:")
@@ -820,6 +1274,10 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  input_json: {artifacts.content_json}")
             print(f"  pdf: {artifacts.origin_pdf}")
             print(f"  output_json: {artifacts.output_json}")
+            if args.no_patching_view:
+                print("  patching_view_pdf: disabled")
+            else:
+                print(f"  patching_view_pdf: {args.patching_view_pdf or patching_view_path_for(artifacts.output_json)}")
             print(f"  checkpoint_json: {args.checkpoint_json or checkpoint_path_for(artifacts.output_json)}")
             print(f"  page_window_size: {args.page_window_size}")
             print(f"  batch_size: {args.batch_size}")
@@ -841,6 +1299,8 @@ def main(argv: list[str] | None = None) -> None:
             checkpoint_interval=args.checkpoint_interval,
             checkpoint_json=args.checkpoint_json,
             resume=not args.no_resume,
+            write_patching_view=not args.no_patching_view,
+            patching_view_pdf=args.patching_view_pdf,
         )
 
 
