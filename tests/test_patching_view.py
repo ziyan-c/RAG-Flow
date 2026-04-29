@@ -64,3 +64,27 @@ def test_collect_patching_view_regions_includes_table_continuation_crop():
     assert plan.field_counts["table_body"] == 2
     body_pages = [region.page_idx for region in plan.regions if region.field == "table_body"]
     assert body_pages == [18, 19]
+
+
+def test_table_footnote_view_region_uses_table_width_with_padding():
+    content_data = [
+        {
+            "type": "table",
+            "bbox": [171, 502, 905, 656],
+            "page_idx": 442,
+            "table_caption": ["Table 8-10"],
+            "table_body": "<table><tr><td>Map Flash</td></tr></table>",
+            "table_footnote": ["Step 3 Click Save."],
+        },
+        {
+            "type": "text",
+            "bbox": [89, 690, 594, 715],
+            "page_idx": 442,
+            "text": "8.7.6 Configure File Storage Settings",
+        },
+    ]
+
+    plan = collect_patching_view_regions(content_data)
+
+    footnote_region = next(region for region in plan.regions if region.field == "table_footnote")
+    assert footnote_region.bbox == (159.0, 656.0, 917.0, 690.0)

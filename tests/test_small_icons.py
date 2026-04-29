@@ -7,6 +7,7 @@ from rag_flow.preprocessing.small_icons import (
     _patch_field_keys,
     _window_visual_page_end,
     build_icon_patch_prompt,
+    build_table_footnote_crop,
     build_inline_icon_links,
     build_table_continuation_map,
     checkpoint_path_for,
@@ -210,6 +211,40 @@ def test_text_crop_expands_to_linked_inline_icon():
     )
 
     assert image == (88.0, 88.0, 272.0, 137.0)
+
+
+def test_table_footnote_crop_uses_table_width_with_padding():
+    class FakePage:
+        width = 1000
+        height = 1000
+
+        def crop(self, box):
+            return box
+
+    content_data = [
+        {
+            "type": "table",
+            "bbox": [171, 502, 905, 656],
+            "page_idx": 0,
+            "table_caption": ["Table 8-10"],
+            "table_body": "<table><tr><td>Map Flash</td></tr></table>",
+            "table_footnote": ["Step 3 Click Save."],
+        },
+        {
+            "type": "text",
+            "bbox": [89, 690, 594, 715],
+            "page_idx": 0,
+            "text": "8.7.6 Configure File Storage Settings",
+        },
+    ]
+
+    crop = build_table_footnote_crop(
+        content_data=content_data,
+        pdf_images=[FakePage()],
+        block_idx=0,
+    )
+
+    assert crop == (159.0, 656.0, 917.0, 690.0)
 
 
 def test_captioning_skips_inline_icon_blocks():

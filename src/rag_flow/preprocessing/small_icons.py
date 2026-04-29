@@ -833,6 +833,9 @@ def build_table_footnote_crop(
     page_offset: int = 0,
 ) -> Any | None:
     block = content_data[block_idx]
+    block_bbox = _block_bbox(block)
+    if block_bbox is None:
+        return None
     last_idx = block_idx
     lookahead_idx = block_idx + 1
 
@@ -857,6 +860,9 @@ def build_table_footnote_crop(
         return None
 
     image = pdf_images[local_page_idx]
+    x_padding_norm = 12.0
+    x0_norm = max(0.0, block_bbox[0] - x_padding_norm)
+    x1_norm = min(1000.0, block_bbox[2] + x_padding_norm)
     y0_norm = last_block["bbox"][3]
     y1_norm = 1000
 
@@ -870,9 +876,9 @@ def build_table_footnote_crop(
                 y1_norm = next_y0
                 break
 
-    rx0 = 0
+    rx0 = (x0_norm / 1000.0) * image.width
     ry0 = (y0_norm / 1000.0) * image.height
-    rx1 = image.width
+    rx1 = (x1_norm / 1000.0) * image.width
     ry1 = (y1_norm / 1000.0) * image.height
     min_height = int(image.width / 190.0) + 1
     if (ry1 - ry0) < min_height:

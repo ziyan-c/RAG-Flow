@@ -88,6 +88,9 @@ def _table_footnote_region(
     block_idx: int,
 ) -> tuple[int, tuple[float, float, float, float]] | None:
     block = content_data[block_idx]
+    block_bbox = small_icons._block_bbox(block)
+    if block_bbox is None:
+        return None
     last_idx = block_idx
     lookahead_idx = block_idx + 1
 
@@ -110,6 +113,9 @@ def _table_footnote_region(
     if last_bbox is None:
         return None
     page_idx = small_icons._block_page_idx(last_block)
+    x_padding_norm = 12.0
+    x0_norm = max(0.0, block_bbox[0] - x_padding_norm)
+    x1_norm = min(1000.0, block_bbox[2] + x_padding_norm)
     y0_norm = last_bbox[3]
     y1_norm = 1000.0
 
@@ -124,7 +130,7 @@ def _table_footnote_region(
                 y1_norm = next_y0
                 break
 
-    return page_idx, (0.0, y0_norm, 1000.0, y1_norm)
+    return page_idx, (x0_norm, y0_norm, x1_norm, y1_norm)
 
 
 def collect_patching_view_regions(content_data: list[dict[str, Any]]) -> PatchingViewPlan:
