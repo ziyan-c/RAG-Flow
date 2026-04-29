@@ -328,6 +328,19 @@ def test_table_icon_prompt_requires_html_preservation():
     assert "Only insert `[Icon: ...]` tokens" in prompt
 
 
+def test_patch_field_keys_includes_table_caption():
+    block = {
+        "type": "table",
+        "bbox": [171, 502, 905, 656],
+        "page_idx": 0,
+        "table_caption": ["Table 8-10"],
+        "table_body": "<table><tr><td>Map Flash</td></tr></table>",
+        "table_footnote": ["Step 3 Click Save."],
+    }
+
+    assert _patch_field_keys(block) == ["table_caption", "table_footnote", "table_body"]
+
+
 def test_table_icon_patch_accepts_icon_output_without_extra_validation():
     assert should_apply_icon_patch(
         original_text="<table><tr><td></td><td>View details.</td></tr></table>",
