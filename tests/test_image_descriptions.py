@@ -3,8 +3,9 @@ import json
 from rag_flow.preprocessing.image_descriptions import (
     captioned_json_path_for,
     checkpoint_path_for,
+    collect_context_token_stats,
     collect_image_description_stats,
-    get_three_page_context,
+    get_surrounding_text_context,
     resolve_image_description_artifacts,
     should_caption_image_block,
 )
@@ -40,6 +41,7 @@ def test_resolve_image_description_artifacts_from_mineru_output_dir(tmp_path):
     assert artifacts.base_dir == artifact_dir
     assert artifacts.input_json == artifact_dir / "manual_content_list_PATCHED.json"
     assert artifacts.output_json == artifact_dir / "manual_content_list_PATCHED_CAPTIONED.json"
+    assert artifacts.origin_pdf == artifact_dir / "manual_origin.pdf"
 
 
 def test_captioning_stats_count_inline_missing_and_existing_images(tmp_path):
@@ -75,17 +77,34 @@ def test_should_caption_image_block_skips_inline_candidate():
     assert should_caption_image_block({"type": "image", "img_path": "images/figure.jpg"})
 
 
-def test_get_three_page_context_limits_length_and_keeps_current_page():
-    page_text_map = {
-        4: ["previous " * 100],
-        5: ["current-page-important " * 100],
-        6: ["next " * 100],
-    }
+def test_surrounding_text_context_limits_length_and_keeps_nearby_blocks():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "far previous " * 100},
+        {"type": "text", "page_idx": 0, "text": "near-before-important " * 100},
+        {"type": "image", "page_idx": 0, "img_path": "images/figure.jpg", "image_caption": ["Figure 1"]},
+        {"type": "text", "page_idx": 0, "text": "near-after-important " * 100},
+        {"type": "text", "page_idx": 0, "text": "far after " * 100},
+    ]
 
-    context = get_three_page_context(page_text_map, 5, max_context_chars=420)
+    context = get_surrounding_text_context(content, 2, max_context_tokens=140)
 
-    assert len(context) <= 420
-    assert "current-page-important" in context
+    assert "near-before-important" in context
+    assert "Figure 1" in context
+    assert "near-after-important" in context
+
+
+def test_context_token_stats_reports_budget_hits():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "before " * 100},
+        {"type": "image", "page_idx": 0, "img_path": "images/figure.jpg"},
+        {"type": "text", "page_idx": 0, "text": "after " * 100},
+    ]
+
+    stats = collect_context_token_stats(content, max_context_tokens=20)
+
+    assert stats.contexts == 1
+    assert stats.max_tokens <= 20
+    assert stats.contexts_at_budget == 1
 
 
 def test_dry_run_stats_can_load_json(tmp_path):

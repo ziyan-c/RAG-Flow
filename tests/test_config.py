@@ -79,3 +79,37 @@ def test_patch_max_new_tokens_reads_local_env(tmp_path, monkeypatch):
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
 
     assert AppConfig.from_env().patching.max_new_tokens == 4000
+
+
+def test_captioning_defaults(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.captioning.max_new_tokens == 8000
+    assert config.captioning.max_context_tokens == 10000
+    assert config.captioning.batch_size == 4
+
+
+def test_captioning_reads_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_CAPTION_MAX_NEW_TOKENS=6000",
+                "RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS=7000",
+                "RAG_FLOW_CAPTION_BATCH_SIZE=2",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.captioning.max_new_tokens == 6000
+    assert config.captioning.max_context_tokens == 7000
+    assert config.captioning.batch_size == 2

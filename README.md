@@ -227,14 +227,34 @@ rag-flow caption --artifact-dir /root/autodl-tmp/manuals/public/example-technica
 
 Captioning resumes from `*_PATCHED_CAPTIONED.checkpoint.json` when available,
 writes a checkpoint after each VLM batch by default, and skips image blocks that
-already have `image_description_vlm`. Useful controls:
+already have `image_description_vlm`. Captioning context is taken from nearby
+text blocks before and after each image in the patched JSON order, rather than
+from a fixed page window. A successful run also writes a
+`*_CAPTIONING_VIEW.pdf` overlay showing each captioned image and the nearby
+context blocks used for it. Useful controls:
 
-- `--dry-run`: print resolved paths and image counts without loading the VLM
-- `--max-context-chars`: cap previous/current/next page text sent with each image, default `12000`
-- `--max-new-tokens`: caption generation budget, default `2000`
+- `--dry-run`: print resolved paths, image counts, and estimated context token stats without loading the VLM
+- `--max-context-tokens`: cap nearby text sent with each image, default `10000`
+- `--max-new-tokens`: caption generation budget, default `8000`
 - `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--captioning-view-pdf`: custom path for the overlay PDF
+- `--no-captioning-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
 - `--no-skip-existing`: regenerate descriptions even when `image_description_vlm` exists
+
+You can regenerate the captioning overlay without loading the VLM:
+
+```bash
+rag-flow caption-view --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+```
+
+Or pass the captioning input JSON and origin PDF explicitly:
+
+```bash
+rag-flow caption-view \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_PATCHED.json \
+  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+```
 
 Build page chunks:
 
@@ -316,6 +336,9 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_MINERU_VERSION`
 - `RAG_FLOW_MINERU_PYTHON`
 - `RAG_FLOW_PATCH_MAX_NEW_TOKENS`
+- `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`
+- `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`
+- `RAG_FLOW_CAPTION_BATCH_SIZE`
 - `RAG_FLOW_CONTENT_JSON`
 - `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`

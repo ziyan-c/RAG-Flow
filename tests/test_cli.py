@@ -39,6 +39,41 @@ def test_caption_command_delegates_to_image_description_main(monkeypatch):
     assert calls == [["--dry-run"]]
 
 
+def test_caption_view_command_delegates_to_captioning_view_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.captioning_view
+
+    monkeypatch.setattr(rag_flow.preprocessing.captioning_view, "main", lambda argv: calls.append(argv))
+
+    cli.main(
+        [
+            "caption-view",
+            "--input-json",
+            "manual_content_list_PATCHED_CAPTIONED.json",
+            "--input-pdf",
+            "manual.pdf",
+            "--dry-run",
+        ]
+    )
+
+    assert calls == [
+        ["--input-json", "manual_content_list_PATCHED_CAPTIONED.json", "--input-pdf", "manual.pdf", "--dry-run"]
+    ]
+
+
+def test_caption_view_artifact_dir_command_delegates_to_captioning_view_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.captioning_view
+
+    monkeypatch.setattr(rag_flow.preprocessing.captioning_view, "main", lambda argv: calls.append(argv))
+
+    cli.main(["caption-view", "--artifact-dir", "hybrid_auto", "--dry-run"])
+
+    assert calls == [["--artifact-dir", "hybrid_auto", "--dry-run"]]
+
+
 def test_patch_view_command_delegates_to_patching_view_main(monkeypatch):
     calls: list[list[str]] = []
 

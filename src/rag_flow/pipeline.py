@@ -95,7 +95,11 @@ def run_ingest(
             base_dir=artifacts.base_dir,
             input_json=artifacts.patched_json,
             output_json=artifacts.captioned_json,
+            pdf_path=source_pdf,
             model_name=config.models.vlm_model,
+            max_new_tokens=config.captioning.max_new_tokens,
+            batch_size=config.captioning.batch_size,
+            max_context_tokens=config.captioning.max_context_tokens,
             model_revision=config.models.vlm_model_revision,
             trusted_remote_code_models=config.models.trusted_remote_code_models,
         )

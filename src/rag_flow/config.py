@@ -175,6 +175,13 @@ class PatchingConfig:
 
 
 @dataclass(frozen=True)
+class CaptioningConfig:
+    max_new_tokens: int
+    max_context_tokens: int
+    batch_size: int
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
@@ -182,6 +189,7 @@ class AppConfig:
     server: ServerConfig
     mineru: MinerUConfig
     patching: PatchingConfig
+    captioning: CaptioningConfig
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -270,4 +278,18 @@ class AppConfig:
             max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
         )
 
-        return cls(paths=paths, models=models, retrieval=retrieval, server=server, mineru=mineru, patching=patching)
+        captioning = CaptioningConfig(
+            max_new_tokens=env.int("RAG_FLOW_CAPTION_MAX_NEW_TOKENS", 8000),
+            max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 10000),
+            batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 4),
+        )
+
+        return cls(
+            paths=paths,
+            models=models,
+            retrieval=retrieval,
+            server=server,
+            mineru=mineru,
+            patching=patching,
+            captioning=captioning,
+        )
