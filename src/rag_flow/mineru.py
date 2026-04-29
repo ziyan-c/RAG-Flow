@@ -36,7 +36,7 @@ class MinerUStatus:
 class MinerUArtifacts:
     base_dir: Path
     content_json: Path
-    small_icon_json: Path
+    patched_json: Path
     captioned_json: Path
     chunks_json: Path
 
@@ -405,7 +405,7 @@ def infer_artifacts(
         return MinerUArtifacts(
             base_dir=config.paths.base_dir,
             content_json=config.paths.content_json,
-            small_icon_json=config.paths.small_icon_json,
+            patched_json=config.paths.patched_json,
             captioned_json=config.paths.captioned_json,
             chunks_json=config.paths.chunks_json,
         )
@@ -421,8 +421,8 @@ def infer_artifacts(
     return MinerUArtifacts(
         base_dir=base_dir,
         content_json=resolved_content,
-        small_icon_json=base_dir / f"{prefix}_content_list_small-icon-fixed.json",
-        captioned_json=base_dir / f"{prefix}_content_list_small-icon-fixed_image-with-captions.json",
+        patched_json=base_dir / f"{prefix}_content_list_PATCHED.json",
+        captioned_json=base_dir / f"{prefix}_content_list_PATCHED_CAPTIONED.json",
         chunks_json=base_dir / f"{prefix}_page_level_chunks.json",
     )
 
@@ -474,7 +474,7 @@ def main(argv: list[str] | None = None) -> None:
         artifacts = infer_artifacts(config, content_json=args.content_json)
         print(f"base_dir={artifacts.base_dir}")
         print(f"content_json={artifacts.content_json}")
-        print(f"small_icon_json={artifacts.small_icon_json}")
+        print(f"patched_json={artifacts.patched_json}")
         print(f"captioned_json={artifacts.captioned_json}")
         print(f"chunks_json={artifacts.chunks_json}")
 

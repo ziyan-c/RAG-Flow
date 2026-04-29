@@ -5,6 +5,7 @@ import importlib
 import os
 import shlex
 import subprocess
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -15,6 +16,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
     "mineru": ("rag_flow.mineru", True),
+    "patch": ("rag_flow.preprocessing.small_icons", True),
+    "caption": ("rag_flow.preprocessing.image_descriptions", True),
     "ingest": ("rag_flow.pipeline", True),
     "chunk": ("rag_flow.chunking", True),
     "index": ("rag_flow.indexing", True),
@@ -26,6 +29,8 @@ MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
 
 MODULE_HELP: dict[str, str] = {
     "mineru": "Check, install, locate, or run MinerU.",
+    "patch": "Patch small icon text from a MinerU artifact directory.",
+    "caption": "Generate image descriptions for patched MinerU output.",
     "ingest": "Run the staged ingestion pipeline.",
     "chunk": "Build page-level chunks from MinerU JSON.",
     "index": "Upsert or inspect Qdrant indexes.",
@@ -46,14 +51,6 @@ options:
   --port PORT
   --reload
 """,
-}
-
-PREPROCESS_COMMANDS: dict[str, str] = {
-    "icons": "rag_flow.preprocessing.small_icons",
-    "small-icons": "rag_flow.preprocessing.small_icons",
-    "captions": "rag_flow.preprocessing.image_descriptions",
-    "images": "rag_flow.preprocessing.image_descriptions",
-    "bbox": "rag_flow.preprocessing.bbox",
 }
 
 INIT_SCRIPTS: dict[str, tuple[str, ...]] = {
@@ -124,10 +121,6 @@ def _run_module_main(module_name: str, args: Sequence[str], *, accepts_argv: boo
 def _dispatch_module(args: argparse.Namespace) -> None:
     module_name, accepts_argv = MODULE_COMMANDS[args.command]
     _run_module_main(module_name, args.args, accepts_argv=accepts_argv)
-
-
-def _dispatch_preprocess(args: argparse.Namespace) -> None:
-    _run_module_main(PREPROCESS_COMMANDS[args.preprocess_command], args.args, accepts_argv=True)
 
 
 def _dispatch_init(args: argparse.Namespace) -> None:
@@ -219,18 +212,6 @@ def build_parser() -> argparse.ArgumentParser:
             handler=_dispatch_env,
         )
 
-    preprocess_parser = subparsers.add_parser("preprocess", help="Run MinerU post-processing steps.")
-    preprocess_subparsers = preprocess_parser.add_subparsers(dest="preprocess_command", required=True)
-    for command, module_name in PREPROCESS_COMMANDS.items():
-        preprocess_command = preprocess_subparsers.add_parser(
-            command,
-            help=f"Run {module_name}.",
-            add_help=False,
-        )
-        preprocess_command.add_argument("-h", "--help", action="store_true", help=argparse.SUPPRESS)
-        _add_passthrough_arguments(preprocess_command)
-        preprocess_command.set_defaults(handler=_dispatch_preprocess)
-
     serve_parser = subparsers.add_parser("serve", help="Start long-running services.")
     serve_subparsers = serve_parser.add_subparsers(dest="serve_command", required=True)
     _add_script_command(
@@ -253,8 +234,19 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> None:
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+    if raw_args and raw_args[0] in MODULE_COMMANDS:
+        command = raw_args[0]
+        module_args = raw_args[1:]
+        if command in COMMAND_HELP and any(arg in {"-h", "--help"} for arg in module_args):
+            print(COMMAND_HELP[command], end="")
+            return
+        module_name, accepts_argv = MODULE_COMMANDS[command]
+        _run_module_main(module_name, module_args, accepts_argv=accepts_argv)
+        return
+
     parser = build_parser()
-    args, unknown = parser.parse_known_args(argv)
+    args, unknown = parser.parse_known_args(raw_args)
     if unknown:
         if hasattr(args, "args"):
             args.args.extend(unknown)

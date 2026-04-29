@@ -77,7 +77,7 @@ def run_ingest(
     def patch_icons() -> None:
         add_small_icon_text(
             input_json=artifacts.content_json,
-            output_json=artifacts.small_icon_json,
+            output_json=artifacts.patched_json,
             pdf_path=source_pdf,
             model_name=config.models.vlm_model,
             model_revision=config.models.vlm_model_revision,
@@ -87,7 +87,7 @@ def run_ingest(
     def caption_images() -> None:
         add_image_descriptions(
             base_dir=artifacts.base_dir,
-            input_json=artifacts.small_icon_json,
+            input_json=artifacts.patched_json,
             output_json=artifacts.captioned_json,
             model_name=config.models.vlm_model,
             model_revision=config.models.vlm_model_revision,
@@ -100,7 +100,7 @@ def run_ingest(
         print(f"Created {len(chunks)} page-level chunks at {artifacts.chunks_json}")
 
     stages = {
-        "patching": Stage("patching", artifacts.small_icon_json, patch_icons),
+        "patching": Stage("patching", artifacts.patched_json, patch_icons),
         "captioning": Stage("captioning", artifacts.captioned_json, caption_images),
         "chunking": Stage("chunking", artifacts.chunks_json, chunk_pages),
         "indexing": Stage(

@@ -25,8 +25,8 @@ def make_config(tmp_path: Path, *, command: str = "mineru", input_path: Path | N
             source_name="manual.pdf",
             source_pdf=source_pdf,
             content_json=base_dir / "manual_content_list.json",
-            small_icon_json=base_dir / "manual_content_list_small-icon-fixed.json",
-            captioned_json=base_dir / "manual_content_list_small-icon-fixed_image-with-captions.json",
+            patched_json=base_dir / "manual_content_list_PATCHED.json",
+            captioned_json=base_dir / "manual_content_list_PATCHED_CAPTIONED.json",
             chunks_json=base_dir / "manual_page_level_chunks.json",
             db_path=tmp_path / "qdrant",
             collection_name="manuals",
@@ -200,9 +200,9 @@ def test_infer_artifacts_from_discovered_content_list(tmp_path):
 
     assert artifacts.base_dir == content_json.parent
     assert artifacts.content_json == content_json
-    assert artifacts.small_icon_json == content_json.parent / "manual_content_list_small-icon-fixed.json"
+    assert artifacts.patched_json == content_json.parent / "manual_content_list_PATCHED.json"
     assert artifacts.captioned_json == (
-        content_json.parent / "manual_content_list_small-icon-fixed_image-with-captions.json"
+        content_json.parent / "manual_content_list_PATCHED_CAPTIONED.json"
     )
     assert artifacts.chunks_json == content_json.parent / "manual_page_level_chunks.json"
 
@@ -229,7 +229,7 @@ def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     config = make_config(tmp_path)
     source_pdf = tmp_path / "source" / "other.pdf"
     content_json = tmp_path / "mineru-output" / "other" / "auto" / "other_content_list.json"
-    captioned_json = content_json.parent / "other_content_list_small-icon-fixed_image-with-captions.json"
+    captioned_json = content_json.parent / "other_content_list_PATCHED_CAPTIONED.json"
     captioned_json.parent.mkdir(parents=True)
     content_json.write_text("[]", encoding="utf-8")
     captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")

@@ -114,7 +114,7 @@ class PathsConfig:
     source_name: str
     source_pdf: Path
     content_json: Path
-    small_icon_json: Path
+    patched_json: Path
     captioned_json: Path
     chunks_json: Path
     db_path: Path
@@ -197,13 +197,16 @@ class AppConfig:
                 "RAG_FLOW_CONTENT_JSON",
                 base_dir / "example-technical-manual_content_list.json",
             ),
-            small_icon_json=env.path(
-                "RAG_FLOW_SMALL_ICON_JSON",
-                base_dir / "example-technical-manual_content_list_small-icon-fixed.json",
+            patched_json=env.path(
+                "RAG_FLOW_PATCHED_JSON",
+                env.path(
+                    "RAG_FLOW_SMALL_ICON_JSON",
+                    base_dir / "example-technical-manual_content_list_PATCHED.json",
+                ),
             ),
             captioned_json=env.path(
                 "RAG_FLOW_CAPTIONED_JSON",
-                base_dir / "example-technical-manual_content_list_small-icon-fixed_image-with-captions.json",
+                base_dir / "example-technical-manual_content_list_PATCHED_CAPTIONED.json",
             ),
             chunks_json=env.path(
                 "RAG_FLOW_CHUNKS_JSON",

@@ -62,9 +62,9 @@ rag-flow init china-all
 rag-flow env create-mineru
 rag-flow mineru doctor
 rag-flow mineru run
+rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 rag-flow ingest --to-stage chunking
-rag-flow preprocess icons
-rag-flow preprocess captions
+rag-flow caption
 rag-flow chunk
 rag-flow index text
 rag-flow retriever
@@ -154,13 +154,51 @@ rag-flow mineru run
 Patch small icons:
 
 ```bash
-rag-flow preprocess icons
+rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 ```
+
+The artifact-dir form is the preferred patching entrypoint after MinerU has
+parsed a PDF. It expects a MinerU output folder containing
+`*_content_list.json` and `*_origin.pdf`, then writes
+`*_content_list_PATCHED.json` in the same folder. The captioning stage then
+writes `*_content_list_PATCHED_CAPTIONED.json`.
+
+Patching focuses on content blocks instead of page furniture: text, lists, and
+tables are patched, while headers, footers, page numbers, and empty fields are
+skipped. MinerU represents cross-page table continuations as empty `table`
+blocks; those blocks are not copied into the JSON as duplicate text. Instead,
+their PDF crops are stacked onto the previous table crop so the VLM can patch
+the single complete `table_body` with visual evidence from every page of the
+same table.
+
+The source PDF is rendered in page windows instead of loading the whole book at
+once; the default is 200 pages per window. When `--artifact-dir` points at a
+parent folder, patching finds nested MinerU artifact folders recursively and
+processes one PDF at a time to avoid GPU memory spikes:
+
+```bash
+rag-flow patch \
+  --artifact-dir /root/autodl-tmp/manuals/public \
+  --page-window-size 200 \
+  --batch-size 6
+```
+
+The VLM prompt is intentionally strict: preserve all existing extracted text and
+only insert `[Icon: ...]` markers. The run writes a checkpoint after each VLM
+batch by default, resumes from that checkpoint on retry, deletes the checkpoint
+after success, and prints patching statistics at the end. Useful controls:
+
+- `--batch-size`: VLM request batch size, default `6`
+- `--max-new-tokens`: generation budget, default `5000`
+- `--page-window-size`: PDF render window size, default `200`
+- `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--no-resume`: ignore an existing checkpoint
+- `--no-recursive`: only patch the exact artifact folder
 
 Generate image descriptions:
 
 ```bash
-rag-flow preprocess captions
+rag-flow caption
 ```
 
 Build page chunks:
@@ -243,6 +281,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_MINERU_VERSION`
 - `RAG_FLOW_MINERU_PYTHON`
 - `RAG_FLOW_CONTENT_JSON`
+- `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`
 - `RAG_FLOW_CHUNKS_JSON`
 - `RAG_FLOW_DB_PATH`

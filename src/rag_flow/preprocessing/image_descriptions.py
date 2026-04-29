@@ -197,7 +197,7 @@ def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Add context-aware image descriptions to MinerU JSON.")
     parser.add_argument("--base-dir", default=str(config.paths.base_dir))
-    parser.add_argument("--input", default=str(config.paths.small_icon_json))
+    parser.add_argument("--input", default=str(config.paths.patched_json))
     parser.add_argument("--output", default=str(config.paths.captioned_json))
     parser.add_argument("--model", default=config.models.vlm_model)
     parser.add_argument("--model-revision", default=config.models.vlm_model_revision)

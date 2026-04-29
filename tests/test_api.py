@@ -20,7 +20,7 @@ def make_config(tmp_path: Path, *, api_key: str = "", max_query_chars: int = 400
             source_name="manual.pdf",
             source_pdf=tmp_path / "manual.pdf",
             content_json=tmp_path / "content.json",
-            small_icon_json=tmp_path / "small-icons.json",
+            patched_json=tmp_path / "patched.json",
             captioned_json=tmp_path / "captioned.json",
             chunks_json=tmp_path / "chunks.json",
             db_path=tmp_path / "qdrant",

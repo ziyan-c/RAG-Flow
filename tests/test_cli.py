@@ -15,6 +15,30 @@ def test_mineru_command_delegates_to_module_main(monkeypatch):
     assert calls == [["doctor"]]
 
 
+def test_patch_command_delegates_to_small_icon_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.small_icons
+
+    monkeypatch.setattr(rag_flow.preprocessing.small_icons, "main", lambda argv: calls.append(argv))
+
+    cli.main(["patch", "--artifact-dir", "hybrid_auto", "--dry-run"])
+
+    assert calls == [["--artifact-dir", "hybrid_auto", "--dry-run"]]
+
+
+def test_caption_command_delegates_to_image_description_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.image_descriptions
+
+    monkeypatch.setattr(rag_flow.preprocessing.image_descriptions, "main", lambda argv: calls.append(argv))
+
+    cli.main(["caption", "--dry-run"])
+
+    assert calls == [["--dry-run"]]
+
+
 def test_module_help_is_forwarded(monkeypatch):
     calls: list[list[str]] = []
 
@@ -63,13 +87,10 @@ def test_retriever_help_is_local_to_unified_cli(capsys):
     assert "--host HOST" in output
 
 
-def test_preprocess_command_delegates_to_module_main(monkeypatch):
-    calls: list[list[str]] = []
-
-    import rag_flow.preprocessing.small_icons
-
-    monkeypatch.setattr(rag_flow.preprocessing.small_icons, "main", lambda argv: calls.append(argv))
-
-    cli.main(["preprocess", "icons", "--dry-run"])
-
-    assert calls == [["--dry-run"]]
+def test_preprocess_command_is_removed():
+    try:
+        cli.main(["preprocess", "icons", "--dry-run"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("preprocess command should be removed")
