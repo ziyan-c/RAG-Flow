@@ -312,24 +312,32 @@ with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
 `RAG_FLOW_SGLANG_PYTHON` back to the env file. The default SGLang profile is
 `qwen3.6-35b-a3b-gptq-int4`.
 
-Download the default profile from ModelScope before the first launch:
+Download the default profile before the first launch. The default source is
+`auto`, which tries ModelScope first and then Hugging Face:
 
 ```bash
 rag-flow download llm
 rag-flow download llm --dry-run
+rag-flow download llm --source modelscope
+rag-flow download llm --source hf
 ```
 
 The download command uses `RAG_FLOW_SGLANG_PYTHON` /
-`RAG_FLOW_LLM_PYTHON_BIN`, installs `modelscope` first when needed, writes the
-resolved model id/path/served model name back to `.local/rag-flow.env`, and
-keeps startup explicit. It does not run automatically inside
-`rag-flow serve llm-sglang` because model downloads can be very large.
+`RAG_FLOW_LLM_PYTHON_BIN`, installs the selected downloader package first when
+needed (`modelscope` or `huggingface_hub`), writes the resolved source/model
+id/path/served model name back to `.local/rag-flow.env`, and keeps startup
+explicit. With `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE=auto`, a ModelScope download
+failure falls back to Hugging Face. It does not run automatically inside `rag-flow serve llm-sglang`
+because model downloads can be very large. For private Hugging Face repos, set
+`HF_TOKEN`, `HUGGINGFACE_HUB_TOKEN`, or `RAG_FLOW_SGLANG_HF_TOKEN` in
+`.local/rag-flow.env`.
 
 Switch profiles or override paths like this:
 
 ```bash
 rag-flow download llm --profile qwen3.6-35b-a3b-gptq-int4
 rag-flow download llm --profile qwen3.5-35b-a3b-gptq-int4
+rag-flow download llm --source hf --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 rag-flow download llm --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 rag-flow serve llm-sglang --profile qwen3.6-35b-a3b-gptq-int4
 rag-flow serve llm-sglang --profile qwen3.5-35b-a3b-gptq-int4
@@ -340,11 +348,13 @@ rag-flow serve llm-sglang --served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-In
 Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
 `RAG_FLOW_SGLANG_MODEL_ID`, `RAG_FLOW_SGLANG_MODEL_PATH`,
 `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`, `RAG_FLOW_SGLANG_MODEL_REVISION`,
-`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`, `RAG_FLOW_SGLANG_PORT`,
-`RAG_FLOW_SGLANG_CONTEXT_LENGTH`, `RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`,
-`RAG_FLOW_SGLANG_QUANTIZATION`, `RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and
-`RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set `RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if
-the LLM environment should not install uv before package installation.
+`RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`, `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`,
+`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`, `RAG_FLOW_SGLANG_HF_TOKEN`,
+`RAG_FLOW_SGLANG_PORT`, `RAG_FLOW_SGLANG_CONTEXT_LENGTH`,
+`RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`, `RAG_FLOW_SGLANG_QUANTIZATION`,
+`RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and `RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set
+`RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if the LLM environment should not install uv
+before package installation.
 
 Chat from the terminal:
 
@@ -402,6 +412,10 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_SGLANG_MODEL_PATH`
 - `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`
 - `RAG_FLOW_SGLANG_MODEL_REVISION`
+- `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`
+- `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`
+- `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`
+- `RAG_FLOW_SGLANG_HF_TOKEN`
 - `RAG_FLOW_SGLANG_PYTHON`
 - `RAG_FLOW_RETRIEVER_API_KEY`
 - `RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS`

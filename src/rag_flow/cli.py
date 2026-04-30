@@ -169,6 +169,7 @@ def _dispatch_download(args: argparse.Namespace) -> None:
     if args.download_command == "llm":
         script_args: list[str] = []
         for attr, flag in (
+            ("source", "--source"),
             ("profile", "--profile"),
             ("model_id", "--model-id"),
             ("model_path", "--model-path"),
@@ -284,11 +285,16 @@ def build_parser() -> argparse.ArgumentParser:
     download_subparsers = download_parser.add_subparsers(dest="download_command", required=True)
     download_llm_parser = download_subparsers.add_parser(
         "llm",
-        help="Download the configured SGLang model from ModelScope.",
+        help="Download the configured SGLang model.",
     )
     download_llm_parser.add_argument("--dry-run", action="store_true", help="Print the download command without running it.")
+    download_llm_parser.add_argument(
+        "--source",
+        choices=("auto", "modelscope", "hf", "huggingface"),
+        help="Download source. Defaults to auto, which tries modelscope before Hugging Face.",
+    )
     download_llm_parser.add_argument("--profile", help="Known model profile, such as qwen3.6-35b-a3b-gptq-int4.")
-    download_llm_parser.add_argument("--model-id", "--model", dest="model_id", help="ModelScope model id to download.")
+    download_llm_parser.add_argument("--model-id", "--model", dest="model_id", help="Model id to download.")
     download_llm_parser.add_argument(
         "--model-path",
         "--local-dir",
@@ -296,8 +302,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Local directory for the model files.",
     )
     download_llm_parser.add_argument("--served-model-name", help="Model name exposed by SGLang after download.")
-    download_llm_parser.add_argument("--revision", help="Optional ModelScope revision or commit.")
-    download_llm_parser.add_argument("--python", help="Python interpreter with, or to install, modelscope.")
+    download_llm_parser.add_argument("--revision", help="Optional model revision or commit.")
+    download_llm_parser.add_argument("--python", help="Python interpreter with, or to install, the downloader package.")
     download_llm_parser.set_defaults(handler=_dispatch_download)
 
     remote_parser = subparsers.add_parser("remote", help="Remote machine helpers.")

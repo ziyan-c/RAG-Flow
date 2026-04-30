@@ -272,6 +272,124 @@ def test_llm_download_dry_run_uses_qwen36_profile(tmp_path):
     assert "/envs/llm/bin/python -c" in result.stdout
 
 
+def test_llm_download_can_select_huggingface_source(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+        "RAG_FLOW_SGLANG_MODEL_PROFILE": "qwen3.6-35b-a3b-gptq-int4",
+    }
+
+    result = subprocess.run(
+        [
+            shutil.which("bash") or "bash",
+            str(ROOT / "scripts/llm/download-sglang-model.sh"),
+            "--dry-run",
+            "--source",
+            "hf",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "Download source: Hugging Face" in result.stdout
+    assert "Hugging Face model id: palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "Local model path: /root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "from huggingface_hub import snapshot_download" in result.stdout
+
+
+def test_llm_download_auto_dry_run_shows_modelscope_then_hf(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/llm/download-sglang-model.sh"), "--dry-run"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "Download source: auto" in result.stdout
+    assert "Download order: ModelScope, then Hugging Face" in result.stdout
+    assert result.stdout.index("ModelScope model id:") < result.stdout.index("Hugging Face model id:")
+
+
+def test_llm_download_source_override_uses_source_specific_default_path(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+        "RAG_FLOW_SGLANG_MODEL_PATH": "/old/modelscope/path",
+    }
+
+    result = subprocess.run(
+        [
+            shutil.which("bash") or "bash",
+            str(ROOT / "scripts/llm/download-sglang-model.sh"),
+            "--dry-run",
+            "--source",
+            "hf",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "/old/modelscope/path" not in result.stdout
+    assert "Local model path: /root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+
+
+def test_llm_download_auto_falls_back_to_huggingface(tmp_path):
+    bin_dir = tmp_path / "bin"
+    env_file = tmp_path / "rag-flow.env"
+    log_file = tmp_path / "download.log"
+    python_stub = bin_dir / "python"
+    bin_dir.mkdir()
+    _write_executable(
+        python_stub,
+        "#!/usr/bin/env bash\n"
+        "if [[ \"$*\" == *\"import modelscope\"* || \"$*\" == *\"import huggingface_hub\"* ]]; then exit 0; fi\n"
+        "printf 'download|%s|%s\\n' \"$RAG_FLOW_DOWNLOAD_MODEL_ID\" \"$RAG_FLOW_DOWNLOAD_LOCAL_DIR\" >> \"$RAG_FLOW_TEST_COMMAND_LOG\"\n"
+        "if [[ \"$RAG_FLOW_DOWNLOAD_LOCAL_DIR\" == *modelscope* ]]; then exit 42; fi\n"
+        "exit 0\n",
+    )
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": f"{bin_dir}{os.pathsep}/usr/bin:/bin",
+        "RAG_FLOW_TEST_COMMAND_LOG": str(log_file),
+        "RAG_FLOW_ENV_FILE": str(env_file),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_UPDATE_ENV_FILE": "1",
+        "RAG_FLOW_SGLANG_PYTHON": str(python_stub),
+    }
+
+    subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/llm/download-sglang-model.sh")],
+        check=True,
+        env=env,
+    )
+
+    log_text = log_file.read_text(encoding="utf-8")
+    env_text = env_file.read_text(encoding="utf-8")
+    assert "/root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in log_text
+    assert "/root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in log_text
+    assert "RAG_FLOW_SGLANG_DOWNLOAD_SOURCE=hf" in env_text
+    assert "RAG_FLOW_SGLANG_MODEL_PATH=/root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in env_text
+
+
 def test_llm_download_profile_overrides_stale_env_model_path_and_id(tmp_path):
     env = {
         "HOME": str(tmp_path / "home"),
@@ -343,6 +461,7 @@ def test_llm_download_writes_resolved_env_values(tmp_path):
     log_text = log_file.read_text(encoding="utf-8")
     env_text = env_file.read_text(encoding="utf-8")
     assert "python|owner/model|" in log_text
+    assert "RAG_FLOW_SGLANG_DOWNLOAD_SOURCE=modelscope" in env_text
     assert f"RAG_FLOW_SGLANG_MODEL_ID=owner/model" in env_text
     assert f"RAG_FLOW_SGLANG_MODEL_PATH={tmp_path / 'models' / 'owner' / 'model'}" in env_text
     assert "RAG_FLOW_SGLANG_SERVED_MODEL_NAME=owner/model" in env_text

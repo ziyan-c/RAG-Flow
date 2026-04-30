@@ -184,6 +184,8 @@ def test_download_llm_options_are_forwarded(monkeypatch):
         [
             "download",
             "llm",
+            "--source",
+            "hf",
             "--profile",
             "qwen3.6-35b-a3b-gptq-int4",
             "--model-path",
@@ -199,6 +201,8 @@ def test_download_llm_options_are_forwarded(monkeypatch):
             cli.DOWNLOAD_SCRIPTS["llm"],
             [
                 "--dry-run",
+                "--source",
+                "hf",
                 "--profile",
                 "qwen3.6-35b-a3b-gptq-int4",
                 "--model-path",
