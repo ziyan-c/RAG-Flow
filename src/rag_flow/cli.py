@@ -77,8 +77,8 @@ SERVE_SCRIPTS: dict[str, tuple[str, ...]] = {
     "llm-sglang": ("scripts", "serve-llm-sglang.sh"),
 }
 
-LLM_SCRIPTS: dict[str, tuple[str, ...]] = {
-    "download": ("scripts", "llm", "download-sglang-model.sh"),
+DOWNLOAD_SCRIPTS: dict[str, tuple[str, ...]] = {
+    "llm": ("scripts", "llm", "download-sglang-model.sh"),
 }
 
 REMOTE_SCRIPTS: dict[str, tuple[str, ...]] = {
@@ -165,8 +165,8 @@ def _dispatch_serve(args: argparse.Namespace) -> None:
     _run_script(SERVE_SCRIPTS[args.serve_command], args.args, dry_run=args.dry_run)
 
 
-def _dispatch_llm(args: argparse.Namespace) -> None:
-    if args.llm_command == "download":
+def _dispatch_download(args: argparse.Namespace) -> None:
+    if args.download_command == "llm":
         script_args: list[str] = []
         for attr, flag in (
             ("profile", "--profile"),
@@ -181,9 +181,9 @@ def _dispatch_llm(args: argparse.Namespace) -> None:
                 script_args.extend([flag, str(value)])
         if args.dry_run:
             script_args.insert(0, "--dry-run")
-        _run_script(LLM_SCRIPTS[args.llm_command], script_args, dry_run=False)
+        _run_script(DOWNLOAD_SCRIPTS[args.download_command], script_args, dry_run=False)
         return
-    _run_script(LLM_SCRIPTS[args.llm_command], args.args, dry_run=args.dry_run)
+    _run_script(DOWNLOAD_SCRIPTS[args.download_command], args.args, dry_run=args.dry_run)
 
 
 def _dispatch_remote(args: argparse.Namespace) -> None:
@@ -280,20 +280,25 @@ def build_parser() -> argparse.ArgumentParser:
     _add_passthrough_arguments(llm_parser)
     llm_parser.set_defaults(handler=_dispatch_serve)
 
-    llm_group_parser = subparsers.add_parser("llm", help="Manage local LLM model assets.")
-    llm_subparsers = llm_group_parser.add_subparsers(dest="llm_command", required=True)
-    llm_download_parser = llm_subparsers.add_parser(
-        "download",
+    download_parser = subparsers.add_parser("download", help="Download local model assets.")
+    download_subparsers = download_parser.add_subparsers(dest="download_command", required=True)
+    download_llm_parser = download_subparsers.add_parser(
+        "llm",
         help="Download the configured SGLang model from ModelScope.",
     )
-    llm_download_parser.add_argument("--dry-run", action="store_true", help="Print the download command without running it.")
-    llm_download_parser.add_argument("--profile", help="Known model profile, such as qwen3.6-35b-a3b-gptq-int4.")
-    llm_download_parser.add_argument("--model-id", "--model", dest="model_id", help="ModelScope model id to download.")
-    llm_download_parser.add_argument("--model-path", "--local-dir", dest="model_path", help="Local directory for the model files.")
-    llm_download_parser.add_argument("--served-model-name", help="Model name exposed by SGLang after download.")
-    llm_download_parser.add_argument("--revision", help="Optional ModelScope revision or commit.")
-    llm_download_parser.add_argument("--python", help="Python interpreter with, or to install, modelscope.")
-    llm_download_parser.set_defaults(handler=_dispatch_llm)
+    download_llm_parser.add_argument("--dry-run", action="store_true", help="Print the download command without running it.")
+    download_llm_parser.add_argument("--profile", help="Known model profile, such as qwen3.6-35b-a3b-gptq-int4.")
+    download_llm_parser.add_argument("--model-id", "--model", dest="model_id", help="ModelScope model id to download.")
+    download_llm_parser.add_argument(
+        "--model-path",
+        "--local-dir",
+        dest="model_path",
+        help="Local directory for the model files.",
+    )
+    download_llm_parser.add_argument("--served-model-name", help="Model name exposed by SGLang after download.")
+    download_llm_parser.add_argument("--revision", help="Optional ModelScope revision or commit.")
+    download_llm_parser.add_argument("--python", help="Python interpreter with, or to install, modelscope.")
+    download_llm_parser.set_defaults(handler=_dispatch_download)
 
     remote_parser = subparsers.add_parser("remote", help="Remote machine helpers.")
     remote_subparsers = remote_parser.add_subparsers(dest="remote_command", required=True)

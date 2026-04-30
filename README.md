@@ -315,8 +315,8 @@ with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
 Download the default profile from ModelScope before the first launch:
 
 ```bash
-rag-flow llm download
-rag-flow llm download --dry-run
+rag-flow download llm
+rag-flow download llm --dry-run
 ```
 
 The download command uses `RAG_FLOW_SGLANG_PYTHON` /
@@ -328,9 +328,9 @@ keeps startup explicit. It does not run automatically inside
 Switch profiles or override paths like this:
 
 ```bash
-rag-flow llm download --profile qwen3.6-35b-a3b-gptq-int4
-rag-flow llm download --profile qwen3.5-35b-a3b-gptq-int4
-rag-flow llm download --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
+rag-flow download llm --profile qwen3.6-35b-a3b-gptq-int4
+rag-flow download llm --profile qwen3.5-35b-a3b-gptq-int4
+rag-flow download llm --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 rag-flow serve llm-sglang --profile qwen3.6-35b-a3b-gptq-int4
 rag-flow serve llm-sglang --profile qwen3.5-35b-a3b-gptq-int4
 rag-flow serve llm-sglang --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4

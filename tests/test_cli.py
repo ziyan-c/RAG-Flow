@@ -172,7 +172,7 @@ def test_serve_llm_sglang_options_are_forwarded(monkeypatch):
     ]
 
 
-def test_llm_download_options_are_forwarded(monkeypatch):
+def test_download_llm_options_are_forwarded(monkeypatch):
     calls: list[tuple[tuple[str, ...], list[str], bool]] = []
 
     def fake_run_script(script_parts, args, *, dry_run):
@@ -182,8 +182,8 @@ def test_llm_download_options_are_forwarded(monkeypatch):
 
     cli.main(
         [
-            "llm",
             "download",
+            "llm",
             "--profile",
             "qwen3.6-35b-a3b-gptq-int4",
             "--model-path",
@@ -196,7 +196,7 @@ def test_llm_download_options_are_forwarded(monkeypatch):
 
     assert calls == [
         (
-            cli.LLM_SCRIPTS["download"],
+            cli.DOWNLOAD_SCRIPTS["llm"],
             [
                 "--dry-run",
                 "--profile",
@@ -209,6 +209,15 @@ def test_llm_download_options_are_forwarded(monkeypatch):
             False,
         )
     ]
+
+
+def test_llm_group_command_is_removed():
+    try:
+        cli.main(["llm", "download", "--dry-run"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("llm command group should be removed")
 
 
 def test_retriever_help_is_local_to_unified_cli(capsys):
