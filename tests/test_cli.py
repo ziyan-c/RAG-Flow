@@ -172,6 +172,45 @@ def test_serve_llm_sglang_options_are_forwarded(monkeypatch):
     ]
 
 
+def test_llm_download_options_are_forwarded(monkeypatch):
+    calls: list[tuple[tuple[str, ...], list[str], bool]] = []
+
+    def fake_run_script(script_parts, args, *, dry_run):
+        calls.append((tuple(script_parts), list(args), dry_run))
+
+    monkeypatch.setattr(cli, "_run_script", fake_run_script)
+
+    cli.main(
+        [
+            "llm",
+            "download",
+            "--profile",
+            "qwen3.6-35b-a3b-gptq-int4",
+            "--model-path",
+            "/models/qwen36",
+            "--revision",
+            "abc123",
+            "--dry-run",
+        ]
+    )
+
+    assert calls == [
+        (
+            cli.LLM_SCRIPTS["download"],
+            [
+                "--dry-run",
+                "--profile",
+                "qwen3.6-35b-a3b-gptq-int4",
+                "--model-path",
+                "/models/qwen36",
+                "--revision",
+                "abc123",
+            ],
+            False,
+        )
+    ]
+
+
 def test_retriever_help_is_local_to_unified_cli(capsys):
     cli.main(["retriever", "--help"])
 

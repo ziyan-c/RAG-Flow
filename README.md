@@ -310,18 +310,37 @@ The SGLang launcher is optional and reads its own profile settings from
 environment under `RAG_FLOW_ENV_ROOT`, installs `RAG_FLOW_LLM_INSTALL_SPEC`
 with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
 `RAG_FLOW_SGLANG_PYTHON` back to the env file. The default SGLang profile is
-`qwen3.6-35b-a3b-gptq-int4`; switch profiles or override paths like this:
+`qwen3.6-35b-a3b-gptq-int4`.
+
+Download the default profile from ModelScope before the first launch:
 
 ```bash
+rag-flow llm download
+rag-flow llm download --dry-run
+```
+
+The download command uses `RAG_FLOW_SGLANG_PYTHON` /
+`RAG_FLOW_LLM_PYTHON_BIN`, installs `modelscope` first when needed, writes the
+resolved model id/path/served model name back to `.local/rag-flow.env`, and
+keeps startup explicit. It does not run automatically inside
+`rag-flow serve llm-sglang` because model downloads can be very large.
+
+Switch profiles or override paths like this:
+
+```bash
+rag-flow llm download --profile qwen3.6-35b-a3b-gptq-int4
+rag-flow llm download --profile qwen3.5-35b-a3b-gptq-int4
+rag-flow llm download --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 rag-flow serve llm-sglang --profile qwen3.6-35b-a3b-gptq-int4
 rag-flow serve llm-sglang --profile qwen3.5-35b-a3b-gptq-int4
 rag-flow serve llm-sglang --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 rag-flow serve llm-sglang --served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
 ```
 
-Useful launcher variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
-`RAG_FLOW_SGLANG_MODEL_PATH`, `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`,
-`RAG_FLOW_SGLANG_PORT`,
+Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
+`RAG_FLOW_SGLANG_MODEL_ID`, `RAG_FLOW_SGLANG_MODEL_PATH`,
+`RAG_FLOW_SGLANG_SERVED_MODEL_NAME`, `RAG_FLOW_SGLANG_MODEL_REVISION`,
+`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`, `RAG_FLOW_SGLANG_PORT`,
 `RAG_FLOW_SGLANG_CONTEXT_LENGTH`, `RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`,
 `RAG_FLOW_SGLANG_QUANTIZATION`, `RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and
 `RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set `RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if
@@ -379,8 +398,10 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_LLM_MODEL`
 - `RAG_FLOW_LLM_PYTHON_BIN`
 - `RAG_FLOW_SGLANG_MODEL_PROFILE`
+- `RAG_FLOW_SGLANG_MODEL_ID`
 - `RAG_FLOW_SGLANG_MODEL_PATH`
 - `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`
+- `RAG_FLOW_SGLANG_MODEL_REVISION`
 - `RAG_FLOW_SGLANG_PYTHON`
 - `RAG_FLOW_RETRIEVER_API_KEY`
 - `RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS`

@@ -77,6 +77,10 @@ SERVE_SCRIPTS: dict[str, tuple[str, ...]] = {
     "llm-sglang": ("scripts", "serve-llm-sglang.sh"),
 }
 
+LLM_SCRIPTS: dict[str, tuple[str, ...]] = {
+    "download": ("scripts", "llm", "download-sglang-model.sh"),
+}
+
 REMOTE_SCRIPTS: dict[str, tuple[str, ...]] = {
     "ssh-autodl": ("scripts", "remote", "ssh-autodl.sh"),
 }
@@ -159,6 +163,27 @@ def _dispatch_serve(args: argparse.Namespace) -> None:
         _run_script(SERVE_SCRIPTS[args.serve_command], script_args, dry_run=False)
         return
     _run_script(SERVE_SCRIPTS[args.serve_command], args.args, dry_run=args.dry_run)
+
+
+def _dispatch_llm(args: argparse.Namespace) -> None:
+    if args.llm_command == "download":
+        script_args: list[str] = []
+        for attr, flag in (
+            ("profile", "--profile"),
+            ("model_id", "--model-id"),
+            ("model_path", "--model-path"),
+            ("served_model_name", "--served-model-name"),
+            ("revision", "--revision"),
+            ("python", "--python"),
+        ):
+            value = getattr(args, attr, None)
+            if value is not None:
+                script_args.extend([flag, str(value)])
+        if args.dry_run:
+            script_args.insert(0, "--dry-run")
+        _run_script(LLM_SCRIPTS[args.llm_command], script_args, dry_run=False)
+        return
+    _run_script(LLM_SCRIPTS[args.llm_command], args.args, dry_run=args.dry_run)
 
 
 def _dispatch_remote(args: argparse.Namespace) -> None:
@@ -254,6 +279,21 @@ def build_parser() -> argparse.ArgumentParser:
     llm_parser.add_argument("--tp-size", help="Tensor parallel size.")
     _add_passthrough_arguments(llm_parser)
     llm_parser.set_defaults(handler=_dispatch_serve)
+
+    llm_group_parser = subparsers.add_parser("llm", help="Manage local LLM model assets.")
+    llm_subparsers = llm_group_parser.add_subparsers(dest="llm_command", required=True)
+    llm_download_parser = llm_subparsers.add_parser(
+        "download",
+        help="Download the configured SGLang model from ModelScope.",
+    )
+    llm_download_parser.add_argument("--dry-run", action="store_true", help="Print the download command without running it.")
+    llm_download_parser.add_argument("--profile", help="Known model profile, such as qwen3.6-35b-a3b-gptq-int4.")
+    llm_download_parser.add_argument("--model-id", "--model", dest="model_id", help="ModelScope model id to download.")
+    llm_download_parser.add_argument("--model-path", "--local-dir", dest="model_path", help="Local directory for the model files.")
+    llm_download_parser.add_argument("--served-model-name", help="Model name exposed by SGLang after download.")
+    llm_download_parser.add_argument("--revision", help="Optional ModelScope revision or commit.")
+    llm_download_parser.add_argument("--python", help="Python interpreter with, or to install, modelscope.")
+    llm_download_parser.set_defaults(handler=_dispatch_llm)
 
     remote_parser = subparsers.add_parser("remote", help="Remote machine helpers.")
     remote_subparsers = remote_parser.add_subparsers(dest="remote_command", required=True)
