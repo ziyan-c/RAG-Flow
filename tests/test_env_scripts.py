@@ -248,6 +248,30 @@ def test_serve_llm_sglang_cli_profile_overrides_stale_env_model_path(tmp_path):
     assert "SGLang served model: palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
 
 
+def test_serve_llm_sglang_prefers_manual_model_root(tmp_path):
+    manual_model = tmp_path / "models" / "palmfuture" / "Qwen3.6-35B-A3B-GPTQ-Int4"
+    manual_model.mkdir(parents=True)
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT": str(tmp_path / "models"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/serve-llm-sglang.sh"), "--dry-run"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert f"SGLang model path: {manual_model}" in result.stdout
+    assert f"--model-path {manual_model}" in result.stdout
+
+
 def test_llm_download_dry_run_uses_qwen36_profile(tmp_path):
     env = {
         "HOME": str(tmp_path / "home"),
@@ -322,6 +346,35 @@ def test_llm_download_auto_dry_run_shows_modelscope_then_hf(tmp_path):
     assert "Download source: auto" in result.stdout
     assert "Download order: ModelScope, then Hugging Face" in result.stdout
     assert result.stdout.index("ModelScope model id:") < result.stdout.index("Hugging Face model id:")
+
+
+def test_llm_download_uses_manual_model_root_before_download(tmp_path):
+    manual_model = tmp_path / "models" / "palmfuture" / "Qwen3.6-35B-A3B-GPTQ-Int4"
+    env_file = tmp_path / "rag-flow.env"
+    manual_model.mkdir(parents=True)
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(env_file),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT": str(tmp_path / "models"),
+        "RAG_FLOW_UPDATE_ENV_FILE": "1",
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/llm/download-sglang-model.sh")],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    env_text = env_file.read_text(encoding="utf-8")
+    assert "Existing model found: Manual local model" in result.stdout
+    assert f"Local model path: {manual_model}" in result.stdout
+    assert "Trying download source:" not in result.stdout
+    assert f"RAG_FLOW_SGLANG_MODEL_PATH={manual_model}" in env_text
 
 
 def test_llm_download_source_override_uses_source_specific_default_path(tmp_path):

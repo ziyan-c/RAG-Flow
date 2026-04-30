@@ -312,8 +312,11 @@ with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
 `RAG_FLOW_SGLANG_PYTHON` back to the env file. The default SGLang profile is
 `qwen3.6-35b-a3b-gptq-int4`.
 
-Download the default profile before the first launch. The default source is
-`auto`, which tries ModelScope first and then Hugging Face:
+Download the default profile before the first launch. The command first looks
+for an existing local model under `RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`
+(`/root/autodl-tmp/models` by default), then the ModelScope cache, then the
+Hugging Face cache. If none exist, the default source is `auto`, which tries
+ModelScope first and then Hugging Face:
 
 ```bash
 rag-flow download llm
@@ -331,6 +334,9 @@ failure falls back to Hugging Face. It does not run automatically inside `rag-fl
 because model downloads can be very large. For private Hugging Face repos, set
 `HF_TOKEN`, `HUGGINGFACE_HUB_TOKEN`, or `RAG_FLOW_SGLANG_HF_TOKEN` in
 `.local/rag-flow.env`.
+For manually uploaded models, put the directory at either
+`/root/autodl-tmp/models/<owner>/<model-name>` or
+`/root/autodl-tmp/models/<model-name>`.
 
 Switch profiles or override paths like this:
 
@@ -348,7 +354,8 @@ rag-flow serve llm-sglang --served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-In
 Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
 `RAG_FLOW_SGLANG_MODEL_ID`, `RAG_FLOW_SGLANG_MODEL_PATH`,
 `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`, `RAG_FLOW_SGLANG_MODEL_REVISION`,
-`RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`, `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`,
+`RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`, `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`,
+`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`,
 `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`, `RAG_FLOW_SGLANG_HF_TOKEN`,
 `RAG_FLOW_SGLANG_PORT`, `RAG_FLOW_SGLANG_CONTEXT_LENGTH`,
 `RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`, `RAG_FLOW_SGLANG_QUANTIZATION`,
@@ -412,6 +419,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_SGLANG_MODEL_PATH`
 - `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`
 - `RAG_FLOW_SGLANG_MODEL_REVISION`
+- `RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`
 - `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`
 - `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`
 - `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`

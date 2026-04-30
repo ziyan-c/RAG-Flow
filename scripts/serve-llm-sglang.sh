@@ -84,6 +84,7 @@ done
 : "${RAG_FLOW_SGLANG_KV_CACHE_DTYPE:=fp8_e5m2}"
 : "${RAG_FLOW_SGLANG_PYTHON:=${RAG_FLOW_LLM_PYTHON_BIN:-python}}"
 : "${RAG_FLOW_SGLANG_EXTRA_ARGS:=}"
+: "${RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT:=$RAG_FLOW_RUNTIME_ROOT/models}"
 
 if [[ "$profile_overridden" == "1" && "$model_path_overridden" != "1" ]]; then
   unset RAG_FLOW_SGLANG_MODEL_PATH
@@ -93,15 +94,22 @@ if [[ "$profile_overridden" == "1" && "$served_model_name_overridden" != "1" ]];
 fi
 
 profile_key="$(printf '%s' "$RAG_FLOW_SGLANG_MODEL_PROFILE" | tr '[:upper:]' '[:lower:]')"
+default_model_id=""
 default_model_path=""
+default_modelscope_path=""
+default_hf_path=""
 default_served_model_name=""
 case "$profile_key" in
   qwen3.6-35b-a3b-gptq-int4|qwen3.6|palmfuture/qwen3.6-35b-a3b-gptq-int4)
-    default_model_path="/root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
+    default_model_id="palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
+    default_modelscope_path="/root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
+    default_hf_path="/root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
     default_served_model_name="palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
     ;;
   qwen3.5-35b-a3b-gptq-int4|qwen3.5|qwen/qwen3.5-35b-a3b-gptq-int4)
-    default_model_path="/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-35B-A3B-GPTQ-Int4"
+    default_model_id="Qwen/Qwen3.5-35B-A3B-GPTQ-Int4"
+    default_modelscope_path="/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-35B-A3B-GPTQ-Int4"
+    default_hf_path="/root/.cache/huggingface/hub/models/Qwen/Qwen3.5-35B-A3B-GPTQ-Int4"
     default_served_model_name="Qwen/Qwen3.5-35B-A3B-GPTQ-Int4"
     ;;
   custom)
@@ -115,6 +123,63 @@ case "$profile_key" in
     fi
     ;;
 esac
+
+if [[ -z "$default_model_path" && -n "$default_modelscope_path" ]]; then
+  default_model_path="$default_modelscope_path"
+fi
+if [[ -z "${RAG_FLOW_SGLANG_MODEL_ID:-}" && -n "$default_model_id" ]]; then
+  RAG_FLOW_SGLANG_MODEL_ID="$default_model_id"
+fi
+if [[ -z "${RAG_FLOW_SGLANG_MODEL_ID:-}" && -n "${RAG_FLOW_LLM_MODEL:-}" ]]; then
+  RAG_FLOW_SGLANG_MODEL_ID="$RAG_FLOW_LLM_MODEL"
+fi
+if [[ -z "$default_modelscope_path" && -n "${RAG_FLOW_SGLANG_MODEL_ID:-}" ]]; then
+  default_modelscope_path="/root/.cache/modelscope/hub/models/$RAG_FLOW_SGLANG_MODEL_ID"
+fi
+if [[ -z "$default_hf_path" && -n "${RAG_FLOW_SGLANG_MODEL_ID:-}" ]]; then
+  default_hf_path="/root/.cache/huggingface/hub/models/$RAG_FLOW_SGLANG_MODEL_ID"
+fi
+
+if [[ "$model_path_overridden" != "1" ]]; then
+  manual_model_candidates=()
+  add_manual_model_candidate() {
+    local candidate="$1"
+    local existing
+    [[ -z "$candidate" ]] && return
+    if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
+      for existing in "${manual_model_candidates[@]}"; do
+        [[ "$existing" == "$candidate" ]] && return
+      done
+    fi
+    manual_model_candidates+=("$candidate")
+  }
+
+  if [[ -n "${RAG_FLOW_SGLANG_MODEL_ID:-}" ]]; then
+    model_basename="${RAG_FLOW_SGLANG_MODEL_ID##*/}"
+    add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_ID"
+    add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$model_basename"
+  fi
+  add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_PROFILE"
+
+  if [[ -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" && -d "$RAG_FLOW_SGLANG_MODEL_PATH" ]]; then
+    :
+  else
+    if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
+      for candidate in "${manual_model_candidates[@]}"; do
+        if [[ -d "$candidate" ]]; then
+          RAG_FLOW_SGLANG_MODEL_PATH="$candidate"
+          break
+        fi
+      done
+    fi
+  fi
+  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) && -d "$default_modelscope_path" ]]; then
+    RAG_FLOW_SGLANG_MODEL_PATH="$default_modelscope_path"
+  fi
+  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) && -d "$default_hf_path" ]]; then
+    RAG_FLOW_SGLANG_MODEL_PATH="$default_hf_path"
+  fi
+fi
 
 : "${RAG_FLOW_SGLANG_MODEL_PATH:=$default_model_path}"
 if [[ -z "$RAG_FLOW_SGLANG_MODEL_PATH" ]]; then

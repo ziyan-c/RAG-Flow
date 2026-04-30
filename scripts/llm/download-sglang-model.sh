@@ -75,6 +75,7 @@ done
 : "${RAG_FLOW_SGLANG_MODEL_PROFILE:=qwen3.6-35b-a3b-gptq-int4}"
 : "${RAG_FLOW_SGLANG_PYTHON:=${RAG_FLOW_LLM_PYTHON_BIN:-python}}"
 : "${RAG_FLOW_SGLANG_MODEL_REVISION:=}"
+: "${RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT:=$RAG_FLOW_RUNTIME_ROOT/models}"
 : "${RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE:=1}"
 : "${RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB:=1}"
 
@@ -147,6 +148,24 @@ if [[ -z "$default_hf_path" ]]; then
   default_hf_path="/root/.cache/huggingface/hub/models/$RAG_FLOW_SGLANG_MODEL_ID"
 fi
 
+manual_model_candidates=()
+add_manual_model_candidate() {
+  local candidate="$1"
+  local existing
+  [[ -z "$candidate" ]] && return
+  if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
+    for existing in "${manual_model_candidates[@]}"; do
+      [[ "$existing" == "$candidate" ]] && return
+    done
+  fi
+  manual_model_candidates+=("$candidate")
+}
+
+model_basename="${RAG_FLOW_SGLANG_MODEL_ID##*/}"
+add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_ID"
+add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$model_basename"
+add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_PROFILE"
+
 model_path_explicit=0
 if [[ -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" ]]; then
   model_path_explicit=1
@@ -177,6 +196,9 @@ prepared_package_module=""
 prepared_package_name=""
 prepared_local_dir=""
 prepared_download_code=""
+existing_model_path=""
+existing_model_source=""
+existing_model_label=""
 
 prepare_download_source() {
   local source="$1"
@@ -226,6 +248,55 @@ print(f"Downloaded model to: {path}")'
       return 1
       ;;
   esac
+}
+
+find_existing_model_path() {
+  local candidate
+  existing_model_path=""
+  existing_model_source=""
+  existing_model_label=""
+
+  if [[ "$model_path_explicit" == "1" && -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" && -d "$RAG_FLOW_SGLANG_MODEL_PATH" ]]; then
+    existing_model_path="$RAG_FLOW_SGLANG_MODEL_PATH"
+    existing_model_source="configured"
+    existing_model_label="Configured model path"
+    return 0
+  fi
+
+  if [[ "$model_path_overridden" == "1" && -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" ]]; then
+    return 1
+  fi
+
+  if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
+    for candidate in "${manual_model_candidates[@]}"; do
+      if [[ -d "$candidate" ]]; then
+        existing_model_path="$candidate"
+        existing_model_source="local"
+        existing_model_label="Manual local model"
+        return 0
+      fi
+    done
+  fi
+
+  if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "modelscope" ]]; then
+    if [[ -d "$default_modelscope_path" ]]; then
+      existing_model_path="$default_modelscope_path"
+      existing_model_source="modelscope"
+      existing_model_label="ModelScope cache"
+      return 0
+    fi
+  fi
+
+  if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "hf" ]]; then
+    if [[ -d "$default_hf_path" ]]; then
+      existing_model_path="$default_hf_path"
+      existing_model_source="hf"
+      existing_model_label="Hugging Face cache"
+      return 0
+    fi
+  fi
+
+  return 1
 }
 
 print_download_plan() {
@@ -304,6 +375,7 @@ echo "LLM model profile: $RAG_FLOW_SGLANG_MODEL_PROFILE"
 echo "Download source: $download_source_display"
 echo "Served model name: $RAG_FLOW_SGLANG_SERVED_MODEL_NAME"
 echo "Download python: $RAG_FLOW_SGLANG_PYTHON"
+echo "Manual model root: $RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT"
 if [[ -n "$RAG_FLOW_SGLANG_MODEL_REVISION" ]]; then
   echo "Model revision: $RAG_FLOW_SGLANG_MODEL_REVISION"
 fi
@@ -319,6 +391,24 @@ case "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" in
 esac
 
 if [[ "$dry_run" == "1" ]]; then
+  echo "Local search order:"
+  if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
+    for candidate in "${manual_model_candidates[@]}"; do
+      echo "  manual: $candidate"
+    done
+  fi
+  if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "modelscope" ]]; then
+    echo "  modelscope: $default_modelscope_path"
+  fi
+  if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "hf" ]]; then
+    echo "  huggingface: $default_hf_path"
+  fi
+  if find_existing_model_path; then
+    echo "Existing model found: $existing_model_label"
+    echo "Local model path: $existing_model_path"
+    echo "Command: no download needed"
+    exit 0
+  fi
   if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" ]]; then
     echo "Download order: ModelScope, then Hugging Face"
   fi
@@ -326,6 +416,24 @@ if [[ "$dry_run" == "1" ]]; then
     prepare_download_source "$source"
     print_download_plan
   done
+  exit 0
+fi
+
+if find_existing_model_path; then
+  echo "Existing model found: $existing_model_label"
+  echo "Local model path: $existing_model_path"
+  RAG_FLOW_SGLANG_MODEL_PATH="$existing_model_path"
+  if [[ "$existing_model_source" == "modelscope" || "$existing_model_source" == "hf" ]]; then
+    RAG_FLOW_SGLANG_DOWNLOAD_SOURCE="$existing_model_source"
+  fi
+  if truthy "$RAG_FLOW_UPDATE_ENV_FILE"; then
+    set_env_var RAG_FLOW_SGLANG_DOWNLOAD_SOURCE "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE"
+    set_env_var RAG_FLOW_SGLANG_MODEL_PROFILE "$RAG_FLOW_SGLANG_MODEL_PROFILE"
+    set_env_var RAG_FLOW_SGLANG_MODEL_ID "$RAG_FLOW_SGLANG_MODEL_ID"
+    set_env_var RAG_FLOW_SGLANG_MODEL_PATH "$RAG_FLOW_SGLANG_MODEL_PATH"
+    set_env_var RAG_FLOW_SGLANG_SERVED_MODEL_NAME "$RAG_FLOW_SGLANG_SERVED_MODEL_NAME"
+    set_env_var RAG_FLOW_LLM_MODEL "$RAG_FLOW_SGLANG_SERVED_MODEL_NAME"
+  fi
   exit 0
 fi
 
