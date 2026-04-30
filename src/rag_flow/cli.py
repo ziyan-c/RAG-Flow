@@ -32,7 +32,7 @@ MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
 MODULE_HELP: dict[str, str] = {
     "mineru": "Check, install, locate, or run MinerU.",
     "patch": "Patch small icon text from a MinerU artifact directory.",
-    "patch-view": "Draw patching VLM crop regions over a source PDF.",
+    "patch-view": "Draw patching LLM crop regions over a source PDF.",
     "caption": "Generate image descriptions for patched MinerU output.",
     "caption-view": "Draw captioning image targets and context blocks over a source PDF.",
     "ingest": "Run the staged ingestion pipeline.",
@@ -136,6 +136,28 @@ def _dispatch_env(args: argparse.Namespace) -> None:
 
 
 def _dispatch_serve(args: argparse.Namespace) -> None:
+    if args.serve_command == "llm-sglang":
+        script_args: list[str] = []
+        for attr, flag in (
+            ("profile", "--profile"),
+            ("model_path", "--model-path"),
+            ("served_model_name", "--served-model-name"),
+            ("port", "--port"),
+            ("context_length", "--context-length"),
+            ("mem_fraction_static", "--mem-fraction-static"),
+            ("tp_size", "--tp-size"),
+        ):
+            value = getattr(args, attr, None)
+            if value is not None:
+                script_args.extend([flag, str(value)])
+        passthrough_args = list(args.args)
+        if passthrough_args[:1] == ["--"]:
+            passthrough_args = passthrough_args[1:]
+        script_args.extend(passthrough_args)
+        if args.dry_run:
+            script_args.insert(0, "--dry-run")
+        _run_script(SERVE_SCRIPTS[args.serve_command], script_args, dry_run=False)
+        return
     _run_script(SERVE_SCRIPTS[args.serve_command], args.args, dry_run=args.dry_run)
 
 
@@ -218,12 +240,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     serve_parser = subparsers.add_parser("serve", help="Start long-running services.")
     serve_subparsers = serve_parser.add_subparsers(dest="serve_command", required=True)
-    _add_script_command(
-        serve_subparsers,
+    llm_parser = serve_subparsers.add_parser(
         "llm-sglang",
-        help_text="Start the SGLang OpenAI-compatible LLM service.",
-        handler=_dispatch_serve,
+        help="Start the SGLang OpenAI-compatible LLM service.",
     )
+    llm_parser.add_argument("--dry-run", action="store_true", help="Print the resolved SGLang command without running it.")
+    llm_parser.add_argument("--profile", help="Known model profile, such as qwen3.6-35b-a3b-gptq-int4.")
+    llm_parser.add_argument("--model-path", help="Local model path. Overrides the selected profile path.")
+    llm_parser.add_argument("--served-model-name", help="Model name exposed by SGLang's OpenAI-compatible API.")
+    llm_parser.add_argument("--port", help="SGLang listen port.")
+    llm_parser.add_argument("--context-length", help="SGLang context length.")
+    llm_parser.add_argument("--mem-fraction-static", help="SGLang static GPU memory fraction.")
+    llm_parser.add_argument("--tp-size", help="Tensor parallel size.")
+    _add_passthrough_arguments(llm_parser)
+    llm_parser.set_defaults(handler=_dispatch_serve)
 
     remote_parser = subparsers.add_parser("remote", help="Remote machine helpers.")
     remote_subparsers = remote_parser.add_subparsers(dest="remote_command", required=True)

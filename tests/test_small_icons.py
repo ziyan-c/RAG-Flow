@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from rag_flow.preprocessing.small_icons import (
@@ -12,11 +14,14 @@ from rag_flow.preprocessing.small_icons import (
     build_table_continuation_map,
     checkpoint_path_for,
     crop_image_from_block_with_inline_icons,
+    image_to_data_url,
     is_inline_icon_candidate,
     is_no_missing_response,
+    request_icon_patch_from_llm,
     resolve_icon_patch_batch,
     resolve_icon_patch_artifacts,
     should_apply_icon_patch,
+    strip_reasoning_text,
 )
 from rag_flow.preprocessing.image_descriptions import should_caption_image_block
 
@@ -365,3 +370,51 @@ def test_no_missing_response_allows_simple_variants():
         patched_text="No missing icons.",
         field_key="text",
     )
+
+
+def test_strip_reasoning_text_removes_thinking_suffix():
+    assert strip_reasoning_text("<think>inspect</think>\nOpen [Icon: gear] settings") == (
+        "Open [Icon: gear] settings"
+    )
+
+
+def test_request_icon_patch_from_llm_sends_openai_vision_payload():
+    class FakeImage:
+        def save(self, buffer, format):
+            assert format == "PNG"
+            buffer.write(b"fake-image")
+
+    class FakeCompletions:
+        def __init__(self):
+            self.kwargs = {}
+
+        def create(self, **kwargs):
+            self.kwargs = kwargs
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content="<think>skip</think>\nClick [Icon: save].")
+                    )
+                ]
+            )
+
+    completions = FakeCompletions()
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+
+    output = request_icon_patch_from_llm(
+        client=client,
+        model="local-vlm",
+        image=FakeImage(),
+        prompt="Patch icons",
+        max_tokens=8000,
+    )
+
+    assert output == "Click [Icon: save]."
+    assert completions.kwargs["model"] == "local-vlm"
+    assert completions.kwargs["max_tokens"] == 8000
+    assert completions.kwargs["temperature"] == 0
+    assert completions.kwargs["extra_body"]["chat_template_kwargs"]["enable_thinking"] is False
+    content = completions.kwargs["messages"][0]["content"]
+    assert content[0]["type"] == "image_url"
+    assert content[0]["image_url"]["url"] == image_to_data_url(FakeImage())
+    assert content[1] == {"type": "text", "text": "Patch icons"}

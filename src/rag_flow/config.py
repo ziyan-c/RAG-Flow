@@ -172,6 +172,7 @@ class MinerUConfig:
 @dataclass(frozen=True)
 class PatchingConfig:
     max_new_tokens: int
+    llm_timeout: float
 
 
 @dataclass(frozen=True)
@@ -239,7 +240,7 @@ class AppConfig:
             trusted_remote_code_models=env.csv("RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS", "Qwen/Qwen3.5-9B"),
             llm_base_url=env.get("RAG_FLOW_LLM_BASE_URL", "http://localhost:8080/v1"),
             llm_api_key=env.get("RAG_FLOW_LLM_API_KEY", "EMPTY"),
-            llm_model=env.get("RAG_FLOW_LLM_MODEL", "/root/autodl-tmp/models/Qwen3.5-35B-A3B-GPTQ-Int4"),
+            llm_model=env.get("RAG_FLOW_LLM_MODEL", "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"),
             llm_max_tokens=env.int("RAG_FLOW_LLM_MAX_TOKENS", 20000),
         )
 
@@ -276,6 +277,7 @@ class AppConfig:
 
         patching = PatchingConfig(
             max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
+            llm_timeout=env.float("RAG_FLOW_PATCH_LLM_TIMEOUT", 120.0),
         )
 
         captioning = CaptioningConfig(

@@ -128,6 +128,50 @@ def test_env_install_uv_dry_run(capsys):
     assert "scripts/env/install-uv.sh" in output
 
 
+def test_serve_llm_sglang_options_are_forwarded(monkeypatch):
+    calls: list[tuple[tuple[str, ...], list[str], bool]] = []
+
+    def fake_run_script(script_parts, args, *, dry_run):
+        calls.append((tuple(script_parts), list(args), dry_run))
+
+    monkeypatch.setattr(cli, "_run_script", fake_run_script)
+
+    cli.main(
+        [
+            "serve",
+            "llm-sglang",
+            "--profile",
+            "qwen3.6-35b-a3b-gptq-int4",
+            "--port",
+            "8090",
+            "--served-model-name",
+            "qwen-local",
+            "--dry-run",
+            "--",
+            "--log-level",
+            "warning",
+        ]
+    )
+
+    assert calls == [
+        (
+            cli.SERVE_SCRIPTS["llm-sglang"],
+            [
+                "--dry-run",
+                "--profile",
+                "qwen3.6-35b-a3b-gptq-int4",
+                "--served-model-name",
+                "qwen-local",
+                "--port",
+                "8090",
+                "--log-level",
+                "warning",
+            ],
+            False,
+        )
+    ]
+
+
 def test_retriever_help_is_local_to_unified_cli(capsys):
     cli.main(["retriever", "--help"])
 

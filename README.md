@@ -154,6 +154,7 @@ rag-flow mineru run
 Patch small icons:
 
 ```bash
+rag-flow serve llm-sglang
 rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 ```
 
@@ -161,7 +162,10 @@ The artifact-dir form is the preferred patching entrypoint after MinerU has
 parsed a PDF. It expects a MinerU output folder containing
 `*_content_list.json` and `*_origin.pdf`, then writes
 `*_content_list_PATCHED.json` in the same folder. The captioning stage then
-writes `*_content_list_PATCHED_CAPTIONED.json`.
+writes `*_content_list_PATCHED_CAPTIONED.json`. Patching sends its crop images
+to the local OpenAI-compatible vision LLM configured by `RAG_FLOW_LLM_BASE_URL`
+and `RAG_FLOW_LLM_MODEL`; start it first with `rag-flow serve llm-sglang`.
+If that service is not reachable, patching fails before rendering PDF pages.
 
 Patching focuses on content blocks instead of page furniture: text, lists, and
 tables are patched, while headers, footers, page numbers, and empty fields are
@@ -171,7 +175,7 @@ the visual crop to include them, marks them in the JSON, and keeps captioning
 from describing them as standalone figures. MinerU represents cross-page table
 continuations as empty `table` blocks; those blocks are not copied into the JSON
 as duplicate text. Instead, their PDF crops are stacked onto the previous table
-crop so the VLM can patch the single complete `table_body` with visual evidence
+crop so the LLM can patch the single complete `table_body` with visual evidence
 from every page of the same table.
 
 The source PDF is rendered in page windows instead of loading the whole book at
@@ -186,17 +190,20 @@ rag-flow patch \
   --batch-size 6
 ```
 
-The VLM prompt is intentionally strict: preserve all existing extracted text and
-only insert `[Icon: ...]` markers. The run writes a checkpoint after each VLM
+The LLM prompt is intentionally strict: preserve all existing extracted text and
+only insert `[Icon: ...]` markers. The run writes a checkpoint after each LLM
 batch by default, resumes from that checkpoint on retry, deletes the checkpoint
 after success, writes a `*_PATCHING_VIEW.pdf` overlay that shows the exact crop
-regions sent to the VLM, and prints patching statistics at the end. Useful
+regions sent to the LLM, and prints patching statistics at the end. Useful
 controls:
 
-- `--batch-size`: VLM request batch size, default `6`
+- `--batch-size`: LLM request group size for checkpoints, default `6`
 - `--max-new-tokens`: generation budget, default `8000`
+- `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
+- `--model` / `--llm-model`: model name sent to the LLM endpoint
+- `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `--page-window-size`: PDF render window size, default `200`
-- `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
@@ -205,7 +212,7 @@ controls:
 The same `--max-new-tokens` override is available on `rag-flow ingest` when
 running through the patching stage.
 
-You can also regenerate the overlay without running the VLM:
+You can also regenerate the overlay without running the LLM:
 
 ```bash
 rag-flow patch-view \
@@ -298,6 +305,28 @@ Start the LLM service on the remote GPU box:
 rag-flow serve llm-sglang
 ```
 
+The SGLang launcher is optional and reads its own profile settings from
+`.local/rag-flow.env`. `rag-flow env create-llm` creates an isolated LLM Python
+environment under `RAG_FLOW_ENV_ROOT`, installs `RAG_FLOW_LLM_INSTALL_SPEC`
+with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
+`RAG_FLOW_SGLANG_PYTHON` back to the env file. The default SGLang profile is
+`qwen3.6-35b-a3b-gptq-int4`; switch profiles or override paths like this:
+
+```bash
+rag-flow serve llm-sglang --profile qwen3.6-35b-a3b-gptq-int4
+rag-flow serve llm-sglang --profile qwen3.5-35b-a3b-gptq-int4
+rag-flow serve llm-sglang --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
+rag-flow serve llm-sglang --served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
+```
+
+Useful launcher variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
+`RAG_FLOW_SGLANG_MODEL_PATH`, `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`,
+`RAG_FLOW_SGLANG_PORT`,
+`RAG_FLOW_SGLANG_CONTEXT_LENGTH`, `RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`,
+`RAG_FLOW_SGLANG_QUANTIZATION`, `RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and
+`RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set `RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if
+the LLM environment should not install uv before package installation.
+
 Chat from the terminal:
 
 ```bash
@@ -317,8 +346,8 @@ models, and conda environments can stay on the machine paths configured in that
 private env file.
 
 If the retriever is exposed beyond localhost, set `RAG_FLOW_RETRIEVER_API_KEY`
-and send it as `Authorization: Bearer <token>`. VLM preprocessing executes
-model-provided Python code for trusted repositories only; keep
+and send it as `Authorization: Bearer <token>`. Captioning VLM preprocessing
+executes model-provided Python code for trusted repositories only; keep
 `RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS` narrow and set `RAG_FLOW_VLM_MODEL_REVISION`
 when pinning a model snapshot.
 
@@ -336,6 +365,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_MINERU_VERSION`
 - `RAG_FLOW_MINERU_PYTHON`
 - `RAG_FLOW_PATCH_MAX_NEW_TOKENS`
+- `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`
 - `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`
 - `RAG_FLOW_CAPTION_BATCH_SIZE`
@@ -347,6 +377,11 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_COLLECTION`
 - `RAG_FLOW_LLM_BASE_URL`
 - `RAG_FLOW_LLM_MODEL`
+- `RAG_FLOW_LLM_PYTHON_BIN`
+- `RAG_FLOW_SGLANG_MODEL_PROFILE`
+- `RAG_FLOW_SGLANG_MODEL_PATH`
+- `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`
+- `RAG_FLOW_SGLANG_PYTHON`
 - `RAG_FLOW_RETRIEVER_API_KEY`
 - `RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS`
 - `RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS`

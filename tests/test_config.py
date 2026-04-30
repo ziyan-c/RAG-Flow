@@ -68,17 +68,31 @@ def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
 
-    assert AppConfig.from_env().patching.max_new_tokens == 8000
+    config = AppConfig.from_env()
+
+    assert config.patching.max_new_tokens == 8000
+    assert config.patching.llm_timeout == 120.0
 
 
-def test_patch_max_new_tokens_reads_local_env(tmp_path, monkeypatch):
+def test_patching_reads_local_env(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
-    env_file.write_text("RAG_FLOW_PATCH_MAX_NEW_TOKENS=4000\n", encoding="utf-8")
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_PATCH_MAX_NEW_TOKENS=4000",
+                "RAG_FLOW_PATCH_LLM_TIMEOUT=30.5",
+            ]
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
 
-    assert AppConfig.from_env().patching.max_new_tokens == 4000
+    config = AppConfig.from_env()
+
+    assert config.patching.max_new_tokens == 4000
+    assert config.patching.llm_timeout == 30.5
 
 
 def test_captioning_defaults(tmp_path, monkeypatch):

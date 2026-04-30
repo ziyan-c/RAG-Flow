@@ -126,4 +126,123 @@ def test_create_mineru_can_disable_uv(tmp_path):
     assert "python3|" not in log_text
     assert "uv|" not in log_text
     assert f"env-python|-m pip install -e {ROOT}[mineru]" in log_text
-    assert env_dir.exists()
+
+
+def test_create_llm_writes_python_path_for_sglang(tmp_path):
+    bin_dir = tmp_path / "bin"
+    env_dir = tmp_path / "envs" / "rag-flow-llm"
+    env_bin = env_dir / "bin"
+    log_file = tmp_path / "commands.log"
+    env_file = tmp_path / "rag-flow.env"
+    bin_dir.mkdir()
+    env_bin.mkdir(parents=True)
+    _write_executable(bin_dir / "python3", "#!/usr/bin/env bash\nexit 0\n")
+    _write_executable(
+        bin_dir / "micromamba",
+        "#!/usr/bin/env bash\nprintf 'micromamba|%s\\n' \"$*\" >> \"$RAG_FLOW_TEST_COMMAND_LOG\"\n",
+    )
+    _write_executable(
+        bin_dir / "uv",
+        "#!/usr/bin/env bash\nprintf 'uv|%s\\n' \"$*\" >> \"$RAG_FLOW_TEST_COMMAND_LOG\"\n",
+    )
+    _write_executable(env_bin / "python", "#!/usr/bin/env bash\nexit 0\n")
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": f"{bin_dir}{os.pathsep}/usr/bin:/bin",
+        "RAG_FLOW_TEST_COMMAND_LOG": str(log_file),
+        "RAG_FLOW_ENV_FILE": str(env_file),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_ENV_ROOT": str(tmp_path / "envs"),
+        "RAG_FLOW_LLM_ENV": "rag-flow-llm",
+        "RAG_FLOW_UPDATE_ENV_FILE": "1",
+    }
+
+    subprocess.run([shutil.which("bash") or "bash", str(ROOT / "scripts/env/create-llm.sh")], check=True, env=env)
+
+    env_text = env_file.read_text(encoding="utf-8")
+    assert f"RAG_FLOW_LLM_PYTHON_BIN={env_dir / 'bin' / 'python'}" in env_text
+    assert f"RAG_FLOW_SGLANG_PYTHON={env_dir / 'bin' / 'python'}" in env_text
+
+
+def test_serve_llm_sglang_profile_dry_run_uses_qwen36_path(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+        "RAG_FLOW_SGLANG_MODEL_PROFILE": "qwen3.6-35b-a3b-gptq-int4",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/serve-llm-sglang.sh"), "--dry-run"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "SGLang profile: qwen3.6-35b-a3b-gptq-int4" in result.stdout
+    assert "/root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "SGLang served model: palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "--served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "/envs/llm/bin/python -m sglang.launch_server" in result.stdout
+
+
+def test_serve_llm_sglang_cli_profile_can_select_qwen35(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [
+            shutil.which("bash") or "bash",
+            str(ROOT / "scripts/serve-llm-sglang.sh"),
+            "--dry-run",
+            "--profile",
+            "qwen3.5-35b-a3b-gptq-int4",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "SGLang profile: qwen3.5-35b-a3b-gptq-int4" in result.stdout
+    assert "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "SGLang served model: Qwen/Qwen3.5-35B-A3B-GPTQ-Int4" in result.stdout
+
+
+def test_serve_llm_sglang_cli_profile_overrides_stale_env_model_path(tmp_path):
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+        "RAG_FLOW_SGLANG_MODEL_PATH": "/old/qwen3.5",
+        "RAG_FLOW_SGLANG_SERVED_MODEL_NAME": "old-model",
+    }
+
+    result = subprocess.run(
+        [
+            shutil.which("bash") or "bash",
+            str(ROOT / "scripts/serve-llm-sglang.sh"),
+            "--dry-run",
+            "--profile",
+            "qwen3.6-35b-a3b-gptq-int4",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert "/old/qwen3.5" not in result.stdout
+    assert "old-model" not in result.stdout
+    assert "/root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout
+    assert "SGLang served model: palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4" in result.stdout

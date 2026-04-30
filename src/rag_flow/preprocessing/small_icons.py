@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import gc
+from io import BytesIO
 import json
 import math
 import re
@@ -11,7 +13,6 @@ from pathlib import Path
 from typing import Any
 
 from rag_flow.config import AppConfig
-from rag_flow.runtime import get_torch_device, require_trusted_remote_code_model
 
 
 IGNORE_TYPES = {
@@ -687,7 +688,7 @@ def _print_stats(stats: IconPatchStats, output_json: Path) -> None:
     print(f"  inline icons linked: {stats.inline_icon_linked}")
     print(f"  inline icons unlinked: {stats.inline_icon_unlinked}")
     print(f"  page windows: {stats.windows_processed}")
-    print(f"  VLM batches: {stats.batches_processed}")
+    print(f"  LLM batches: {stats.batches_processed}")
     print(f"  checkpoints written: {stats.checkpoints_written}")
     print(f"  output: {output_json}")
 
@@ -727,6 +728,88 @@ def build_icon_patch_prompt(*, original_text: str, field_key: str) -> str:
         "Return only the modified complete text. If no icons are missing, return exactly "
         "`No missing`."
     )
+
+
+def image_to_data_url(image: Any) -> str:
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+def strip_reasoning_text(text: str) -> str:
+    output = text.strip()
+    if "</think>" in output:
+        output = output.split("</think>")[-1].strip()
+    return output
+
+
+def make_patching_llm_client(*, base_url: str, api_key: str, timeout: float) -> Any:
+    from openai import OpenAI
+
+    return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
+
+
+def assert_patching_llm_available(client: Any, *, base_url: str) -> None:
+    from openai import APIConnectionError, APIStatusError, APITimeoutError
+
+    try:
+        client.models.list()
+    except (APIConnectionError, APITimeoutError) as exc:
+        raise RuntimeError(
+            f"Cannot reach the patching LLM service at {base_url}. "
+            "Start it first with `rag-flow serve llm-sglang`."
+        ) from exc
+    except APIStatusError as exc:
+        if exc.status_code in {404, 405}:
+            return
+        raise RuntimeError(
+            f"The patching LLM service at {base_url} is reachable but not ready "
+            f"(HTTP {exc.status_code})."
+        ) from exc
+
+
+def request_icon_patch_from_llm(
+    *,
+    client: Any,
+    model: str,
+    image: Any,
+    prompt: str,
+    max_tokens: int,
+) -> str:
+    from openai import APIConnectionError, APIStatusError, APITimeoutError
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": image_to_data_url(image)}},
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ],
+            max_tokens=max_tokens,
+            temperature=0,
+            extra_body={
+                "chat_template_kwargs": {"enable_thinking": False},
+                "separate_reasoning": True,
+            },
+        )
+    except (APIConnectionError, APITimeoutError) as exc:
+        raise RuntimeError(
+            "Cannot reach the patching LLM service. Start it first with "
+            "`rag-flow serve llm-sglang`."
+        ) from exc
+    except APIStatusError as exc:
+        raise RuntimeError(f"Patching LLM request failed with HTTP {exc.status_code}: {exc}") from exc
+
+    content = response.choices[0].message.content
+    if not content:
+        raise RuntimeError("Patching LLM returned an empty response.")
+    return strip_reasoning_text(content)
 
 
 def is_no_missing_response(text: str) -> bool:
@@ -930,12 +1013,13 @@ def add_small_icon_text(
     input_json: str | Path,
     output_json: str | Path,
     pdf_path: str | Path,
-    model_name: str,
+    llm_base_url: str,
+    llm_api_key: str,
+    llm_model: str,
     dpi: int = 200,
     batch_size: int = 6,
     max_new_tokens: int = 8000,
-    model_revision: str = "",
-    trusted_remote_code_models: tuple[str, ...] = ("Qwen/Qwen3.5-9B",),
+    llm_timeout: float = 120.0,
     page_window_size: int = 200,
     checkpoint_interval: int = 1,
     checkpoint_json: str | Path | None = None,
@@ -943,28 +1027,15 @@ def add_small_icon_text(
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
 ) -> None:
-    import torch
-    from modelscope import snapshot_download
     from pdf2image import convert_from_path
-    from qwen_vl_utils import process_vision_info
     from tqdm import tqdm
-    from transformers import AutoModelForImageTextToText, AutoProcessor
 
-    device = get_torch_device(feature="Small-icon VLM preprocessing")
-    dtype = torch.bfloat16 if device == "cuda" else torch.float32
-    require_trusted_remote_code_model(model_name, allowed_models=trusted_remote_code_models)
-    snapshot_kwargs = {"revision": model_revision} if model_revision else {}
-    model_dir = snapshot_download(model_name, **snapshot_kwargs)
-    processor = AutoProcessor.from_pretrained(model_dir, trust_remote_code=True, padding_side="left")
-    processor.tokenizer.pad_token_id = processor.tokenizer.eos_token_id
-    model = AutoModelForImageTextToText.from_pretrained(
-        model_dir,
-        device_map="auto",
-        torch_dtype=dtype,
-        trust_remote_code=True,
-        attn_implementation="sdpa",
+    llm_client = make_patching_llm_client(
+        base_url=llm_base_url,
+        api_key=llm_api_key,
+        timeout=llm_timeout,
     )
-    model.generation_config.pad_token_id = processor.tokenizer.eos_token_id
+    assert_patching_llm_available(llm_client, base_url=llm_base_url)
 
     input_path = Path(input_json)
     output_path = Path(output_json)
@@ -1001,53 +1072,14 @@ def add_small_icon_text(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        messages = [
-            [{"role": "user", "content": [{"type": "image", "image": req["image"]}, {"type": "text", "text": req["prompt"]}]}]
-            for req in requests
-        ]
-        texts = [
-            processor.apply_chat_template(message, tokenize=False, add_generation_prompt=True, enable_thinking=False)
-            for message in messages
-        ]
-
-        image_inputs_list = []
-        video_inputs_list = []
-        for message in messages:
-            image_inputs, video_inputs = process_vision_info(message)
-            image_inputs_list.append(image_inputs)
-            video_inputs_list.append(video_inputs)
-
-        flat_images = [item for sublist in image_inputs_list if sublist for item in sublist]
-        flat_videos = [item for sublist in video_inputs_list if sublist for item in sublist]
-        inputs = processor(
-            text=texts,
-            images=flat_images if flat_images else None,
-            videos=flat_videos if flat_videos else None,
-            padding=True,
-            return_tensors="pt",
-        ).to(device)
-
-        with torch.no_grad():
-            generated_ids = model.generate(
-                **inputs,
-                max_new_tokens=max_new_tokens,
-                do_sample=False,
-                use_cache=True,
+        for req in requests:
+            output = request_icon_patch_from_llm(
+                client=llm_client,
+                model=llm_model,
+                image=req["image"],
+                prompt=req["prompt"],
+                max_tokens=max_new_tokens,
             )
-        generated_ids_trimmed = [
-            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-        ]
-        outputs = processor.batch_decode(
-            generated_ids_trimmed,
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=False,
-        )
-
-        for req, raw_output in zip(requests, outputs):
-            output = raw_output.strip()
-            if "</think>" in output:
-                output = output.split("</think>")[-1].strip()
-
             idx = req["idx"]
             key = req["key"]
             block = content_data[idx]
@@ -1066,12 +1098,7 @@ def add_small_icon_text(
                 _mark_patched(content_data[idx], key)
                 stats.patched_count += 1
 
-        del inputs
-        del generated_ids
-        del generated_ids_trimmed
         gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
         if checkpoint_interval > 0 and stats.batches_processed % checkpoint_interval == 0:
             write_checkpoint()
 
@@ -1188,20 +1215,12 @@ def add_small_icon_text(
 
             del pdf_images
             gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
             write_checkpoint()
 
     except Exception:
         write_checkpoint()
         print(f"Icon patching checkpoint saved before failure: {checkpoint_path}")
         raise
-    finally:
-        del model
-        del processor
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
 
     _strip_checkpoint_fields(content_data)
     _write_json(output_path, content_data)
@@ -1223,24 +1242,28 @@ def add_small_icon_text(
 
 def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
-    parser = argparse.ArgumentParser(description="Use a VLM to patch small icon text missing from MinerU JSON.")
+    parser = argparse.ArgumentParser(
+        description="Use a local OpenAI-compatible vision LLM to patch small icon text missing from MinerU JSON."
+    )
     parser.add_argument("--artifact-dir", help="MinerU output folder containing *_content_list.json and *_origin.pdf.")
     parser.add_argument("--input", default=None, help="Input MinerU content_list JSON.")
     parser.add_argument("--output", default=None, help="Output patched content_list JSON.")
     parser.add_argument("--pdf", default=None, help="PDF used for bbox crops. Defaults to *_origin.pdf in --artifact-dir.")
-    parser.add_argument("--model", default=config.models.vlm_model)
-    parser.add_argument("--model-revision", default=config.models.vlm_model_revision)
+    parser.add_argument("--model", "--llm-model", dest="llm_model", default=config.models.llm_model)
+    parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
+    parser.add_argument("--api-key", default=config.models.llm_api_key)
     parser.add_argument("--dpi", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=6)
     parser.add_argument("--max-new-tokens", type=int, default=config.patching.max_new_tokens)
+    parser.add_argument("--request-timeout", type=float, default=config.patching.llm_timeout)
     parser.add_argument("--page-window-size", type=int, default=200)
     parser.add_argument("--checkpoint-interval", type=int, default=1)
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--no-recursive", action="store_true")
-    parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes VLM patching crop regions.")
+    parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes patching LLM crop regions.")
     parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")
-    parser.add_argument("--dry-run", action="store_true", help="Print resolved inputs without loading the VLM.")
+    parser.add_argument("--dry-run", action="store_true", help="Print resolved inputs without calling the LLM.")
     args = parser.parse_args(argv)
 
     if args.artifact_dir:
@@ -1288,6 +1311,9 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  page_window_size: {args.page_window_size}")
             print(f"  batch_size: {args.batch_size}")
             print(f"  max_new_tokens: {args.max_new_tokens}")
+            print(f"  llm_base_url: {args.llm_base_url}")
+            print(f"  llm_model: {args.llm_model}")
+            print(f"  request_timeout: {args.request_timeout}")
         return
 
     for job_idx, artifacts in enumerate(artifacts_list, start=1):
@@ -1296,12 +1322,13 @@ def main(argv: list[str] | None = None) -> None:
             input_json=artifacts.content_json,
             output_json=artifacts.output_json,
             pdf_path=artifacts.origin_pdf,
-            model_name=args.model,
+            llm_base_url=args.llm_base_url,
+            llm_api_key=args.api_key,
+            llm_model=args.llm_model,
             dpi=args.dpi,
             batch_size=args.batch_size,
             max_new_tokens=args.max_new_tokens,
-            model_revision=args.model_revision,
-            trusted_remote_code_models=config.models.trusted_remote_code_models,
+            llm_timeout=args.request_timeout,
             page_window_size=args.page_window_size,
             checkpoint_interval=args.checkpoint_interval,
             checkpoint_json=args.checkpoint_json,

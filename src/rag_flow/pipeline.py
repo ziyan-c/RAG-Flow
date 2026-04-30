@@ -82,10 +82,11 @@ def run_ingest(
             input_json=artifacts.content_json,
             output_json=artifacts.patched_json,
             pdf_path=source_pdf,
-            model_name=config.models.vlm_model,
-            model_revision=config.models.vlm_model_revision,
-            trusted_remote_code_models=config.models.trusted_remote_code_models,
+            llm_base_url=config.models.llm_base_url,
+            llm_api_key=config.models.llm_api_key,
+            llm_model=config.models.llm_model,
             max_new_tokens=config.patching.max_new_tokens if patch_max_new_tokens is None else patch_max_new_tokens,
+            llm_timeout=config.patching.llm_timeout,
             write_patching_view=write_patching_view,
             patching_view_pdf=patching_view_pdf,
         )
@@ -151,7 +152,7 @@ def main(argv: list[str] | None = None) -> None:
         "--max-new-tokens",
         type=int,
         default=config.patching.max_new_tokens,
-        help="Patching VLM generation budget.",
+        help="Patching LLM generation budget.",
     )
     parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes patching crop regions.")
     parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")

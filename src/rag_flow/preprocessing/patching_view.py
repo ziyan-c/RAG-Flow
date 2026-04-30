@@ -345,7 +345,7 @@ def write_patching_view_pdf(
 
 def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
-    parser = argparse.ArgumentParser(description="Draw patching VLM crop regions over a source PDF.")
+    parser = argparse.ArgumentParser(description="Draw patching LLM crop regions over a source PDF.")
     parser.add_argument(
         "--input-json",
         default=str(config.paths.patched_json),
