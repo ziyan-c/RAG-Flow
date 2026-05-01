@@ -156,28 +156,49 @@ if [[ "$model_path_overridden" != "1" ]]; then
 
   if [[ -n "${RAG_FLOW_SGLANG_MODEL_ID:-}" ]]; then
     model_basename="${RAG_FLOW_SGLANG_MODEL_ID##*/}"
+    hf_cache_name="models--${RAG_FLOW_SGLANG_MODEL_ID//\//--}"
     add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_ID"
     add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$model_basename"
+    add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$hf_cache_name"
   fi
   add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_PROFILE"
 
-  if [[ -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" && -d "$RAG_FLOW_SGLANG_MODEL_PATH" ]]; then
-    :
+  resolve_model_dir() {
+    local candidate="$1"
+    local snapshot
+    [[ -d "$candidate" ]] || return 1
+    if [[ -f "$candidate/config.json" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+    for snapshot in "$candidate"/snapshots/*; do
+      [[ -d "$snapshot" ]] || continue
+      if [[ -f "$snapshot/config.json" ]]; then
+        printf '%s\n' "$snapshot"
+        return 0
+      fi
+    done
+    printf '%s\n' "$candidate"
+    return 0
+  }
+
+  if [[ -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" ]] && resolved_model_path="$(resolve_model_dir "$RAG_FLOW_SGLANG_MODEL_PATH")"; then
+    RAG_FLOW_SGLANG_MODEL_PATH="$resolved_model_path"
   else
     if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
       for candidate in "${manual_model_candidates[@]}"; do
-        if [[ -d "$candidate" ]]; then
-          RAG_FLOW_SGLANG_MODEL_PATH="$candidate"
+        if resolved_model_path="$(resolve_model_dir "$candidate")"; then
+          RAG_FLOW_SGLANG_MODEL_PATH="$resolved_model_path"
           break
         fi
       done
     fi
   fi
-  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) && -d "$default_modelscope_path" ]]; then
-    RAG_FLOW_SGLANG_MODEL_PATH="$default_modelscope_path"
+  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) ]] && resolved_model_path="$(resolve_model_dir "$default_modelscope_path")"; then
+    RAG_FLOW_SGLANG_MODEL_PATH="$resolved_model_path"
   fi
-  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) && -d "$default_hf_path" ]]; then
-    RAG_FLOW_SGLANG_MODEL_PATH="$default_hf_path"
+  if [[ ( -z "${RAG_FLOW_SGLANG_MODEL_PATH:-}" || ! -d "$RAG_FLOW_SGLANG_MODEL_PATH" ) ]] && resolved_model_path="$(resolve_model_dir "$default_hf_path")"; then
+    RAG_FLOW_SGLANG_MODEL_PATH="$resolved_model_path"
   fi
 fi
 

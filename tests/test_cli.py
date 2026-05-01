@@ -27,6 +27,25 @@ def test_patch_command_delegates_to_small_icon_main(monkeypatch):
     assert calls == [["--artifact-dir", "hybrid_auto", "--dry-run"]]
 
 
+def test_patch_command_reexecs_to_pipeline_python_when_configured(tmp_path, monkeypatch):
+    env_python = tmp_path / "env" / "bin" / "python"
+    env_python.parent.mkdir(parents=True)
+    env_python.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    env_python.chmod(0o755)
+    calls = []
+
+    monkeypatch.delenv("RAG_FLOW_ENV_REEXECED", raising=False)
+    monkeypatch.setattr(cli, "_script_env", lambda: {"RAG_FLOW_PIPELINE_PYTHON_BIN": str(env_python)})
+    monkeypatch.setattr(cli.subprocess, "run", lambda *args, **kwargs: calls.append((args, kwargs)))
+
+    cli.main(["patch", "--dry-run"])
+
+    assert calls
+    command = calls[0][0][0]
+    assert command == [str(env_python), "-m", "rag_flow.cli", "patch", "--dry-run"]
+    assert calls[0][1]["env"]["RAG_FLOW_ENV_REEXECED"] == "1"
+
+
 def test_caption_command_delegates_to_image_description_main(monkeypatch):
     calls: list[list[str]] = []
 

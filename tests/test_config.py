@@ -72,6 +72,11 @@ def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
 
     assert config.patching.max_new_tokens == 8000
     assert config.patching.llm_timeout == 120.0
+    assert config.patching.batch_size == 16
+    assert config.patching.concurrency == 1
+    assert config.patching.checkpoint_interval == 10
+    assert config.patching.dpi == 200
+    assert config.patching.page_window_size == 200
 
 
 def test_patching_reads_local_env(tmp_path, monkeypatch):
@@ -82,6 +87,11 @@ def test_patching_reads_local_env(tmp_path, monkeypatch):
             [
                 "RAG_FLOW_PATCH_MAX_NEW_TOKENS=4000",
                 "RAG_FLOW_PATCH_LLM_TIMEOUT=30.5",
+                "RAG_FLOW_PATCH_BATCH_SIZE=12",
+                "RAG_FLOW_PATCH_CONCURRENCY=2",
+                "RAG_FLOW_PATCH_CHECKPOINT_INTERVAL=5",
+                "RAG_FLOW_PATCH_DPI=180",
+                "RAG_FLOW_PATCH_PAGE_WINDOW_SIZE=50",
             ]
         ),
         encoding="utf-8",
@@ -93,6 +103,11 @@ def test_patching_reads_local_env(tmp_path, monkeypatch):
 
     assert config.patching.max_new_tokens == 4000
     assert config.patching.llm_timeout == 30.5
+    assert config.patching.batch_size == 12
+    assert config.patching.concurrency == 2
+    assert config.patching.checkpoint_interval == 5
+    assert config.patching.dpi == 180
+    assert config.patching.page_window_size == 50
 
 
 def test_captioning_defaults(tmp_path, monkeypatch):

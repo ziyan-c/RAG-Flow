@@ -128,6 +128,43 @@ def test_create_mineru_can_disable_uv(tmp_path):
     assert f"env-python|-m pip install -e {ROOT}[mineru]" in log_text
 
 
+def test_create_pipeline_writes_python_path(tmp_path):
+    bin_dir = tmp_path / "bin"
+    env_dir = tmp_path / "envs" / "rag-flow-pipeline"
+    env_bin = env_dir / "bin"
+    log_file = tmp_path / "commands.log"
+    env_file = tmp_path / "rag-flow.env"
+    bin_dir.mkdir()
+    env_bin.mkdir(parents=True)
+    _write_executable(
+        bin_dir / "micromamba",
+        "#!/usr/bin/env bash\nprintf 'micromamba|%s\\n' \"$*\" >> \"$RAG_FLOW_TEST_COMMAND_LOG\"\n",
+    )
+    _write_executable(
+        bin_dir / "uv",
+        "#!/usr/bin/env bash\nprintf 'uv|%s\\n' \"$*\" >> \"$RAG_FLOW_TEST_COMMAND_LOG\"\n",
+    )
+    _write_executable(env_bin / "python", "#!/usr/bin/env bash\nexit 0\n")
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": f"{bin_dir}{os.pathsep}/usr/bin:/bin",
+        "RAG_FLOW_TEST_COMMAND_LOG": str(log_file),
+        "RAG_FLOW_ENV_FILE": str(env_file),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_ENV_ROOT": str(tmp_path / "envs"),
+        "RAG_FLOW_PIPELINE_ENV": "rag-flow-pipeline",
+        "RAG_FLOW_UPDATE_ENV_FILE": "1",
+    }
+
+    subprocess.run([shutil.which("bash") or "bash", str(ROOT / "scripts/env/create-pipeline.sh")], check=True, env=env)
+
+    log_text = log_file.read_text(encoding="utf-8")
+    env_text = env_file.read_text(encoding="utf-8")
+    assert f"uv|pip install --python {env_dir / 'bin' / 'python'} --index-url" in log_text
+    assert f"uv|pip install --python {env_dir / 'bin' / 'python'} -e {ROOT}[retrieval,preprocess]" in log_text
+    assert f"RAG_FLOW_PIPELINE_PYTHON_BIN={env_dir / 'bin' / 'python'}" in env_text
+
+
 def test_create_llm_writes_python_path_for_sglang(tmp_path):
     bin_dir = tmp_path / "bin"
     env_dir = tmp_path / "envs" / "rag-flow-llm"
@@ -159,7 +196,10 @@ def test_create_llm_writes_python_path_for_sglang(tmp_path):
 
     subprocess.run([shutil.which("bash") or "bash", str(ROOT / "scripts/env/create-llm.sh")], check=True, env=env)
 
+    log_text = log_file.read_text(encoding="utf-8")
     env_text = env_file.read_text(encoding="utf-8")
+    assert f"uv|pip install --python {env_dir / 'bin' / 'python'} sglang[all]" in log_text
+    assert f"uv|pip install --python {env_dir / 'bin' / 'python'} nvidia-cudnn-cu12==9.16.0.29" in log_text
     assert f"RAG_FLOW_LLM_PYTHON_BIN={env_dir / 'bin' / 'python'}" in env_text
     assert f"RAG_FLOW_SGLANG_PYTHON={env_dir / 'bin' / 'python'}" in env_text
 
@@ -272,6 +312,31 @@ def test_serve_llm_sglang_prefers_manual_model_root(tmp_path):
     assert f"--model-path {manual_model}" in result.stdout
 
 
+def test_serve_llm_sglang_accepts_huggingface_cache_layout(tmp_path):
+    snapshot = tmp_path / "models" / "models--palmfuture--Qwen3.6-35B-A3B-GPTQ-Int4" / "snapshots" / "abc123"
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text("{}", encoding="utf-8")
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(tmp_path / "rag-flow.env"),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT": str(tmp_path / "models"),
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/serve-llm-sglang.sh"), "--dry-run"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert f"SGLang model path: {snapshot}" in result.stdout
+    assert f"--model-path {snapshot}" in result.stdout
+
+
 def test_llm_download_dry_run_uses_qwen36_profile(tmp_path):
     env = {
         "HOME": str(tmp_path / "home"),
@@ -375,6 +440,36 @@ def test_llm_download_uses_manual_model_root_before_download(tmp_path):
     assert f"Local model path: {manual_model}" in result.stdout
     assert "Trying download source:" not in result.stdout
     assert f"RAG_FLOW_SGLANG_MODEL_PATH={manual_model}" in env_text
+
+
+def test_llm_download_uses_huggingface_cache_layout_before_download(tmp_path):
+    snapshot = tmp_path / "models" / "models--palmfuture--Qwen3.6-35B-A3B-GPTQ-Int4" / "snapshots" / "abc123"
+    env_file = tmp_path / "rag-flow.env"
+    snapshot.mkdir(parents=True)
+    (snapshot / "config.json").write_text("{}", encoding="utf-8")
+    env = {
+        "HOME": str(tmp_path / "home"),
+        "PATH": "/usr/bin:/bin",
+        "RAG_FLOW_ENV_FILE": str(env_file),
+        "RAG_FLOW_RUNTIME_ROOT": str(tmp_path / "runtime"),
+        "RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT": str(tmp_path / "models"),
+        "RAG_FLOW_UPDATE_ENV_FILE": "1",
+        "RAG_FLOW_SGLANG_PYTHON": "/envs/llm/bin/python",
+    }
+
+    result = subprocess.run(
+        [shutil.which("bash") or "bash", str(ROOT / "scripts/llm/download-sglang-model.sh")],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    env_text = env_file.read_text(encoding="utf-8")
+    assert "Existing model found: Manual local model" in result.stdout
+    assert f"Local model path: {snapshot}" in result.stdout
+    assert "Trying download source:" not in result.stdout
+    assert f"RAG_FLOW_SGLANG_MODEL_PATH={snapshot}" in env_text
 
 
 def test_llm_download_source_override_uses_source_specific_default_path(tmp_path):

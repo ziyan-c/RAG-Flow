@@ -282,6 +282,8 @@ choose_managed_value() {
 : "${RAG_FLOW_INIT_REWRITE_APT:=1}"
 : "${RAG_FLOW_INIT_APT_MIRROR:=mirrors.aliyun.com}"
 : "${RAG_FLOW_INIT_APT_UPDATE:=1}"
+: "${RAG_FLOW_INIT_INSTALL_APT_PACKAGES:=1}"
+: "${RAG_FLOW_INIT_APT_PACKAGES:=poppler-utils}"
 : "${RAG_FLOW_INIT_CONFIGURE_LOCALE:=1}"
 : "${RAG_FLOW_INIT_LOCALE:=en_US.UTF-8}"
 : "${RAG_FLOW_INIT_WRITE_BASHRC:=1}"
@@ -357,6 +359,21 @@ if truthy "$RAG_FLOW_INIT_REWRITE_APT"; then
   fi
 fi
 
+if truthy "$RAG_FLOW_INIT_INSTALL_APT_PACKAGES"; then
+  if command -v apt-get >/dev/null 2>&1; then
+    # shellcheck disable=SC2206
+    apt_packages=($RAG_FLOW_INIT_APT_PACKAGES)
+    if [[ "${#apt_packages[@]}" -gt 0 ]]; then
+      if truthy "$RAG_FLOW_INIT_APT_UPDATE"; then
+        apt-get update -y
+      fi
+      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${apt_packages[@]}"
+    fi
+  else
+    echo "Skip apt package install: apt-get not found."
+  fi
+fi
+
 if truthy "$RAG_FLOW_INIT_CONFIGURE_LOCALE"; then
   if command -v locale-gen >/dev/null 2>&1; then
     locale-gen "$RAG_FLOW_INIT_LOCALE"
@@ -421,6 +438,8 @@ if truthy "$RAG_FLOW_INIT_UPDATE_ENV_FILE"; then
   set_env_var "RAG_FLOW_INIT_APT_MIRROR" "$RAG_FLOW_INIT_APT_MIRROR"
   set_env_var "RAG_FLOW_INIT_PIP_INDEX_URL" "$RAG_FLOW_INIT_PIP_INDEX_URL"
   set_env_var "RAG_FLOW_INIT_UV_INDEX_URL" "$RAG_FLOW_INIT_UV_INDEX_URL"
+  set_env_var "RAG_FLOW_INIT_INSTALL_APT_PACKAGES" "$RAG_FLOW_INIT_INSTALL_APT_PACKAGES"
+  set_env_var "RAG_FLOW_INIT_APT_PACKAGES" "$RAG_FLOW_INIT_APT_PACKAGES"
   set_env_var "RAG_FLOW_INIT_CONDA_MAIN_CHANNEL" "$RAG_FLOW_INIT_CONDA_MAIN_CHANNEL"
   set_env_var "RAG_FLOW_INIT_CONDA_R_CHANNEL" "$RAG_FLOW_INIT_CONDA_R_CHANNEL"
   set_env_var "RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL" "$RAG_FLOW_INIT_CONDA_MSYS2_CHANNEL"

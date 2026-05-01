@@ -54,6 +54,9 @@ def run_ingest(
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
     patch_max_new_tokens: int | None = None,
+    patch_batch_size: int | None = None,
+    patch_concurrency: int | None = None,
+    patch_checkpoint_interval: int | None = None,
 ) -> MinerUArtifacts:
     selected_stages = _stage_slice(from_stage, to_stage)
     source_pdf = Path(pdf_path or config.mineru.input_path)
@@ -85,8 +88,17 @@ def run_ingest(
             llm_base_url=config.models.llm_base_url,
             llm_api_key=config.models.llm_api_key,
             llm_model=config.models.llm_model,
+            dpi=config.patching.dpi,
+            batch_size=config.patching.batch_size if patch_batch_size is None else patch_batch_size,
+            concurrency=config.patching.concurrency if patch_concurrency is None else patch_concurrency,
             max_new_tokens=config.patching.max_new_tokens if patch_max_new_tokens is None else patch_max_new_tokens,
             llm_timeout=config.patching.llm_timeout,
+            page_window_size=config.patching.page_window_size,
+            checkpoint_interval=(
+                config.patching.checkpoint_interval
+                if patch_checkpoint_interval is None
+                else patch_checkpoint_interval
+            ),
             write_patching_view=write_patching_view,
             patching_view_pdf=patching_view_pdf,
         )
@@ -154,6 +166,9 @@ def main(argv: list[str] | None = None) -> None:
         default=config.patching.max_new_tokens,
         help="Patching LLM generation budget.",
     )
+    parser.add_argument("--patch-batch-size", type=int, default=config.patching.batch_size)
+    parser.add_argument("--patch-concurrency", type=int, default=config.patching.concurrency)
+    parser.add_argument("--patch-checkpoint-interval", type=int, default=config.patching.checkpoint_interval)
     parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes patching crop regions.")
     parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")
     parser.add_argument("--dry-run", action="store_true", help="Print the pipeline without running it.")
@@ -170,6 +185,9 @@ def main(argv: list[str] | None = None) -> None:
         write_patching_view=not args.no_patching_view,
         patching_view_pdf=args.patching_view_pdf,
         patch_max_new_tokens=args.max_new_tokens,
+        patch_batch_size=args.patch_batch_size,
+        patch_concurrency=args.patch_concurrency,
+        patch_checkpoint_interval=args.patch_checkpoint_interval,
     )
 
 

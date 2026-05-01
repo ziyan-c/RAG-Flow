@@ -11,9 +11,13 @@ requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.110",
   "openai>=1.0",
+  "pdf2image",
+  "pillow",
   "pydantic>=2",
+  "pymupdf",
   "qdrant-client>=1.10",
   "requests>=2.31",
+  "tqdm",
   "uvicorn>=0.30",
 ]
 
@@ -27,11 +31,7 @@ retrieval = [
 ]
 preprocess = [
   "modelscope",
-  "pdf2image",
-  "pillow",
-  "pymupdf",
   "qwen-vl-utils",
-  "tqdm",
 ]
 "mineru" = [
   "mineru[all]==3.0.9; python_version < '3.14'",

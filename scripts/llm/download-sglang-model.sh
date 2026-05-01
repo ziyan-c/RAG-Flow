@@ -162,8 +162,10 @@ add_manual_model_candidate() {
 }
 
 model_basename="${RAG_FLOW_SGLANG_MODEL_ID##*/}"
+hf_cache_name="models--${RAG_FLOW_SGLANG_MODEL_ID//\//--}"
 add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_ID"
 add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$model_basename"
+add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$hf_cache_name"
 add_manual_model_candidate "$RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT/$RAG_FLOW_SGLANG_MODEL_PROFILE"
 
 model_path_explicit=0
@@ -199,6 +201,25 @@ prepared_download_code=""
 existing_model_path=""
 existing_model_source=""
 existing_model_label=""
+
+resolve_model_dir() {
+  local candidate="$1"
+  local snapshot
+  [[ -d "$candidate" ]] || return 1
+  if [[ -f "$candidate/config.json" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+  for snapshot in "$candidate"/snapshots/*; do
+    [[ -d "$snapshot" ]] || continue
+    if [[ -f "$snapshot/config.json" ]]; then
+      printf '%s\n' "$snapshot"
+      return 0
+    fi
+  done
+  printf '%s\n' "$candidate"
+  return 0
+}
 
 prepare_download_source() {
   local source="$1"
@@ -252,12 +273,13 @@ print(f"Downloaded model to: {path}")'
 
 find_existing_model_path() {
   local candidate
+  local resolved
   existing_model_path=""
   existing_model_source=""
   existing_model_label=""
 
-  if [[ "$model_path_explicit" == "1" && -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" && -d "$RAG_FLOW_SGLANG_MODEL_PATH" ]]; then
-    existing_model_path="$RAG_FLOW_SGLANG_MODEL_PATH"
+  if [[ "$model_path_explicit" == "1" && -n "${RAG_FLOW_SGLANG_MODEL_PATH:-}" ]] && resolved="$(resolve_model_dir "$RAG_FLOW_SGLANG_MODEL_PATH")"; then
+    existing_model_path="$resolved"
     existing_model_source="configured"
     existing_model_label="Configured model path"
     return 0
@@ -269,8 +291,8 @@ find_existing_model_path() {
 
   if [[ ${#manual_model_candidates[@]} -gt 0 ]]; then
     for candidate in "${manual_model_candidates[@]}"; do
-      if [[ -d "$candidate" ]]; then
-        existing_model_path="$candidate"
+      if resolved="$(resolve_model_dir "$candidate")"; then
+        existing_model_path="$resolved"
         existing_model_source="local"
         existing_model_label="Manual local model"
         return 0
@@ -279,8 +301,8 @@ find_existing_model_path() {
   fi
 
   if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "modelscope" ]]; then
-    if [[ -d "$default_modelscope_path" ]]; then
-      existing_model_path="$default_modelscope_path"
+    if resolved="$(resolve_model_dir "$default_modelscope_path")"; then
+      existing_model_path="$resolved"
       existing_model_source="modelscope"
       existing_model_label="ModelScope cache"
       return 0
@@ -288,8 +310,8 @@ find_existing_model_path() {
   fi
 
   if [[ "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "auto" || "$RAG_FLOW_SGLANG_DOWNLOAD_SOURCE" == "hf" ]]; then
-    if [[ -d "$default_hf_path" ]]; then
-      existing_model_path="$default_hf_path"
+    if resolved="$(resolve_model_dir "$default_hf_path")"; then
+      existing_model_path="$resolved"
       existing_model_source="hf"
       existing_model_label="Hugging Face cache"
       return 0

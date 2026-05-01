@@ -15,6 +15,7 @@ from rag_flow.preprocessing.small_icons import (
     checkpoint_path_for,
     crop_image_from_block_with_inline_icons,
     image_to_data_url,
+    iter_icon_patch_results,
     is_inline_icon_candidate,
     is_no_missing_response,
     request_icon_patch_from_llm,
@@ -418,3 +419,32 @@ def test_request_icon_patch_from_llm_sends_openai_vision_payload():
     assert content[0]["type"] == "image_url"
     assert content[0]["image_url"]["url"] == image_to_data_url(FakeImage())
     assert content[1] == {"type": "text", "text": "Patch icons"}
+
+
+def test_iter_icon_patch_results_sends_multiple_requests():
+    class FakeImage:
+        def save(self, buffer, format):
+            buffer.write(b"fake-image")
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            prompt = kwargs["messages"][0]["content"][1]["text"]
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=f"{prompt} done"))])
+
+    client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
+    requests = [
+        {"image": FakeImage(), "prompt": "first"},
+        {"image": FakeImage(), "prompt": "second"},
+    ]
+
+    results = list(
+        iter_icon_patch_results(
+            requests,
+            client=client,
+            model="local-vlm",
+            max_tokens=8000,
+            concurrency=2,
+        )
+    )
+
+    assert {output for _, output in results} == {"first done", "second done"}

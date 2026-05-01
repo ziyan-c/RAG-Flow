@@ -60,8 +60,11 @@ All operations are available through the unified `rag-flow` command:
 ```bash
 rag-flow init china-all
 rag-flow env create-mineru
+rag-flow env create-pipeline
+rag-flow env create-llm
 rag-flow mineru doctor
 rag-flow mineru run
+rag-flow serve llm-sglang
 rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 rag-flow ingest --to-stage chunking
 rag-flow caption
@@ -76,6 +79,7 @@ Use `--dry-run` on script-backed commands to see what would run:
 ```bash
 rag-flow init china-all --dry-run
 rag-flow env create-mineru --dry-run
+rag-flow env create-pipeline --dry-run
 rag-flow serve llm-sglang --dry-run
 ```
 
@@ -187,27 +191,37 @@ processes one PDF at a time to avoid GPU memory spikes:
 rag-flow patch \
   --artifact-dir /root/autodl-tmp/manuals/public \
   --page-window-size 200 \
-  --batch-size 6
+  --batch-size 16 \
+  --concurrency 1
 ```
 
 The LLM prompt is intentionally strict: preserve all existing extracted text and
-only insert `[Icon: ...]` markers. The run writes a checkpoint after each LLM
-batch by default, resumes from that checkpoint on retry, deletes the checkpoint
-after success, writes a `*_PATCHING_VIEW.pdf` overlay that shows the exact crop
-regions sent to the LLM, and prints patching statistics at the end. Useful
-controls:
+only insert `[Icon: ...]` markers. The run writes a checkpoint every 10 LLM
+batches by default, also checkpoints at the end of each page window, resumes
+from that checkpoint on retry, deletes the checkpoint after success, writes a
+`*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
+and prints patching statistics at the end. Useful controls:
 
-- `--batch-size`: LLM request group size for checkpoints, default `6`
+- `--batch-size`: LLM request group size for checkpoints, default `16`
+- `--concurrency`: maximum simultaneous patching LLM requests, default `1`
 - `--max-new-tokens`: generation budget, default `8000`
 - `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
 - `--model` / `--llm-model`: model name sent to the LLM endpoint
 - `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `--page-window-size`: PDF render window size, default `200`
-- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
+- `--checkpoint-interval`: write checkpoint every N LLM batches, default `10`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
 - `--no-recursive`: only patch the exact artifact folder
+
+Patching needs the pipeline Python environment and Poppler PDF rendering
+commands (`pdfinfo` and `pdftoppm`). `rag-flow env create-pipeline` installs the
+Python packages, writes `RAG_FLOW_PIPELINE_PYTHON_BIN`, and later `rag-flow
+patch` automatically re-runs itself with that Python when the variable is
+available.
+`rag-flow init china-all` installs `poppler-utils` by default on apt-based
+Linux machines.
 
 The same `--max-new-tokens` override is available on `rag-flow ingest` when
 running through the patching stage.
@@ -308,9 +322,10 @@ rag-flow serve llm-sglang
 The SGLang launcher is optional and reads its own profile settings from
 `.local/rag-flow.env`. `rag-flow env create-llm` creates an isolated LLM Python
 environment under `RAG_FLOW_ENV_ROOT`, installs `RAG_FLOW_LLM_INSTALL_SPEC`
-with uv pip by default, and writes `RAG_FLOW_LLM_PYTHON_BIN` /
-`RAG_FLOW_SGLANG_PYTHON` back to the env file. The default SGLang profile is
-`qwen3.6-35b-a3b-gptq-int4`.
+with uv pip by default, installs the CuDNN compatibility fix package
+`RAG_FLOW_LLM_CUDNN_PACKAGE` when `RAG_FLOW_LLM_FIX_CUDNN=1`, and writes
+`RAG_FLOW_LLM_PYTHON_BIN` / `RAG_FLOW_SGLANG_PYTHON` back to the env file. The
+default SGLang profile is `qwen3.6-35b-a3b-gptq-int4`.
 
 Download the default profile before the first launch. The command first looks
 for an existing local model under `RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`
@@ -360,8 +375,11 @@ Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
 `RAG_FLOW_SGLANG_PORT`, `RAG_FLOW_SGLANG_CONTEXT_LENGTH`,
 `RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`, `RAG_FLOW_SGLANG_QUANTIZATION`,
 `RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and `RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set
+`RAG_FLOW_LLM_FIX_CUDNN`, `RAG_FLOW_LLM_CUDNN_PACKAGE`,
+`RAG_FLOW_LLM_EXTRA_PACKAGES`, and `RAG_FLOW_CREATE_LLM_INSTALL_UV`. Set
 `RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if the LLM environment should not install uv
-before package installation.
+before package installation. Set `RAG_FLOW_LLM_FIX_CUDNN=0` only if you want to
+handle SGLang/PyTorch/CuDNN compatibility yourself.
 
 Chat from the terminal:
 
@@ -400,8 +418,15 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_MINERU_MODEL_SOURCE`
 - `RAG_FLOW_MINERU_VERSION`
 - `RAG_FLOW_MINERU_PYTHON`
+- `RAG_FLOW_INIT_INSTALL_APT_PACKAGES`
+- `RAG_FLOW_INIT_APT_PACKAGES`
 - `RAG_FLOW_PATCH_MAX_NEW_TOKENS`
 - `RAG_FLOW_PATCH_LLM_TIMEOUT`
+- `RAG_FLOW_PATCH_BATCH_SIZE`
+- `RAG_FLOW_PATCH_CONCURRENCY`
+- `RAG_FLOW_PATCH_CHECKPOINT_INTERVAL`
+- `RAG_FLOW_PATCH_DPI`
+- `RAG_FLOW_PATCH_PAGE_WINDOW_SIZE`
 - `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`
 - `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`
 - `RAG_FLOW_CAPTION_BATCH_SIZE`
@@ -411,6 +436,10 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_CHUNKS_JSON`
 - `RAG_FLOW_DB_PATH`
 - `RAG_FLOW_COLLECTION`
+- `RAG_FLOW_PIPELINE_ENV`
+- `RAG_FLOW_PIPELINE_PYTHON`
+- `RAG_FLOW_PIPELINE_PYTHON_BIN`
+- `RAG_FLOW_PIPELINE_TORCH_INDEX_URL`
 - `RAG_FLOW_LLM_BASE_URL`
 - `RAG_FLOW_LLM_MODEL`
 - `RAG_FLOW_LLM_PYTHON_BIN`
@@ -449,18 +478,23 @@ commands inherit the working source.
 For Python environments, use the split setup under `scripts/env/`:
 
 ```bash
-rag-flow env create-core
 rag-flow env create-mineru
-rag-flow env create-gpu
+rag-flow env create-pipeline
 rag-flow env create-llm
 ```
 
+`create-pipeline` installs the CLI plus patching, captioning, chunking,
+indexing, retriever, and chat dependencies. It writes the resolved Python path
+back to `.local/rag-flow.env`, so module commands can re-enter the right
+environment automatically.
+
 On a new AutoDL China machine, run initialization first, then create the MinerU
-environment, then check MinerU:
+and pipeline environments, then check MinerU:
 
 ```bash
 rag-flow init china-all
 rag-flow env create-mineru
+rag-flow env create-pipeline
 rag-flow mineru doctor
 rag-flow mineru run --dry-run
 ```
@@ -473,6 +507,6 @@ to skip installing and using uv, or set `RAG_FLOW_CREATE_MINERU_INSTALL_UV=0`
 to only skip the automatic install step. Keep
 `RAG_FLOW_ENV_ROOT`, pip/uv caches, conda package caches, Hugging Face cache,
 ModelScope cache, and Torch cache under `~/autodl-tmp` on rented GPU machines.
-The GPU setup uses the PyTorch CUDA 12.8 wheel index by default, which fits
-current RTX 50-series Linux machines better than mixing all packages into one
-environment.
+The pipeline setup uses the PyTorch CUDA 12.8 wheel index by default, which
+fits current RTX 50-series Linux machines better than mixing all packages into
+one environment.

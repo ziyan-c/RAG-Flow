@@ -44,6 +44,20 @@ MODULE_HELP: dict[str, str] = {
     "agent-demo": "Run the tool-calling demo.",
 }
 
+MODULE_ENV_PYTHON: dict[str, str] = {
+    "patch": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "patch-view": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "caption": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "caption-view": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "chunk": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "index": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "retriever": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "test-retriever": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "chat": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "agent-demo": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "ingest": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+}
+
 COMMAND_HELP: dict[str, str] = {
     "retriever": """usage: rag-flow retriever [-h] [--host HOST] [--port PORT] [--reload]
 
@@ -66,9 +80,8 @@ INIT_SCRIPTS: dict[str, tuple[str, ...]] = {
 
 ENV_SCRIPTS = (
     "install-uv",
-    "create-core",
     "create-mineru",
-    "create-gpu",
+    "create-pipeline",
     "create-llm",
     "create-all",
 )
@@ -126,7 +139,51 @@ def _run_module_main(module_name: str, args: Sequence[str], *, accepts_argv: boo
     main()
 
 
+def _truthy(value: str | None) -> bool:
+    return (value or "").lower() in {"1", "true", "yes", "on"}
+
+
+def _same_executable(left: Path, right: Path) -> bool:
+    try:
+        return left.resolve() == right.resolve()
+    except OSError:
+        return left == right
+
+
+def _maybe_reexec_module(command_name: str, module_args: Sequence[str]) -> bool:
+    if _truthy(os.environ.get("RAG_FLOW_DISABLE_ENV_REEXEC")):
+        return False
+    if os.environ.get("RAG_FLOW_ENV_REEXECED"):
+        return False
+
+    env_key = MODULE_ENV_PYTHON.get(command_name)
+    if not env_key:
+        return False
+
+    env = _script_env()
+    target_python = env.get(env_key, "").strip()
+    if not target_python:
+        return False
+
+    target_path = Path(target_python).expanduser()
+    if not target_path.exists():
+        return False
+    if _same_executable(target_path, Path(sys.executable)):
+        return False
+
+    run_env = env.copy()
+    run_env["RAG_FLOW_ENV_REEXECED"] = "1"
+    subprocess.run(
+        [str(target_path), "-m", "rag_flow.cli", command_name, *module_args],
+        check=True,
+        env=run_env,
+    )
+    return True
+
+
 def _dispatch_module(args: argparse.Namespace) -> None:
+    if _maybe_reexec_module(args.command, args.args):
+        return
     module_name, accepts_argv = MODULE_COMMANDS[args.command]
     _run_module_main(module_name, args.args, accepts_argv=accepts_argv)
 

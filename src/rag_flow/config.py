@@ -173,6 +173,11 @@ class MinerUConfig:
 class PatchingConfig:
     max_new_tokens: int
     llm_timeout: float
+    batch_size: int = 16
+    concurrency: int = 1
+    checkpoint_interval: int = 10
+    dpi: int = 200
+    page_window_size: int = 200
 
 
 @dataclass(frozen=True)
@@ -278,6 +283,11 @@ class AppConfig:
         patching = PatchingConfig(
             max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
             llm_timeout=env.float("RAG_FLOW_PATCH_LLM_TIMEOUT", 120.0),
+            batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 16),
+            concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 1),
+            checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 10),
+            dpi=env.int("RAG_FLOW_PATCH_DPI", 200),
+            page_window_size=env.int("RAG_FLOW_PATCH_PAGE_WINDOW_SIZE", 200),
         )
 
         captioning = CaptioningConfig(

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import argparse
 import base64
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import gc
 from io import BytesIO
 import json
 import math
 import re
+import shutil
 from collections import defaultdict
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -812,6 +815,50 @@ def request_icon_patch_from_llm(
     return strip_reasoning_text(content)
 
 
+def iter_icon_patch_results(
+    requests: list[dict[str, Any]],
+    *,
+    client: Any,
+    model: str,
+    max_tokens: int,
+    concurrency: int,
+) -> Iterator[tuple[dict[str, Any], str]]:
+    if concurrency <= 1 or len(requests) <= 1:
+        for req in requests:
+            yield (
+                req,
+                request_icon_patch_from_llm(
+                    client=client,
+                    model=model,
+                    image=req["image"],
+                    prompt=req["prompt"],
+                    max_tokens=max_tokens,
+                ),
+            )
+        return
+
+    max_workers = min(concurrency, len(requests))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_request = {
+            executor.submit(
+                request_icon_patch_from_llm,
+                client=client,
+                model=model,
+                image=req["image"],
+                prompt=req["prompt"],
+                max_tokens=max_tokens,
+            ): req
+            for req in requests
+        }
+        try:
+            for future in as_completed(future_to_request):
+                yield future_to_request[future], future.result()
+        except Exception:
+            for future in future_to_request:
+                future.cancel()
+            raise
+
+
 def is_no_missing_response(text: str) -> bool:
     normalized = re.sub(r"[\s`\"'.:;!,，。；：！]+", " ", text.strip().lower()).strip()
     return normalized in {"no missing", "no missing icon", "no missing icons"} or normalized.startswith(
@@ -1017,18 +1064,44 @@ def add_small_icon_text(
     llm_api_key: str,
     llm_model: str,
     dpi: int = 200,
-    batch_size: int = 6,
+    batch_size: int = 16,
     max_new_tokens: int = 8000,
     llm_timeout: float = 120.0,
     page_window_size: int = 200,
-    checkpoint_interval: int = 1,
+    checkpoint_interval: int = 10,
+    concurrency: int = 1,
     checkpoint_json: str | Path | None = None,
     resume: bool = True,
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
 ) -> None:
-    from pdf2image import convert_from_path
-    from tqdm import tqdm
+    try:
+        from pdf2image import convert_from_path
+        from tqdm import tqdm
+    except ModuleNotFoundError as exc:
+        missing = exc.name or "required patching dependency"
+        raise RuntimeError(
+            f"Missing Python package for patching: {missing}. "
+            "Run `rag-flow env create-pipeline`, then retry `rag-flow patch`."
+        ) from exc
+
+    missing_poppler = [name for name in ("pdfinfo", "pdftoppm") if shutil.which(name) is None]
+    if missing_poppler:
+        raise RuntimeError(
+            "Missing PDF rendering command(s): "
+            f"{', '.join(missing_poppler)}. Install Poppler, for example "
+            "`apt-get install -y poppler-utils`, or run `rag-flow init china-all` "
+            "after updating the project."
+        )
+
+    if batch_size < 1:
+        raise ValueError("batch_size must be >= 1.")
+    if page_window_size < 1:
+        raise ValueError("page_window_size must be >= 1.")
+    if checkpoint_interval < 0:
+        raise ValueError("checkpoint_interval must be >= 0.")
+    if concurrency < 1:
+        raise ValueError("concurrency must be >= 1.")
 
     llm_client = make_patching_llm_client(
         base_url=llm_base_url,
@@ -1072,14 +1145,13 @@ def add_small_icon_text(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        for req in requests:
-            output = request_icon_patch_from_llm(
-                client=llm_client,
-                model=llm_model,
-                image=req["image"],
-                prompt=req["prompt"],
-                max_tokens=max_new_tokens,
-            )
+        for req, output in iter_icon_patch_results(
+            requests,
+            client=llm_client,
+            model=llm_model,
+            max_tokens=max_new_tokens,
+            concurrency=concurrency,
+        ):
             idx = req["idx"]
             key = req["key"]
             block = content_data[idx]
@@ -1252,12 +1324,13 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--model", "--llm-model", dest="llm_model", default=config.models.llm_model)
     parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
     parser.add_argument("--api-key", default=config.models.llm_api_key)
-    parser.add_argument("--dpi", type=int, default=200)
-    parser.add_argument("--batch-size", type=int, default=6)
+    parser.add_argument("--dpi", type=int, default=config.patching.dpi)
+    parser.add_argument("--batch-size", type=int, default=config.patching.batch_size)
+    parser.add_argument("--concurrency", type=int, default=config.patching.concurrency)
     parser.add_argument("--max-new-tokens", type=int, default=config.patching.max_new_tokens)
     parser.add_argument("--request-timeout", type=float, default=config.patching.llm_timeout)
-    parser.add_argument("--page-window-size", type=int, default=200)
-    parser.add_argument("--checkpoint-interval", type=int, default=1)
+    parser.add_argument("--page-window-size", type=int, default=config.patching.page_window_size)
+    parser.add_argument("--checkpoint-interval", type=int, default=config.patching.checkpoint_interval)
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--no-recursive", action="store_true")
@@ -1292,6 +1365,14 @@ def main(argv: list[str] | None = None) -> None:
         parser.error("--checkpoint-json can only be used with a single patching job.")
     if len(artifacts_list) > 1 and args.patching_view_pdf:
         parser.error("--patching-view-pdf can only be used with a single patching job.")
+    if args.batch_size < 1:
+        parser.error("--batch-size must be >= 1.")
+    if args.concurrency < 1:
+        parser.error("--concurrency must be >= 1.")
+    if args.page_window_size < 1:
+        parser.error("--page-window-size must be >= 1.")
+    if args.checkpoint_interval < 0:
+        parser.error("--checkpoint-interval must be >= 0.")
 
     if args.dry_run:
         from rag_flow.preprocessing.patching_view import patching_view_path_for
@@ -1310,6 +1391,8 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  checkpoint_json: {args.checkpoint_json or checkpoint_path_for(artifacts.output_json)}")
             print(f"  page_window_size: {args.page_window_size}")
             print(f"  batch_size: {args.batch_size}")
+            print(f"  concurrency: {args.concurrency}")
+            print(f"  checkpoint_interval: {args.checkpoint_interval}")
             print(f"  max_new_tokens: {args.max_new_tokens}")
             print(f"  llm_base_url: {args.llm_base_url}")
             print(f"  llm_model: {args.llm_model}")
@@ -1327,6 +1410,7 @@ def main(argv: list[str] | None = None) -> None:
             llm_model=args.llm_model,
             dpi=args.dpi,
             batch_size=args.batch_size,
+            concurrency=args.concurrency,
             max_new_tokens=args.max_new_tokens,
             llm_timeout=args.request_timeout,
             page_window_size=args.page_window_size,
