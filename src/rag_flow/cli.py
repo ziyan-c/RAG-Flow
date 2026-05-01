@@ -167,7 +167,23 @@ def _maybe_reexec_module(command_name: str, module_args: Sequence[str]) -> bool:
 
     target_path = Path(target_python).expanduser()
     if not target_path.exists():
+        if "--dry-run" in module_args or "--help" in module_args or "-h" in module_args:
+            return False
+        raise SystemExit(
+            f"{env_key} is configured as {target_path}, but that Python does not exist. "
+            "Run `rag-flow env create-pipeline` first, then retry this command."
+        )
+    if not target_path.is_file():
         return False
+    if not os.access(target_path, os.X_OK):
+        raise SystemExit(f"{env_key} is configured as {target_path}, but it is not executable.")
+    if not (target_path.parent / "rag-flow").exists() and command_name != "agent-demo":
+        if "--dry-run" in module_args or "--help" in module_args or "-h" in module_args:
+            return False
+        raise SystemExit(
+            f"{target_path} exists, but the pipeline environment does not appear to have rag-flow installed. "
+            "Run `rag-flow env create-pipeline` first, then retry this command."
+        )
     if _same_executable(target_path, Path(sys.executable)):
         return False
 
