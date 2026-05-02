@@ -12,7 +12,7 @@ def test_patching_view_path_removes_content_list_suffix():
     )
 
 
-def test_collect_patching_view_regions_includes_linked_inline_icon_and_expanded_text_bbox():
+def test_collect_patching_view_regions_includes_linked_inline_icon_without_padding():
     content_data = [
         {
             "type": "image",
@@ -35,7 +35,7 @@ def test_collect_patching_view_regions_includes_linked_inline_icon_and_expanded_
     assert plan.inline_icons_linked == 1
     assert plan.field_counts == {"text": 1, "inline_icon": 1}
     text_region = next(region for region in plan.regions if region.field == "text")
-    assert text_region.bbox == (158.0, 528.0, 672.0, 587.0)
+    assert text_region.bbox == (170.0, 540.0, 660.0, 575.0)
 
 
 def test_collect_patching_view_regions_includes_table_continuation_crop():

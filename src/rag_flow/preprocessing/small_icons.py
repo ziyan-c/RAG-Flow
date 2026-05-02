@@ -33,7 +33,7 @@ IGNORE_TYPES = {
 TEXT_FIELD_MAP = {
     "text": ["text"],
     "list": ["list_items"],
-    "table": ["table_caption", "table_footnote", "table_body"],
+    "table": ["table_footnote", "table_body"],
     "image": ["image_caption", "image_footnote"],
     "code": ["code_caption", "code_footnote"],
 }
@@ -48,6 +48,9 @@ TEXT_FIELD_KEYS = {
     "image_footnote",
     "code_caption",
     "code_footnote",
+}
+NON_PATCH_FIELD_KEYS = {
+    "table_caption",
 }
 
 INLINE_ICON_KEY = "vlm-small-icon-inline-icon"
@@ -260,6 +263,8 @@ def _patch_field_keys(block: dict[str, Any]) -> list[str]:
         if key in block:
             keys.append(key)
     for key, value in block.items():
+        if key in NON_PATCH_FIELD_KEYS:
+            continue
         if key in keys or key in METADATA_KEYS or key.startswith("vlm-small-icon-"):
             continue
         if key in TEXT_FIELD_KEYS or isinstance(value, str) or _is_text_list(value):
@@ -360,7 +365,7 @@ def _bbox_distance(
 def _bbox_union(
     boxes: list[tuple[float, float, float, float]],
     *,
-    padding: float = 12.0,
+    padding: float = 0.0,
 ) -> tuple[float, float, float, float] | None:
     if not boxes:
         return None
@@ -705,30 +710,20 @@ def _join(value: Any) -> str:
 def build_icon_patch_prompt(*, original_text: str, field_key: str) -> str:
     if field_key == "table_body" and "<table" in original_text.lower():
         return (
-            "Please inspect the image and determine whether any small icons "
-            "(for example plus sign, wrench, gear, arrow, save icon) are embedded "
-            "in the table but missing from the extracted HTML. The image may contain "
-            "one or more vertically stacked crops from the same table across pages.\n"
+            "Inspect the table image and add any missing small icons to the extracted "
+            "table content. The image may contain vertically stacked crops from the "
+            "same table across pages.\n"
             f"Here is the extracted HTML table:\n{original_text}\n\n"
-            "If icons are missing, insert `[Icon: shape/name]` into the exact table cells "
-            "where they belong. Preserve the full HTML table structure, tags, rows, columns, "
-            "and all existing text exactly. Do not translate, summarize, rewrite, fix OCR, "
-            "normalize punctuation, delete text, or add explanations. Only insert `[Icon: ...]` "
-            "tokens where visual icons are present but absent from the HTML. Do not create "
-            "a second table for continuation-page crops. Return only the complete modified "
-            "HTML table. If no icons are missing, return exactly `No missing`."
+            "Use this format for icons: `[Icon: icon shape/icon name]`.\n"
+            "Return only the patched table content. If there are no missing icons, "
+            "return exactly `No missing`."
         )
 
     return (
-        "Please inspect the image and determine whether any small icons "
-        "(for example plus sign, wrench, gear, arrow, save icon) are embedded "
-        "in or around the text.\n"
+        "Inspect the image and add any missing small icons to the extracted text.\n"
         f'Here is the extracted text:\n"{original_text}"\n\n'
-        "If icons are missing from the text, insert `[Icon: shape/name]` at the exact "
-        "corresponding position. Preserve every original character, word, line break, "
-        "number, and punctuation mark exactly. Do not translate, summarize, rewrite, "
-        "fix OCR, delete text, or add explanations. Only insert `[Icon: ...]` tokens. "
-        "Return only the modified complete text. If no icons are missing, return exactly "
+        "Use this format for icons: `[Icon: icon shape/icon name]`.\n"
+        "Return only the patched text. If there are no missing icons, return exactly "
         "`No missing`."
     )
 

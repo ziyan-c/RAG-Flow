@@ -216,7 +216,7 @@ def test_text_crop_expands_to_linked_inline_icon():
         pdf_images=[FakePage()],
     )
 
-    assert image == (88.0, 88.0, 272.0, 137.0)
+    assert image == (100.0, 100.0, 260.0, 125.0)
 
 
 def test_table_footnote_crop_uses_table_width_with_padding():
@@ -330,11 +330,23 @@ def test_table_icon_prompt_requires_html_preservation():
         field_key="table_body",
     )
 
-    assert "Preserve the full HTML table structure" in prompt
-    assert "Only insert `[Icon: ...]` tokens" in prompt
+    assert "Use this format for icons: `[Icon: icon shape/icon name]`" in prompt
+    assert "Return only the patched table content" in prompt
+    assert "return exactly `No missing`" in prompt
 
 
-def test_patch_field_keys_includes_table_caption():
+def test_text_icon_prompt_requires_icon_format():
+    prompt = build_icon_patch_prompt(
+        original_text="Click .",
+        field_key="text",
+    )
+
+    assert "Use this format for icons: `[Icon: icon shape/icon name]`" in prompt
+    assert "Return only the patched text" in prompt
+    assert "return exactly `No missing`" in prompt
+
+
+def test_patch_field_keys_skips_table_caption_by_default():
     block = {
         "type": "table",
         "bbox": [171, 502, 905, 656],
@@ -344,7 +356,7 @@ def test_patch_field_keys_includes_table_caption():
         "table_footnote": ["Step 3 Click Save."],
     }
 
-    assert _patch_field_keys(block) == ["table_caption", "table_footnote", "table_body"]
+    assert _patch_field_keys(block) == ["table_footnote", "table_body"]
 
 
 def test_table_icon_patch_accepts_icon_output_without_extra_validation():

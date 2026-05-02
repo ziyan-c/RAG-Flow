@@ -9,10 +9,11 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from .config import load_env_file, resolve_env_file
+from .config import load_env_file
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ENV_FILE = REPO_ROOT / ".local" / "rag-flow.env"
 
 MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
     "mineru": ("rag_flow.mineru", True),
@@ -108,7 +109,7 @@ def _script_path(*parts: str) -> Path:
 
 def _script_env() -> dict[str, str]:
     env = os.environ.copy()
-    env_file = resolve_env_file()
+    env_file = os.environ.get("RAG_FLOW_ENV_FILE") or REPO_ENV_FILE
     if env_file:
         env.setdefault("RAG_FLOW_ENV_FILE", str(env_file))
         for key, value in load_env_file(env_file).items():
@@ -398,6 +399,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         module_args = raw_args[1:]
         if command in COMMAND_HELP and any(arg in {"-h", "--help"} for arg in module_args):
             print(COMMAND_HELP[command], end="")
+            return
+        if _maybe_reexec_module(command, module_args):
             return
         module_name, accepts_argv = MODULE_COMMANDS[command]
         _run_module_main(module_name, module_args, accepts_argv=accepts_argv)

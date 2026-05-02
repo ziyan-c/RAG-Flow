@@ -30,7 +30,22 @@ resolve_env_file() {
   echo "$preferred"
 }
 
-ENV_FILE="$(resolve_env_file)"
+absolute_env_file() {
+  local path="$1"
+  local parent
+  local name
+  parent="$(dirname "$path")"
+  name="$(basename "$path")"
+  mkdir -p "$parent"
+  parent="$(cd "$parent" && pwd)"
+  echo "$parent/$name"
+}
+
+shell_quote() {
+  printf "%q" "$1"
+}
+
+ENV_FILE="$(absolute_env_file "$(resolve_env_file)")"
 
 load_env_file() {
   local file="$1"
@@ -385,9 +400,12 @@ fi
 
 if truthy "$RAG_FLOW_INIT_WRITE_BASHRC"; then
   write_bashrc_block() {
+    local env_file_q
+    env_file_q="$(shell_quote "$ENV_FILE")"
     cat <<EOF
 
 # --- RAG Flow AutoDL Environment ---
+export RAG_FLOW_ENV_FILE=$env_file_q
 export LC_ALL=$RAG_FLOW_INIT_LOCALE
 export LANG=$RAG_FLOW_INIT_LOCALE
 export LANGUAGE=en_US:en

@@ -61,6 +61,25 @@ def test_patch_command_errors_when_pipeline_python_missing(tmp_path, monkeypatch
         raise AssertionError("Expected SystemExit for missing pipeline environment")
 
 
+def test_script_env_prefers_repo_local_env_over_cwd(tmp_path, monkeypatch):
+    repo_env = tmp_path / "repo" / ".local" / "rag-flow.env"
+    repo_env.parent.mkdir(parents=True)
+    repo_env.write_text("RAG_FLOW_PIPELINE_PYTHON_BIN=/repo/python\n", encoding="utf-8")
+    cwd_env = tmp_path / "cwd" / ".local" / "rag-flow.env"
+    cwd_env.parent.mkdir(parents=True)
+    cwd_env.write_text("RAG_FLOW_PIPELINE_PYTHON_BIN=/cwd/python\n", encoding="utf-8")
+
+    monkeypatch.chdir(cwd_env.parent.parent)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PIPELINE_PYTHON_BIN", raising=False)
+    monkeypatch.setattr(cli, "REPO_ENV_FILE", repo_env)
+
+    env = cli._script_env()
+
+    assert env["RAG_FLOW_ENV_FILE"] == str(repo_env)
+    assert env["RAG_FLOW_PIPELINE_PYTHON_BIN"] == "/repo/python"
+
+
 def test_caption_command_delegates_to_image_description_main(monkeypatch):
     calls: list[list[str]] = []
 

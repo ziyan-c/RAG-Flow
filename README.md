@@ -172,8 +172,9 @@ and `RAG_FLOW_LLM_MODEL`; start it first with `rag-flow serve llm-sglang`.
 If that service is not reachable, patching fails before rendering PDF pages.
 
 Patching focuses on content blocks instead of page furniture: text, lists, and
-tables are patched, while headers, footers, page numbers, and empty fields are
-skipped. Small uncaptioned `image` blocks are treated as possible inline icons:
+table bodies/footnotes are patched, while table captions, headers, footers, page
+numbers, and empty fields are skipped. Small uncaptioned `image` blocks are
+treated as possible inline icons:
 patching links them to nearby text/list blocks or containing table cells, expands
 the visual crop to include them, marks them in the JSON, and keeps captioning
 from describing them as standalone figures. MinerU represents cross-page table
@@ -195,9 +196,9 @@ rag-flow patch \
   --concurrency 1
 ```
 
-The LLM prompt is intentionally strict: preserve all existing extracted text and
-only insert `[Icon: ...]` markers. The run writes a checkpoint every 10 LLM
-batches by default, also checkpoints at the end of each page window, resumes
+The LLM prompt asks the model to add missing `[Icon: ...]` markers without
+explanations or surrounding commentary. The run writes a checkpoint every 10
+LLM batches by default, also checkpoints at the end of each page window, resumes
 from that checkpoint on retry, deletes the checkpoint after success, writes a
 `*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
 and prints patching statistics at the end. Useful controls:
@@ -468,6 +469,10 @@ Hugging Face cache/mirror settings, `MINERU_MODEL_SOURCE`, locale, and conda
 channels without editing the script. The individual helpers remain available
 as `rag-flow init soft-links`, `rag-flow init cpu-cores`, and
 `rag-flow init china-sources`.
+
+`china-sources` also writes `RAG_FLOW_ENV_FILE=<repo>/.local/rag-flow.env` into
+the managed shell block. That pins future `rag-flow` commands to the project
+env file even when they are launched from `/root` or another directory.
 
 For China mirrors, `RAG_FLOW_INIT_MIRROR_ORDER=aliyun,tencent,tuna` is the
 default. `china-sources` probes apt, pip/uv, and conda mirrors independently,

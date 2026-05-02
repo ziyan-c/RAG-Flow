@@ -77,6 +77,7 @@ def test_china_source_rewrites_single_bashrc_block(tmp_path):
 
     text = bashrc.read_text(encoding="utf-8")
     assert text.count("RAG Flow AutoDL Environment") == 1
+    assert f"export RAG_FLOW_ENV_FILE={tmp_path / 'missing.env'}" in text
     assert "export HF_ENDPOINT=https://mirror-b.example" in text
     assert "export HF_ENDPOINT=https://mirror-a.example" not in text
 
