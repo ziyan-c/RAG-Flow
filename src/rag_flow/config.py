@@ -94,7 +94,7 @@ class EnvView:
     def path(self, key: str, default: str | Path) -> Path:
         if key in os.environ:
             value = os.environ[key]
-            base = None
+            base = self.path_base if self.file_values.get(key) == value else None
         elif key in self.file_values:
             value = self.file_values[key]
             base = self.path_base
@@ -176,6 +176,7 @@ class PatchingConfig:
     batch_size: int = 16
     concurrency: int = 1
     checkpoint_interval: int = 10
+    invalid_retry_limit: int = 0
     dpi: int = 200
     page_window_size: int = 200
 
@@ -286,6 +287,7 @@ class AppConfig:
             batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 16),
             concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 1),
             checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 10),
+            invalid_retry_limit=env.int("RAG_FLOW_PATCH_INVALID_RETRY_LIMIT", 0),
             dpi=env.int("RAG_FLOW_PATCH_DPI", 200),
             page_window_size=env.int("RAG_FLOW_PATCH_PAGE_WINDOW_SIZE", 200),
         )

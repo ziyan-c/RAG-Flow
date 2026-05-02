@@ -211,6 +211,7 @@ and prints patching statistics at the end. Useful controls:
 - `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `--page-window-size`: PDF render window size, default `200`
 - `--checkpoint-interval`: write checkpoint every N LLM batches, default `10`
+- `--invalid-retry-limit`: retry only-icon VLM outputs before fallback insertion, default `0`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
@@ -426,6 +427,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_PATCH_BATCH_SIZE`
 - `RAG_FLOW_PATCH_CONCURRENCY`
 - `RAG_FLOW_PATCH_CHECKPOINT_INTERVAL`
+- `RAG_FLOW_PATCH_INVALID_RETRY_LIMIT`
 - `RAG_FLOW_PATCH_DPI`
 - `RAG_FLOW_PATCH_PAGE_WINDOW_SIZE`
 - `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`

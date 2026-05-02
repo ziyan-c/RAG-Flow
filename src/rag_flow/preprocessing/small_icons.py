@@ -80,6 +80,7 @@ METADATA_KEYS = {
 
 CHECKED_FIELDS_KEY = "vlm-small-icon-checked-fields"
 PATCHED_FIELDS_KEY = "vlm-small-icon-patched-fields"
+NO_MISSING_SENTINEL = "NO_MISSING_SAFE"
 
 
 @dataclass(frozen=True)
@@ -95,6 +96,9 @@ class IconPatchStats:
     blocks_seen: int = 0
     fields_seen: int = 0
     requests_submitted: int = 0
+    invalid_retries: int = 0
+    invalid_fallbacks: int = 0
+    invalid_rejected: int = 0
     checked_count: int = 0
     patched_count: int = 0
     no_missing_count: int = 0
@@ -683,6 +687,9 @@ def _print_stats(stats: IconPatchStats, output_json: Path) -> None:
     print(f"  blocks seen: {stats.blocks_seen}")
     print(f"  fields seen: {stats.fields_seen}")
     print(f"  requests submitted: {stats.requests_submitted}")
+    print(f"  invalid retries: {stats.invalid_retries}")
+    print(f"  invalid fallbacks: {stats.invalid_fallbacks}")
+    print(f"  invalid rejected: {stats.invalid_rejected}")
     print(f"  checked: {stats.checked_count}")
     print(f"  patched: {stats.patched_count}")
     print(f"  no missing: {stats.no_missing_count}")
@@ -710,21 +717,23 @@ def _join(value: Any) -> str:
 def build_icon_patch_prompt(*, original_text: str, field_key: str) -> str:
     if field_key == "table_body" and "<table" in original_text.lower():
         return (
-            "Inspect the table image and add any missing small icons to the extracted "
-            "table content. The image may contain vertically stacked crops from the "
-            "same table across pages.\n"
-            f"Here is the extracted HTML table:\n{original_text}\n\n"
-            "Use this format for icons: `[Icon: icon shape/icon name]`.\n"
-            "Return only the patched table content. If there are no missing icons, "
-            "return exactly `No missing`."
+            "Patch missing small icons in this OCR table.\n"
+            "Keep the complete original table content.\n"
+            "Insert each missing icon at its missing position.\n"
+            "Return only the complete patched table content, including inserted icons.\n"
+            "Use `[Icon: name]` for inserted icons.\n"
+            f"If no icon is missing, return exactly without any other text or icons: {NO_MISSING_SENTINEL}\n\n"
+            f"Original table content:\n{original_text}"
         )
 
     return (
-        "Inspect the image and add any missing small icons to the extracted text.\n"
-        f'Here is the extracted text:\n"{original_text}"\n\n'
-        "Use this format for icons: `[Icon: icon shape/icon name]`.\n"
-        "Return only the patched text. If there are no missing icons, return exactly "
-        "`No missing`."
+        "Patch missing small icons in this OCR text.\n"
+        "Keep the complete original text.\n"
+        "Insert each missing icon at its missing position.\n"
+        "Return only the complete patched text, including inserted icons.\n"
+        "Use `[Icon: name]` for inserted icons.\n"
+        f"If no icon is missing, return exactly without any other text or icons: {NO_MISSING_SENTINEL}\n\n"
+        f"Original text:\n{original_text}"
     )
 
 
@@ -810,6 +819,103 @@ def request_icon_patch_from_llm(
     return strip_reasoning_text(content)
 
 
+ICON_MARKER_RE = re.compile(r"\[icon\s*:[^\]]+\]", re.IGNORECASE)
+
+
+def extract_icon_markers(text: str) -> list[str]:
+    markers: list[str] = []
+    for match in ICON_MARKER_RE.finditer(text):
+        raw = match.group(0)
+        name = re.sub(r"^\[icon\s*:\s*", "", raw[:-1], flags=re.IGNORECASE).strip()
+        if name:
+            markers.append(f"[Icon: {name}]")
+    return markers
+
+
+def _without_icon_markers(text: str) -> str:
+    return ICON_MARKER_RE.sub(" ", text)
+
+
+def is_only_icon_output(*, original_text: str, patched_text: str) -> bool:
+    if not original_text.strip() or not re.search(r"\[icon\s*:", patched_text, flags=re.IGNORECASE):
+        return False
+    remainder = _without_icon_markers(patched_text)
+    remainder = re.sub(r"[\s`\"'.:;!,，。；：！/\\|()\[\]{}<>_-]+", "", remainder)
+    return not remainder
+
+
+def invalid_icon_patch_reason(*, original_text: str, patched_text: str, field_key: str) -> str | None:
+    if is_no_missing_response(patched_text):
+        return None
+    if field_key != "table_body" and is_only_icon_output(original_text=original_text, patched_text=patched_text):
+        return "only icon output"
+    return None
+
+
+def build_icon_patch_retry_prompt(*, prompt: str, invalid_reason: str) -> str:
+    if invalid_reason == "only icon output":
+        retry_hint = "Previous answer dropped the original text."
+    else:
+        retry_hint = "Previous answer did not follow the output rules."
+    return f"{prompt}\n\nRetry: {retry_hint} Return only the complete patched content."
+
+
+def fallback_only_icon_output(*, original_text: str, icon_only_output: str) -> str | None:
+    markers = extract_icon_markers(icon_only_output)
+    if not original_text.strip() or not markers:
+        return None
+
+    icon_text = " ".join(markers)
+
+    before_punctuation = re.search(r"\s+([,.;:!?，。；：！？])", original_text)
+    if before_punctuation:
+        start, end = before_punctuation.span()
+        punctuation = before_punctuation.group(1)
+        return f"{original_text[:start]} {icon_text}{punctuation}{original_text[end:]}"
+
+    inner_gap = re.search(r"[ \t]{2,}", original_text)
+    if inner_gap:
+        start, end = inner_gap.span()
+        return f"{original_text[:start]} {icon_text} {original_text[end:]}"
+
+    trailing = original_text[len(original_text.rstrip()) :]
+    return f"{original_text.rstrip()} {icon_text}{trailing}"
+
+
+def request_valid_icon_patch_from_llm(
+    *,
+    client: Any,
+    model: str,
+    image: Any,
+    prompt: str,
+    original_text: str,
+    field_key: str,
+    max_tokens: int,
+    invalid_retry_limit: int,
+) -> tuple[str, int, str | None]:
+    retry_count = 0
+    current_prompt = prompt
+    while True:
+        output = request_icon_patch_from_llm(
+            client=client,
+            model=model,
+            image=image,
+            prompt=current_prompt,
+            max_tokens=max_tokens,
+        )
+        invalid_reason = invalid_icon_patch_reason(
+            original_text=original_text,
+            patched_text=output,
+            field_key=field_key,
+        )
+        if invalid_reason is None:
+            return output, retry_count, None
+        if retry_count >= invalid_retry_limit:
+            return output, retry_count, invalid_reason
+        retry_count += 1
+        current_prompt = build_icon_patch_retry_prompt(prompt=prompt, invalid_reason=invalid_reason)
+
+
 def iter_icon_patch_results(
     requests: list[dict[str, Any]],
     *,
@@ -817,37 +923,43 @@ def iter_icon_patch_results(
     model: str,
     max_tokens: int,
     concurrency: int,
-) -> Iterator[tuple[dict[str, Any], str]]:
+    invalid_retry_limit: int,
+) -> Iterator[tuple[dict[str, Any], str, int, str | None]]:
     if concurrency <= 1 or len(requests) <= 1:
         for req in requests:
-            yield (
-                req,
-                request_icon_patch_from_llm(
-                    client=client,
-                    model=model,
-                    image=req["image"],
-                    prompt=req["prompt"],
-                    max_tokens=max_tokens,
-                ),
+            output, retries, invalid_reason = request_valid_icon_patch_from_llm(
+                client=client,
+                model=model,
+                image=req["image"],
+                prompt=req["prompt"],
+                original_text=req["original_text"],
+                field_key=req["key"],
+                max_tokens=max_tokens,
+                invalid_retry_limit=invalid_retry_limit,
             )
+            yield req, output, retries, invalid_reason
         return
 
     max_workers = min(concurrency, len(requests))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_request = {
             executor.submit(
-                request_icon_patch_from_llm,
+                request_valid_icon_patch_from_llm,
                 client=client,
                 model=model,
                 image=req["image"],
                 prompt=req["prompt"],
+                original_text=req["original_text"],
+                field_key=req["key"],
                 max_tokens=max_tokens,
+                invalid_retry_limit=invalid_retry_limit,
             ): req
             for req in requests
         }
         try:
             for future in as_completed(future_to_request):
-                yield future_to_request[future], future.result()
+                output, retries, invalid_reason = future.result()
+                yield future_to_request[future], output, retries, invalid_reason
         except Exception:
             for future in future_to_request:
                 future.cancel()
@@ -855,6 +967,8 @@ def iter_icon_patch_results(
 
 
 def is_no_missing_response(text: str) -> bool:
+    if NO_MISSING_SENTINEL.lower() in text.lower():
+        return True
     normalized = re.sub(r"[\s`\"'.:;!,，。；：！]+", " ", text.strip().lower()).strip()
     return normalized in {"no missing", "no missing icon", "no missing icons"} or normalized.startswith(
         "no missing "
@@ -864,7 +978,9 @@ def is_no_missing_response(text: str) -> bool:
 def should_apply_icon_patch(*, original_text: str, patched_text: str, field_key: str) -> bool:
     if is_no_missing_response(patched_text):
         return False
-    return bool(re.search(r"\[icon\s*:", patched_text, flags=re.IGNORECASE))
+    if invalid_icon_patch_reason(original_text=original_text, patched_text=patched_text, field_key=field_key):
+        return False
+    return bool(patched_text.strip())
 
 
 def crop_image_from_bbox(
@@ -1064,6 +1180,7 @@ def add_small_icon_text(
     llm_timeout: float = 120.0,
     page_window_size: int = 200,
     checkpoint_interval: int = 10,
+    invalid_retry_limit: int = 0,
     concurrency: int = 1,
     checkpoint_json: str | Path | None = None,
     resume: bool = True,
@@ -1095,6 +1212,8 @@ def add_small_icon_text(
         raise ValueError("page_window_size must be >= 1.")
     if checkpoint_interval < 0:
         raise ValueError("checkpoint_interval must be >= 0.")
+    if invalid_retry_limit < 0:
+        raise ValueError("invalid_retry_limit must be >= 0.")
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1.")
 
@@ -1140,18 +1259,37 @@ def add_small_icon_text(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        for req, output in iter_icon_patch_results(
+        for req, output, retries, invalid_reason in iter_icon_patch_results(
             requests,
             client=llm_client,
             model=llm_model,
             max_tokens=max_new_tokens,
             concurrency=concurrency,
+            invalid_retry_limit=invalid_retry_limit,
         ):
+            stats.invalid_retries += retries
             idx = req["idx"]
             key = req["key"]
             block = content_data[idx]
             _mark_checked(block, key)
             stats.checked_count += 1
+            if invalid_reason is not None:
+                fallback_output = None
+                if invalid_reason == "only icon output":
+                    fallback_output = fallback_only_icon_output(
+                        original_text=req["original_text"],
+                        icon_only_output=output,
+                    )
+                if fallback_output and should_apply_icon_patch(
+                    original_text=req["original_text"],
+                    patched_text=fallback_output,
+                    field_key=req["key"],
+                ):
+                    output = fallback_output
+                    stats.invalid_fallbacks += 1
+                else:
+                    stats.invalid_rejected += 1
+                    continue
             if is_no_missing_response(output):
                 stats.no_missing_count += 1
                 continue
@@ -1326,6 +1464,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--request-timeout", type=float, default=config.patching.llm_timeout)
     parser.add_argument("--page-window-size", type=int, default=config.patching.page_window_size)
     parser.add_argument("--checkpoint-interval", type=int, default=config.patching.checkpoint_interval)
+    parser.add_argument("--invalid-retry-limit", type=int, default=config.patching.invalid_retry_limit)
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--no-recursive", action="store_true")
@@ -1368,6 +1507,8 @@ def main(argv: list[str] | None = None) -> None:
         parser.error("--page-window-size must be >= 1.")
     if args.checkpoint_interval < 0:
         parser.error("--checkpoint-interval must be >= 0.")
+    if args.invalid_retry_limit < 0:
+        parser.error("--invalid-retry-limit must be >= 0.")
 
     if args.dry_run:
         from rag_flow.preprocessing.patching_view import patching_view_path_for
@@ -1388,6 +1529,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  batch_size: {args.batch_size}")
             print(f"  concurrency: {args.concurrency}")
             print(f"  checkpoint_interval: {args.checkpoint_interval}")
+            print(f"  invalid_retry_limit: {args.invalid_retry_limit}")
             print(f"  max_new_tokens: {args.max_new_tokens}")
             print(f"  llm_base_url: {args.llm_base_url}")
             print(f"  llm_model: {args.llm_model}")
@@ -1410,6 +1552,7 @@ def main(argv: list[str] | None = None) -> None:
             llm_timeout=args.request_timeout,
             page_window_size=args.page_window_size,
             checkpoint_interval=args.checkpoint_interval,
+            invalid_retry_limit=args.invalid_retry_limit,
             checkpoint_json=args.checkpoint_json,
             resume=not args.no_resume,
             write_patching_view=not args.no_patching_view,

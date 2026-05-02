@@ -64,6 +64,31 @@ def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatc
     assert config.paths.base_dir == tmp_path / "runtime" / "manual"
 
 
+def test_relative_paths_imported_from_env_file_still_resolve_from_repo_root(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_SOURCE_PDF=.local/source-documents/manual.pdf",
+                "RAG_FLOW_BASE_DIR=runtime/manual",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path / ".local")
+    monkeypatch.setenv("RAG_FLOW_ENV_FILE", str(env_file))
+    monkeypatch.setenv("RAG_FLOW_SOURCE_PDF", ".local/source-documents/manual.pdf")
+    monkeypatch.setenv("RAG_FLOW_BASE_DIR", "runtime/manual")
+
+    config = AppConfig.from_env()
+
+    root = tmp_path.resolve()
+    assert config.paths.source_pdf == root / ".local" / "source-documents" / "manual.pdf"
+    assert config.paths.base_dir == root / "runtime" / "manual"
+
+
 def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
@@ -75,6 +100,7 @@ def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
     assert config.patching.batch_size == 16
     assert config.patching.concurrency == 1
     assert config.patching.checkpoint_interval == 10
+    assert config.patching.invalid_retry_limit == 0
     assert config.patching.dpi == 200
     assert config.patching.page_window_size == 200
 
@@ -90,6 +116,7 @@ def test_patching_reads_local_env(tmp_path, monkeypatch):
                 "RAG_FLOW_PATCH_BATCH_SIZE=12",
                 "RAG_FLOW_PATCH_CONCURRENCY=2",
                 "RAG_FLOW_PATCH_CHECKPOINT_INTERVAL=5",
+                "RAG_FLOW_PATCH_INVALID_RETRY_LIMIT=4",
                 "RAG_FLOW_PATCH_DPI=180",
                 "RAG_FLOW_PATCH_PAGE_WINDOW_SIZE=50",
             ]
@@ -106,6 +133,7 @@ def test_patching_reads_local_env(tmp_path, monkeypatch):
     assert config.patching.batch_size == 12
     assert config.patching.concurrency == 2
     assert config.patching.checkpoint_interval == 5
+    assert config.patching.invalid_retry_limit == 4
     assert config.patching.dpi == 180
     assert config.patching.page_window_size == 50
 

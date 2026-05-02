@@ -9,11 +9,13 @@ from rag_flow.preprocessing.small_icons import (
     _patch_field_keys,
     _window_visual_page_end,
     build_icon_patch_prompt,
+    build_icon_patch_retry_prompt,
     build_table_footnote_crop,
     build_inline_icon_links,
     build_table_continuation_map,
     checkpoint_path_for,
     crop_image_from_block_with_inline_icons,
+    fallback_only_icon_output,
     image_to_data_url,
     iter_icon_patch_results,
     is_inline_icon_candidate,
@@ -330,9 +332,11 @@ def test_table_icon_prompt_requires_html_preservation():
         field_key="table_body",
     )
 
-    assert "Use this format for icons: `[Icon: icon shape/icon name]`" in prompt
-    assert "Return only the patched table content" in prompt
-    assert "return exactly `No missing`" in prompt
+    assert "Keep the complete original table content" in prompt
+    assert "Insert each missing icon at its missing position" in prompt
+    assert "Return only the complete patched table content, including inserted icons" in prompt
+    assert "Use `[Icon: name]` for inserted icons" in prompt
+    assert "return exactly without any other text or icons: NO_MISSING_SAFE" in prompt
 
 
 def test_text_icon_prompt_requires_icon_format():
@@ -341,9 +345,19 @@ def test_text_icon_prompt_requires_icon_format():
         field_key="text",
     )
 
-    assert "Use this format for icons: `[Icon: icon shape/icon name]`" in prompt
-    assert "Return only the patched text" in prompt
-    assert "return exactly `No missing`" in prompt
+    assert "Keep the complete original text" in prompt
+    assert "Insert each missing icon at its missing position" in prompt
+    assert "Return only the complete patched text, including inserted icons" in prompt
+    assert "Use `[Icon: name]` for inserted icons" in prompt
+    assert "return exactly without any other text or icons: NO_MISSING_SAFE" in prompt
+
+
+def test_retry_prompt_explains_only_icon_failure():
+    prompt = build_icon_patch_retry_prompt(prompt="Base prompt", invalid_reason="only icon output")
+
+    assert "Base prompt" in prompt
+    assert "dropped the original text" in prompt
+    assert "Return only the complete patched content" in prompt
 
 
 def test_patch_field_keys_skips_table_caption_by_default():
@@ -376,11 +390,65 @@ def test_table_icon_patch_accepts_html_output():
 
 
 def test_no_missing_response_allows_simple_variants():
+    assert is_no_missing_response("NO_MISSING_SAFE")
+    assert is_no_missing_response("Explanation... NO_MISSING_SAFE [Icon: name]")
     assert is_no_missing_response("No missing.")
     assert is_no_missing_response("`No missing icons`")
     assert not should_apply_icon_patch(
         original_text="Open settings",
-        patched_text="No missing icons.",
+        patched_text="NO_MISSING_SAFE [Icon: name]",
+        field_key="text",
+    )
+
+
+def test_icon_patch_rejects_only_icon_output_for_text():
+    assert not should_apply_icon_patch(
+        original_text="Step 7 Click and select a target.",
+        patched_text="[Icon: search]",
+        field_key="text",
+    )
+    assert should_apply_icon_patch(
+        original_text="Step 7 Click and select a target.",
+        patched_text="Step 7 Click [Icon: search] and select a target.",
+        field_key="text",
+    )
+
+
+def test_icon_patch_accepts_non_icon_marker_output():
+    assert should_apply_icon_patch(
+        original_text="Step 7 Click and select a target.",
+        patched_text="Step 7 Click the search icon and select a target.",
+        field_key="text",
+    )
+
+
+def test_only_icon_fallback_inserts_icon_before_punctuation_gap():
+    assert fallback_only_icon_output(original_text="Click .", icon_only_output="[Icon: search]") == (
+        "Click [Icon: search]."
+    )
+
+
+def test_only_icon_fallback_inserts_icon_into_inner_gap():
+    assert fallback_only_icon_output(original_text="Select  option", icon_only_output="[Icon: gear]") == (
+        "Select [Icon: gear] option"
+    )
+
+
+def test_only_icon_fallback_appends_when_no_gap_is_obvious():
+    assert fallback_only_icon_output(original_text="Click Search.", icon_only_output="[icon: search]") == (
+        "Click Search. [Icon: search]"
+    )
+
+
+def test_icon_patch_allows_icon_name_quality_issues_when_text_is_preserved():
+    assert should_apply_icon_patch(
+        original_text="Open settings",
+        patched_text="[Icon: bullet] Open settings",
+        field_key="text",
+    )
+    assert should_apply_icon_patch(
+        original_text="Step 2 Click Add.",
+        patched_text="[Icon: Step 2] Step 2 Click Add.",
         field_key="text",
     )
 
@@ -445,8 +513,8 @@ def test_iter_icon_patch_results_sends_multiple_requests():
 
     client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
     requests = [
-        {"image": FakeImage(), "prompt": "first"},
-        {"image": FakeImage(), "prompt": "second"},
+        {"image": FakeImage(), "prompt": "first", "original_text": "first", "key": "text"},
+        {"image": FakeImage(), "prompt": "second", "original_text": "second", "key": "text"},
     ]
 
     results = list(
@@ -456,7 +524,8 @@ def test_iter_icon_patch_results_sends_multiple_requests():
             model="local-vlm",
             max_tokens=8000,
             concurrency=2,
+            invalid_retry_limit=3,
         )
     )
 
-    assert {output for _, output in results} == {"first done", "second done"}
+    assert {output for _, output, _, _ in results} == {"first done", "second done"}
