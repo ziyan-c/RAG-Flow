@@ -1,0 +1,40 @@
+{
+  "source_content_json": "/root/autodl-tmp/manuals/public/technical-manual/technical-manual/hybrid_auto/technical-manual_content_list.json",
+  "source_pdf": "/root/RAG-Flow/.local/source-documents/technical-manual.pdf",
+  "input_json": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_20260503_235315/inputs/chrome_pages_313_320_435_content_list.json",
+  "selected_pdf": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_20260503_235315/inputs/chrome_pages_313_320_435.pdf",
+  "chrome_pages": [
+    313,
+    320,
+    435
+  ],
+  "original_page_indices": [
+    312,
+    319,
+    434
+  ],
+  "remapped_page_indices": {
+    "312": 0,
+    "319": 1,
+    "434": 2
+  },
+  "blocks": 35,
+  "candidate_fields": 25,
+  "empty_fields": 1,
+  "ignored_blocks": 10,
+  "no_bbox_blocks": 0,
+  "no_text_field_blocks": 0,
+  "type_counts": {
+    "text": 18,
+    "list": 6,
+    "header": 6,
+    "page_number": 3,
+    "image": 1,
+    "table": 1
+  },
+  "field_counts": {
+    "text": 18,
+    "list_items": 6,
+    "table_body": 1
+  }
+}

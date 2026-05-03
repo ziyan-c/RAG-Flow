@@ -1,0 +1,4 @@
+stage,name,dpi,concurrency,batch_size,status,elapsed_sec,requests_submitted,requests_per_sec,checked,patched,no_missing,invalid_fallbacks,invalid_rejected,gpu_util_pct_avg,gpu_util_pct_max,memory_used_mib_avg,memory_used_mib_max,power_w_avg,power_w_max
+dpi_icon_pages,d200,200,10,140,0,8.873,25,2.8175,25,15,10,0,0,62.2,90.0,25497.8,25733.0,269.746,366.18
+dpi_icon_pages,d250,250,10,140,0,9.043,25,2.7646,25,14,11,0,0,65.0,90.0,25946.2,26173.0,331.206,366.73
+dpi_icon_pages,d300,300,10,140,0,9.998,25,2.5006,25,13,12,0,0,72.2,93.0,26470.6,26791.0,346.578,437.26

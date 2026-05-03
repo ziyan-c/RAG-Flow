@@ -192,8 +192,8 @@ processes one PDF at a time to avoid GPU memory spikes:
 rag-flow patch \
   --artifact-dir /root/autodl-tmp/manuals/public \
   --page-window-size 200 \
-  --batch-size 16 \
-  --concurrency 1
+  --batch-size 9 \
+  --concurrency 3
 ```
 
 The LLM prompt asks the model to add missing `[Icon: ...]` markers without
@@ -203,15 +203,15 @@ from that checkpoint on retry, deletes the checkpoint after success, writes a
 `*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
 and prints patching statistics at the end. Useful controls:
 
-- `--batch-size`: LLM request group size for checkpoints, default `16`
-- `--concurrency`: maximum simultaneous patching LLM requests, default `1`
+- `--batch-size`: LLM request group size for checkpoints, default `9`
+- `--concurrency`: maximum simultaneous patching LLM requests, default `3`
 - `--max-new-tokens`: generation budget, default `8000`
 - `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
 - `--model` / `--llm-model`: model name sent to the LLM endpoint
 - `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `--dpi`: PDF render DPI for patching crops, default `250`
 - `--page-window-size`: PDF render window size, default `200`
-- `--checkpoint-interval`: write checkpoint every N LLM batches, default `10`
+- `--checkpoint-interval`: write checkpoint every N LLM batches, default `30`
 - `--invalid-retry-limit`: retry only-icon LLM outputs before fallback insertion, default `0`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF

@@ -1,0 +1,4 @@
+dpi,output_icon_markers,manual_target_sites,strict_hits,wrong_or_misplaced_target_icons,missed_target_icons,obvious_false_positive_icons,notes
+200,16,10,1,6,3,8,"Fastest DPI in throughput sweep, but this page shows many false positives: text labels such as Video/Image/File and normal bullets were converted into icons; several real note/warning icons were attached to the wrong nearby text."
+250,12,10,3,4,3,4,"Better than 200 DPI on this page: fewer false positives and correct inline refresh/disk/wrench icons, but note/warning callout icons were still missed or assigned to adjacent blocks."
+300,12,10,4,3,3,4,"Best qualitative result on this single page: similar false-positive count to 250 DPI, with one more inline operation icon judged correct; still not perfect because callout icons remained difficult."

@@ -173,9 +173,9 @@ class MinerUConfig:
 class PatchingConfig:
     max_new_tokens: int
     llm_timeout: float
-    batch_size: int = 16
-    concurrency: int = 1
-    checkpoint_interval: int = 10
+    batch_size: int = 9
+    concurrency: int = 3
+    checkpoint_interval: int = 30
     invalid_retry_limit: int = 0
     dpi: int = 250
     page_window_size: int = 200
@@ -286,9 +286,9 @@ class AppConfig:
         patching = PatchingConfig(
             max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
             llm_timeout=env.float("RAG_FLOW_PATCH_LLM_TIMEOUT", 120.0),
-            batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 16),
-            concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 1),
-            checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 10),
+            batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 140),
+            concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 10),
+            checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 30),
             invalid_retry_limit=env.int("RAG_FLOW_PATCH_INVALID_RETRY_LIMIT", 0),
             dpi=env.int("RAG_FLOW_PATCH_DPI", 250),
             page_window_size=env.int("RAG_FLOW_PATCH_PAGE_WINDOW_SIZE", 200),

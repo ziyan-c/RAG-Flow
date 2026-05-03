@@ -1,0 +1,594 @@
+[
+  {
+    "type": "text",
+    "text": "further searched for (manually select a target or use AcuPick to automatically recognize targets). ",
+    "bbox": [
+      262,
+      96,
+      835,
+      124
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4311,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "[Icon: bullet] When viewing recorded videos and snapshots, you can select a target manually or select one automatically recognized by AcuPick, and then search for it in DeepXplore.",
+      "[Icon: bullet] If the channel is bound to other video channels, the recorded video from the bound video channels will play automatically.",
+      "[Icon: bullet] Add a record to a case"
+    ],
+    "bbox": [
+      240,
+      127,
+      895,
+      205
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4312,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "Click [Icon: star] to add a record to the tracks and favorites, and then click [Icon: star with badge 1] at the upper-right corner to view all records in the tracks and favorites. You can add them to a case.",
+    "bbox": [
+      262,
+      214,
+      897,
+      250
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4313,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "[Icon: bullet] Generate tracks",
+    "bbox": [
+      240,
+      253,
+      386,
+      266
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4314,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "Click [Icon: star_outline] to add a record to the temporary records, and then click [Icon: star_with_notification_badge] at the upper-right corner to view all records in the temporary records. Select multiple records, and then click **Generate Track** to generate a track.",
+    "bbox": [
+      262,
+      275,
+      890,
+      326
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4315,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "You can also click [Icon: face_add] to add it to a face arming group. After you send the group to devices and configure an event, devices can trigger alarms when the face is recognized.",
+      "● For the face snapshot and body capture, you can select a record, and then click [Icon: track_playback] to view the track playback. Perform searching by image using the current captured snapshot, with the search criteria defaulting to the current retrieval conditions. You can click [Icon: filter] on the track playback page, and then configure the conditions to search again.",
+      "● If a license plate is recognized, click [Icon: vehicle_add] to add the vehicle to an arming group. After you send the group to devices and configure an event, devices can trigger alarms when the vehicle is recognized.",
+      "● Click [Icon: delete] to delete it one by one."
+    ],
+    "bbox": [
+      240,
+      329,
+      892,
+      562
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4316,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "The access records, mobile device records which are stored in EEC, and POS records cannot be deleted. ",
+    "bbox": [
+      262,
+      573,
+      880,
+      601
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4317,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "text",
+    "text": "Extract records: When NVR and IVSS go online again after [Icon: offline], the records of faces, human bodies, motor vehicles, and non-motor vehicles captured when they are [Icon: offline] can be uploaded to the platform.",
+    "bbox": [
+      240,
+      605,
+      905,
+      650
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4318,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "Click [Icon: upload] at the upper right, and then enter the platform login password. The Resume Upload when Offline page is displayed.",
+    "bbox": [
+      262,
+      657,
+      895,
+      694
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4319,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "[Icon: diamond] Auto extraction: Set the extraction time, and then the system automatically extracts the snapshot records 24 hours before the defined time. To extract records prior to 24-hour period, you need to perform manual extraction.",
+      "[Icon: diamond] Manual extraction: Set the extraction time (up to 24 hours), select the type of record that you want to extract, select the device source for extraction (multiple channels of one device can be selected), and then click OK."
+    ],
+    "bbox": [
+      265,
+      701,
+      895,
+      791
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4320,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "The system extracts records according to the configuration. ",
+    "bbox": [
+      287,
+      800,
+      729,
+      815
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4321,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "header",
+    "text": "@lhua TECHNOLOGY ",
+    "bbox": [
+      90,
+      48,
+      226,
+      80
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4322,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "header",
+    "text": "User Manual ",
+    "bbox": [
+      808,
+      66,
+      905,
+      79
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4323,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "page_number",
+    "text": "",
+    "bbox": [
+      484,
+      972,
+      512,
+      984
+    ],
+    "page_idx": 0,
+    "benchmark_global_idx": 4324,
+    "benchmark_original_page_idx": 312,
+    "benchmark_chrome_page": 313
+  },
+  {
+    "type": "image",
+    "img_path": "images/d18330ebd561d6f71fb69980d3b3128e8ed4f6542f2ccc87c76fd30b4502a0f1.jpg",
+    "image_caption": [
+      "Figure 5-67 Add face capture record "
+    ],
+    "image_footnote": [],
+    "bbox": [
+      168,
+      123,
+      902,
+      298
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4432,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "3. Click [Icon: plus] next to the record to add it to the case.",
+      "4. Click [Icon: left arrow] to go back to the case adding page, you can add other type of records related to the case."
+    ],
+    "bbox": [
+      240,
+      302,
+      905,
+      361
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4433,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "Step 8 Click [Icon: attachment], and then click Add under Attachment to upload images and videos related to the case.",
+    "bbox": [
+      169,
+      363,
+      894,
+      404
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4434,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "● The platform supports uploading up to 20 videos, and each video cannot exceed 300 MB. Format includes .dav, .mp4, .avi, [Icon: flv] and .asf.",
+      "● Up to 20 images can be uploaded. Image format includes .png, .jpg and .jpeg. [Icon: book]"
+    ],
+    "bbox": [
+      240,
+      411,
+      890,
+      475
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4435,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "The number of all video files and images cannot be more than 20. ",
+    "bbox": [
+      263,
+      483,
+      749,
+      500
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4436,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "text",
+    "text": "Step 9 Click OK. ",
+    "bbox": [
+      169,
+      502,
+      312,
+      519
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4437,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "text",
+    "text": "Related Operations ",
+    "text_level": 1,
+    "bbox": [
+      90,
+      524,
+      285,
+      542
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4438,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "list",
+    "sub_type": "text",
+    "list_items": [
+      "● Delete or replace an icon",
+      "Click [Icon: eye] on the case card, and then click edit. Click [Icon: minus] to delete it; Drag the image file to uploading image area, or click [Icon: upload] on the uploading area, and then upload the image file.",
+      "● Enter case name in the search box at the upper-right corner, and then press Enter or click [Icon: search] to search for cases.",
+      "● Click [Icon: eye] under a temporary case to view the case details. If you need to edit the details, click Edit and change the information as needed.",
+      "● Click [Icon: download] under a temporary case to download it, or you can click Download in the case details page. Click Download Progress at the lower-left corner to check the download progress.",
+      "● Click [Icon: trash] under a case to delete it one by one, or you can select cases, and then click Delete to delete them in batches.",
+      "● Click [Icon: toggle] to close the case and click it again to open the case."
+    ],
+    "bbox": [
+      169,
+      546,
+      892,
+      781
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4439,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320,
+    "vlm-small-icon-patched-fields": [
+      "list_items"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "5.4 Access Management ",
+    "text_level": 1,
+    "bbox": [
+      90,
+      799,
+      426,
+      822
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4440,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "text",
+    "text": "On the Access Management page, you can perform operations on access control, lift control, attendance, video intercom, and visitor. ",
+    "bbox": [
+      166,
+      840,
+      862,
+      869
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4441,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "text",
+    "text": "5.4.1 Access Control ",
+    "text_level": 1,
+    "bbox": [
+      90,
+      888,
+      371,
+      909
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4442,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "header",
+    "text": "@lhua TECHNOLOGY ",
+    "bbox": [
+      90,
+      48,
+      226,
+      80
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4443,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "header",
+    "text": "User Manual ",
+    "bbox": [
+      808,
+      65,
+      905,
+      80
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4444,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "page_number",
+    "text": "310 ",
+    "bbox": [
+      482,
+      972,
+      515,
+      984
+    ],
+    "page_idx": 1,
+    "benchmark_global_idx": 4445,
+    "benchmark_original_page_idx": 319,
+    "benchmark_chrome_page": 320
+  },
+  {
+    "type": "text",
+    "text": "Related Operations ",
+    "text_level": 1,
+    "bbox": [
+      90,
+      93,
+      284,
+      112
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6209,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435
+  },
+  {
+    "type": "table",
+    "img_path": "images/b391d32be94e9b1f7ac5b13edcbd535591fd0f6fa866ef793cb7ea8c5408c236.jpg",
+    "table_caption": [
+      "Table 8-4 Interface operation "
+    ],
+    "table_footnote": [],
+    "table_body": "<table><tr><td>Icon/Function</td><td>Description</td></tr><tr><td>Right-click menu</td><td>· **Continuous Snapshot**: Take snapshots of the current image (2 snapshots each time by default). The snapshots are saved to ..\\DSS\\DSS Client\\Picture by default. To change the snapshot saving path, see \"8.7.6 Configure File Storage Settings\". \n· **Video Adjustment**: Adjust the brightness, contrast, saturation, and chroma of the video for video enhancement. \n· **Digital Zoom**: Click and hold to select an area to zoom in on it. Double-click the image again to exit zooming in. \n[Icon: key]\nYou can also scroll to zoom in and out.</td></tr><tr><td>[Icon: close all videos]</td><td>Close all playing videos.</td></tr><tr><td>[Icon: split window]</td><td>Split the window into multiple ones and play a video in full screen.</td></tr><tr><td>[Icon: camera]</td><td>Take a snapshot of the current image and save it locally. The path is C:\\DSS \\DSS Client\\Picture\\ by default.</td></tr><tr><td>[Icon: close window]</td><td>Close the window.</td></tr><tr><td>[Icon: stop/pause]</td><td>Stop/pause the video.</td></tr><tr><td>[Icon: speed control]</td><td>Fast/slow playback. Max. supports 64X or 1/64X.</td></tr><tr><td>[Icon: frame by frame]</td><td>Frame by frame playback/frame by frame backward.</td></tr><tr><td>[Icon: search snapshot]</td><td>Capture the target in the playback window. Click [Icon: search] to select the search method, and then the system goes to the page with search results. More operations: \n· Move the selection area: Hover over the selection area, and then left-click to move. \n· Adjust the size of the selection area: Hover over the upper-right, upper-left and lower-left corner of the selection area, and then left-click to adjust. \n· Right-click to exit search by snapshot.</td></tr></table>",
+    "bbox": [
+      171,
+      146,
+      905,
+      699
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6210,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435,
+    "vlm-small-icon-patched-fields": [
+      "table_body"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "text",
+    "text": "8.7 Configuring Local Settings ",
+    "text_level": 1,
+    "bbox": [
+      89,
+      714,
+      505,
+      739
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6211,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435
+  },
+  {
+    "type": "text",
+    "text": "After logging in to the client, you can manage default settings, and configure the parameters including [Icon: settings] basic settings, [Icon: video] video parameters, [Icon: play] record playback, [Icon: camera] snapshot, [Icon: record] recording, [Icon: alarm] alarm, [Icon: video_wall] video wall, [Icon: security] security settings and [Icon: keyboard] shortcut keys.",
+    "bbox": [
+      168,
+      756,
+      897,
+      802
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6212,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435,
+    "vlm-small-icon-patched-fields": [
+      "text"
+    ],
+    "vlm-small-icon-patched": true
+  },
+  {
+    "type": "header",
+    "text": "@lhua TECHNOLOGY ",
+    "bbox": [
+      90,
+      48,
+      226,
+      80
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6213,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435
+  },
+  {
+    "type": "header",
+    "text": "User Manual ",
+    "bbox": [
+      808,
+      65,
+      905,
+      79
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6214,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435
+  },
+  {
+    "type": "page_number",
+    "text": "425 ",
+    "bbox": [
+      482,
+      972,
+      512,
+      984
+    ],
+    "page_idx": 2,
+    "benchmark_global_idx": 6215,
+    "benchmark_original_page_idx": 434,
+    "benchmark_chrome_page": 435
+  }
+]

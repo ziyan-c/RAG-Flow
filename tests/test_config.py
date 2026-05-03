@@ -97,9 +97,9 @@ def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
 
     assert config.patching.max_new_tokens == 8000
     assert config.patching.llm_timeout == 120.0
-    assert config.patching.batch_size == 16
-    assert config.patching.concurrency == 1
-    assert config.patching.checkpoint_interval == 10
+    assert config.patching.batch_size == 140
+    assert config.patching.concurrency == 10
+    assert config.patching.checkpoint_interval == 30
     assert config.patching.invalid_retry_limit == 0
     assert config.patching.dpi == 250
     assert config.patching.page_window_size == 200

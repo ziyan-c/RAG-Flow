@@ -1,0 +1,52 @@
+{
+  "summaries": [
+    {
+      "dpi": 200,
+      "name": "d200",
+      "elapsed_sec": 8.873,
+      "requests_submitted": 25,
+      "requests_per_sec": 2.8175,
+      "expected_icon_groups": 27,
+      "expected_icon_hits": 13,
+      "expected_icon_recall": 0.4815,
+      "unexpected_marker_proxy": 25,
+      "no_missing_passed": 0,
+      "no_missing_total": 1,
+      "avg_text_retention": 0.9814,
+      "quality_proxy": 4.75,
+      "output_json": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/runs/d200/d200_PATCHED.json"
+    },
+    {
+      "dpi": 250,
+      "name": "d250",
+      "elapsed_sec": 9.043,
+      "requests_submitted": 25,
+      "requests_per_sec": 2.7646,
+      "expected_icon_groups": 27,
+      "expected_icon_hits": 10,
+      "expected_icon_recall": 0.3704,
+      "unexpected_marker_proxy": 28,
+      "no_missing_passed": 0,
+      "no_missing_total": 1,
+      "avg_text_retention": 0.9834,
+      "quality_proxy": 1.0,
+      "output_json": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/runs/d250/d250_PATCHED.json"
+    },
+    {
+      "dpi": 300,
+      "name": "d300",
+      "elapsed_sec": 9.998,
+      "requests_submitted": 25,
+      "requests_per_sec": 2.5006,
+      "expected_icon_groups": 27,
+      "expected_icon_hits": 11,
+      "expected_icon_recall": 0.4074,
+      "unexpected_marker_proxy": 18,
+      "no_missing_passed": 1,
+      "no_missing_total": 1,
+      "avg_text_retention": 0.9844,
+      "quality_proxy": 6.5,
+      "output_json": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/runs/d300/d300_PATCHED.json"
+    }
+  ]
+}

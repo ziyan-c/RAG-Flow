@@ -1181,7 +1181,7 @@ def add_small_icon_text(
     page_window_size: int = 200,
     checkpoint_interval: int = 10,
     invalid_retry_limit: int = 0,
-    concurrency: int = 1,
+    concurrency: int = 3,
     checkpoint_json: str | Path | None = None,
     resume: bool = True,
     write_patching_view: bool = True,
