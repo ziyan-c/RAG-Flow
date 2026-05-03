@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 
 from rag_flow.preprocessing.image_descriptions import (
     captioned_json_path_for,
@@ -6,9 +7,11 @@ from rag_flow.preprocessing.image_descriptions import (
     collect_context_token_stats,
     collect_image_description_stats,
     get_surrounding_text_context,
+    request_image_description_from_llm,
     resolve_image_description_artifacts,
     should_caption_image_block,
 )
+from rag_flow.preprocessing.small_icons import image_to_data_url
 
 
 def test_captioned_json_path_for_content_list_names():
@@ -116,3 +119,45 @@ def test_dry_run_stats_can_load_json(tmp_path):
     stats = collect_image_description_stats(loaded, base_dir=tmp_path)
 
     assert stats.caption_candidates == 1
+
+
+def test_request_image_description_from_llm_sends_openai_vision_payload():
+    class FakeImage:
+        def save(self, buffer, format):
+            assert format == "PNG"
+            buffer.write(b"fake-image")
+
+    class FakeCompletions:
+        def __init__(self):
+            self.kwargs = {}
+
+        def create(self, **kwargs):
+            self.kwargs = kwargs
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content="<think>skip</think>\nA button toolbar screenshot.")
+                    )
+                ]
+            )
+
+    completions = FakeCompletions()
+    client = SimpleNamespace(chat=SimpleNamespace(completions=completions))
+
+    output = request_image_description_from_llm(
+        client=client,
+        model="local-vlm",
+        image=FakeImage(),
+        prompt="Describe image",
+        max_tokens=8000,
+    )
+
+    assert output == "A button toolbar screenshot."
+    assert completions.kwargs["model"] == "local-vlm"
+    assert completions.kwargs["max_tokens"] == 8000
+    assert completions.kwargs["temperature"] == 0
+    assert completions.kwargs["extra_body"]["chat_template_kwargs"]["enable_thinking"] is False
+    content = completions.kwargs["messages"][0]["content"]
+    assert content[0]["type"] == "image_url"
+    assert content[0]["image_url"]["url"] == image_to_data_url(FakeImage())
+    assert content[1] == {"type": "text", "text": "Describe image"}

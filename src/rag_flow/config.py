@@ -177,7 +177,7 @@ class PatchingConfig:
     concurrency: int = 1
     checkpoint_interval: int = 10
     invalid_retry_limit: int = 0
-    dpi: int = 200
+    dpi: int = 250
     page_window_size: int = 200
 
 
@@ -186,6 +186,8 @@ class CaptioningConfig:
     max_new_tokens: int
     max_context_tokens: int
     batch_size: int
+    concurrency: int = 1
+    llm_timeout: float = 120.0
 
 
 @dataclass(frozen=True)
@@ -288,7 +290,7 @@ class AppConfig:
             concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 1),
             checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 10),
             invalid_retry_limit=env.int("RAG_FLOW_PATCH_INVALID_RETRY_LIMIT", 0),
-            dpi=env.int("RAG_FLOW_PATCH_DPI", 200),
+            dpi=env.int("RAG_FLOW_PATCH_DPI", 250),
             page_window_size=env.int("RAG_FLOW_PATCH_PAGE_WINDOW_SIZE", 200),
         )
 
@@ -296,6 +298,8 @@ class AppConfig:
             max_new_tokens=env.int("RAG_FLOW_CAPTION_MAX_NEW_TOKENS", 8000),
             max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 10000),
             batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 4),
+            concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 1),
+            llm_timeout=env.float("RAG_FLOW_CAPTION_LLM_TIMEOUT", 120.0),
         )
 
         return cls(

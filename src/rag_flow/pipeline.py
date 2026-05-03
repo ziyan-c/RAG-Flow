@@ -109,12 +109,14 @@ def run_ingest(
             input_json=artifacts.patched_json,
             output_json=artifacts.captioned_json,
             pdf_path=source_pdf,
-            model_name=config.models.vlm_model,
+            model_name=config.models.llm_model,
             max_new_tokens=config.captioning.max_new_tokens,
             batch_size=config.captioning.batch_size,
+            concurrency=config.captioning.concurrency,
             max_context_tokens=config.captioning.max_context_tokens,
-            model_revision=config.models.vlm_model_revision,
-            trusted_remote_code_models=config.models.trusted_remote_code_models,
+            llm_base_url=config.models.llm_base_url,
+            llm_api_key=config.models.llm_api_key,
+            llm_timeout=config.captioning.llm_timeout,
         )
 
     def chunk_pages() -> None:

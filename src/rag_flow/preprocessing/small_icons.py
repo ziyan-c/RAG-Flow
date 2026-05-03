@@ -1174,7 +1174,7 @@ def add_small_icon_text(
     llm_base_url: str,
     llm_api_key: str,
     llm_model: str,
-    dpi: int = 200,
+    dpi: int = 250,
     batch_size: int = 16,
     max_new_tokens: int = 8000,
     llm_timeout: float = 120.0,
@@ -1525,6 +1525,7 @@ def main(argv: list[str] | None = None) -> None:
             else:
                 print(f"  patching_view_pdf: {args.patching_view_pdf or patching_view_path_for(artifacts.output_json)}")
             print(f"  checkpoint_json: {args.checkpoint_json or checkpoint_path_for(artifacts.output_json)}")
+            print(f"  dpi: {args.dpi}")
             print(f"  page_window_size: {args.page_window_size}")
             print(f"  batch_size: {args.batch_size}")
             print(f"  concurrency: {args.concurrency}")

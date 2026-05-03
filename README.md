@@ -209,9 +209,10 @@ and prints patching statistics at the end. Useful controls:
 - `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
 - `--model` / `--llm-model`: model name sent to the LLM endpoint
 - `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
+- `--dpi`: PDF render DPI for patching crops, default `250`
 - `--page-window-size`: PDF render window size, default `200`
 - `--checkpoint-interval`: write checkpoint every N LLM batches, default `10`
-- `--invalid-retry-limit`: retry only-icon VLM outputs before fallback insertion, default `0`
+- `--invalid-retry-limit`: retry only-icon LLM outputs before fallback insertion, default `0`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
@@ -248,24 +249,31 @@ After patching a MinerU artifact folder, you can also use the artifact-dir form:
 rag-flow caption --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 ```
 
-Captioning resumes from `*_PATCHED_CAPTIONED.checkpoint.json` when available,
-writes a checkpoint after each VLM batch by default, and skips image blocks that
-already have `image_description_vlm`. Captioning context is taken from nearby
-text blocks before and after each image in the patched JSON order, rather than
-from a fixed page window. A successful run also writes a
-`*_CAPTIONING_VIEW.pdf` overlay showing each captioned image and the nearby
-context blocks used for it. Useful controls:
+Captioning calls the local OpenAI-compatible SGLang service configured by
+`RAG_FLOW_LLM_BASE_URL` / `RAG_FLOW_LLM_MODEL`, so start it first with
+`rag-flow serve llm-sglang`. It resumes from
+`*_PATCHED_CAPTIONED.checkpoint.json` when available, writes a checkpoint after
+each LLM batch by default, and skips image blocks that already have
+`image_description_vlm`. Captioning context is taken from nearby text blocks
+before and after each image in the patched JSON order, rather than from a fixed
+page window. A successful run also writes a `*_CAPTIONING_VIEW.pdf` overlay
+showing each captioned image and the nearby context blocks used for it. Useful
+controls:
 
-- `--dry-run`: print resolved paths, image counts, and estimated context token stats without loading the VLM
+- `--dry-run`: print resolved paths, image counts, and estimated context token stats without calling the LLM
 - `--max-context-tokens`: cap nearby text sent with each image, default `10000`
 - `--max-new-tokens`: caption generation budget, default `8000`
-- `--checkpoint-interval`: write checkpoint every N VLM batches, default `1`
+- `--batch-size`: images grouped per local batch, default `4`
+- `--concurrency`: maximum simultaneous captioning LLM requests inside each batch, default `1`
+- `--llm-base-url`: OpenAI-compatible endpoint, default `RAG_FLOW_LLM_BASE_URL`
+- `--request-timeout`: captioning request timeout in seconds, default `120`
+- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
 - `--captioning-view-pdf`: custom path for the overlay PDF
 - `--no-captioning-view`: skip writing the overlay PDF
 - `--no-resume`: ignore an existing checkpoint
 - `--no-skip-existing`: regenerate descriptions even when `image_description_vlm` exists
 
-You can regenerate the captioning overlay without loading the VLM:
+You can regenerate the captioning overlay without calling the LLM:
 
 ```bash
 rag-flow caption-view --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
@@ -402,10 +410,9 @@ models, and conda environments can stay on the machine paths configured in that
 private env file.
 
 If the retriever is exposed beyond localhost, set `RAG_FLOW_RETRIEVER_API_KEY`
-and send it as `Authorization: Bearer <token>`. Captioning VLM preprocessing
-executes model-provided Python code for trusted repositories only; keep
-`RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS` narrow and set `RAG_FLOW_VLM_MODEL_REVISION`
-when pinning a model snapshot.
+and send it as `Authorization: Bearer <token>`. Patching and captioning call the
+configured local OpenAI-compatible LLM endpoint instead of loading a VLM inside
+the pipeline process.
 
 ## Configuration
 
@@ -433,6 +440,8 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`
 - `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`
 - `RAG_FLOW_CAPTION_BATCH_SIZE`
+- `RAG_FLOW_CAPTION_CONCURRENCY`
+- `RAG_FLOW_CAPTION_LLM_TIMEOUT`
 - `RAG_FLOW_CONTENT_JSON`
 - `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`

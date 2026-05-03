@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import argparse
-import gc
 import json
 import math
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
 from rag_flow.config import AppConfig
-from rag_flow.preprocessing.small_icons import resolve_icon_patch_artifacts, resolve_icon_patch_batch
-from rag_flow.runtime import get_torch_device, require_trusted_remote_code_model
+from rag_flow.preprocessing.small_icons import (
+    image_to_data_url,
+    resolve_icon_patch_artifacts,
+    resolve_icon_patch_batch,
+    strip_reasoning_text,
+)
 
 
 TEXT_KEYS = [
@@ -95,7 +99,7 @@ class TextBudgeter(Protocol):
 
 
 class ApproxTokenBudgeter:
-    """Conservative token estimate for dry-run stats without loading the VLM."""
+    """Conservative token estimate for dry-run stats without calling the LLM."""
 
     def count(self, text: str) -> int:
         if not text:
@@ -535,7 +539,7 @@ def _print_stats(stats: ImageDescriptionStats, output_json: Path) -> None:
     print(f"  skipped existing descriptions: {stats.skipped_existing}")
     print(f"  missing image files: {stats.missing_image_files}")
     print(f"  failed image reads: {stats.failed_image_reads}")
-    print(f"  VLM batches: {stats.batches_processed}")
+    print(f"  LLM batches: {stats.batches_processed}")
     print(f"  checkpoints written: {stats.checkpoints_written}")
     print(f"  output: {output_json}")
 
@@ -552,6 +556,115 @@ def _print_context_token_stats(stats: ContextTokenStats, *, estimated: bool = Fa
     print(f"  contexts near budget: {stats.contexts_at_budget}")
 
 
+def make_captioning_llm_client(*, base_url: str, api_key: str, timeout: float) -> Any:
+    from openai import OpenAI
+
+    return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
+
+
+def assert_captioning_llm_available(client: Any, *, base_url: str) -> None:
+    from openai import APIConnectionError, APIStatusError, APITimeoutError
+
+    try:
+        client.models.list()
+    except (APIConnectionError, APITimeoutError) as exc:
+        raise RuntimeError(
+            f"Cannot reach the captioning LLM service at {base_url}. "
+            "Start it first with `rag-flow serve llm-sglang`."
+        ) from exc
+    except APIStatusError as exc:
+        if exc.status_code in {404, 405}:
+            return
+        raise RuntimeError(
+            f"The captioning LLM service at {base_url} is reachable but not ready "
+            f"(HTTP {exc.status_code})."
+        ) from exc
+
+
+def request_image_description_from_llm(
+    *,
+    client: Any,
+    model: str,
+    image: Any,
+    prompt: str,
+    max_tokens: int,
+) -> str:
+    from openai import APIConnectionError, APIStatusError, APITimeoutError
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": image_to_data_url(image)}},
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ],
+            max_tokens=max_tokens,
+            temperature=0,
+            extra_body={
+                "chat_template_kwargs": {"enable_thinking": False},
+                "separate_reasoning": True,
+            },
+        )
+    except (APIConnectionError, APITimeoutError) as exc:
+        raise RuntimeError(
+            "Cannot reach the captioning LLM service. Start it first with "
+            "`rag-flow serve llm-sglang`."
+        ) from exc
+    except APIStatusError as exc:
+        raise RuntimeError(f"Captioning LLM request failed with HTTP {exc.status_code}: {exc}") from exc
+
+    content = response.choices[0].message.content
+    if not content:
+        raise RuntimeError("Captioning LLM returned an empty response.")
+    return strip_reasoning_text(content)
+
+
+def iter_image_description_results(
+    requests: list[dict[str, Any]],
+    *,
+    client: Any,
+    model: str,
+    max_tokens: int,
+    concurrency: int,
+) -> Any:
+    if concurrency <= 1 or len(requests) <= 1:
+        for req in requests:
+            yield req, request_image_description_from_llm(
+                client=client,
+                model=model,
+                image=req["image"],
+                prompt=req["prompt"],
+                max_tokens=max_tokens,
+            )
+        return
+
+    max_workers = min(concurrency, len(requests))
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_request = {
+            executor.submit(
+                request_image_description_from_llm,
+                client=client,
+                model=model,
+                image=req["image"],
+                prompt=req["prompt"],
+                max_tokens=max_tokens,
+            ): req
+            for req in requests
+        }
+        try:
+            for future in as_completed(future_to_request):
+                yield future_to_request[future], future.result()
+        except Exception:
+            for future in future_to_request:
+                future.cancel()
+            raise
+
+
 def add_image_descriptions(
     *,
     base_dir: str | Path,
@@ -561,9 +674,11 @@ def add_image_descriptions(
     model_name: str,
     max_new_tokens: int = DEFAULT_CAPTION_MAX_NEW_TOKENS,
     batch_size: int = 4,
+    concurrency: int = 1,
     max_context_tokens: int = DEFAULT_CAPTION_MAX_CONTEXT_TOKENS,
-    model_revision: str = "",
-    trusted_remote_code_models: tuple[str, ...] = ("Qwen/Qwen3.5-9B",),
+    llm_base_url: str = "http://localhost:8080/v1",
+    llm_api_key: str = "EMPTY",
+    llm_timeout: float = 120.0,
     checkpoint_interval: int = 1,
     checkpoint_json: str | Path | None = None,
     resume: bool = True,
@@ -571,12 +686,8 @@ def add_image_descriptions(
     write_captioning_view: bool = True,
     captioning_view_pdf: str | Path | None = None,
 ) -> None:
-    import torch
-    from modelscope import snapshot_download
     from PIL import Image
-    from qwen_vl_utils import process_vision_info
     from tqdm import tqdm
-    from transformers import AutoModelForImageTextToText, AutoProcessor
 
     base_path = Path(base_dir)
     output_path = Path(output_json)
@@ -591,21 +702,13 @@ def add_image_descriptions(
         content_data: list[dict[str, Any]] = json.load(f)
 
     stats = collect_image_description_stats(content_data, base_dir=base_path, skip_existing=skip_existing)
-    device = get_torch_device(feature="Image-description VLM preprocessing")
-    dtype = torch.bfloat16 if device == "cuda" else torch.float32
-    require_trusted_remote_code_model(model_name, allowed_models=trusted_remote_code_models)
-    snapshot_kwargs = {"revision": model_revision} if model_revision else {}
-    model_dir = snapshot_download(model_name, **snapshot_kwargs)
-    processor = AutoProcessor.from_pretrained(model_dir, trust_remote_code=True, padding_side="left")
-    processor.tokenizer.pad_token_id = processor.tokenizer.eos_token_id
-    context_budgeter = TokenizerBudgeter(processor.tokenizer)
-    model = AutoModelForImageTextToText.from_pretrained(
-        model_dir,
-        device_map="auto",
-        torch_dtype=dtype,
-        trust_remote_code=True,
+    llm_client = make_captioning_llm_client(
+        base_url=llm_base_url,
+        api_key=llm_api_key,
+        timeout=llm_timeout,
     )
-    model.generation_config.pad_token_id = processor.tokenizer.eos_token_id
+    assert_captioning_llm_available(llm_client, base_url=llm_base_url)
+    context_budgeter = ApproxTokenBudgeter()
 
     def write_checkpoint() -> None:
         _write_json(checkpoint_path, content_data)
@@ -617,62 +720,18 @@ def add_image_descriptions(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        batch_messages = [
-            {"role": "user", "content": [{"type": "image", "image": req["image"]}, {"type": "text", "text": req["prompt"]}]}
-            for req in requests
-        ]
-        texts = [
-            processor.apply_chat_template([message], tokenize=False, add_generation_prompt=True, enable_thinking=False)
-            for message in batch_messages
-        ]
-
-        image_inputs_list = []
-        video_inputs_list = []
-        for message in batch_messages:
-            image_inputs, video_inputs = process_vision_info([message])
-            image_inputs_list.append(image_inputs)
-            video_inputs_list.append(video_inputs)
-
-        flat_images = [item for sublist in image_inputs_list if sublist for item in sublist]
-        flat_videos = [item for sublist in video_inputs_list if sublist for item in sublist]
-        inputs = processor(
-            text=texts,
-            images=flat_images if flat_images else None,
-            videos=flat_videos if flat_videos else None,
-            padding=True,
-            return_tensors="pt",
-        ).to(device)
-
-        with torch.no_grad():
-            generated_ids = model.generate(
-                **inputs,
-                max_new_tokens=max_new_tokens,
-                do_sample=False,
-                use_cache=True,
-            )
-        generated_ids_trimmed = [
-            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-        ]
-        outputs = processor.batch_decode(
-            generated_ids_trimmed,
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=False,
-        )
-
-        for req, raw_output in zip(requests, outputs):
+        for req, raw_output in iter_image_description_results(
+            requests,
+            client=llm_client,
+            model=model_name,
+            max_tokens=max_new_tokens,
+            concurrency=concurrency,
+        ):
             output = raw_output.strip()
-            if "</think>" in output:
-                output = output.split("</think>")[-1].strip()
             if output:
                 content_data[req["idx"]]["image_description_vlm"] = output
                 stats.captioned_count += 1
 
-        del inputs
-        del generated_ids
-        del generated_ids_trimmed
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
         if checkpoint_interval > 0 and stats.batches_processed % checkpoint_interval == 0:
             write_checkpoint()
 
@@ -732,13 +791,6 @@ def add_image_descriptions(
         write_checkpoint()
         print(f"Image captioning checkpoint saved before failure: {checkpoint_path}")
         raise
-    finally:
-        del model
-        del processor
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
     _write_json(output_path, content_data)
     if checkpoint_path.exists():
         checkpoint_path.unlink()
@@ -766,10 +818,13 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--input", default=None)
     parser.add_argument("--output", default=None)
     parser.add_argument("--pdf", default=None, help="Source PDF used for the CAPTIONING_VIEW overlay.")
-    parser.add_argument("--model", default=config.models.vlm_model)
-    parser.add_argument("--model-revision", default=config.models.vlm_model_revision)
+    parser.add_argument("--model", default=config.models.llm_model, help="Model name served by the SGLang API.")
+    parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
+    parser.add_argument("--llm-api-key", default=config.models.llm_api_key)
+    parser.add_argument("--request-timeout", type=float, default=config.captioning.llm_timeout)
     parser.add_argument("--max-new-tokens", type=int, default=config.captioning.max_new_tokens)
     parser.add_argument("--batch-size", type=int, default=config.captioning.batch_size)
+    parser.add_argument("--concurrency", type=int, default=config.captioning.concurrency)
     parser.add_argument("--max-context-tokens", type=int, default=config.captioning.max_context_tokens)
     parser.add_argument("--checkpoint-interval", type=int, default=1)
     parser.add_argument("--checkpoint-json")
@@ -778,7 +833,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--no-recursive", action="store_true")
     parser.add_argument("--captioning-view-pdf", help="Output PDF that visualizes captioning targets and context blocks.")
     parser.add_argument("--no-captioning-view", action="store_true", help="Do not write the CAPTIONING_VIEW PDF.")
-    parser.add_argument("--dry-run", action="store_true", help="Print resolved inputs and image counts without loading the VLM.")
+    parser.add_argument("--dry-run", action="store_true", help="Print resolved inputs and image counts without calling the LLM.")
     args = parser.parse_args(argv)
 
     if args.artifact_dir:
@@ -828,6 +883,10 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  max_context_tokens: {args.max_context_tokens}")
             print(f"  max_new_tokens: {args.max_new_tokens}")
             print(f"  batch_size: {args.batch_size}")
+            print(f"  concurrency: {args.concurrency}")
+            print(f"  llm_base_url: {args.llm_base_url}")
+            print(f"  llm_model: {args.model}")
+            print(f"  request_timeout: {args.request_timeout}")
             if artifacts.input_json.exists():
                 with artifacts.input_json.open("r", encoding="utf-8") as f:
                     content_data: list[dict[str, Any]] = json.load(f)
@@ -857,9 +916,11 @@ def main(argv: list[str] | None = None) -> None:
             model_name=args.model,
             max_new_tokens=args.max_new_tokens,
             batch_size=args.batch_size,
+            concurrency=args.concurrency,
             max_context_tokens=args.max_context_tokens,
-            model_revision=args.model_revision,
-            trusted_remote_code_models=config.models.trusted_remote_code_models,
+            llm_base_url=args.llm_base_url,
+            llm_api_key=args.llm_api_key,
+            llm_timeout=args.request_timeout,
             checkpoint_interval=args.checkpoint_interval,
             checkpoint_json=args.checkpoint_json,
             resume=not args.no_resume,
