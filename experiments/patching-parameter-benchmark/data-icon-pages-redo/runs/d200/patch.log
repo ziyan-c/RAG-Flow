@@ -1,25 +1,0 @@
-Icon patching job 1/1: /root/autodl-tmp/manuals/public/technical-manual/technical-manual/hybrid_auto
-Scanning pages 1-3:   0%|          | 0/35 [00:00<?, ?it/s]Scanning pages 1-3: 100%|██████████| 35/35 [00:00<00:00, 1126.73it/s]
-Icon patching stats:
-  blocks seen: 35
-  fields seen: 26
-  requests submitted: 25
-  invalid retries: 0
-  invalid fallbacks: 0
-  invalid rejected: 0
-  checked: 25
-  patched: 15
-  no missing: 10
-  skipped ignored blocks: 10
-  skipped without bbox: 0
-  skipped without text fields: 0
-  skipped empty fields: 1
-  table continuation blocks: 0
-  table continuation crops: 0
-  inline icon candidates: 0
-  inline icons linked: 0
-  inline icons unlinked: 0
-  page windows: 1
-  LLM batches: 1
-  checkpoints written: 1
-  output: /root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/runs/d200/d200_PATCHED.json

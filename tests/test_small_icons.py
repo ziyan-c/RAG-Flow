@@ -373,6 +373,20 @@ def test_patch_field_keys_skips_table_caption_by_default():
     assert _patch_field_keys(block) == ["table_footnote", "table_body"]
 
 
+def test_patch_field_keys_patches_image_footnote_but_not_caption():
+    block = {
+        "type": "image",
+        "bbox": [169, 458, 899, 871],
+        "page_idx": 79,
+        "img_path": "images/disk.jpg",
+        "image_caption": ["Figure 3-26 Format a disk"],
+        "image_footnote": ["Step 5 Select a disk, and then click ."],
+        "image_description_vlm": "A disk management screenshot.",
+    }
+
+    assert _patch_field_keys(block) == ["image_footnote"]
+
+
 def test_table_icon_patch_accepts_icon_output_without_extra_validation():
     assert should_apply_icon_patch(
         original_text="<table><tr><td></td><td>View details.</td></tr></table>",
@@ -528,4 +542,5 @@ def test_iter_icon_patch_results_sends_multiple_requests():
         )
     )
 
-    assert {output for _, output, _, _ in results} == {"first done", "second done"}
+    assert {output for _, output, _, _, _ in results} == {"first done", "second done"}
+    assert {event["status"] for *_, event in results} == {"ok"}

@@ -1,1 +1,0 @@
-{"stage":"dpi_icon_pages","name":"d300","dpi":300,"concurrency":10,"batch_size":140,"input_json":"/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/inputs/chrome_pages_313_320_435_content_list.json","output_json":"/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_redo_20260503/runs/d300/d300_PATCHED.json"}

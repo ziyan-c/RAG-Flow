@@ -589,7 +589,13 @@ def request_image_description_from_llm(
     prompt: str,
     max_tokens: int,
 ) -> str:
-    from openai import APIConnectionError, APIStatusError, APITimeoutError
+    try:
+        from openai import APIConnectionError, APIStatusError, APITimeoutError
+    except ModuleNotFoundError:
+        class _OpenAIUnavailableError(Exception):
+            pass
+
+        APIConnectionError = APIStatusError = APITimeoutError = _OpenAIUnavailableError
 
     try:
         response = client.chat.completions.create(

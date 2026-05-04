@@ -1,25 +1,0 @@
-Icon patching job 1/1: /root/autodl-tmp/manuals/public/technical-manual/technical-manual/hybrid_auto
-Scanning pages 1-150:   0%|          | 0/1394 [00:00<?, ?it/s]Scanning pages 1-150:  14%|█▎        | 191/1394 [00:17<01:48, 11.06it/s]Scanning pages 1-150:  24%|██▍       | 338/1394 [00:17<00:45, 23.03it/s]Scanning pages 1-150:  24%|██▍       | 338/1394 [00:30<00:45, 23.03it/s]Scanning pages 1-150:  28%|██▊       | 390/1394 [00:37<01:57,  8.54it/s]Scanning pages 1-150:  42%|████▏     | 580/1394 [00:38<00:45, 17.78it/s]Scanning pages 1-150:  42%|████▏     | 580/1394 [00:50<00:45, 17.78it/s]Scanning pages 1-150:  42%|████▏     | 587/1394 [01:01<01:57,  6.89it/s]Scanning pages 1-150:  56%|█████▌    | 777/1394 [01:18<01:12,  8.56it/s]Scanning pages 1-150:  66%|██████▌   | 918/1394 [01:18<00:36, 13.13it/s]Scanning pages 1-150:  66%|██████▌   | 918/1394 [01:30<00:36, 13.13it/s]Scanning pages 1-150:  71%|███████   | 992/1394 [01:44<00:53,  7.53it/s]Scanning pages 1-150:  85%|████████▍ | 1182/1394 [02:03<00:25,  8.42it/s]Scanning pages 1-150:  92%|█████████▏| 1287/1394 [02:03<00:09, 11.26it/s]Scanning pages 1-150:  92%|█████████▏| 1287/1394 [02:20<00:09, 11.26it/s]Scanning pages 1-150:  99%|█████████▉| 1384/1394 [02:38<00:01,  6.44it/s]Scanning pages 1-150: 100%|██████████| 1394/1394 [02:38<00:00,  8.82it/s]
-Icon patching stats:
-  blocks seen: 1394
-  fields seen: 1015
-  requests submitted: 987
-  invalid retries: 0
-  invalid fallbacks: 6
-  invalid rejected: 0
-  checked: 987
-  patched: 376
-  no missing: 611
-  skipped ignored blocks: 420
-  skipped without bbox: 0
-  skipped without text fields: 0
-  skipped empty fields: 28
-  table continuation blocks: 20
-  table continuation crops: 20
-  inline icon candidates: 40
-  inline icons linked: 40
-  inline icons unlinked: 0
-  page windows: 1
-  LLM batches: 8
-  checkpoints written: 1
-  output: /root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/runs/c10_d200_b140/c10_d200_b140_PATCHED.json

@@ -32,9 +32,15 @@ def create_page_level_chunks(
         if block_type == "image":
             description = str(block.get("image_description_vlm", "")).strip()
             caption = _join_field(block.get("image_caption", [])).strip()
-            if description or caption:
+            footnote = _join_field(block.get("image_footnote", [])).strip()
+            if description or caption or footnote:
+                parts = []
                 label = f"[Image with illustration: {caption}]" if caption else "[Image with illustration]"
-                page_contents[page_idx].append(f"\n{label}\n{description}".strip())
+                if description or caption:
+                    parts.append(f"\n{label}\n{description}".strip())
+                if footnote:
+                    parts.append(f"[Image footnote: {footnote}]")
+                page_contents[page_idx].append("\n".join(parts))
             if block.get("img_path"):
                 page_images[page_idx].append(block["img_path"])
 

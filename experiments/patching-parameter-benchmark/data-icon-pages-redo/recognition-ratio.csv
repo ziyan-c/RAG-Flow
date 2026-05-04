@@ -1,7 +1,0 @@
-scope,dpi,total_cases,correct,partial,wrong,correct_ratio,partial_ratio,wrong_ratio
-all_submitted_fields,200,25,15,1,9,0.6000,0.0400,0.3600
-all_submitted_fields,250,25,17,2,6,0.6800,0.0800,0.2400
-all_submitted_fields,300,25,18,0,7,0.7200,0.0000,0.2800
-icon_required_fields,200,8,5,1,2,0.6250,0.1250,0.2500
-icon_required_fields,250,8,6,2,0,0.7500,0.2500,0.0000
-icon_required_fields,300,8,6,0,2,0.7500,0.0000,0.2500

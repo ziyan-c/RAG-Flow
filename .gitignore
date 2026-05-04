@@ -23,3 +23,8 @@ models/
 .local
 .local/
 .local.backup-*/
+
+# Thesis keeps small data placeholders and curated experiment tables.
+!thesis/**/data/
+!thesis/**/data/.gitkeep
+thesis/**/data/benchmark-runs/

@@ -17,6 +17,7 @@ FIELD_COLORS = {
     "table_body": (0.95, 0.35, 0.05),
     "table_caption": (0.90, 0.70, 0.05),
     "table_footnote": (0.65, 0.20, 0.85),
+    "image_footnote": (0.00, 0.62, 0.62),
     "inline_icon": (0.95, 0.05, 0.15),
 }
 

@@ -1,25 +1,0 @@
-Icon patching job 1/1: /root/autodl-tmp/manuals/public/technical-manual/technical-manual/hybrid_auto
-Scanning pages 1-150:   0%|          | 0/1394 [00:00<?, ?it/s]Scanning pages 1-150:   6%|▌         | 78/1394 [00:18<05:20,  4.11it/s]Scanning pages 1-150:  12%|█▏        | 165/1394 [00:28<03:14,  6.31it/s]Scanning pages 1-150:  19%|█▊        | 260/1394 [00:36<02:22,  7.97it/s]Scanning pages 1-150:  24%|██▎       | 330/1394 [00:36<01:28, 12.01it/s]Scanning pages 1-150:  26%|██▌       | 363/1394 [00:49<02:22,  7.22it/s]Scanning pages 1-150:  30%|██▉       | 413/1394 [00:55<02:12,  7.43it/s]Scanning pages 1-150:  36%|███▌      | 499/1394 [00:55<01:11, 12.59it/s]Scanning pages 1-150:  39%|███▉      | 541/1394 [01:06<01:40,  8.47it/s]Scanning pages 1-150:  42%|████▏     | 587/1394 [01:21<02:18,  5.82it/s]Scanning pages 1-150:  46%|████▋     | 646/1394 [01:21<01:27,  8.55it/s]Scanning pages 1-150:  50%|████▉     | 691/1394 [01:30<01:38,  7.16it/s]Scanning pages 1-150:  54%|█████▍    | 752/1394 [01:35<01:18,  8.19it/s]Scanning pages 1-150:  60%|█████▉    | 834/1394 [01:36<00:41, 13.37it/s]Scanning pages 1-150:  60%|█████▉    | 834/1394 [01:50<00:41, 13.37it/s]Scanning pages 1-150:  61%|██████    | 848/1394 [01:55<01:44,  5.24it/s]Scanning pages 1-150:  67%|██████▋   | 934/1394 [02:05<01:11,  6.40it/s]Scanning pages 1-150:  73%|███████▎  | 1022/1394 [02:15<00:52,  7.03it/s]Scanning pages 1-150:  79%|███████▉  | 1103/1394 [02:23<00:36,  7.95it/s]Scanning pages 1-150:  85%|████████▍ | 1182/1394 [02:32<00:26,  8.11it/s]Scanning pages 1-150:  90%|█████████ | 1259/1394 [02:44<00:17,  7.53it/s]Scanning pages 1-150:  94%|█████████▍| 1316/1394 [02:44<00:07,  9.94it/s]Scanning pages 1-150:  94%|█████████▍| 1316/1394 [03:00<00:07,  9.94it/s]Scanning pages 1-150:  98%|█████████▊| 1360/1394 [03:09<00:06,  5.05it/s]Scanning pages 1-150: 100%|██████████| 1394/1394 [03:09<00:00,  7.37it/s]
-Icon patching stats:
-  blocks seen: 1394
-  fields seen: 1015
-  requests submitted: 987
-  invalid retries: 0
-  invalid fallbacks: 7
-  invalid rejected: 0
-  checked: 987
-  patched: 353
-  no missing: 634
-  skipped ignored blocks: 420
-  skipped without bbox: 0
-  skipped without text fields: 0
-  skipped empty fields: 28
-  table continuation blocks: 20
-  table continuation crops: 20
-  inline icon candidates: 40
-  inline icons linked: 40
-  inline icons unlinked: 0
-  page windows: 1
-  LLM batches: 17
-  checkpoints written: 1
-  output: /root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/runs/c10_d250_b60/c10_d250_b60_PATCHED.json

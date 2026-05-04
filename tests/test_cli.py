@@ -92,6 +92,18 @@ def test_caption_command_delegates_to_image_description_main(monkeypatch):
     assert calls == [["--dry-run"]]
 
 
+def test_benchmark_command_delegates_to_benchmark_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.benchmark.cli
+
+    monkeypatch.setattr(rag_flow.benchmark.cli, "main", lambda argv: calls.append(argv))
+
+    cli.main(["benchmark", "patching", "dpi", "--dry-run"])
+
+    assert calls == [["patching", "dpi", "--dry-run"]]
+
+
 def test_caption_view_command_delegates_to_captioning_view_main(monkeypatch):
     calls: list[list[str]] = []
 

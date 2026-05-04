@@ -1,25 +1,0 @@
-Icon patching job 1/1: /root/autodl-tmp/manuals/public/technical-manual/technical-manual/hybrid_auto
-Scanning pages 1-150:   0%|          | 0/1394 [00:00<?, ?it/s]Scanning pages 1-150:  11%|█▏        | 160/1394 [00:00<00:00, 1549.61it/s]Scanning pages 1-150:  11%|█▏        | 160/1394 [00:19<00:00, 1549.61it/s]Scanning pages 1-150:  21%|██        | 290/1394 [00:34<02:37,  7.01it/s]  Scanning pages 1-150:  35%|███▌      | 493/1394 [00:34<00:58, 15.34it/s]Scanning pages 1-150:  35%|███▌      | 493/1394 [00:50<00:58, 15.34it/s]Scanning pages 1-150:  40%|████      | 564/1394 [01:10<02:12,  6.26it/s]Scanning pages 1-150:  50%|████▉     | 692/1394 [01:10<01:12,  9.68it/s]Scanning pages 1-150:  61%|██████    | 845/1394 [01:10<00:35, 15.48it/s]Scanning pages 1-150:  61%|██████    | 845/1394 [01:30<00:35, 15.48it/s]Scanning pages 1-150:  61%|██████    | 848/1394 [01:47<01:44,  5.22it/s]Scanning pages 1-150:  69%|██████▉   | 961/1394 [01:47<00:53,  8.15it/s]Scanning pages 1-150:  78%|███████▊  | 1091/1394 [01:47<00:23, 12.92it/s]Scanning pages 1-150:  78%|███████▊  | 1091/1394 [02:00<00:23, 12.92it/s]Scanning pages 1-150:  81%|████████  | 1126/1394 [02:16<00:45,  5.91it/s]Scanning pages 1-150:  89%|████████▊ | 1235/1394 [02:16<00:17,  9.17it/s]Scanning pages 1-150:  97%|█████████▋| 1356/1394 [02:16<00:02, 14.29it/s]Scanning pages 1-150: 100%|██████████| 1394/1394 [02:16<00:00, 10.23it/s]
-Icon patching stats:
-  blocks seen: 1394
-  fields seen: 1015
-  requests submitted: 987
-  invalid retries: 0
-  invalid fallbacks: 5
-  invalid rejected: 0
-  checked: 987
-  patched: 356
-  no missing: 631
-  skipped ignored blocks: 420
-  skipped without bbox: 0
-  skipped without text fields: 0
-  skipped empty fields: 28
-  table continuation blocks: 20
-  table continuation crops: 20
-  inline icon candidates: 40
-  inline icons linked: 40
-  inline icons unlinked: 0
-  page windows: 1
-  LLM batches: 5
-  checkpoints written: 1
-  output: /root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/runs/c10_d250_b200/c10_d250_b200_PATCHED.json

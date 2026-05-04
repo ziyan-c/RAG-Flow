@@ -1,4 +1,0 @@
-dpi,name,elapsed_sec,requests_submitted,requests_per_sec,expected_icon_groups,expected_icon_hits,expected_icon_recall,unexpected_marker_proxy,no_missing_passed,no_missing_total,avg_text_retention,quality_proxy,output_json
-200,d200,8.943,25,2.7955,27,13,0.4815,25,0,1,0.9814,4.75,/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_20260503_235315/runs/d200/d200_PATCHED.json
-250,d250,9.765,25,2.5603,27,10,0.3704,28,0,1,0.9834,1.0,/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_20260503_235315/runs/d250/d250_PATCHED.json
-300,d300,11.081,25,2.2561,27,12,0.4444,17,1,1,0.9844,7.75,/root/autodl-tmp/rag-flow-benchmarks/technical-manual/dpi_icon_pages_20260503_235315/runs/d300/d300_PATCHED.json

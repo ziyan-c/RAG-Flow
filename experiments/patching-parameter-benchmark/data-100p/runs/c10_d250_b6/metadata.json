@@ -1,1 +1,0 @@
-{"stage":"batch","name":"c10_d250_b6","dpi":250,"concurrency":10,"batch_size":6,"input_json":"/root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/inputs/technical_manual_page_idx_50_149_content_list.json","output_json":"/root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/runs/c10_d250_b6/c10_d250_b6_PATCHED.json"}

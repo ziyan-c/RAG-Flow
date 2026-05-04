@@ -28,6 +28,7 @@ MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
     "test-retriever": ("rag_flow.retrieval_client", True),
     "chat": ("rag_flow.chat_cli", True),
     "agent-demo": ("rag_flow.agentic", False),
+    "benchmark": ("rag_flow.benchmark.cli", True),
 }
 
 MODULE_HELP: dict[str, str] = {
@@ -43,6 +44,7 @@ MODULE_HELP: dict[str, str] = {
     "test-retriever": "Query the retrieval API from the terminal.",
     "chat": "Start the terminal RAG chat client.",
     "agent-demo": "Run the tool-calling demo.",
+    "benchmark": "Run benchmark workflows.",
 }
 
 MODULE_ENV_PYTHON: dict[str, str] = {
@@ -57,6 +59,7 @@ MODULE_ENV_PYTHON: dict[str, str] = {
     "chat": "RAG_FLOW_PIPELINE_PYTHON_BIN",
     "agent-demo": "RAG_FLOW_PIPELINE_PYTHON_BIN",
     "ingest": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "benchmark": "RAG_FLOW_PIPELINE_PYTHON_BIN",
 }
 
 COMMAND_HELP: dict[str, str] = {

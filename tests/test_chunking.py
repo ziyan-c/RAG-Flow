@@ -20,6 +20,7 @@ def test_create_page_level_chunks(tmp_path):
             "type": "image",
             "page_idx": 1,
             "image_caption": ["Login"],
+            "image_footnote": ["Step 3 Click OK."],
             "image_description_vlm": "A login screen.",
             "img_path": "images/login.png",
         },
@@ -33,4 +34,5 @@ def test_create_page_level_chunks(tmp_path):
     assert chunks[0]["metadata"]["page_idx"] == 0
     assert "Overview" in chunks[0]["page_content"]
     assert "Port 8000" in chunks[1]["page_content"]
+    assert "Step 3 Click OK." in chunks[1]["page_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]

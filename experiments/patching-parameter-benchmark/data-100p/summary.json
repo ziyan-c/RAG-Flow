@@ -1,8 +1,0 @@
-{
-  "best_concurrency_by_throughput": 10,
-  "best_batch_by_throughput": 140,
-  "best_dpi_by_throughput": 200,
-  "runs": 34,
-  "results_csv": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/results.csv",
-  "results_jsonl": "/root/autodl-tmp/rag-flow-benchmarks/technical-manual/page50_150_20260503_202046/results.jsonl"
-}

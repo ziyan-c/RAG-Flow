@@ -9,6 +9,7 @@ import json
 import math
 import re
 import shutil
+import time
 from collections import defaultdict
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -21,7 +22,6 @@ from rag_flow.config import AppConfig
 IGNORE_TYPES = {
     "header",
     "footer",
-    "image",
     "page_number",
     "aside_text",
     "page_footnote",
@@ -51,6 +51,8 @@ TEXT_FIELD_KEYS = {
 }
 NON_PATCH_FIELD_KEYS = {
     "table_caption",
+    "image_caption",
+    "image_description_vlm",
 }
 
 INLINE_ICON_KEY = "vlm-small-icon-inline-icon"
@@ -81,6 +83,7 @@ METADATA_KEYS = {
 CHECKED_FIELDS_KEY = "vlm-small-icon-checked-fields"
 PATCHED_FIELDS_KEY = "vlm-small-icon-patched-fields"
 NO_MISSING_SENTINEL = "NO_MISSING_SAFE"
+BENCHMARK_ORIGINAL_INDEX_KEY = "rag-flow-benchmark-original-index"
 
 
 @dataclass(frozen=True)
@@ -264,14 +267,16 @@ def _patch_field_keys(block: dict[str, Any]) -> list[str]:
 
     keys: list[str] = []
     for key in TEXT_FIELD_MAP.get(str(block_type), []):
-        if key in block:
+        if key in NON_PATCH_FIELD_KEYS:
+            continue
+        if key in block and _join(block.get(key, "")).strip():
             keys.append(key)
     for key, value in block.items():
         if key in NON_PATCH_FIELD_KEYS:
             continue
         if key in keys or key in METADATA_KEYS or key.startswith("vlm-small-icon-"):
             continue
-        if key in TEXT_FIELD_KEYS or isinstance(value, str) or _is_text_list(value):
+        if (key in TEXT_FIELD_KEYS or isinstance(value, str) or _is_text_list(value)) and _join(value).strip():
             keys.append(key)
     return keys
 
@@ -670,6 +675,67 @@ def _window_visual_page_end(
     return min(visual_page_end, max_page_idx)
 
 
+def _iter_page_windows(
+    *,
+    content_data: list[dict[str, Any]],
+    table_continuations: dict[int, list[int]],
+    max_page_idx: int,
+    page_window_size: int,
+    page_indices: set[int] | None,
+) -> Iterator[tuple[int, int, int]]:
+    if page_indices is None:
+        for page_start in range(0, max_page_idx + 1, max(1, page_window_size)):
+            scan_page_end = min(max_page_idx, page_start + max(1, page_window_size) - 1)
+            visual_page_end = _window_visual_page_end(
+                content_data=content_data,
+                table_continuations=table_continuations,
+                page_start=page_start,
+                page_end=scan_page_end,
+                max_page_idx=max_page_idx,
+            )
+            yield page_start, scan_page_end, visual_page_end
+        return
+
+    pages = sorted(page for page in page_indices if 0 <= page <= max_page_idx)
+    if not pages:
+        return
+
+    max_window = max(1, page_window_size)
+    group_start = pages[0]
+    previous = pages[0]
+    for page in pages[1:]:
+        if page == previous + 1 and page - group_start + 1 <= max_window:
+            previous = page
+            continue
+        visual_page_end = _window_visual_page_end(
+            content_data=content_data,
+            table_continuations=table_continuations,
+            page_start=group_start,
+            page_end=previous,
+            max_page_idx=max_page_idx,
+        )
+        yield group_start, previous, visual_page_end
+        group_start = previous = page
+
+    visual_page_end = _window_visual_page_end(
+        content_data=content_data,
+        table_continuations=table_continuations,
+        page_start=group_start,
+        page_end=previous,
+        max_page_idx=max_page_idx,
+    )
+    yield group_start, previous, visual_page_end
+
+
+def _emit_metric(metrics_sink: Any | None, kind: str, payload: dict[str, Any]) -> None:
+    if metrics_sink is None:
+        return
+    emit = getattr(metrics_sink, "emit", None)
+    if emit is None:
+        return
+    emit(kind, payload)
+
+
 def _write_json(path: Path, content_data: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
@@ -784,7 +850,13 @@ def request_icon_patch_from_llm(
     prompt: str,
     max_tokens: int,
 ) -> str:
-    from openai import APIConnectionError, APIStatusError, APITimeoutError
+    try:
+        from openai import APIConnectionError, APIStatusError, APITimeoutError
+    except ModuleNotFoundError:
+        class _OpenAIUnavailableError(Exception):
+            pass
+
+        APIConnectionError = APIStatusError = APITimeoutError = _OpenAIUnavailableError
 
     try:
         response = client.chat.completions.create(
@@ -916,6 +988,84 @@ def request_valid_icon_patch_from_llm(
         current_prompt = build_icon_patch_retry_prompt(prompt=prompt, invalid_reason=invalid_reason)
 
 
+def _request_metric_base(req: dict[str, Any], *, batch_id: int) -> dict[str, Any]:
+    image = req.get("image")
+    width = getattr(image, "width", None)
+    height = getattr(image, "height", None)
+    pixels = int(width) * int(height) if isinstance(width, int) and isinstance(height, int) else None
+    original_index = req.get("original_idx", req.get("idx"))
+    return {
+        "batch_id": batch_id,
+        "field_id": f"{original_index}:{req.get('key')}",
+        "block_idx": req.get("idx"),
+        "original_block_idx": original_index,
+        "page_idx": req.get("page_idx"),
+        "pdf_page": int(req.get("page_idx", 0)) + 1 if req.get("page_idx") is not None else None,
+        "block_type": req.get("block_type"),
+        "field": req.get("key"),
+        "image_width": width,
+        "image_height": height,
+        "image_pixels": pixels,
+        "original_text_chars": len(str(req.get("original_text", ""))),
+    }
+
+
+def _run_icon_patch_request(
+    req: dict[str, Any],
+    *,
+    client: Any,
+    model: str,
+    max_tokens: int,
+    invalid_retry_limit: int,
+    batch_id: int,
+    metrics_sink: Any | None,
+) -> tuple[str, int, str | None, dict[str, Any]]:
+    started_at = time.time()
+    started_perf = time.perf_counter()
+    event = _request_metric_base(req, batch_id=batch_id)
+    event["started_at"] = started_at
+    try:
+        output, retries, invalid_reason = request_valid_icon_patch_from_llm(
+            client=client,
+            model=model,
+            image=req["image"],
+            prompt=req["prompt"],
+            original_text=req["original_text"],
+            field_key=req["key"],
+            max_tokens=max_tokens,
+            invalid_retry_limit=invalid_retry_limit,
+        )
+    except Exception as exc:
+        ended_at = time.time()
+        event.update(
+            {
+                "ended_at": ended_at,
+                "duration_s": time.perf_counter() - started_perf,
+                "status": "error",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "written": False,
+            }
+        )
+        _emit_metric(metrics_sink, "request", event)
+        raise
+
+    ended_at = time.time()
+    event.update(
+        {
+            "ended_at": ended_at,
+            "duration_s": time.perf_counter() - started_perf,
+            "status": "ok",
+            "error_type": None,
+            "error": None,
+            "retries": retries,
+            "invalid_reason": invalid_reason,
+            "output_chars": len(output),
+        }
+    )
+    return output, retries, invalid_reason, event
+
+
 def iter_icon_patch_results(
     requests: list[dict[str, Any]],
     *,
@@ -924,42 +1074,42 @@ def iter_icon_patch_results(
     max_tokens: int,
     concurrency: int,
     invalid_retry_limit: int,
-) -> Iterator[tuple[dict[str, Any], str, int, str | None]]:
+    batch_id: int = 0,
+    metrics_sink: Any | None = None,
+) -> Iterator[tuple[dict[str, Any], str, int, str | None, dict[str, Any]]]:
     if concurrency <= 1 or len(requests) <= 1:
         for req in requests:
-            output, retries, invalid_reason = request_valid_icon_patch_from_llm(
+            output, retries, invalid_reason, event = _run_icon_patch_request(
+                req,
                 client=client,
                 model=model,
-                image=req["image"],
-                prompt=req["prompt"],
-                original_text=req["original_text"],
-                field_key=req["key"],
                 max_tokens=max_tokens,
                 invalid_retry_limit=invalid_retry_limit,
+                batch_id=batch_id,
+                metrics_sink=metrics_sink,
             )
-            yield req, output, retries, invalid_reason
+            yield req, output, retries, invalid_reason, event
         return
 
     max_workers = min(concurrency, len(requests))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_request = {
             executor.submit(
-                request_valid_icon_patch_from_llm,
+                _run_icon_patch_request,
+                req,
                 client=client,
                 model=model,
-                image=req["image"],
-                prompt=req["prompt"],
-                original_text=req["original_text"],
-                field_key=req["key"],
                 max_tokens=max_tokens,
                 invalid_retry_limit=invalid_retry_limit,
+                batch_id=batch_id,
+                metrics_sink=metrics_sink,
             ): req
             for req in requests
         }
         try:
             for future in as_completed(future_to_request):
-                output, retries, invalid_reason = future.result()
-                yield future_to_request[future], output, retries, invalid_reason
+                output, retries, invalid_reason, event = future.result()
+                yield future_to_request[future], output, retries, invalid_reason, event
         except Exception:
             for future in future_to_request:
                 future.cancel()
@@ -1186,6 +1336,8 @@ def add_small_icon_text(
     resume: bool = True,
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
+    page_indices: set[int] | None = None,
+    metrics_sink: Any | None = None,
 ) -> None:
     try:
         from pdf2image import convert_from_path
@@ -1249,9 +1401,26 @@ def add_small_icon_text(
     stats.inline_icon_linked = len(inline_icon_links.by_icon)
     stats.inline_icon_unlinked = stats.inline_icon_candidates - stats.inline_icon_linked
 
-    def write_checkpoint() -> None:
+    def write_checkpoint(reason: str) -> None:
+        started_at = time.time()
+        started_perf = time.perf_counter()
         _write_json(checkpoint_path, content_data)
         stats.checkpoints_written += 1
+        _emit_metric(
+            metrics_sink,
+            "checkpoint",
+            {
+                "reason": reason,
+                "path": str(checkpoint_path),
+                "checkpoint_index": stats.checkpoints_written,
+                "batches_processed": stats.batches_processed,
+                "requests_submitted": stats.requests_submitted,
+                "started_at": started_at,
+                "ended_at": time.time(),
+                "duration_s": time.perf_counter() - started_perf,
+                "file_size_bytes": checkpoint_path.stat().st_size if checkpoint_path.exists() else 0,
+            },
+        )
 
     def process_batch(requests: list[dict[str, Any]]) -> None:
         if not requests:
@@ -1259,13 +1428,16 @@ def add_small_icon_text(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        for req, output, retries, invalid_reason in iter_icon_patch_results(
+        batch_id = stats.batches_processed
+        for req, output, retries, invalid_reason, request_event in iter_icon_patch_results(
             requests,
             client=llm_client,
             model=llm_model,
             max_tokens=max_new_tokens,
             concurrency=concurrency,
             invalid_retry_limit=invalid_retry_limit,
+            batch_id=batch_id,
+            metrics_sink=metrics_sink,
         ):
             stats.invalid_retries += retries
             idx = req["idx"]
@@ -1273,6 +1445,8 @@ def add_small_icon_text(
             block = content_data[idx]
             _mark_checked(block, key)
             stats.checked_count += 1
+            decision = "unchanged"
+            written = False
             if invalid_reason is not None:
                 fallback_output = None
                 if invalid_reason == "only icon output":
@@ -1287,11 +1461,16 @@ def add_small_icon_text(
                 ):
                     output = fallback_output
                     stats.invalid_fallbacks += 1
+                    decision = "fallback"
                 else:
                     stats.invalid_rejected += 1
+                    request_event.update({"decision": "invalid_rejected", "written": False})
+                    _emit_metric(metrics_sink, "request", request_event)
                     continue
             if is_no_missing_response(output):
                 stats.no_missing_count += 1
+                request_event.update({"decision": "no_missing", "written": False})
+                _emit_metric(metrics_sink, "request", request_event)
                 continue
 
             if should_apply_icon_patch(
@@ -1302,10 +1481,15 @@ def add_small_icon_text(
                 content_data[idx][key] = output.split("\n") if req["is_list"] else output
                 _mark_patched(content_data[idx], key)
                 stats.patched_count += 1
+                decision = "patched" if decision == "unchanged" else f"{decision}_patched"
+                written = True
+
+            request_event.update({"decision": decision, "written": written})
+            _emit_metric(metrics_sink, "request", request_event)
 
         gc.collect()
         if checkpoint_interval > 0 and stats.batches_processed % checkpoint_interval == 0:
-            write_checkpoint()
+            write_checkpoint("interval")
 
     try:
         if max_page_idx < 0:
@@ -1314,15 +1498,15 @@ def add_small_icon_text(
             _print_stats(stats, output_path)
             return
 
-        for page_start in range(0, max_page_idx + 1, max(1, page_window_size)):
-            scan_page_end = min(max_page_idx, page_start + max(1, page_window_size) - 1)
-            visual_page_end = _window_visual_page_end(
-                content_data=content_data,
-                table_continuations=table_continuations,
-                page_start=page_start,
-                page_end=scan_page_end,
-                max_page_idx=max_page_idx,
-            )
+        for page_start, scan_page_end, visual_page_end in _iter_page_windows(
+            content_data=content_data,
+            table_continuations=table_continuations,
+            max_page_idx=max_page_idx,
+            page_window_size=page_window_size,
+            page_indices=page_indices,
+        ):
+            render_started_at = time.time()
+            render_started_perf = time.perf_counter()
             pdf_images = convert_from_path(
                 str(pdf_path),
                 dpi=dpi,
@@ -1330,6 +1514,24 @@ def add_small_icon_text(
                 last_page=visual_page_end + 1,
             )
             stats.windows_processed += 1
+            _emit_metric(
+                metrics_sink,
+                "render",
+                {
+                    "window_index": stats.windows_processed,
+                    "page_start_idx": page_start,
+                    "scan_page_end_idx": scan_page_end,
+                    "visual_page_end_idx": visual_page_end,
+                    "first_pdf_page": page_start + 1,
+                    "last_scan_pdf_page": scan_page_end + 1,
+                    "last_visual_pdf_page": visual_page_end + 1,
+                    "pages_rendered": len(pdf_images),
+                    "dpi": dpi,
+                    "started_at": render_started_at,
+                    "ended_at": time.time(),
+                    "duration_s": time.perf_counter() - render_started_perf,
+                },
+            )
 
             batch: list[dict[str, Any]] = []
             for idx in tqdm(range(len(content_data)), desc=f"Scanning pages {page_start + 1}-{scan_page_end + 1}"):
@@ -1405,6 +1607,7 @@ def add_small_icon_text(
                             "key": key,
                             "block_type": block.get("type"),
                             "page_idx": page_idx,
+                            "original_idx": block.get(BENCHMARK_ORIGINAL_INDEX_KEY, idx),
                             "original_text": original_text,
                             "is_list": is_list,
                             "image": final_image,
@@ -1420,10 +1623,10 @@ def add_small_icon_text(
 
             del pdf_images
             gc.collect()
-            write_checkpoint()
+            write_checkpoint("page_window")
 
     except Exception:
-        write_checkpoint()
+        write_checkpoint("failure")
         print(f"Icon patching checkpoint saved before failure: {checkpoint_path}")
         raise
 
