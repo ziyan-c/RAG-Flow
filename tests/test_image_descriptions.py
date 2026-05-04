@@ -1,6 +1,8 @@
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from rag_flow.preprocessing.image_descriptions import (
     captioned_json_path_for,
     checkpoint_path_for,
@@ -8,6 +10,7 @@ from rag_flow.preprocessing.image_descriptions import (
     collect_image_description_stats,
     get_surrounding_text_context,
     request_image_description_from_llm,
+    resize_image_for_captioning,
     resolve_image_description_artifacts,
     should_caption_image_block,
 )
@@ -108,6 +111,17 @@ def test_context_token_stats_reports_budget_hits():
     assert stats.contexts == 1
     assert stats.max_tokens <= 20
     assert stats.contexts_at_budget == 1
+
+
+def test_resize_image_for_captioning_preserves_aspect_ratio():
+    Image = pytest.importorskip("PIL.Image")
+
+    image = Image.new("RGB", (4000, 2000), "white")
+    resized = resize_image_for_captioning(image, 1000)
+
+    assert resized.size == (1000, 500)
+    assert resize_image_for_captioning(image, 0).size == (4000, 2000)
+    assert resize_image_for_captioning(Image.new("RGB", (800, 400), "white"), 1000).size == (800, 400)
 
 
 def test_dry_run_stats_can_load_json(tmp_path):

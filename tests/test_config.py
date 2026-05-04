@@ -146,6 +146,7 @@ def test_captioning_defaults(tmp_path, monkeypatch):
 
     assert config.captioning.max_new_tokens == 8000
     assert config.captioning.max_context_tokens == 10000
+    assert config.captioning.max_image_side == 0
     assert config.captioning.batch_size == 4
     assert config.captioning.concurrency == 1
     assert config.captioning.llm_timeout == 120.0
@@ -159,6 +160,7 @@ def test_captioning_reads_local_env(tmp_path, monkeypatch):
             [
                 "RAG_FLOW_CAPTION_MAX_NEW_TOKENS=6000",
                 "RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS=7000",
+                "RAG_FLOW_CAPTION_MAX_IMAGE_SIDE=1536",
                 "RAG_FLOW_CAPTION_BATCH_SIZE=2",
                 "RAG_FLOW_CAPTION_CONCURRENCY=3",
                 "RAG_FLOW_CAPTION_LLM_TIMEOUT=45.5",
@@ -173,6 +175,7 @@ def test_captioning_reads_local_env(tmp_path, monkeypatch):
 
     assert config.captioning.max_new_tokens == 6000
     assert config.captioning.max_context_tokens == 7000
+    assert config.captioning.max_image_side == 1536
     assert config.captioning.batch_size == 2
     assert config.captioning.concurrency == 3
     assert config.captioning.llm_timeout == 45.5

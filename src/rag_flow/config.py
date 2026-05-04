@@ -186,6 +186,7 @@ class CaptioningConfig:
     max_new_tokens: int
     max_context_tokens: int
     batch_size: int
+    max_image_side: int = 0
     concurrency: int = 1
     llm_timeout: float = 120.0
 
@@ -298,6 +299,7 @@ class AppConfig:
             max_new_tokens=env.int("RAG_FLOW_CAPTION_MAX_NEW_TOKENS", 8000),
             max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 10000),
             batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 4),
+            max_image_side=env.int("RAG_FLOW_CAPTION_MAX_IMAGE_SIDE", 0),
             concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 1),
             llm_timeout=env.float("RAG_FLOW_CAPTION_LLM_TIMEOUT", 120.0),
         )

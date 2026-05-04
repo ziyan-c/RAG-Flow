@@ -114,6 +114,7 @@ def run_ingest(
             batch_size=config.captioning.batch_size,
             concurrency=config.captioning.concurrency,
             max_context_tokens=config.captioning.max_context_tokens,
+            max_image_side=config.captioning.max_image_side,
             llm_base_url=config.models.llm_base_url,
             llm_api_key=config.models.llm_api_key,
             llm_timeout=config.captioning.llm_timeout,

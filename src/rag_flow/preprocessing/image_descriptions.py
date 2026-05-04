@@ -250,6 +250,21 @@ def _truncate_text(text: str, max_chars: int) -> str:
     return text[: max_chars - len(marker)].rstrip() + marker
 
 
+def resize_image_for_captioning(image: Any, max_image_side: int) -> Any:
+    if max_image_side <= 0:
+        return image
+    width, height = image.size
+    longest_side = max(width, height)
+    if longest_side <= max_image_side:
+        return image
+    scale = max_image_side / longest_side
+    new_size = (max(1, round(width * scale)), max(1, round(height * scale)))
+    from PIL import Image as PILImage
+
+    resampling = getattr(getattr(PILImage, "Resampling", None), "LANCZOS", PILImage.LANCZOS)
+    return image.resize(new_size, resampling)
+
+
 def _take_by_estimated_tokens(
     text: str,
     max_tokens: int,
@@ -682,6 +697,7 @@ def add_image_descriptions(
     batch_size: int = 4,
     concurrency: int = 1,
     max_context_tokens: int = DEFAULT_CAPTION_MAX_CONTEXT_TOKENS,
+    max_image_side: int = 0,
     llm_base_url: str = "http://localhost:8080/v1",
     llm_api_key: str = "EMPTY",
     llm_timeout: float = 120.0,
@@ -760,6 +776,7 @@ def add_image_descriptions(
 
             try:
                 image = Image.open(image_path).convert("RGB")
+                image = resize_image_for_captioning(image, max_image_side)
             except Exception as exc:
                 stats.failed_image_reads += 1
                 print(f"Warning: failed to read {image_path}: {exc}")
@@ -832,6 +849,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--batch-size", type=int, default=config.captioning.batch_size)
     parser.add_argument("--concurrency", type=int, default=config.captioning.concurrency)
     parser.add_argument("--max-context-tokens", type=int, default=config.captioning.max_context_tokens)
+    parser.add_argument(
+        "--max-image-side",
+        type=int,
+        default=config.captioning.max_image_side,
+        help="Resize captioning images so their longest side is at most this many pixels; 0 keeps original size.",
+    )
     parser.add_argument("--checkpoint-interval", type=int, default=1)
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
@@ -887,6 +910,7 @@ def main(argv: list[str] | None = None) -> None:
 
                 print(f"  captioning_view_pdf: {args.captioning_view_pdf or captioning_view_path_for(artifacts.input_json)}")
             print(f"  max_context_tokens: {args.max_context_tokens}")
+            print(f"  max_image_side: {args.max_image_side}")
             print(f"  max_new_tokens: {args.max_new_tokens}")
             print(f"  batch_size: {args.batch_size}")
             print(f"  concurrency: {args.concurrency}")
@@ -924,6 +948,7 @@ def main(argv: list[str] | None = None) -> None:
             batch_size=args.batch_size,
             concurrency=args.concurrency,
             max_context_tokens=args.max_context_tokens,
+            max_image_side=args.max_image_side,
             llm_base_url=args.llm_base_url,
             llm_api_key=args.llm_api_key,
             llm_timeout=args.request_timeout,
