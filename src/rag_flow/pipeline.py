@@ -118,6 +118,7 @@ def run_ingest(
             llm_base_url=config.models.llm_base_url,
             llm_api_key=config.models.llm_api_key,
             llm_timeout=config.captioning.llm_timeout,
+            checkpoint_interval=config.captioning.checkpoint_interval,
         )
 
     def chunk_pages() -> None:

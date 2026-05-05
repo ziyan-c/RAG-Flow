@@ -188,6 +188,7 @@ class CaptioningConfig:
     batch_size: int
     max_image_side: int = 0
     concurrency: int = 1
+    checkpoint_interval: int = 1
     llm_timeout: float = 120.0
 
 
@@ -287,9 +288,9 @@ class AppConfig:
         patching = PatchingConfig(
             max_new_tokens=env.int("RAG_FLOW_PATCH_MAX_NEW_TOKENS", 8000),
             llm_timeout=env.float("RAG_FLOW_PATCH_LLM_TIMEOUT", 120.0),
-            batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 140),
-            concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 10),
-            checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 30),
+            batch_size=env.int("RAG_FLOW_PATCH_BATCH_SIZE", 512),
+            concurrency=env.int("RAG_FLOW_PATCH_CONCURRENCY", 8),
+            checkpoint_interval=env.int("RAG_FLOW_PATCH_CHECKPOINT_INTERVAL", 1),
             invalid_retry_limit=env.int("RAG_FLOW_PATCH_INVALID_RETRY_LIMIT", 0),
             dpi=env.int("RAG_FLOW_PATCH_DPI", 250),
             page_window_size=env.int("RAG_FLOW_PATCH_PAGE_WINDOW_SIZE", 200),
@@ -297,10 +298,11 @@ class AppConfig:
 
         captioning = CaptioningConfig(
             max_new_tokens=env.int("RAG_FLOW_CAPTION_MAX_NEW_TOKENS", 8000),
-            max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 10000),
-            batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 4),
-            max_image_side=env.int("RAG_FLOW_CAPTION_MAX_IMAGE_SIDE", 0),
-            concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 1),
+            max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 2000),
+            batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 32),
+            max_image_side=env.int("RAG_FLOW_CAPTION_MAX_IMAGE_SIDE", 2048),
+            concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 6),
+            checkpoint_interval=env.int("RAG_FLOW_CAPTION_CHECKPOINT_INTERVAL", 1),
             llm_timeout=env.float("RAG_FLOW_CAPTION_LLM_TIMEOUT", 120.0),
         )
 

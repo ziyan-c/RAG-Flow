@@ -97,9 +97,9 @@ def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
 
     assert config.patching.max_new_tokens == 8000
     assert config.patching.llm_timeout == 120.0
-    assert config.patching.batch_size == 140
-    assert config.patching.concurrency == 10
-    assert config.patching.checkpoint_interval == 30
+    assert config.patching.batch_size == 512
+    assert config.patching.concurrency == 8
+    assert config.patching.checkpoint_interval == 1
     assert config.patching.invalid_retry_limit == 0
     assert config.patching.dpi == 250
     assert config.patching.page_window_size == 200
@@ -145,10 +145,11 @@ def test_captioning_defaults(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.captioning.max_new_tokens == 8000
-    assert config.captioning.max_context_tokens == 10000
-    assert config.captioning.max_image_side == 0
-    assert config.captioning.batch_size == 4
-    assert config.captioning.concurrency == 1
+    assert config.captioning.max_context_tokens == 2000
+    assert config.captioning.max_image_side == 2048
+    assert config.captioning.batch_size == 32
+    assert config.captioning.concurrency == 6
+    assert config.captioning.checkpoint_interval == 1
     assert config.captioning.llm_timeout == 120.0
 
 
@@ -163,6 +164,7 @@ def test_captioning_reads_local_env(tmp_path, monkeypatch):
                 "RAG_FLOW_CAPTION_MAX_IMAGE_SIDE=1536",
                 "RAG_FLOW_CAPTION_BATCH_SIZE=2",
                 "RAG_FLOW_CAPTION_CONCURRENCY=3",
+                "RAG_FLOW_CAPTION_CHECKPOINT_INTERVAL=7",
                 "RAG_FLOW_CAPTION_LLM_TIMEOUT=45.5",
             ]
         ),
@@ -178,4 +180,5 @@ def test_captioning_reads_local_env(tmp_path, monkeypatch):
     assert config.captioning.max_image_side == 1536
     assert config.captioning.batch_size == 2
     assert config.captioning.concurrency == 3
+    assert config.captioning.checkpoint_interval == 7
     assert config.captioning.llm_timeout == 45.5

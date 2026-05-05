@@ -874,16 +874,13 @@ def add_image_descriptions(
 
     try:
         batch: list[dict[str, Any]] = []
-        for idx in tqdm(range(len(content_data)), desc="Processing images"):
+        candidate_indices = [
+            idx
+            for idx, block in enumerate(content_data)
+            if isinstance(block, dict) and _is_caption_candidate(block, skip_existing=skip_existing)
+        ]
+        for idx in tqdm(candidate_indices, desc="Processing images"):
             block = content_data[idx]
-            if not isinstance(block, dict) or block.get("type") != "image":
-                continue
-            if any(block.get(key) for key in INLINE_ICON_SKIP_KEYS):
-                continue
-            if not block.get("img_path"):
-                continue
-            if not _is_caption_candidate(block, skip_existing=skip_existing):
-                continue
             image_path = base_path / block["img_path"]
             if not image_path.exists():
                 print(f"Warning: image not found: {image_path}")
@@ -1013,7 +1010,7 @@ def main(argv: list[str] | None = None) -> None:
         default=config.captioning.max_image_side,
         help="Resize captioning images so their longest side is at most this many pixels; 0 keeps original size.",
     )
-    parser.add_argument("--checkpoint-interval", type=int, default=1)
+    parser.add_argument("--checkpoint-interval", type=int, default=config.captioning.checkpoint_interval)
     parser.add_argument("--checkpoint-json")
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--no-skip-existing", action="store_true")
@@ -1050,6 +1047,8 @@ def main(argv: list[str] | None = None) -> None:
         parser.error("--checkpoint-json can only be used with a single captioning job.")
     if len(artifacts_list) > 1 and args.captioning_view_pdf:
         parser.error("--captioning-view-pdf can only be used with a single captioning job.")
+    if args.checkpoint_interval < 0:
+        parser.error("--checkpoint-interval must be >= 0.")
 
     if args.dry_run:
         print(f"Image captioning jobs: {len(artifacts_list)}")
@@ -1072,6 +1071,7 @@ def main(argv: list[str] | None = None) -> None:
             print(f"  max_new_tokens: {args.max_new_tokens}")
             print(f"  batch_size: {args.batch_size}")
             print(f"  concurrency: {args.concurrency}")
+            print(f"  checkpoint_interval: {args.checkpoint_interval}")
             print(f"  llm_base_url: {args.llm_base_url}")
             print(f"  llm_model: {args.model}")
             print(f"  request_timeout: {args.request_timeout}")
