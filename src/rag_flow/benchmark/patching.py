@@ -15,6 +15,7 @@ import threading
 import time
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,8 @@ ACTION_PATTERN = re.compile(
     r"\b(click|select|choose|tap|press|hover|open|close|delete|edit|add|upload|download|import|export|save|send)\b",
     re.IGNORECASE,
 )
+ICON_TAG_PATTERN = re.compile(r"\[Icon:[^\]]+\]", re.IGNORECASE)
+MARKDOWN_BOLD_PATTERN = re.compile(r"\*\*([^*]+)\*\*")
 
 
 @dataclass(frozen=True)
@@ -336,6 +339,8 @@ def write_quality_scoring_template(
                 "wrong_icons": "",
                 "missed_targets": "",
                 "false_positives": "",
+                "overall_patch_quality_score": "",
+                "text_preserved": "",
                 "human_notes": "",
             }
             if page_idx in quality_pages:
@@ -362,6 +367,8 @@ def write_quality_scoring_template(
         "wrong_icons",
         "missed_targets",
         "false_positives",
+        "overall_patch_quality_score",
+        "text_preserved",
         "human_notes",
     ]
     with output_csv.open("w", encoding="utf-8", newline="") as f:
@@ -404,6 +411,8 @@ def _collect_quality_rows(
                 "wrong_icons": "",
                 "missed_targets": "",
                 "false_positives": "",
+                "overall_patch_quality_score": "",
+                "text_preserved": "",
                 "human_notes": "",
             }
             if page_idx in quality_pages:
@@ -501,6 +510,8 @@ def write_quality_review_samples(
         "wrong_icons",
         "missed_targets",
         "false_positives",
+        "overall_patch_quality_score",
+        "text_preserved",
         "review_notes",
     ]
     with score_template_csv.open("w", encoding="utf-8", newline="") as f:
@@ -521,6 +532,8 @@ def write_quality_review_samples(
                         "wrong_icons": "",
                         "missed_targets": "",
                         "false_positives": "",
+                        "overall_patch_quality_score": "",
+                        "text_preserved": "",
                         "review_notes": "",
                     }
                 )
@@ -717,9 +730,130 @@ def _safe_float(value: Any) -> float:
         return 0.0
 
 
+def _optional_float(value: Any) -> float | None:
+    if value is None or str(value).strip() == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_int(value: Any) -> int:
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return 0
+
+
 def _mean(values: Iterable[float]) -> float:
     values = [value for value in values if value is not None]
     return (sum(values) / len(values)) if values else 0.0
+
+
+def _normalize_for_text_preservation(text: str) -> str:
+    text = ICON_TAG_PATTERN.sub(" ", text)
+    text = MARKDOWN_BOLD_PATTERN.sub(r"\1", text)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"[\s\W_]+", " ", text.lower(), flags=re.UNICODE)
+    return " ".join(text.split())
+
+
+def infer_text_preserved(original_text: str, patched_text: str) -> int:
+    original = _normalize_for_text_preservation(original_text)
+    patched = _normalize_for_text_preservation(patched_text)
+    if not original:
+        return 1
+    if not patched:
+        return 0
+    if original in patched or patched in original:
+        return 1
+    return 1 if SequenceMatcher(None, original, patched).ratio() >= 0.86 else 0
+
+
+def derive_overall_patch_quality_score(row: dict[str, Any], *, text_preserved: int = 1) -> int:
+    if not text_preserved:
+        return 0
+
+    target_icons = _safe_int(row.get("target_icons"))
+    strict_hits = _safe_int(row.get("strict_hits"))
+    wrong_icons = _safe_int(row.get("wrong_icons"))
+    missed_targets = _safe_int(row.get("missed_targets"))
+    false_positives = _safe_int(row.get("false_positives"))
+
+    if target_icons <= 0:
+        if false_positives <= 0:
+            return 5
+        if false_positives == 1:
+            return 3
+        if false_positives == 2:
+            return 2
+        return 1
+
+    score = 5.0 - missed_targets * 2.0 - wrong_icons * 1.5 - false_positives * 1.0
+    recall = strict_hits / target_icons if target_icons else 0.0
+    if strict_hits == 0 and (wrong_icons or missed_targets):
+        score = min(score, 2.0)
+    elif recall < 0.5:
+        score = min(score, 2.0)
+    elif recall < 0.8:
+        score = min(score, 3.0)
+
+    return max(0, min(5, int(score + 0.5)))
+
+
+def _worklist_key(row: dict[str, Any]) -> tuple[str, str]:
+    return (str(row.get("dpi", "")), str(row.get("sample_id", "")))
+
+
+def backfill_quality_scores(
+    *,
+    scores_csv: Path,
+    worklist_csv: Path | None = None,
+    output_csv: Path | None = None,
+) -> dict[str, Any]:
+    rows = list(csv.DictReader(scores_csv.open(encoding="utf-8")))
+    if not rows:
+        return {"rows": 0, "text_preserved_zero": 0, "score_avg": 0.0, "output_csv": str(output_csv or scores_csv)}
+
+    worklist_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    if worklist_csv and worklist_csv.exists():
+        with worklist_csv.open(encoding="utf-8") as f:
+            worklist_by_key = {_worklist_key(row): row for row in csv.DictReader(f)}
+
+    updated_rows: list[dict[str, Any]] = []
+    text_preserved_zero = 0
+    score_total = 0
+    for row in rows:
+        work = worklist_by_key.get(_worklist_key(row), {})
+        text_preserved = infer_text_preserved(
+            str(work.get("original_text", "")),
+            str(work.get("patched_text", "")),
+        ) if work else 1
+        score = derive_overall_patch_quality_score(row, text_preserved=text_preserved)
+        updated = dict(row)
+        updated["overall_patch_quality_score"] = str(score)
+        updated["text_preserved"] = str(text_preserved)
+        updated_rows.append(updated)
+        text_preserved_zero += 1 if text_preserved == 0 else 0
+        score_total += score
+
+    output_path = output_csv or scores_csv
+    fieldnames = list(rows[0].keys())
+    for field in ("overall_patch_quality_score", "text_preserved"):
+        if field not in fieldnames:
+            fieldnames.append(field)
+    with output_path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(updated_rows)
+
+    return {
+        "rows": len(updated_rows),
+        "text_preserved_zero": text_preserved_zero,
+        "score_avg": score_total / len(updated_rows),
+        "output_csv": str(output_path),
+    }
 
 
 def _summarize_gpu_csv(path: Path) -> dict[str, Any]:
@@ -1053,30 +1187,68 @@ def _write_quality_charts(output_dir: Path, report_dir: Path, charts_dir: Path) 
                 "wrong_icons": 0.0,
                 "missed_targets": 0.0,
                 "false_positives": 0.0,
+                "overall_patch_quality_score_total": 0.0,
+                "overall_patch_quality_score_count": 0.0,
+                "text_preserved_total": 0.0,
+                "text_preserved_count": 0.0,
             },
         )
-        for key in bucket:
+        for key in ("target_icons", "strict_hits", "wrong_icons", "missed_targets", "false_positives"):
             bucket[key] += _safe_float(row.get(key))
+        overall_score = _optional_float(row.get("overall_patch_quality_score"))
+        if overall_score is not None:
+            bucket["overall_patch_quality_score_total"] += overall_score
+            bucket["overall_patch_quality_score_count"] += 1.0
+        text_preserved = _optional_float(row.get("text_preserved"))
+        if text_preserved is not None:
+            bucket["text_preserved_total"] += text_preserved
+            bucket["text_preserved_count"] += 1.0
     if not grouped:
         return []
 
     summary_rows = []
     hit_points = []
     miss_points = []
+    overall_score_points = []
+    text_preserved_points = []
     for dpi, values in sorted(grouped.items()):
         target_icons = values["target_icons"]
         strict_hit_ratio = values["strict_hits"] / target_icons * 100.0 if target_icons else 0.0
         miss_rate = values["missed_targets"] / target_icons * 100.0 if target_icons else 0.0
+        overall_score_count = values["overall_patch_quality_score_count"]
+        overall_score_avg = (
+            values["overall_patch_quality_score_total"] / overall_score_count
+            if overall_score_count
+            else 0.0
+        )
+        text_preserved_count = values["text_preserved_count"]
+        text_preserved_ratio = (
+            values["text_preserved_total"] / text_preserved_count * 100.0
+            if text_preserved_count
+            else 0.0
+        )
         summary_rows.append(
             {
                 "dpi": int(dpi),
-                **values,
+                "target_icons": values["target_icons"],
+                "strict_hits": values["strict_hits"],
+                "wrong_icons": values["wrong_icons"],
+                "missed_targets": values["missed_targets"],
+                "false_positives": values["false_positives"],
                 "strict_hit_ratio_pct": strict_hit_ratio,
                 "miss_rate_pct": miss_rate,
+                "overall_patch_quality_score_avg": overall_score_avg,
+                "text_preserved_ratio_pct": text_preserved_ratio,
+                "overall_patch_quality_score_count": overall_score_count,
+                "text_preserved_count": text_preserved_count,
             }
         )
         hit_points.append((dpi, strict_hit_ratio, int(target_icons)))
         miss_points.append((dpi, miss_rate, int(target_icons)))
+        if overall_score_count:
+            overall_score_points.append((dpi, overall_score_avg, int(overall_score_count)))
+        if text_preserved_count:
+            text_preserved_points.append((dpi, text_preserved_ratio, int(text_preserved_count)))
 
     with (report_dir / "quality_summary.csv").open("w", encoding="utf-8", newline="") as f:
         fieldnames = [
@@ -1088,6 +1260,10 @@ def _write_quality_charts(output_dir: Path, report_dir: Path, charts_dir: Path) 
             "false_positives",
             "strict_hit_ratio_pct",
             "miss_rate_pct",
+            "overall_patch_quality_score_avg",
+            "overall_patch_quality_score_count",
+            "text_preserved_ratio_pct",
+            "text_preserved_count",
         ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -1112,6 +1288,24 @@ def _write_quality_charts(output_dir: Path, report_dir: Path, charts_dir: Path) 
         stroke="#dc2626",
     ):
         chart_files.append(("quality_miss_rate.svg", "DPI 复核质量评分：Miss Rate"))
+    if _write_line_svg(
+        points=overall_score_points,
+        output_path=charts_dir / "quality_overall_patch_score.svg",
+        title="DPI 复核质量评分：Overall Patch Quality",
+        x_label="DPI",
+        y_label="overall patch quality (0-5)",
+        stroke="#7c3aed",
+    ):
+        chart_files.append(("quality_overall_patch_score.svg", "DPI 复核质量评分：Overall Patch Quality"))
+    if _write_line_svg(
+        points=text_preserved_points,
+        output_path=charts_dir / "quality_text_preserved_ratio.svg",
+        title="DPI 复核质量评分：Text Preserved Ratio",
+        x_label="DPI",
+        y_label="text preserved (%)",
+        stroke="#0f766e",
+    ):
+        chart_files.append(("quality_text_preserved_ratio.svg", "DPI 复核质量评分：Text Preserved Ratio"))
     return chart_files
 
 
@@ -1168,6 +1362,8 @@ def write_quality_review_worklist(output_dir: Path, report_dir: Path) -> Path | 
                     "wrong_icons": "",
                     "missed_targets": "",
                     "false_positives": "",
+                    "overall_patch_quality_score": "",
+                    "text_preserved": "",
                     "review_decision": "",
                     "review_notes": "",
                 }
@@ -1194,6 +1390,8 @@ def write_quality_review_worklist(output_dir: Path, report_dir: Path) -> Path | 
         "wrong_icons",
         "missed_targets",
         "false_positives",
+        "overall_patch_quality_score",
+        "text_preserved",
         "review_decision",
         "review_notes",
     ]
@@ -1373,7 +1571,7 @@ def _repeat_specs(spec: RunSpec, repeat: int) -> list[RunSpec]:
 def build_run_specs(args: argparse.Namespace, config: AppConfig) -> list[RunSpec]:
     stage = args.stage
     repeat = args.repeat if args.repeat is not None else (3 if stage == "final" else 1)
-    if stage in {"prepare", "report"}:
+    if stage in {"prepare", "report", "score"}:
         return []
     if stage == "baseline":
         return [
@@ -1642,6 +1840,7 @@ def build_parser(config: AppConfig) -> argparse.ArgumentParser:
             "checkpoint",
             "dpi-confirm",
             "final",
+            "score",
             "report",
         ),
     )
@@ -1689,6 +1888,22 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     if args.stage == "report":
         generate_report(args.output_dir, main_pages=args.main_pages, quality_pages=args.quality_pages)
+        return
+    if args.stage == "score":
+        summary = backfill_quality_scores(
+            scores_csv=args.output_dir / "quality_scores.csv",
+            worklist_csv=args.output_dir / "report" / "quality_review_worklist.csv",
+        )
+        report_dir = args.output_dir / "report"
+        charts_dir = report_dir / "charts"
+        report_dir.mkdir(parents=True, exist_ok=True)
+        charts_dir.mkdir(parents=True, exist_ok=True)
+        quality_charts = _write_quality_charts(args.output_dir, report_dir, charts_dir)
+        print(f"Backfilled quality scores: {summary['output_csv']}")
+        print(f"  rows: {summary['rows']}")
+        print(f"  average overall patch quality: {summary['score_avg']:.2f}")
+        print(f"  text preservation failures: {summary['text_preserved_zero']}")
+        print(f"  refreshed quality charts: {len(quality_charts)}")
         return
 
     main_pages = parse_pdf_pages(args.main_pages)

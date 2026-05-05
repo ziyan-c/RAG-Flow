@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -384,7 +385,7 @@ def collect_surrounding_context_selection(
 ) -> tuple[str, ContextBlockSelection]:
     budgeter = budgeter or ApproxTokenBudgeter()
     if max_context_tokens <= 0:
-        max_context_tokens = 10**12
+        return "", ContextBlockSelection(before_indices=(), current_indices=(), after_indices=())
 
     target = ""
     current_indices: tuple[int, ...] = ()
@@ -577,6 +578,15 @@ def make_captioning_llm_client(*, base_url: str, api_key: str, timeout: float) -
     return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
 
 
+def _emit_metric(metrics_sink: Any | None, kind: str, payload: dict[str, Any]) -> None:
+    if metrics_sink is None:
+        return
+    emit = getattr(metrics_sink, "emit", None)
+    if emit is None:
+        return
+    emit(kind, payload)
+
+
 def assert_captioning_llm_available(client: Any, *, base_url: str) -> None:
     from openai import APIConnectionError, APIStatusError, APITimeoutError
 
@@ -645,6 +655,79 @@ def request_image_description_from_llm(
     return strip_reasoning_text(content)
 
 
+def _caption_request_metric_base(req: dict[str, Any], *, batch_id: int) -> dict[str, Any]:
+    image = req.get("image")
+    width = getattr(image, "width", None)
+    height = getattr(image, "height", None)
+    pixels = int(width) * int(height) if isinstance(width, int) and isinstance(height, int) else None
+    return {
+        "batch_id": batch_id,
+        "image_id": req.get("idx"),
+        "block_idx": req.get("idx"),
+        "page_idx": req.get("page_idx"),
+        "pdf_page": int(req.get("page_idx", 0)) + 1 if req.get("page_idx") is not None else None,
+        "img_path": req.get("img_path"),
+        "original_image_width": req.get("original_image_width"),
+        "original_image_height": req.get("original_image_height"),
+        "input_image_width": width,
+        "input_image_height": height,
+        "input_image_pixels": pixels,
+        "model_context_tokens": req.get("model_context_tokens"),
+        "review_context_tokens": req.get("review_context_tokens"),
+        "prompt_chars": len(str(req.get("prompt", ""))),
+    }
+
+
+def _run_image_description_request(
+    req: dict[str, Any],
+    *,
+    client: Any,
+    model: str,
+    max_tokens: int,
+    batch_id: int,
+    metrics_sink: Any | None,
+) -> tuple[str, dict[str, Any]]:
+    started_at = time.time()
+    started_perf = time.perf_counter()
+    event = _caption_request_metric_base(req, batch_id=batch_id)
+    event["started_at"] = started_at
+    try:
+        output = request_image_description_from_llm(
+            client=client,
+            model=model,
+            image=req["image"],
+            prompt=req["prompt"],
+            max_tokens=max_tokens,
+        )
+    except Exception as exc:
+        ended_at = time.time()
+        event.update(
+            {
+                "ended_at": ended_at,
+                "duration_s": time.perf_counter() - started_perf,
+                "status": "error",
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "written": False,
+            }
+        )
+        _emit_metric(metrics_sink, "request", event)
+        raise
+
+    ended_at = time.time()
+    event.update(
+        {
+            "ended_at": ended_at,
+            "duration_s": time.perf_counter() - started_perf,
+            "status": "ok",
+            "error_type": None,
+            "error": None,
+            "output_chars": len(output),
+        }
+    )
+    return output, event
+
+
 def iter_image_description_results(
     requests: list[dict[str, Any]],
     *,
@@ -652,34 +735,40 @@ def iter_image_description_results(
     model: str,
     max_tokens: int,
     concurrency: int,
+    batch_id: int = 0,
+    metrics_sink: Any | None = None,
 ) -> Any:
     if concurrency <= 1 or len(requests) <= 1:
         for req in requests:
-            yield req, request_image_description_from_llm(
+            output, event = _run_image_description_request(
+                req,
                 client=client,
                 model=model,
-                image=req["image"],
-                prompt=req["prompt"],
                 max_tokens=max_tokens,
+                batch_id=batch_id,
+                metrics_sink=metrics_sink,
             )
+            yield req, output, event
         return
 
     max_workers = min(concurrency, len(requests))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_request = {
             executor.submit(
-                request_image_description_from_llm,
+                _run_image_description_request,
+                req,
                 client=client,
                 model=model,
-                image=req["image"],
-                prompt=req["prompt"],
                 max_tokens=max_tokens,
+                batch_id=batch_id,
+                metrics_sink=metrics_sink,
             ): req
             for req in requests
         }
         try:
             for future in as_completed(future_to_request):
-                yield future_to_request[future], future.result()
+                output, event = future.result()
+                yield future_to_request[future], output, event
         except Exception:
             for future in future_to_request:
                 future.cancel()
@@ -707,6 +796,8 @@ def add_image_descriptions(
     skip_existing: bool = True,
     write_captioning_view: bool = True,
     captioning_view_pdf: str | Path | None = None,
+    review_context_tokens: int | None = None,
+    metrics_sink: Any | None = None,
 ) -> None:
     from PIL import Image
     from tqdm import tqdm
@@ -733,8 +824,25 @@ def add_image_descriptions(
     context_budgeter = ApproxTokenBudgeter()
 
     def write_checkpoint() -> None:
+        started_at = time.time()
+        started_perf = time.perf_counter()
         _write_json(checkpoint_path, content_data)
         stats.checkpoints_written += 1
+        _emit_metric(
+            metrics_sink,
+            "checkpoint",
+            {
+                "reason": "interval",
+                "path": str(checkpoint_path),
+                "checkpoint_index": stats.checkpoints_written,
+                "batches_processed": stats.batches_processed,
+                "requests_submitted": stats.requests_submitted,
+                "started_at": started_at,
+                "ended_at": time.time(),
+                "duration_s": time.perf_counter() - started_perf,
+                "file_size_bytes": checkpoint_path.stat().st_size if checkpoint_path.exists() else 0,
+            },
+        )
 
     def process_batch(requests: list[dict[str, Any]]) -> None:
         if not requests:
@@ -742,17 +850,24 @@ def add_image_descriptions(
         stats.requests_submitted += len(requests)
         stats.batches_processed += 1
 
-        for req, raw_output in iter_image_description_results(
+        batch_id = stats.batches_processed
+        for req, raw_output, request_event in iter_image_description_results(
             requests,
             client=llm_client,
             model=model_name,
             max_tokens=max_new_tokens,
             concurrency=concurrency,
+            batch_id=batch_id,
+            metrics_sink=metrics_sink,
         ):
             output = raw_output.strip()
+            written = False
             if output:
                 content_data[req["idx"]]["image_description_vlm"] = output
                 stats.captioned_count += 1
+                written = True
+            request_event.update({"decision": "captioned" if written else "empty", "written": written})
+            _emit_metric(metrics_sink, "request", request_event)
 
         if checkpoint_interval > 0 and stats.batches_processed % checkpoint_interval == 0:
             write_checkpoint()
@@ -776,6 +891,7 @@ def add_image_descriptions(
 
             try:
                 image = Image.open(image_path).convert("RGB")
+                original_width, original_height = image.size
                 image = resize_image_for_captioning(image, max_image_side)
             except Exception as exc:
                 stats.failed_image_reads += 1
@@ -783,12 +899,21 @@ def add_image_descriptions(
                 continue
 
             page_idx = int(block.get("page_idx", 0))
-            context_text = get_surrounding_text_context(
+            context_text, context_selection = collect_surrounding_context_selection(
                 content_data,
                 idx,
                 max_context_tokens=max_context_tokens,
                 budgeter=context_budgeter,
             )
+            review_context_token_count = None
+            if review_context_tokens is not None:
+                review_context, _review_selection = collect_surrounding_context_selection(
+                    content_data,
+                    idx,
+                    max_context_tokens=review_context_tokens,
+                    budgeter=context_budgeter,
+                )
+                review_context_token_count = context_budgeter.count(review_context)
             prompt = (
                 "You are an expert technical documentation assistant. I will provide an image "
                 "extracted from a manual, plus nearby text before and after this image in the "
@@ -802,7 +927,22 @@ def add_image_descriptions(
                 "in the manual. Keep the answer concise when the image is simple, but be complete "
                 "for dense technical diagrams or UI screenshots. Do not include greetings."
             )
-            batch.append({"idx": idx, "page_idx": page_idx, "image": image, "prompt": prompt})
+            batch.append(
+                {
+                    "idx": idx,
+                    "page_idx": page_idx,
+                    "img_path": block["img_path"],
+                    "image": image,
+                    "prompt": prompt,
+                    "original_image_width": original_width,
+                    "original_image_height": original_height,
+                    "model_context_tokens": context_budgeter.count(context_text),
+                    "review_context_tokens": review_context_token_count,
+                    "context_before_indices": list(context_selection.before_indices),
+                    "context_current_indices": list(context_selection.current_indices),
+                    "context_after_indices": list(context_selection.after_indices),
+                }
+            )
             if len(batch) >= batch_size:
                 process_batch(batch)
                 batch = []
@@ -811,7 +951,25 @@ def add_image_descriptions(
             process_batch(batch)
 
     except Exception:
-        write_checkpoint()
+        started_at = time.time()
+        started_perf = time.perf_counter()
+        _write_json(checkpoint_path, content_data)
+        stats.checkpoints_written += 1
+        _emit_metric(
+            metrics_sink,
+            "checkpoint",
+            {
+                "reason": "failure",
+                "path": str(checkpoint_path),
+                "checkpoint_index": stats.checkpoints_written,
+                "batches_processed": stats.batches_processed,
+                "requests_submitted": stats.requests_submitted,
+                "started_at": started_at,
+                "ended_at": time.time(),
+                "duration_s": time.perf_counter() - started_perf,
+                "file_size_bytes": checkpoint_path.stat().st_size if checkpoint_path.exists() else 0,
+            },
+        )
         print(f"Image captioning checkpoint saved before failure: {checkpoint_path}")
         raise
     _write_json(output_path, content_data)

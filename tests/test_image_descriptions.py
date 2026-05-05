@@ -99,6 +99,18 @@ def test_surrounding_text_context_limits_length_and_keeps_nearby_blocks():
     assert "near-after-important" in context
 
 
+def test_surrounding_text_context_zero_budget_is_empty():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "near-before-important " * 20},
+        {"type": "image", "page_idx": 0, "img_path": "images/figure.jpg", "image_caption": ["Figure 1"]},
+        {"type": "text", "page_idx": 0, "text": "near-after-important " * 20},
+    ]
+
+    context = get_surrounding_text_context(content, 1, max_context_tokens=0)
+
+    assert context == ""
+
+
 def test_context_token_stats_reports_budget_hits():
     content = [
         {"type": "text", "page_idx": 0, "text": "before " * 100},

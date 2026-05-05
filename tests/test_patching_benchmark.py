@@ -5,9 +5,12 @@ import json
 from types import SimpleNamespace
 
 from rag_flow.benchmark.patching import (
+    backfill_quality_scores,
     build_run_specs,
     build_subset,
+    derive_overall_patch_quality_score,
     generate_report,
+    infer_text_preserved,
     page_indices_for_stage,
     parse_batch_size_spec,
     parse_pdf_pages,
@@ -89,6 +92,8 @@ def test_quality_template_adds_negative_controls(tmp_path):
 
     rows = list(csv.DictReader(output.open(encoding="utf-8")))
     assert [row["sample_label"] for row in rows] == ["quality_page", "negative_control"]
+    assert "overall_patch_quality_score" in rows[0]
+    assert "text_preserved" in rows[0]
 
 
 def test_cross_page_table_samples_are_written(tmp_path):
@@ -199,6 +204,43 @@ def test_concurrency_auto_stop_detects_throughput_drop():
     assert "fields/min" in reason
 
 
+def test_derive_overall_patch_quality_score_uses_icon_counts():
+    assert derive_overall_patch_quality_score({"target_icons": 1, "strict_hits": 1}) == 5
+    assert derive_overall_patch_quality_score({"target_icons": 1, "wrong_icons": 1}) == 2
+    assert derive_overall_patch_quality_score({"target_icons": 0, "false_positives": 1}) == 3
+
+
+def test_infer_text_preserved_ignores_icon_tags_and_markdown():
+    assert infer_text_preserved("Click Setting and OK.", "Click [Icon: gear] **Setting** and **OK**.") == 1
+    assert infer_text_preserved("Click Setting and OK.", "[Icon: gear]") == 0
+
+
+def test_backfill_quality_scores_adds_overall_score_and_text_preserved(tmp_path):
+    scores = tmp_path / "quality_scores.csv"
+    scores.write_text(
+        "dpi,sample_id,target_icons,strict_hits,wrong_icons,missed_targets,false_positives,review_notes\n"
+        "250,q0001,1,1,0,0,0,clean\n"
+        "250,q0002,0,0,0,0,1,false icon\n",
+        encoding="utf-8",
+    )
+    worklist = tmp_path / "quality_review_worklist.csv"
+    worklist.write_text(
+        "dpi,sample_id,original_text,patched_text\n"
+        "250,q0001,Click Setting.,Click [Icon: gear] Setting.\n"
+        "250,q0002,Plain text.,[Icon: book]\n",
+        encoding="utf-8",
+    )
+
+    summary = backfill_quality_scores(scores_csv=scores, worklist_csv=worklist)
+
+    rows = list(csv.DictReader(scores.open(encoding="utf-8")))
+    assert summary["rows"] == 2
+    assert rows[0]["overall_patch_quality_score"] == "5"
+    assert rows[0]["text_preserved"] == "1"
+    assert rows[1]["overall_patch_quality_score"] == "0"
+    assert rows[1]["text_preserved"] == "0"
+
+
 def test_quality_review_samples_write_score_template(tmp_path):
     content_data = [
         {"type": "text", "bbox": [0, 0, 100, 20], "page_idx": 51, "text": "Click ."},
@@ -220,6 +262,8 @@ def test_quality_review_samples_write_score_template(tmp_path):
     score_rows = list(csv.DictReader((tmp_path / "scores.csv").open(encoding="utf-8")))
     assert len(review_rows) == 2
     assert {row["dpi"] for row in score_rows} == {"200", "250"}
+    assert "overall_patch_quality_score" in score_rows[0]
+    assert "text_preserved" in score_rows[0]
 
 
 def test_generate_report_writes_summary_and_charts(tmp_path):
@@ -253,8 +297,9 @@ def test_generate_report_writes_summary_and_charts(tmp_path):
         encoding="utf-8",
     )
     (tmp_path / "quality_scores.csv").write_text(
-        "dpi,target_icons,strict_hits,wrong_icons,missed_targets,false_positives\n"
-        "250,10,8,1,2,0\n",
+        "dpi,target_icons,strict_hits,wrong_icons,missed_targets,false_positives,"
+        "overall_patch_quality_score,text_preserved\n"
+        "250,10,8,1,2,0,4,1\n",
         encoding="utf-8",
     )
 
@@ -265,6 +310,11 @@ def test_generate_report_writes_summary_and_charts(tmp_path):
     assert (tmp_path / "report" / "report.typ").exists()
     assert (tmp_path / "report" / "charts" / "dpi_throughput.svg").exists()
     assert (tmp_path / "report" / "charts" / "quality_strict_hit_ratio.svg").exists()
+    assert (tmp_path / "report" / "charts" / "quality_overall_patch_score.svg").exists()
+    assert (tmp_path / "report" / "charts" / "quality_text_preserved_ratio.svg").exists()
+    quality_rows = list(csv.DictReader((tmp_path / "report" / "quality_summary.csv").open(encoding="utf-8")))
+    assert quality_rows[0]["overall_patch_quality_score_avg"] == "4.0"
+    assert quality_rows[0]["text_preserved_ratio_pct"] == "100.0"
 
 
 def test_quality_review_worklist_merges_quality_outputs(tmp_path):
@@ -306,3 +356,5 @@ def test_quality_review_worklist_merges_quality_outputs(tmp_path):
     rows = list(csv.DictReader(worklist.open(encoding="utf-8")))
     assert rows[0]["original_text"] == "Click ."
     assert rows[0]["patched_text"] == "Click [Icon: camera]."
+    assert "overall_patch_quality_score" in rows[0]
+    assert "text_preserved" in rows[0]
