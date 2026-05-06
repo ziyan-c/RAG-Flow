@@ -10,6 +10,10 @@ def test_patching_view_path_removes_content_list_suffix():
         patching_view_path_for(Path("/tmp/manual_content_list_PATCHED_CAPTIONED.json")).name
         == "manual_PATCHING_VIEW.pdf"
     )
+    assert (
+        patching_view_path_for(Path("/tmp/manual_content_list_SECTIONED_PATCHED.json")).name
+        == "manual_PATCHING_VIEW.pdf"
+    )
 
 
 def test_collect_patching_view_regions_includes_linked_inline_icon_without_padding():

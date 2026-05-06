@@ -53,6 +53,9 @@ def patching_view_path_for(content_json: str | Path) -> Path:
     path = Path(content_json)
     name = path.name
     for suffix in (
+        "_content_list_SECTIONED_PATCHED_CAPTIONED.json",
+        "_content_list_SECTIONED_PATCHED.json",
+        "_content_list_SECTIONED.json",
         "_content_list_PATCHED_CAPTIONED.json",
         "_content_list_PATCHED.json",
         "_content_list.json",

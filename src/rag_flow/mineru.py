@@ -36,6 +36,8 @@ class MinerUStatus:
 class MinerUArtifacts:
     base_dir: Path
     content_json: Path
+    sectioned_json: Path
+    sectioning_audit_json: Path
     patched_json: Path
     captioned_json: Path
     chunks_json: Path
@@ -360,6 +362,33 @@ def _content_json_candidates(root: Path, *, source_pdf: str | Path | None = None
     )
 
 
+def _sectioned_json_path_for(content_json: Path) -> Path:
+    name = content_json.name
+    if name.endswith("_content_list.json"):
+        prefix = name[: -len("_content_list.json")]
+        return content_json.with_name(f"{prefix}_content_list_SECTIONED.json")
+    if name == "content_list.json":
+        return content_json.with_name("content_list_SECTIONED.json")
+    return content_json.with_name(f"{content_json.stem}_SECTIONED.json")
+
+
+def _sectioning_audit_path_for(content_json: Path, *, source_pdf: str | Path | None = None) -> Path:
+    name = content_json.name
+    if name.endswith("_content_list.json"):
+        prefix = name[: -len("_content_list.json")]
+        return content_json.with_name(f"{prefix}_SECTIONING_AUDIT.json")
+    if name == "content_list.json":
+        prefix = Path(source_pdf).stem if source_pdf else ""
+        return content_json.with_name(f"{prefix + '_' if prefix else ''}SECTIONING_AUDIT.json")
+    return content_json.with_name(f"{content_json.stem}_SECTIONING_AUDIT.json")
+
+
+def _append_stage_suffix(path: Path, suffix: str) -> Path:
+    if path.name.endswith(".json"):
+        return path.with_name(f"{path.stem}_{suffix}.json")
+    return path.with_name(f"{path.name}_{suffix}")
+
+
 def find_content_json(
     config: AppConfig,
     *,
@@ -405,25 +434,26 @@ def infer_artifacts(
         return MinerUArtifacts(
             base_dir=config.paths.base_dir,
             content_json=config.paths.content_json,
+            sectioned_json=config.paths.sectioned_json,
+            sectioning_audit_json=_sectioning_audit_path_for(config.paths.content_json, source_pdf=source_pdf),
             patched_json=config.paths.patched_json,
             captioned_json=config.paths.captioned_json,
             chunks_json=config.paths.chunks_json,
         )
 
-    base_dir = resolved_content.parent
-    if resolved_content.name.endswith("_content_list.json"):
-        prefix = resolved_content.name[: -len("_content_list.json")]
-    elif resolved_content.name == "content_list.json":
-        prefix = Path(source_pdf or config.mineru.input_path).stem
-    else:
-        prefix = resolved_content.stem
+    sectioned_json = _sectioned_json_path_for(resolved_content)
+    patched_json = _append_stage_suffix(sectioned_json, "PATCHED")
+    captioned_json = _append_stage_suffix(patched_json, "CAPTIONED")
+    chunks_json = _append_stage_suffix(captioned_json, "CHUNKED")
 
     return MinerUArtifacts(
-        base_dir=base_dir,
+        base_dir=resolved_content.parent,
         content_json=resolved_content,
-        patched_json=base_dir / f"{prefix}_content_list_PATCHED.json",
-        captioned_json=base_dir / f"{prefix}_content_list_PATCHED_CAPTIONED.json",
-        chunks_json=base_dir / f"{prefix}_page_level_chunks.json",
+        sectioned_json=sectioned_json,
+        sectioning_audit_json=_sectioning_audit_path_for(resolved_content, source_pdf=source_pdf),
+        patched_json=patched_json,
+        captioned_json=captioned_json,
+        chunks_json=chunks_json,
     )
 
 
@@ -474,6 +504,8 @@ def main(argv: list[str] | None = None) -> None:
         artifacts = infer_artifacts(config, content_json=args.content_json)
         print(f"base_dir={artifacts.base_dir}")
         print(f"content_json={artifacts.content_json}")
+        print(f"sectioned_json={artifacts.sectioned_json}")
+        print(f"sectioning_audit_json={artifacts.sectioning_audit_json}")
         print(f"patched_json={artifacts.patched_json}")
         print(f"captioned_json={artifacts.captioned_json}")
         print(f"chunks_json={artifacts.chunks_json}")

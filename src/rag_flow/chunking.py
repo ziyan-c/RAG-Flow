@@ -8,11 +8,18 @@ from typing import Any
 
 from .config import AppConfig
 
+INLINE_ICON_KEYS = ("vlm-small-icon-inline-icon", "vlm-small-icon-inline-candidate")
+IGNORED_BLOCK_TYPES = {"header", "footer", "page_number"}
+
 
 def _join_field(value: Any) -> str:
     if isinstance(value, list):
         return "\n".join(str(item) for item in value)
     return str(value or "")
+
+
+def _has_inline_icon_marker(block: dict[str, Any]) -> bool:
+    return any(block.get(key) for key in INLINE_ICON_KEYS)
 
 
 def create_page_level_chunks(
@@ -24,10 +31,14 @@ def create_page_level_chunks(
 
     page_contents: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
+    page_tables: dict[int, list[str]] = defaultdict(list)
 
     for block in content_data:
         page_idx = int(block.get("page_idx", 0))
         block_type = block.get("type")
+
+        if block_type in IGNORED_BLOCK_TYPES:
+            continue
 
         if block_type == "image":
             description = str(block.get("image_description_vlm", "")).strip()
@@ -41,7 +52,7 @@ def create_page_level_chunks(
                 if footnote:
                     parts.append(f"[Image footnote: {footnote}]")
                 page_contents[page_idx].append("\n".join(parts))
-            if block.get("img_path"):
+            if block.get("img_path") and not _has_inline_icon_marker(block):
                 page_images[page_idx].append(block["img_path"])
 
         elif block_type == "table":
@@ -57,6 +68,8 @@ def create_page_level_chunks(
                 parts.append(f"[Footnote: {footnote}]")
             if parts:
                 page_contents[page_idx].append("\n".join(parts))
+            if block.get("img_path"):
+                page_tables[page_idx].append(block["img_path"])
 
         elif block_type in {"text", "list"}:
             key = "list_items" if block_type == "list" else "text"
@@ -76,6 +89,7 @@ def create_page_level_chunks(
                     "source": source_name,
                     "page_idx": page_idx,
                     "images_on_page": page_images[page_idx],
+                    "tables_on_page": page_tables[page_idx],
                 },
             }
         )

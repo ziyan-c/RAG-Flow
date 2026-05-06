@@ -45,6 +45,22 @@ def test_resolve_icon_patch_artifacts_from_mineru_output_dir(tmp_path):
     assert artifacts.output_json == artifact_dir / "manual_content_list_PATCHED.json"
 
 
+def test_resolve_icon_patch_artifacts_prefers_sectioned_json(tmp_path):
+    artifact_dir = tmp_path / "hybrid_auto"
+    artifact_dir.mkdir()
+    raw_json = artifact_dir / "manual_content_list.json"
+    sectioned_json = artifact_dir / "manual_content_list_SECTIONED.json"
+    origin_pdf = artifact_dir / "manual_origin.pdf"
+    raw_json.write_text("[]", encoding="utf-8")
+    sectioned_json.write_text("[]", encoding="utf-8")
+    origin_pdf.write_text("pdf", encoding="utf-8")
+
+    artifacts = resolve_icon_patch_artifacts(artifact_dir)
+
+    assert artifacts.content_json == sectioned_json
+    assert artifacts.output_json == artifact_dir / "manual_content_list_SECTIONED_PATCHED.json"
+
+
 def test_resolve_icon_patch_artifacts_ignores_v2_content_list(tmp_path):
     artifact_dir = tmp_path / "hybrid_auto"
     artifact_dir.mkdir()

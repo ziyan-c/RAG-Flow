@@ -17,6 +17,7 @@ REPO_ENV_FILE = REPO_ROOT / ".local" / "rag-flow.env"
 
 MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
     "mineru": ("rag_flow.mineru", True),
+    "section": ("rag_flow.sectioning", True),
     "patch": ("rag_flow.preprocessing.small_icons", True),
     "patch-view": ("rag_flow.preprocessing.patching_view", True),
     "caption": ("rag_flow.preprocessing.image_descriptions", True),
@@ -33,6 +34,7 @@ MODULE_COMMANDS: dict[str, tuple[str, bool]] = {
 
 MODULE_HELP: dict[str, str] = {
     "mineru": "Check, install, locate, or run MinerU.",
+    "section": "Annotate MinerU JSON blocks with PDF outline sections.",
     "patch": "Patch small icon text from a MinerU artifact directory.",
     "patch-view": "Draw patching LLM crop regions over a source PDF.",
     "caption": "Generate image descriptions for patched MinerU output.",
@@ -49,6 +51,7 @@ MODULE_HELP: dict[str, str] = {
 
 MODULE_ENV_PYTHON: dict[str, str] = {
     "patch": "RAG_FLOW_PIPELINE_PYTHON_BIN",
+    "section": "RAG_FLOW_PIPELINE_PYTHON_BIN",
     "patch-view": "RAG_FLOW_PIPELINE_PYTHON_BIN",
     "caption": "RAG_FLOW_PIPELINE_PYTHON_BIN",
     "caption-view": "RAG_FLOW_PIPELINE_PYTHON_BIN",

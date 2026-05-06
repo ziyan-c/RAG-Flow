@@ -15,6 +15,18 @@ def test_mineru_command_delegates_to_module_main(monkeypatch):
     assert calls == [["doctor"]]
 
 
+def test_section_command_delegates_to_sectioning_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.sectioning
+
+    monkeypatch.setattr(rag_flow.sectioning, "main", lambda argv: calls.append(argv))
+
+    cli.main(["section", "--input-json", "manual_content_list.json", "--dry-run"])
+
+    assert calls == [["--input-json", "manual_content_list.json", "--dry-run"]]
+
+
 def test_patch_command_delegates_to_small_icon_main(monkeypatch):
     calls: list[list[str]] = []
 

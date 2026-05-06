@@ -170,6 +170,11 @@ def _join(value: Any) -> str:
 def captioned_json_path_for(input_json: str | Path) -> Path:
     path = Path(input_json)
     name = path.name
+    if name.endswith("_content_list_SECTIONED_PATCHED_CAPTIONED.json"):
+        return path
+    if name.endswith("_content_list_SECTIONED_PATCHED.json"):
+        prefix = name[: -len("_content_list_SECTIONED_PATCHED.json")]
+        return path.with_name(f"{prefix}_content_list_SECTIONED_PATCHED_CAPTIONED.json")
     for suffix in ("_content_list_PATCHED.json", "_content_list.json"):
         if name.endswith(suffix):
             prefix = name[: -len(suffix)]
@@ -991,7 +996,7 @@ def add_image_descriptions(
 def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Add context-aware image descriptions to MinerU JSON.")
-    parser.add_argument("--artifact-dir", help="MinerU output folder containing *_content_list_PATCHED.json.")
+    parser.add_argument("--artifact-dir", help="MinerU output folder containing patched content_list JSON.")
     parser.add_argument("--base-dir", default=None)
     parser.add_argument("--input", default=None)
     parser.add_argument("--output", default=None)

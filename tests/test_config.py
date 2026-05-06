@@ -89,6 +89,31 @@ def test_relative_paths_imported_from_env_file_still_resolve_from_repo_root(tmp_
     assert config.paths.base_dir == root / "runtime" / "manual"
 
 
+def test_default_stage_paths_follow_source_name(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_BASE_DIR=runtime/manual/hybrid_auto",
+                "RAG_FLOW_SOURCE_NAME=manual.pdf",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.paths.content_json.name == "manual_content_list.json"
+    assert config.paths.sectioned_json.name == "manual_content_list_SECTIONED.json"
+    assert config.paths.patched_json.name == "manual_content_list_SECTIONED_PATCHED.json"
+    assert config.paths.captioned_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    assert config.paths.chunks_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"
+
+
 def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)

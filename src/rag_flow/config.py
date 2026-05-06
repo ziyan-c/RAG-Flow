@@ -114,6 +114,7 @@ class PathsConfig:
     source_name: str
     source_pdf: Path
     content_json: Path
+    sectioned_json: Path
     patched_json: Path
     captioned_json: Path
     chunks_json: Path
@@ -210,6 +211,7 @@ class AppConfig:
 
         base_dir = env.path("RAG_FLOW_BASE_DIR", DEFAULT_BASE_DIR)
         source_name = env.get("RAG_FLOW_SOURCE_NAME", DEFAULT_SOURCE_NAME)
+        source_stem = Path(source_name).stem
 
         paths = PathsConfig(
             base_dir=base_dir,
@@ -220,22 +222,26 @@ class AppConfig:
             ),
             content_json=env.path(
                 "RAG_FLOW_CONTENT_JSON",
-                base_dir / "example-technical-manual_content_list.json",
+                base_dir / f"{source_stem}_content_list.json",
+            ),
+            sectioned_json=env.path(
+                "RAG_FLOW_SECTIONED_JSON",
+                base_dir / f"{source_stem}_content_list_SECTIONED.json",
             ),
             patched_json=env.path(
                 "RAG_FLOW_PATCHED_JSON",
                 env.path(
                     "RAG_FLOW_SMALL_ICON_JSON",
-                    base_dir / "example-technical-manual_content_list_PATCHED.json",
+                    base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED.json",
                 ),
             ),
             captioned_json=env.path(
                 "RAG_FLOW_CAPTIONED_JSON",
-                base_dir / "example-technical-manual_content_list_PATCHED_CAPTIONED.json",
+                base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED.json",
             ),
             chunks_json=env.path(
                 "RAG_FLOW_CHUNKS_JSON",
-                base_dir / "example-technical-manual_page_level_chunks.json",
+                base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
             ),
             db_path=env.path("RAG_FLOW_DB_PATH", "/root/qdrant-dbs/manual-db"),
             collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),

@@ -145,11 +145,25 @@ def _single_candidate(candidates: list[Path], *, label: str, artifact_dir: Path)
 
 
 def _content_stem(content_json: Path, artifact_dir: Path) -> str:
+    if content_json.name.endswith("_content_list_SECTIONED.json"):
+        return content_json.name[: -len("_content_list_SECTIONED.json")]
     if content_json.name.endswith("_content_list.json"):
         return content_json.name[: -len("_content_list.json")]
+    if content_json.name == "content_list_SECTIONED.json":
+        return artifact_dir.name
     if content_json.name == "content_list.json":
         return artifact_dir.name
     return content_json.stem
+
+
+def _patched_json_path_for(content_json: Path, artifact_dir: Path) -> Path:
+    if content_json.name.endswith("_content_list_SECTIONED.json"):
+        prefix = content_json.name[: -len("_content_list_SECTIONED.json")]
+        return artifact_dir / f"{prefix}_content_list_SECTIONED_PATCHED.json"
+    if content_json.name == "content_list_SECTIONED.json":
+        return artifact_dir / f"{artifact_dir.name}_content_list_SECTIONED_PATCHED.json"
+    stem = _content_stem(content_json, artifact_dir)
+    return artifact_dir / f"{stem}_content_list_PATCHED.json"
 
 
 def resolve_icon_patch_artifacts(
@@ -168,9 +182,17 @@ def resolve_icon_patch_artifacts(
     else:
         content_candidates = sorted(
             path
-            for path in resolved_dir.glob("*_content_list.json")
-            if "small-icon" not in path.name and "caption" not in path.name
+            for path in resolved_dir.glob("*_content_list_SECTIONED.json")
+            if "PATCHED" not in path.name and "CAPTIONED" not in path.name
         )
+        if not content_candidates:
+            content_candidates = sorted(path for path in resolved_dir.glob("content_list_SECTIONED.json"))
+        if not content_candidates:
+            content_candidates = sorted(
+                path
+                for path in resolved_dir.glob("*_content_list.json")
+                if "small-icon" not in path.name and "caption" not in path.name
+            )
         if not content_candidates:
             content_candidates = sorted(path for path in resolved_dir.glob("content_list.json"))
         resolved_content = _single_candidate(
@@ -193,8 +215,9 @@ def resolve_icon_patch_artifacts(
                 artifact_dir=resolved_dir,
             )
 
-    resolved_output = Path(output_json).expanduser() if output_json else resolved_dir / (
-        f"{stem}_content_list_PATCHED.json"
+    resolved_output = Path(output_json).expanduser() if output_json else _patched_json_path_for(
+        resolved_content,
+        resolved_dir,
     )
     return IconPatchArtifacts(
         artifact_dir=resolved_dir,
@@ -215,11 +238,16 @@ def resolve_icon_patch_batch(
     except (FileNotFoundError, ValueError):
         pass
 
-    candidates = root.rglob("*_content_list.json") if recursive else root.glob("*_content_list.json")
+    sectioned_candidates = (
+        root.rglob("*_content_list_SECTIONED.json") if recursive else root.glob("*_content_list_SECTIONED.json")
+    )
+    raw_candidates = root.rglob("*_content_list.json") if recursive else root.glob("*_content_list.json")
     artifacts = []
     seen_dirs: set[Path] = set()
-    for content_json in sorted(candidates):
+    for content_json in sorted([*sectioned_candidates, *raw_candidates]):
         if "small-icon" in content_json.name or "caption" in content_json.name:
+            continue
+        if "PATCHED" in content_json.name or "CAPTIONED" in content_json.name:
             continue
         artifact_parent = content_json.parent
         if artifact_parent in seen_dirs:

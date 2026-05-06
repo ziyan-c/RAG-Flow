@@ -11,8 +11,9 @@ from .indexing import upsert_colpali_vectors, upsert_text_vectors
 from .mineru import MinerUArtifacts, expected_content_json, find_content_json, infer_artifacts, run_mineru
 from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
+from .sectioning import write_sectioned_json
 
-STAGES = ("parsing", "patching", "captioning", "chunking", "indexing")
+STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
 
 
 @dataclass(frozen=True)
@@ -80,9 +81,21 @@ def run_ingest(
 
     artifacts = infer_artifacts(config, content_json=content_json, source_pdf=source_pdf)
 
+    def recover_sections() -> None:
+        result = write_sectioned_json(
+            input_json=artifacts.content_json,
+            input_pdf=source_pdf,
+            output_json=artifacts.sectioned_json,
+            audit_json=artifacts.sectioning_audit_json,
+        )
+        print(
+            f"Recovered {result.stats['section_event_count']} PDF outline sections at "
+            f"{artifacts.sectioned_json}"
+        )
+
     def patch_icons() -> None:
         add_small_icon_text(
-            input_json=artifacts.content_json,
+            input_json=artifacts.sectioned_json,
             output_json=artifacts.patched_json,
             pdf_path=source_pdf,
             llm_base_url=config.models.llm_base_url,
@@ -127,6 +140,7 @@ def run_ingest(
         print(f"Created {len(chunks)} page-level chunks at {artifacts.chunks_json}")
 
     stages = {
+        "sectioning": Stage("sectioning", artifacts.sectioned_json, recover_sections),
         "patching": Stage("patching", artifacts.patched_json, patch_icons),
         "captioning": Stage("captioning", artifacts.captioned_json, caption_images),
         "chunking": Stage("chunking", artifacts.chunks_json, chunk_pages),

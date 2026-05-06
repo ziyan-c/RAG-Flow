@@ -17,6 +17,9 @@ def test_captioning_view_path_removes_content_list_suffix():
     assert captioning_view_path_for(Path("/tmp/manual_content_list_PATCHED_CAPTIONED.json")).name == (
         "manual_CAPTIONING_VIEW.pdf"
     )
+    assert captioning_view_path_for(Path("/tmp/manual_content_list_SECTIONED_PATCHED.json")).name == (
+        "manual_CAPTIONING_VIEW.pdf"
+    )
 
 
 def test_collect_captioning_view_regions_includes_image_and_context_blocks():

@@ -15,6 +15,7 @@ def test_create_page_level_chunks(tmp_path):
             "table_caption": ["Ports"],
             "table_body": ["Port 8000: retriever"],
             "table_footnote": ["Local only"],
+            "img_path": "tables/ports.png",
         },
         {
             "type": "image",
@@ -24,6 +25,15 @@ def test_create_page_level_chunks(tmp_path):
             "image_description_vlm": "A login screen.",
             "img_path": "images/login.png",
         },
+        {
+            "type": "image",
+            "page_idx": 1,
+            "img_path": "images/tiny-icon.png",
+            "vlm-small-icon-inline-icon": True,
+        },
+        {"type": "header", "page_idx": 1, "text": "User Manual"},
+        {"type": "footer", "page_idx": 1, "text": "Contact us"},
+        {"type": "page_number", "page_idx": 1, "text": "2"},
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
@@ -35,4 +45,7 @@ def test_create_page_level_chunks(tmp_path):
     assert "Overview" in chunks[0]["page_content"]
     assert "Port 8000" in chunks[1]["page_content"]
     assert "Step 3 Click OK." in chunks[1]["page_content"]
+    assert "User Manual" not in chunks[1]["page_content"]
+    assert "Contact us" not in chunks[1]["page_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
+    assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]

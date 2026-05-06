@@ -34,9 +34,10 @@ def make_config(tmp_path: Path, *, command: str = "mineru", input_path: Path | N
             source_name="manual.pdf",
             source_pdf=source_pdf,
             content_json=base_dir / "manual_content_list.json",
-            patched_json=base_dir / "manual_content_list_PATCHED.json",
-            captioned_json=base_dir / "manual_content_list_PATCHED_CAPTIONED.json",
-            chunks_json=base_dir / "manual_page_level_chunks.json",
+            sectioned_json=base_dir / "manual_content_list_SECTIONED.json",
+            patched_json=base_dir / "manual_content_list_SECTIONED_PATCHED.json",
+            captioned_json=base_dir / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json",
+            chunks_json=base_dir / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
             db_path=tmp_path / "qdrant",
             collection_name="manuals",
         ),
@@ -211,11 +212,15 @@ def test_infer_artifacts_from_discovered_content_list(tmp_path):
 
     assert artifacts.base_dir == content_json.parent
     assert artifacts.content_json == content_json
-    assert artifacts.patched_json == content_json.parent / "manual_content_list_PATCHED.json"
+    assert artifacts.sectioned_json == content_json.parent / "manual_content_list_SECTIONED.json"
+    assert artifacts.sectioning_audit_json == content_json.parent / "manual_SECTIONING_AUDIT.json"
+    assert artifacts.patched_json == content_json.parent / "manual_content_list_SECTIONED_PATCHED.json"
     assert artifacts.captioned_json == (
-        content_json.parent / "manual_content_list_PATCHED_CAPTIONED.json"
+        content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     )
-    assert artifacts.chunks_json == content_json.parent / "manual_page_level_chunks.json"
+    assert artifacts.chunks_json == (
+        content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"
+    )
 
 
 def test_find_content_json_ignores_other_pdf_outputs(tmp_path):
@@ -236,11 +241,48 @@ def test_find_content_json_matches_current_pdf_stem(tmp_path):
     assert find_content_json(config, source_pdf=config.paths.source_pdf) == content_json
 
 
+def test_run_ingest_sectioning_stage_recovers_pdf_outline(tmp_path):
+    fitz = __import__("fitz")
+    config = make_config(tmp_path)
+    config.paths.source_pdf.parent.mkdir(parents=True)
+    config.paths.base_dir.mkdir(parents=True)
+
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((72, 72), "1 Overview")
+    page.insert_text((72, 120), "Body")
+    doc.set_toc([[1, "1 Overview", 1]])
+    doc.save(config.paths.source_pdf)
+    doc.close()
+
+    config.paths.content_json.write_text(
+        json.dumps(
+            [
+                {"type": "text", "page_idx": 0, "text": "1 Overview", "bbox": [100, 100, 300, 130]},
+                {"type": "text", "page_idx": 0, "text": "Body"},
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    artifacts = run_ingest(
+        config,
+        from_stage="sectioning",
+        to_stage="sectioning",
+        skip_existing=False,
+    )
+
+    sectioned = json.loads(artifacts.sectioned_json.read_text(encoding="utf-8"))
+    audit = json.loads(artifacts.sectioning_audit_json.read_text(encoding="utf-8"))
+    assert sectioned[1]["section_path"] == ["1 Overview"]
+    assert audit["stats"]["section_event_count"] == 1
+
+
 def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     config = make_config(tmp_path)
     source_pdf = tmp_path / "source" / "other.pdf"
     content_json = tmp_path / "mineru-output" / "other" / "auto" / "other_content_list.json"
-    captioned_json = content_json.parent / "other_content_list_PATCHED_CAPTIONED.json"
+    captioned_json = content_json.parent / "other_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     captioned_json.parent.mkdir(parents=True)
     content_json.write_text("[]", encoding="utf-8")
     captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")

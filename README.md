@@ -64,6 +64,7 @@ rag-flow env create-pipeline
 rag-flow env create-llm
 rag-flow mineru doctor
 rag-flow mineru run
+rag-flow section
 rag-flow serve llm-sglang
 rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
 rag-flow ingest --to-stage chunking
@@ -144,7 +145,11 @@ rag-flow ingest --to-stage indexing
 The individual steps are also available when you need manual control.
 If MinerU writes files into a nested output folder, `rag-flow ingest` searches
 `RAG_FLOW_MINERU_OUTPUT_DIR` for a `*content_list.json` matching the current
-source PDF name, then derives the downstream artifact paths from that folder.
+source PDF name, then derives the downstream artifact paths from that folder:
+`*_content_list_SECTIONED.json`,
+`*_content_list_SECTIONED_PATCHED.json`,
+`*_content_list_SECTIONED_PATCHED_CAPTIONED.json`, and
+`*_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json`.
 Set `RAG_FLOW_MINERU_BACKEND=pipeline` for CPU-friendly parsing. Set
 `RAG_FLOW_MINERU_MODEL_SOURCE=modelscope` to run MinerU with
 `MINERU_MODEL_SOURCE=modelscope`.
@@ -155,6 +160,20 @@ Run MinerU only:
 rag-flow mineru run
 ```
 
+Recover PDF outline sections into MinerU JSON:
+
+```bash
+rag-flow section \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list.json \
+  --input-pdf .local/source-documents/example-technical-manual.pdf
+```
+
+This writes `*_content_list_SECTIONED.json` plus `*_SECTIONING_AUDIT.json`.
+It uses the original source PDF outline/bookmarks, not MinerU heading labels,
+and only adds `section_*` metadata fields to blocks.
+Inside `rag-flow ingest`, this stage runs automatically after MinerU parsing and
+before patching.
+
 Patch small icons:
 
 ```bash
@@ -164,12 +183,14 @@ rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-
 
 The artifact-dir form is the preferred patching entrypoint after MinerU has
 parsed a PDF. It expects a MinerU output folder containing
-`*_content_list.json` and `*_origin.pdf`, then writes
-`*_content_list_PATCHED.json` in the same folder. The captioning stage then
-writes `*_content_list_PATCHED_CAPTIONED.json`. Patching sends its crop images
-to the local OpenAI-compatible vision LLM configured by `RAG_FLOW_LLM_BASE_URL`
-and `RAG_FLOW_LLM_MODEL`; start it first with `rag-flow serve llm-sglang`.
-If that service is not reachable, patching fails before rendering PDF pages.
+`*_content_list.json` and `*_origin.pdf`. If a
+`*_content_list_SECTIONED.json` file is present, patching uses that sectioned
+file and writes `*_content_list_SECTIONED_PATCHED.json`; otherwise it patches
+the raw MinerU file and writes `*_content_list_PATCHED.json`. Patching sends
+its crop images to the local OpenAI-compatible vision LLM configured by
+`RAG_FLOW_LLM_BASE_URL` and `RAG_FLOW_LLM_MODEL`; start it first with
+`rag-flow serve llm-sglang`. If that service is not reachable, patching fails
+before rendering PDF pages.
 
 Patching focuses on content blocks instead of page furniture: text, lists, and
 table bodies/footnotes are patched, while table captions, headers, footers, page
@@ -233,7 +254,7 @@ You can also regenerate the overlay without running the LLM:
 
 ```bash
 rag-flow patch-view \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_PATCHED.json \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
   --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
 ```
 
@@ -283,7 +304,7 @@ Or pass the captioning input JSON and origin PDF explicitly:
 
 ```bash
 rag-flow caption-view \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_PATCHED.json \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
   --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
 ```
 
@@ -443,6 +464,7 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_CAPTION_CONCURRENCY`
 - `RAG_FLOW_CAPTION_LLM_TIMEOUT`
 - `RAG_FLOW_CONTENT_JSON`
+- `RAG_FLOW_SECTIONED_JSON`
 - `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`
 - `RAG_FLOW_CHUNKS_JSON`

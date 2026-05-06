@@ -27,6 +27,12 @@ def test_captioned_json_path_for_content_list_names():
     assert captioned_json_path_for("/tmp/manual_content_list_PATCHED_CAPTIONED.json").name == (
         "manual_content_list_PATCHED_CAPTIONED.json"
     )
+    assert captioned_json_path_for("/tmp/manual_content_list_SECTIONED_PATCHED.json").name == (
+        "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    )
+    assert captioned_json_path_for("/tmp/manual_content_list_SECTIONED_PATCHED_CAPTIONED.json").name == (
+        "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    )
 
 
 def test_image_caption_checkpoint_path_uses_output_stem():
