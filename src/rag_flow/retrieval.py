@@ -124,7 +124,7 @@ class RetrievalEngine:
                 context="No relevant information found in the manual.",
             )
 
-        seen_pages: set[tuple[str, int]] = set()
+        seen_records: set[tuple[str, str]] = set()
         context_blocks: list[str] = []
         hit_details: list[HitDetail] = []
 
@@ -146,18 +146,27 @@ class RetrievalEngine:
             logical_center_page = int(payload.get("parent_page_idx", original_hit_page))
             should_conditions = [
                 models.FieldCondition(key="page_idx", match=models.MatchValue(value=logical_center_page)),
+                models.FieldCondition(key="page_indices", match=models.MatchValue(value=logical_center_page)),
                 models.FieldCondition(key="parent_page_idx", match=models.MatchValue(value=logical_center_page)),
             ]
             if rank == 0:
-                should_conditions.extend(
-                    models.FieldCondition(key="page_idx", match=models.MatchValue(value=logical_center_page + offset))
-                    for offset in [-2, -1, 1, 2]
-                )
+                for offset in [-2, -1, 1, 2]:
+                    page = logical_center_page + offset
+                    should_conditions.append(
+                        models.FieldCondition(key="page_idx", match=models.MatchValue(value=page))
+                    )
+                    should_conditions.append(
+                        models.FieldCondition(key="page_indices", match=models.MatchValue(value=page))
+                    )
             elif rank <= 2:
-                should_conditions.extend(
-                    models.FieldCondition(key="page_idx", match=models.MatchValue(value=logical_center_page + offset))
-                    for offset in [-1, 1]
-                )
+                for offset in [-1, 1]:
+                    page = logical_center_page + offset
+                    should_conditions.append(
+                        models.FieldCondition(key="page_idx", match=models.MatchValue(value=page))
+                    )
+                    should_conditions.append(
+                        models.FieldCondition(key="page_indices", match=models.MatchValue(value=page))
+                    )
 
             records, _ = self.client.scroll(
                 collection_name=collection,
@@ -173,19 +182,30 @@ class RetrievalEngine:
             unique_records = []
             for record in records:
                 page_idx = int(record.payload["page_idx"])
-                key = (source_pdf, page_idx)
-                if page_idx >= 0 and key not in seen_pages:
+                key = (source_pdf, str(record.payload.get("chunk_id") or record.id))
+                if page_idx >= 0 and key not in seen_records:
                     unique_records.append(record)
-                    seen_pages.add(key)
-            unique_records.sort(key=lambda item: int(item.payload["page_idx"]))
+                    seen_records.add(key)
+            unique_records.sort(
+                key=lambda item: (
+                    int(item.payload.get("page_idx", item.payload.get("page_start", 0))),
+                    int(item.payload.get("chunk_idx", -1)),
+                    str(item.payload.get("chunk_id", "")),
+                )
+            )
 
             for record in unique_records:
                 page_idx = int(record.payload["page_idx"])
+                page_start = int(record.payload.get("page_start", page_idx))
+                page_end = int(record.payload.get("page_end", page_idx))
+                page_label = f"{page_start + 1}" if page_start == page_end else f"{page_start + 1}-{page_end + 1}"
+                section = record.payload.get("section_title")
+                section_line = f", Section: {section}" if section else ""
                 note_prefix = ""
                 if page_idx == original_hit_page and is_continuation:
                     note_prefix = "[Target Visual Match] "
                 context_blocks.append(
-                    f"[Source: {source_pdf}, Page: {page_idx + 1}]\n"
+                    f"[Source: {source_pdf}, Page: {page_label}{section_line}]\n"
                     f"{note_prefix}{record.payload.get('page_content', '')}"
                 )
 

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from .chunking import create_page_level_chunks, write_chunks
+from .chunking import create_chunks, write_chunks
 from .config import AppConfig
 from .indexing import upsert_colpali_vectors, upsert_text_vectors
 from .mineru import MinerUArtifacts, expected_content_json, find_content_json, infer_artifacts, run_mineru
@@ -135,9 +135,16 @@ def run_ingest(
         )
 
     def chunk_pages() -> None:
-        chunks = create_page_level_chunks(artifacts.captioned_json, source_name)
+        chunks = create_chunks(
+            artifacts.captioned_json,
+            source_name,
+            mode=config.chunking.mode,
+            max_tokens=config.chunking.max_tokens,
+            overlap_tokens=config.chunking.overlap_tokens,
+            min_tokens=config.chunking.min_tokens,
+        )
         write_chunks(chunks, artifacts.chunks_json)
-        print(f"Created {len(chunks)} page-level chunks at {artifacts.chunks_json}")
+        print(f"Created {len(chunks)} {config.chunking.mode} chunks at {artifacts.chunks_json}")
 
     stages = {
         "sectioning": Stage("sectioning", artifacts.sectioned_json, recover_sections),

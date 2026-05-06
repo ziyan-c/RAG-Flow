@@ -207,3 +207,40 @@ def test_captioning_reads_local_env(tmp_path, monkeypatch):
     assert config.captioning.concurrency == 3
     assert config.captioning.checkpoint_interval == 7
     assert config.captioning.llm_timeout == 45.5
+
+
+def test_chunking_defaults(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.chunking.mode == "auto"
+    assert config.chunking.max_tokens == 1500
+    assert config.chunking.overlap_tokens == 200
+    assert config.chunking.min_tokens == 200
+
+
+def test_chunking_reads_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_CHUNK_MODE=token",
+                "RAG_FLOW_CHUNK_MAX_TOKENS=900",
+                "RAG_FLOW_CHUNK_OVERLAP_TOKENS=100",
+                "RAG_FLOW_CHUNK_MIN_TOKENS=80",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.chunking.mode == "token"
+    assert config.chunking.max_tokens == 900
+    assert config.chunking.overlap_tokens == 100
+    assert config.chunking.min_tokens == 80

@@ -7,16 +7,17 @@ and collection names can be changed through environment variables.
 ## What It Does
 
 1. Parse the source PDF with MinerU into structured `content_list.json`.
-2. Patch MinerU output with a vision language model:
+2. Recover PDF outline sections into MinerU block metadata when outline data exists.
+3. Patch MinerU output with a vision language model:
    - recover small icon text that MinerU/OCR missed
    - add context-aware descriptions to extracted images
-3. Build page-level chunks from enriched `content_list.json`.
-4. Store three retrieval signals in Qdrant:
+4. Build section-aware or fixed token-window chunks from enriched `content_list.json`.
+5. Store three retrieval signals in Qdrant:
    - dense text vectors
    - sparse BM25 vectors
    - ColPali page-image multivectors
-5. Serve a FastAPI `/retrieve` endpoint with RRF fusion.
-6. Use an OpenAI-compatible LLM endpoint for cited terminal chat.
+6. Serve a FastAPI `/retrieve` endpoint with RRF fusion.
+7. Use an OpenAI-compatible LLM endpoint for cited terminal chat.
 
 ## Project Layout
 
@@ -25,7 +26,7 @@ src/rag_flow/
   config.py                 Environment-driven configuration
   mineru.py                 MinerU install/check/run helpers
   pipeline.py               End-to-end ingestion orchestration
-  chunking.py               MinerU JSON to page-level chunks
+  chunking.py               MinerU JSON to retrieval chunks
   indexing.py               Qdrant collection, text vectors, visual vectors
   retrieval.py              Hybrid retrieval engine and context builder
   api.py                    FastAPI retrieval service
@@ -100,7 +101,7 @@ should be 3.10 through 3.13:
 rag-flow mineru setup
 ```
 
-Run the default ingestion path from PDF to page chunks:
+Run the default ingestion path from PDF to retrieval chunks:
 
 ```bash
 rag-flow ingest --pdf .local/source-documents/example-technical-manual.pdf
@@ -308,11 +309,22 @@ rag-flow caption-view \
   --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
 ```
 
-Build page chunks:
+Build retrieval chunks:
 
 ```bash
 rag-flow chunk
 ```
+
+By default `rag-flow chunk` uses `RAG_FLOW_CHUNK_MODE=auto`. If the input JSON
+contains `section_path` metadata from sectioning, chunks are grouped by section
+and then split by token budget. If no PDF outline was available and sectioning
+was a no-op, chunking falls back to sequential fixed token windows. Useful
+controls:
+
+- `--mode`: `auto`, `section`, `token`, or `page`
+- `--max-tokens`: target chunk budget, default `1500`
+- `--overlap-tokens`: repeated tail context between adjacent token chunks, default `200`
+- `--min-tokens`: minimum size before flushing a chunk, default `200`
 
 Upsert text vectors:
 
@@ -325,6 +337,18 @@ Upsert ColPali visual vectors:
 ```bash
 rag-flow index visual
 ```
+
+ColPali is still a page-level visual index. When chunk output is available,
+visual page payloads inherit page/section metadata from the chunk JSON, so
+visual hits can be shown and filtered with the same section context as text
+hits. The visual embeddings themselves are not section-level; section metadata
+is auxiliary payload for retrieval context and explanation.
+
+Chunking also records source block indices and page bboxes in chunk metadata.
+This makes it possible to attribute a page-level ColPali hit back to the most
+likely text chunk by ranking token-wise top-k image-patch evidence with
+`chunk_score`, `token_coverage`, and `density_score`, without storing a separate
+ColPali vector for every chunk.
 
 Inspect the Qdrant collection:
 
@@ -468,6 +492,10 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_PATCHED_JSON`
 - `RAG_FLOW_CAPTIONED_JSON`
 - `RAG_FLOW_CHUNKS_JSON`
+- `RAG_FLOW_CHUNK_MODE`
+- `RAG_FLOW_CHUNK_MAX_TOKENS`
+- `RAG_FLOW_CHUNK_OVERLAP_TOKENS`
+- `RAG_FLOW_CHUNK_MIN_TOKENS`
 - `RAG_FLOW_DB_PATH`
 - `RAG_FLOW_COLLECTION`
 - `RAG_FLOW_PIPELINE_ENV`

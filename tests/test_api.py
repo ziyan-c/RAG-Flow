@@ -12,6 +12,7 @@ from rag_flow.api import create_app
 from rag_flow.config import (
     AppConfig,
     CaptioningConfig,
+    ChunkingConfig,
     MinerUConfig,
     ModelConfig,
     PatchingConfig,
@@ -78,6 +79,7 @@ def make_config(tmp_path: Path, *, api_key: str = "", max_query_chars: int = 400
         ),
         patching=PatchingConfig(max_new_tokens=8000, llm_timeout=120.0),
         captioning=CaptioningConfig(max_new_tokens=8000, max_context_tokens=10000, batch_size=4),
+        chunking=ChunkingConfig(),
     )
 
 

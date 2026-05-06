@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from rag_flow.chunking import create_page_level_chunks
+from rag_flow.chunking import create_chunks, create_page_level_chunks, main
 
 
 def test_create_page_level_chunks(tmp_path):
@@ -49,3 +49,68 @@ def test_create_page_level_chunks(tmp_path):
     assert "Contact us" not in chunks[1]["page_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
     assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]
+
+
+def test_auto_chunks_without_sections_use_token_windows(tmp_path):
+    content = [
+        {"type": "text", "page_idx": 0, "text": "alpha beta gamma delta", "bbox": [10, 10, 100, 30]},
+        {"type": "text", "page_idx": 1, "text": "epsilon zeta eta theta", "bbox": [20, 20, 120, 40]},
+        {"type": "text", "page_idx": 2, "text": "iota kappa lambda mu", "bbox": [30, 30, 130, 50]},
+    ]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    chunks = create_chunks(input_path, "manual.pdf", mode="auto", max_tokens=5, overlap_tokens=0, min_tokens=1)
+
+    assert len(chunks) == 3
+    assert all(chunk["metadata"]["chunk_mode"] == "token" for chunk in chunks)
+    assert chunks[0]["metadata"]["page_indices"] == [0]
+    assert chunks[0]["metadata"]["bboxes_by_page"] == {"0": [[10.0, 10.0, 100.0, 30.0]]}
+    assert chunks[0]["metadata"]["block_indices"] == [0]
+    assert chunks[1]["metadata"]["page_indices"] == [1]
+    assert chunks[2]["metadata"]["chunk_id"] == "manual-chunk-00002"
+
+
+def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
+    content = [
+        {
+            "type": "text",
+            "page_idx": 0,
+            "text": "1 Overview",
+            "section_path": ["1 Overview"],
+            "section_level": 1,
+            "section_source": "pdf_outline_exact",
+            "bbox": [10, 10, 200, 30],
+        },
+        {"type": "text", "page_idx": 0, "text": "overview body", "section_path": ["1 Overview"], "bbox": [10, 40, 200, 80]},
+        {
+            "type": "text",
+            "page_idx": 1,
+            "text": "2 Setup",
+            "section_path": ["2 Setup"],
+            "section_level": 1,
+            "section_source": "pdf_outline_exact",
+            "bbox": [10, 10, 220, 30],
+        },
+        {"type": "text", "page_idx": 1, "text": "setup body", "section_path": ["2 Setup"], "bbox": [10, 40, 220, 80]},
+    ]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    chunks = create_chunks(input_path, "manual.pdf", mode="auto", max_tokens=100, overlap_tokens=0, min_tokens=1)
+
+    assert len(chunks) == 2
+    assert chunks[0]["metadata"]["chunk_mode"] == "section"
+    assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
+    assert chunks[0]["metadata"]["bboxes_by_page"]["0"] == [[10.0, 10.0, 200.0, 30.0], [10.0, 40.0, 200.0, 80.0]]
+    assert chunks[1]["metadata"]["section_path"] == ["2 Setup"]
+    assert "setup body" not in chunks[0]["page_content"]
+
+
+def test_chunking_main_dry_run_prints_settings(capsys):
+    main(["--input", "missing.json", "--mode", "token", "--max-tokens", "900", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert "Chunking inputs:" in output
+    assert "mode: token" in output
+    assert "max_tokens: 900" in output

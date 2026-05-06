@@ -40,7 +40,7 @@ MODULE_HELP: dict[str, str] = {
     "caption": "Generate image descriptions for patched MinerU output.",
     "caption-view": "Draw captioning image targets and context blocks over a source PDF.",
     "ingest": "Run the staged ingestion pipeline.",
-    "chunk": "Build page-level chunks from MinerU JSON.",
+    "chunk": "Build retrieval chunks from MinerU JSON.",
     "index": "Upsert or inspect Qdrant indexes.",
     "retriever": "Start the retrieval API service.",
     "test-retriever": "Query the retrieval API from the terminal.",

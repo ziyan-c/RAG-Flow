@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import uuid
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -13,8 +14,9 @@ DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
 
 
-def point_id(source_name: str, page_idx: int) -> str:
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{source_name}_{page_idx}"))
+def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None) -> str:
+    key = f"{source_name}_{chunk_id}" if chunk_id is not None else f"{source_name}_{page_idx}"
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, key))
 
 
 def validate_collection_schema(config: AppConfig) -> None:
@@ -96,6 +98,26 @@ def ensure_collection(config: AppConfig) -> None:
         field_name="page_idx",
         field_schema=models.PayloadSchemaType.INTEGER,
     )
+    client.create_payload_index(
+        collection_name=collection,
+        field_name="chunk_id",
+        field_schema=models.PayloadSchemaType.KEYWORD,
+    )
+    client.create_payload_index(
+        collection_name=collection,
+        field_name="section_title",
+        field_schema=models.PayloadSchemaType.KEYWORD,
+    )
+    client.create_payload_index(
+        collection_name=collection,
+        field_name="page_start",
+        field_schema=models.PayloadSchemaType.INTEGER,
+    )
+    client.create_payload_index(
+        collection_name=collection,
+        field_name="page_end",
+        field_schema=models.PayloadSchemaType.INTEGER,
+    )
 
 
 def load_chunks(path: str | Path) -> list[dict[str, Any]]:
@@ -121,9 +143,11 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
     for doc, meta, dense_vec, sparse_vec in zip(documents, metadatas, dense_embeddings, sparse_embeddings):
         payload = dict(meta)
         payload["page_content"] = doc
+        page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
+        chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
         points.append(
             models.PointStruct(
-                id=point_id(payload["source"], int(payload["page_idx"])),
+                id=point_id(payload["source"], page_idx, chunk_id=chunk_id),
                 payload=payload,
                 vector={
                     "page-dense": dense_vec.tolist(),
@@ -138,6 +162,88 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
     client = QdrantClient(path=str(config.paths.db_path))
     client.upsert(collection_name=config.paths.collection_name, points=points)
     print(f"Upserted {len(points)} text points into {config.paths.collection_name}")
+
+
+def _page_payloads_from_chunks(
+    chunks: list[dict[str, Any]],
+    *,
+    source_name: str,
+) -> dict[int, dict[str, Any]]:
+    by_page: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    for chunk in chunks:
+        meta = dict(chunk.get("metadata", {}))
+        if meta.get("source") != source_name:
+            continue
+        pages = meta.get("page_indices")
+        if not isinstance(pages, list) or not pages:
+            pages = [meta.get("page_idx", meta.get("page_start", 0))]
+        for page in pages:
+            try:
+                by_page[int(page)].append(chunk)
+            except (TypeError, ValueError):
+                continue
+
+    payloads = {}
+    for page_idx, page_chunks in by_page.items():
+        first_meta = dict(page_chunks[0].get("metadata", {}))
+        section_path = first_meta.get("section_path", [])
+        page_texts = []
+        chunk_ids = []
+        for chunk in page_chunks:
+            meta = dict(chunk.get("metadata", {}))
+            if meta.get("chunk_id"):
+                chunk_ids.append(str(meta["chunk_id"]))
+            text = str(chunk.get("page_content", "")).strip()
+            if text:
+                page_texts.append(text)
+        payload: dict[str, Any] = {
+            "source": source_name,
+            "page_idx": page_idx,
+            "page_start": page_idx,
+            "page_end": page_idx,
+            "page_indices": [page_idx],
+            "is_visual_page": True,
+            "chunk_ids_on_page": chunk_ids,
+            "page_content": "\n\n".join(page_texts),
+        }
+        if section_path:
+            payload["section_path"] = section_path
+            payload["section_title"] = first_meta.get("section_title") or section_path[-1]
+            if first_meta.get("section_level") is not None:
+                payload["section_level"] = first_meta["section_level"]
+            if first_meta.get("section_source"):
+                payload["section_source"] = first_meta["section_source"]
+        payloads[page_idx] = payload
+    return payloads
+
+
+def _visual_page_payload(
+    page_payloads: dict[int, dict[str, Any]],
+    *,
+    source_name: str,
+    page_idx: int,
+    parent_page_idx: int,
+) -> dict[str, Any]:
+    payload = dict(page_payloads.get(page_idx, {}))
+    if not payload:
+        payload = {
+            "source": source_name,
+            "page_idx": page_idx,
+            "page_start": page_idx,
+            "page_end": page_idx,
+            "page_indices": [page_idx],
+            "is_visual_page": True,
+            "page_content": (
+                "[Visual page evidence only. Text chunking did not produce text for this page.]"
+            ),
+        }
+    payload.setdefault("source", source_name)
+    payload.setdefault("page_idx", page_idx)
+    payload.setdefault("is_visual_page", True)
+    if page_idx != parent_page_idx:
+        payload.setdefault("parent_page_idx", parent_page_idx)
+        payload.setdefault("is_table_continuation", True)
+    return payload
 
 
 def upsert_colpali_vectors(
@@ -170,6 +276,13 @@ def upsert_colpali_vectors(
     images = convert_from_path(str(pdf_path or config.paths.source_pdf), dpi=dpi)
     skipped_pages: list[int] = []
     last_valid_page_idx = 0
+    try:
+        page_payloads = _page_payloads_from_chunks(
+            load_chunks(config.paths.chunks_json),
+            source_name=resolved_source_name,
+        )
+    except (FileNotFoundError, json.JSONDecodeError):
+        page_payloads = {}
 
     for start in tqdm(range(0, len(images), batch_size), desc="Processing pages"):
         batch_images = images[start : start + batch_size]
@@ -206,17 +319,12 @@ def upsert_colpali_vectors(
                         points=[
                             models.PointStruct(
                                 id=point_id(resolved_source_name, current_page_idx),
-                                payload={
-                                    "source": resolved_source_name,
-                                    "page_idx": current_page_idx,
-                                    "parent_page_idx": last_valid_page_idx,
-                                    "is_table_continuation": True,
-                                    "page_content": (
-                                        "[System Note: This page is a continuation containing only "
-                                        f"tables/images. Please refer to page {last_valid_page_idx + 1} "
-                                        "for headers and primary context.]"
-                                    ),
-                                },
+                                payload=_visual_page_payload(
+                                    page_payloads,
+                                    source_name=resolved_source_name,
+                                    page_idx=current_page_idx,
+                                    parent_page_idx=last_valid_page_idx,
+                                ),
                                 vector={"page-colpali": point.vector["page-colpali"]},
                             )
                         ],
@@ -224,7 +332,7 @@ def upsert_colpali_vectors(
                     skipped_pages.append(current_page_idx)
 
     if skipped_pages:
-        print(f"Inserted {len(skipped_pages)} visual-only continuation pages: {skipped_pages}")
+        print(f"Inserted {len(skipped_pages)} visual page points without matching page-level text point: {skipped_pages}")
     print(f"ColPali vectors are ready in {config.paths.collection_name}")
 
 

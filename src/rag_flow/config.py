@@ -194,6 +194,14 @@ class CaptioningConfig:
 
 
 @dataclass(frozen=True)
+class ChunkingConfig:
+    mode: str = "auto"
+    max_tokens: int = 1500
+    overlap_tokens: int = 200
+    min_tokens: int = 200
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
@@ -202,6 +210,7 @@ class AppConfig:
     mineru: MinerUConfig
     patching: PatchingConfig
     captioning: CaptioningConfig
+    chunking: ChunkingConfig
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -312,6 +321,13 @@ class AppConfig:
             llm_timeout=env.float("RAG_FLOW_CAPTION_LLM_TIMEOUT", 120.0),
         )
 
+        chunking = ChunkingConfig(
+            mode=env.get("RAG_FLOW_CHUNK_MODE", "auto"),
+            max_tokens=env.int("RAG_FLOW_CHUNK_MAX_TOKENS", 1500),
+            overlap_tokens=env.int("RAG_FLOW_CHUNK_OVERLAP_TOKENS", 200),
+            min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 200),
+        )
+
         return cls(
             paths=paths,
             models=models,
@@ -320,4 +336,5 @@ class AppConfig:
             mineru=mineru,
             patching=patching,
             captioning=captioning,
+            chunking=chunking,
         )
