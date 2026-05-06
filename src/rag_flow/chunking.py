@@ -255,10 +255,10 @@ def _make_chunk(
     if section_path:
         heading = " > ".join(section_path)
         parts.insert(0, f"[Section: {heading}]")
-    page_content = "\n\n".join(parts).strip()
-    token_count = estimate_token_count(page_content)
+    chunk_content = "\n\n".join(parts).strip()
+    token_count = estimate_token_count(chunk_content)
     return {
-        "page_content": page_content,
+        "chunk_content": chunk_content,
         "metadata": _chunk_metadata(
             source_name=source_name,
             chunk_idx=chunk_idx,
@@ -308,7 +308,7 @@ def _token_window_chunks(
                 section_level=section_level,
                 section_source=section_source,
             )
-            if chunk["page_content"]:
+            if chunk["chunk_content"]:
                 chunks.append(chunk)
                 chunk_idx += 1
             current = _tail_overlap(current, overlap_tokens)
@@ -327,7 +327,7 @@ def _token_window_chunks(
             section_level=section_level,
             section_source=section_source,
         )
-        if chunk["page_content"]:
+        if chunk["chunk_content"]:
             chunks.append(chunk)
     return chunks
 
@@ -389,7 +389,7 @@ def create_page_level_chunks(
     with Path(json_path).open("r", encoding="utf-8") as f:
         content_data = json.load(f)
 
-    page_contents: dict[int, list[str]] = defaultdict(list)
+    chunk_contents_by_page: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
     page_tables: dict[int, list[str]] = defaultdict(list)
 
@@ -411,7 +411,7 @@ def create_page_level_chunks(
                     parts.append(f"\n{label}\n{description}".strip())
                 if footnote:
                     parts.append(f"[Image footnote: {footnote}]")
-                page_contents[page_idx].append("\n".join(parts))
+                chunk_contents_by_page[page_idx].append("\n".join(parts))
             if block.get("img_path") and not _has_inline_icon_marker(block):
                 page_images[page_idx].append(block["img_path"])
 
@@ -427,7 +427,7 @@ def create_page_level_chunks(
             if footnote:
                 parts.append(f"[Footnote: {footnote}]")
             if parts:
-                page_contents[page_idx].append("\n".join(parts))
+                chunk_contents_by_page[page_idx].append("\n".join(parts))
             if block.get("img_path"):
                 page_tables[page_idx].append(block["img_path"])
 
@@ -435,16 +435,16 @@ def create_page_level_chunks(
             key = "list_items" if block_type == "list" else "text"
             text = _join_field(block.get(key, [])).strip()
             if text:
-                page_contents[page_idx].append(text)
+                chunk_contents_by_page[page_idx].append(text)
 
     chunks: list[dict[str, Any]] = []
-    for page_idx in sorted(page_contents):
-        page_content = "\n\n".join(page_contents[page_idx]).strip()
-        if not page_content:
+    for page_idx in sorted(chunk_contents_by_page):
+        chunk_content = "\n\n".join(chunk_contents_by_page[page_idx]).strip()
+        if not chunk_content:
             continue
         chunks.append(
             {
-                "page_content": page_content,
+                "chunk_content": chunk_content,
                 "metadata": {
                     "source": source_name,
                     "page_idx": page_idx,

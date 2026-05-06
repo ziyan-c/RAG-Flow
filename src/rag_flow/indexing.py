@@ -131,7 +131,7 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
 
     ensure_collection(config)
     chunks = load_chunks(chunks_path or config.paths.chunks_json)
-    documents = [chunk["page_content"] for chunk in chunks]
+    documents = [chunk["chunk_content"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
 
     dense_model = TextEmbedding(config.models.dense_model)
@@ -142,7 +142,7 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
     points = []
     for doc, meta, dense_vec, sparse_vec in zip(documents, metadatas, dense_embeddings, sparse_embeddings):
         payload = dict(meta)
-        payload["page_content"] = doc
+        payload["chunk_content"] = doc
         page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
         chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
         points.append(
@@ -193,7 +193,7 @@ def _page_payloads_from_chunks(
             meta = dict(chunk.get("metadata", {}))
             if meta.get("chunk_id"):
                 chunk_ids.append(str(meta["chunk_id"]))
-            text = str(chunk.get("page_content", "")).strip()
+            text = str(chunk.get("chunk_content", "")).strip()
             if text:
                 page_texts.append(text)
         payload: dict[str, Any] = {
@@ -204,7 +204,7 @@ def _page_payloads_from_chunks(
             "page_indices": [page_idx],
             "is_visual_page": True,
             "chunk_ids_on_page": chunk_ids,
-            "page_content": "\n\n".join(page_texts),
+            "chunk_content": "\n\n".join(page_texts),
         }
         if section_path:
             payload["section_path"] = section_path
@@ -233,7 +233,7 @@ def _visual_page_payload(
             "page_end": page_idx,
             "page_indices": [page_idx],
             "is_visual_page": True,
-            "page_content": (
+            "chunk_content": (
                 "[Visual page evidence only. Text chunking did not produce text for this page.]"
             ),
         }

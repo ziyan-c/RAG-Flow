@@ -206,7 +206,7 @@ class RetrievalEngine:
                     note_prefix = "[Target Visual Match] "
                 context_blocks.append(
                     f"[Source: {source_pdf}, Page: {page_label}{section_line}]\n"
-                    f"{note_prefix}{record.payload.get('page_content', '')}"
+                    f"{note_prefix}{record.payload.get('chunk_content', '')}"
                 )
 
         final_context = (

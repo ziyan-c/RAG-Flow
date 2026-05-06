@@ -15,7 +15,7 @@ def test_point_id_uses_chunk_id_when_present():
 def test_page_payloads_from_chunks_carry_section_metadata():
     chunks = [
         {
-            "page_content": "Section text",
+            "chunk_content": "Section text",
             "metadata": {
                 "source": "manual.pdf",
                 "chunk_id": "manual-chunk-00001",
@@ -34,4 +34,4 @@ def test_page_payloads_from_chunks_carry_section_metadata():
     assert payloads[2]["section_path"] == ["1 Overview", "1.1 Login"]
     assert payloads[2]["section_title"] == "1.1 Login"
     assert payloads[2]["chunk_ids_on_page"] == ["manual-chunk-00001"]
-    assert "Section text" in payloads[2]["page_content"]
+    assert "Section text" in payloads[2]["chunk_content"]

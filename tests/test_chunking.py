@@ -42,11 +42,11 @@ def test_create_page_level_chunks(tmp_path):
 
     assert len(chunks) == 2
     assert chunks[0]["metadata"]["page_idx"] == 0
-    assert "Overview" in chunks[0]["page_content"]
-    assert "Port 8000" in chunks[1]["page_content"]
-    assert "Step 3 Click OK." in chunks[1]["page_content"]
-    assert "User Manual" not in chunks[1]["page_content"]
-    assert "Contact us" not in chunks[1]["page_content"]
+    assert "Overview" in chunks[0]["chunk_content"]
+    assert "Port 8000" in chunks[1]["chunk_content"]
+    assert "Step 3 Click OK." in chunks[1]["chunk_content"]
+    assert "User Manual" not in chunks[1]["chunk_content"]
+    assert "Contact us" not in chunks[1]["chunk_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
     assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]
 
@@ -104,7 +104,7 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
     assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
     assert chunks[0]["metadata"]["bboxes_by_page"]["0"] == [[10.0, 10.0, 200.0, 30.0], [10.0, 40.0, 200.0, 80.0]]
     assert chunks[1]["metadata"]["section_path"] == ["2 Setup"]
-    assert "setup body" not in chunks[0]["page_content"]
+    assert "setup body" not in chunks[0]["chunk_content"]
 
 
 def test_chunking_main_dry_run_prints_settings(capsys):

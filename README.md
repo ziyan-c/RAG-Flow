@@ -315,6 +315,9 @@ Build retrieval chunks:
 rag-flow chunk
 ```
 
+The chunk JSON contains `chunk_content` plus `metadata`; `chunk_content` is the
+text used for embeddings and retrieved context.
+
 By default `rag-flow chunk` uses `RAG_FLOW_CHUNK_MODE=auto`. If the input JSON
 contains `section_path` metadata from sectioning, chunks are grouped by section
 and then split by token budget. If no PDF outline was available and sectioning
