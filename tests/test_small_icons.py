@@ -389,6 +389,21 @@ def test_patch_field_keys_skips_table_caption_by_default():
     assert _patch_field_keys(block) == ["table_footnote", "table_body"]
 
 
+def test_patch_field_keys_skips_sectioning_and_continuation_metadata():
+    block = {
+        "type": "text",
+        "bbox": [100, 100, 500, 150],
+        "page_idx": 0,
+        "text": "Click .",
+        "section_path": ["1 Overview"],
+        "section_title": "1 Overview",
+        "section_source": "pdf_outline_exact",
+        "rag_flow_table_continuation_indices": [3],
+    }
+
+    assert _patch_field_keys(block) == ["text"]
+
+
 def test_patch_field_keys_patches_image_footnote_but_not_caption():
     block = {
         "type": "image",

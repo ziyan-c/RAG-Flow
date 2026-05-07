@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .config import AppConfig
+from .indexing import PAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
 from .runtime import get_torch_device
 
 
@@ -90,19 +91,19 @@ class RetrievalEngine:
         dense_hits = self.client.query_points(
             collection_name=collection,
             query=dense_query,
-            using="page-dense",
+            using=TEXT_DENSE_VECTOR_NAME,
             limit=retrieval_k,
         ).points
         sparse_hits = self.client.query_points(
             collection_name=collection,
             query=models.SparseVector(indices=sparse_indices, values=sparse_values),
-            using="page-sparse",
+            using=TEXT_SPARSE_VECTOR_NAME,
             limit=retrieval_k,
         ).points
         visual_hits = self.client.query_points(
             collection_name=collection,
             query=visual_query,
-            using="page-colpali",
+            using=PAGE_COLPALI_VECTOR_NAME,
             limit=retrieval_k,
             search_params=models.SearchParams(
                 quantization=models.QuantizationSearchParams(

@@ -17,6 +17,7 @@ from rag_flow.preprocessing.small_icons import (
     resolve_icon_patch_batch,
     strip_reasoning_text,
 )
+from rag_flow.table_continuations import build_table_continuation_map, table_master_by_continuation
 
 
 TEXT_KEYS = [
@@ -238,13 +239,30 @@ def _block_context_text(block: dict[str, Any]) -> str:
     return "\n".join(block_texts)
 
 
-def _format_context_block(block: dict[str, Any], idx: int) -> str:
-    text = _block_context_text(block)
+def _format_context_block(
+    content_data: list[dict[str, Any]],
+    idx: int,
+    *,
+    continuation_to_master: dict[int, int] | None = None,
+) -> str:
+    block = content_data[idx]
+    source_block = block
+    source_idx = idx
+    continuation_suffix = ""
+    if continuation_to_master and idx in continuation_to_master:
+        master_idx = continuation_to_master[idx]
+        if 0 <= master_idx < len(content_data) and isinstance(content_data[master_idx], dict):
+            source_block = content_data[master_idx]
+            source_idx = master_idx
+            continuation_suffix = f", continuation of table block {master_idx}"
+
+    text = _block_context_text(source_block)
     if not text:
         return ""
     page_idx = block.get("page_idx", "?")
     block_type = block.get("type", "unknown")
-    return f"--- [Block {idx}, page {page_idx}, type {block_type}] ---\n{text}"
+    source_label = f", source block {source_idx}" if source_idx != idx else ""
+    return f"--- [Block {idx}, page {page_idx}, type {block_type}{continuation_suffix}{source_label}] ---\n{text}"
 
 
 def _truncate_text(text: str, max_chars: int) -> str:
@@ -337,6 +355,7 @@ def _collect_nearby_context(
     direction: int,
     max_tokens: int,
     budgeter: TextBudgeter,
+    continuation_to_master: dict[int, int] | None = None,
 ) -> ContextCollection:
     if max_tokens <= 0:
         return ContextCollection(text="", block_indices=())
@@ -354,7 +373,11 @@ def _collect_nearby_context(
         block = content_data[idx]
         if not isinstance(block, dict):
             continue
-        segment = _format_context_block(block, idx)
+        segment = _format_context_block(
+            content_data,
+            idx,
+            continuation_to_master=continuation_to_master,
+        )
         if not segment:
             continue
         separator_budget = separator_tokens if segments else 0
@@ -387,15 +410,25 @@ def collect_surrounding_context_selection(
     *,
     max_context_tokens: int = DEFAULT_CAPTION_MAX_CONTEXT_TOKENS,
     budgeter: TextBudgeter | None = None,
+    table_continuations: dict[int, list[int]] | None = None,
 ) -> tuple[str, ContextBlockSelection]:
     budgeter = budgeter or ApproxTokenBudgeter()
     if max_context_tokens <= 0:
         return "", ContextBlockSelection(before_indices=(), current_indices=(), after_indices=())
 
+    resolved_continuations = (
+        build_table_continuation_map(content_data) if table_continuations is None else table_continuations
+    )
+    continuation_to_master = table_master_by_continuation(resolved_continuations)
+
     target = ""
     current_indices: tuple[int, ...] = ()
     if 0 <= target_idx < len(content_data) and isinstance(content_data[target_idx], dict):
-        target = _format_context_block(content_data[target_idx], target_idx)
+        target = _format_context_block(
+            content_data,
+            target_idx,
+            continuation_to_master=continuation_to_master,
+        )
         if target:
             current_indices = (target_idx,)
 
@@ -411,6 +444,7 @@ def collect_surrounding_context_selection(
         direction=-1,
         max_tokens=before_budget,
         budgeter=budgeter,
+        continuation_to_master=continuation_to_master,
     )
     after_context = _collect_nearby_context(
         content_data,
@@ -418,6 +452,7 @@ def collect_surrounding_context_selection(
         direction=1,
         max_tokens=after_budget,
         budgeter=budgeter,
+        continuation_to_master=continuation_to_master,
     )
 
     sections = []
@@ -442,12 +477,14 @@ def get_surrounding_text_context(
     *,
     max_context_tokens: int = DEFAULT_CAPTION_MAX_CONTEXT_TOKENS,
     budgeter: TextBudgeter | None = None,
+    table_continuations: dict[int, list[int]] | None = None,
 ) -> str:
     context, _selection = collect_surrounding_context_selection(
         content_data,
         target_idx,
         max_context_tokens=max_context_tokens,
         budgeter=budgeter,
+        table_continuations=table_continuations,
     )
     return context
 
@@ -508,6 +545,7 @@ def collect_context_token_stats(
     budgeter: TextBudgeter | None = None,
 ) -> ContextTokenStats:
     budgeter = budgeter or ApproxTokenBudgeter()
+    table_continuations = build_table_continuation_map(content_data)
     token_counts = []
     contexts_at_budget = 0
     for idx, block in enumerate(content_data):
@@ -518,6 +556,7 @@ def collect_context_token_stats(
             idx,
             max_context_tokens=max_context_tokens,
             budgeter=budgeter,
+            table_continuations=table_continuations,
         )
         token_count = budgeter.count(context)
         token_counts.append(token_count)
@@ -827,6 +866,7 @@ def add_image_descriptions(
     )
     assert_captioning_llm_available(llm_client, base_url=llm_base_url)
     context_budgeter = ApproxTokenBudgeter()
+    table_continuations = build_table_continuation_map(content_data)
 
     def write_checkpoint() -> None:
         started_at = time.time()
@@ -906,6 +946,7 @@ def add_image_descriptions(
                 idx,
                 max_context_tokens=max_context_tokens,
                 budgeter=context_budgeter,
+                table_continuations=table_continuations,
             )
             review_context_token_count = None
             if review_context_tokens is not None:
@@ -914,6 +955,7 @@ def add_image_descriptions(
                     idx,
                     max_context_tokens=review_context_tokens,
                     budgeter=context_budgeter,
+                    table_continuations=table_continuations,
                 )
                 review_context_token_count = context_budgeter.count(review_context)
             prompt = (

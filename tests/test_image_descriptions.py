@@ -105,6 +105,35 @@ def test_surrounding_text_context_limits_length_and_keeps_nearby_blocks():
     assert "near-after-important" in context
 
 
+def test_surrounding_text_context_uses_table_master_for_continuation_blocks():
+    content = [
+        {
+            "type": "table",
+            "page_idx": 0,
+            "bbox": [100, 500, 900, 900],
+            "table_caption": ["Table 1"],
+            "table_body": "<table><tr><td>Record Mode</td></tr></table>",
+            "table_footnote": [],
+        },
+        {
+            "type": "table",
+            "page_idx": 1,
+            "bbox": [100, 80, 900, 300],
+            "table_caption": [],
+            "table_body": "",
+            "table_footnote": [],
+            "img_path": "",
+        },
+        {"type": "image", "page_idx": 1, "img_path": "images/figure.jpg", "image_caption": ["Figure 1"]},
+    ]
+
+    context = get_surrounding_text_context(content, 2, max_context_tokens=400)
+
+    assert "continuation of table block 0" in context
+    assert "Table 1" in context
+    assert "Record Mode" in context
+
+
 def test_surrounding_text_context_zero_budget_is_empty():
     content = [
         {"type": "text", "page_idx": 0, "text": "near-before-important " * 20},

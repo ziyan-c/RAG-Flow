@@ -12,6 +12,10 @@ from rag_flow.sectioning import (
     sectioning_audit_path_for,
     write_sectioned_json,
 )
+from rag_flow.table_continuations import (
+    TABLE_CONTINUATION_INDICES_KEY,
+    TABLE_CONTINUATION_MASTER_IDX_KEY,
+)
 
 
 def test_section_paths_insert_stage_suffixes():
@@ -84,6 +88,55 @@ def test_section_content_matches_exact_fuzzy_and_page_fallback():
     assert result.content_data[5]["section_source"] == "pdf_outline_fuzzy"
     assert result.content_data[8]["section_source"] == "pdf_outline_page_fallback"
     assert result.content_data[8]["section_confidence"] == 0.75
+
+
+def test_sectioning_keeps_table_continuation_under_master_section():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "1 Overview", "bbox": [10, 100, 200, 120]},
+        {
+            "type": "table",
+            "page_idx": 0,
+            "bbox": [100, 500, 900, 900],
+            "table_caption": ["Table 1"],
+            "table_body": "<table><tr><td>Port</td></tr></table>",
+            "table_footnote": [],
+        },
+        {"type": "text", "page_idx": 1, "text": "2 Setup", "bbox": [10, 250, 200, 280]},
+        {
+            "type": "table",
+            "page_idx": 1,
+            "bbox": [100, 80, 900, 300],
+            "table_caption": [],
+            "table_body": "",
+            "table_footnote": [],
+            "img_path": "",
+        },
+    ]
+    entries = [
+        OutlineEntry(
+            outline_index=0,
+            level=1,
+            title="1 Overview",
+            page_idx=0,
+            section_path=("1 Overview",),
+        ),
+        OutlineEntry(
+            outline_index=1,
+            level=1,
+            title="2 Setup",
+            page_idx=1,
+            section_path=("2 Setup",),
+        ),
+    ]
+
+    result = section_content(content, entries)
+
+    assert result.content_data[1]["section_path"] == ["1 Overview"]
+    assert result.content_data[1][TABLE_CONTINUATION_INDICES_KEY] == [3]
+    assert result.content_data[3]["section_path"] == ["1 Overview"]
+    assert result.content_data[3][TABLE_CONTINUATION_MASTER_IDX_KEY] == 1
+    assert result.stats["table_continuation_groups"] == 1
+    assert result.stats["table_continuation_blocks"] == 1
 
 
 def test_write_sectioned_json_reads_pdf_outline(tmp_path):

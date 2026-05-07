@@ -329,6 +329,23 @@ controls:
 - `--overlap-tokens`: repeated tail context between adjacent token chunks, default `200`
 - `--min-tokens`: minimum size before flushing a chunk, default `200`
 
+Cross-page table continuations use the same relation as patching. The empty
+continuation `table` blocks are not emitted as duplicate text chunks; instead,
+their block indices, pages, and bboxes are attached to the master table chunk's
+metadata. That keeps `chunk_content` clean while letting chunking view and
+visual retrieval know that the table spans multiple pages.
+
+Successful pipeline chunking also writes a `*_CHUNKING_VIEW.pdf` overlay. It
+draws each chunk's source bboxes over the original PDF; adjacent chunks use
+different semi-transparent colors so section boundaries and overlap are easier
+to inspect. To generate it separately:
+
+```bash
+rag-flow chunk-view \
+  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json \
+  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+```
+
 Upsert text vectors:
 
 ```bash

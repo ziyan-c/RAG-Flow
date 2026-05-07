@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from rag_flow.indexing import _page_payloads_from_chunks, point_id
+from types import SimpleNamespace
+
+from rag_flow.indexing import _page_payloads_from_chunks, point_id, uses_idf_modifier
 
 
 def test_point_id_uses_chunk_id_when_present():
@@ -35,3 +37,11 @@ def test_page_payloads_from_chunks_carry_section_metadata():
     assert payloads[2]["section_title"] == "1.1 Login"
     assert payloads[2]["chunk_ids_on_page"] == ["manual-chunk-00001"]
     assert "Section text" in payloads[2]["chunk_content"]
+
+
+def test_sparse_schema_requires_idf_modifier():
+    fake_models = SimpleNamespace(Modifier=SimpleNamespace(IDF="idf"))
+
+    assert uses_idf_modifier(SimpleNamespace(modifier="idf"), fake_models)
+    assert not uses_idf_modifier(SimpleNamespace(modifier=None), fake_models)
+    assert not uses_idf_modifier(SimpleNamespace(modifier="none"), fake_models)

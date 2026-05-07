@@ -17,6 +17,15 @@ from pathlib import Path
 from typing import Any
 
 from rag_flow.config import AppConfig
+from rag_flow.table_continuations import (
+    TABLE_CONTINUATION_INDICES_KEY,
+    TABLE_CONTINUATION_MASTER_IDX_KEY,
+    build_table_continuation_map as _build_table_continuation_map,
+    is_table_continuation_block as _shared_is_table_continuation_block,
+    is_table_continuation_for_master as _shared_is_table_continuation_for_master,
+    table_continuation_indices as _shared_table_continuation_indices,
+    table_master_by_continuation as _shared_table_master_by_continuation,
+)
 
 
 IGNORE_TYPES = {
@@ -77,6 +86,15 @@ METADATA_KEYS = {
     "text_level",
     "img_path",
     "sub_type",
+    "section_path",
+    "section_title",
+    "section_level",
+    "section_source",
+    "section_confidence",
+    "section_match_score",
+    "section_outline_index",
+    TABLE_CONTINUATION_INDICES_KEY,
+    TABLE_CONTINUATION_MASTER_IDX_KEY,
     *INLINE_ICON_KEYS,
 }
 
@@ -427,11 +445,7 @@ def is_inline_icon_candidate(block: dict[str, Any]) -> bool:
 
 
 def _table_master_by_continuation(table_continuations: dict[int, list[int]]) -> dict[int, int]:
-    return {
-        continuation_idx: master_idx
-        for master_idx, continuation_indices in table_continuations.items()
-        for continuation_idx in continuation_indices
-    }
+    return _shared_table_master_by_continuation(table_continuations)
 
 
 def _primary_inline_target_field(block: dict[str, Any]) -> str | None:
@@ -633,55 +647,19 @@ def build_inline_icon_links(
 
 
 def _is_table_continuation_block(block: dict[str, Any]) -> bool:
-    if block.get("type") != "table":
-        return False
-    return (
-        not _join(block.get("table_body", "")).strip()
-        and not _join(block.get("table_caption", "")).strip()
-        and not _join(block.get("table_footnote", "")).strip()
-        and not str(block.get("img_path", "")).strip()
-    )
+    return _shared_is_table_continuation_block(block)
 
 
 def _is_table_continuation_for_master(master: dict[str, Any], block: dict[str, Any]) -> bool:
-    if not _is_table_continuation_block(block):
-        return False
-    if "bbox" not in master or "bbox" not in block:
-        return False
-
-    master_page = int(master.get("page_idx", 0))
-    block_page = int(block.get("page_idx", 0))
-    if block_page < master_page:
-        return False
-    if block_page == master_page:
-        return block["bbox"][1] >= master["bbox"][3]
-    return block["bbox"][1] <= 180
+    return _shared_is_table_continuation_for_master(master, block)
 
 
 def build_table_continuation_map(content_data: list[dict[str, Any]]) -> dict[int, list[int]]:
-    continuations: dict[int, list[int]] = {}
-    current_master_idx: int | None = None
-
-    for idx, block in enumerate(content_data):
-        if not isinstance(block, dict) or block.get("type") != "table":
-            continue
-
-        if _join(block.get("table_body", "")).strip():
-            current_master_idx = idx
-            continuations.setdefault(idx, [])
-            continue
-
-        if current_master_idx is None:
-            continue
-        master = content_data[current_master_idx]
-        if _is_table_continuation_for_master(master, block):
-            continuations.setdefault(current_master_idx, []).append(idx)
-
-    return {master_idx: indices for master_idx, indices in continuations.items() if indices}
+    return _build_table_continuation_map(content_data)
 
 
 def _table_continuation_indices(table_continuations: dict[int, list[int]]) -> set[int]:
-    return {idx for indices in table_continuations.values() for idx in indices}
+    return _shared_table_continuation_indices(table_continuations)
 
 
 def _window_visual_page_end(

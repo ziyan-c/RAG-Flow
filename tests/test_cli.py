@@ -177,6 +177,35 @@ def test_patch_view_command_delegates_to_patching_view_main(monkeypatch):
     ]
 
 
+def test_chunk_view_command_delegates_to_chunking_view_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.preprocessing.chunking_view
+
+    monkeypatch.setattr(rag_flow.preprocessing.chunking_view, "main", lambda argv: calls.append(argv))
+
+    cli.main(
+        [
+            "chunk-view",
+            "--input-json",
+            "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
+            "--input-pdf",
+            "manual.pdf",
+            "--dry-run",
+        ]
+    )
+
+    assert calls == [
+        [
+            "--input-json",
+            "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
+            "--input-pdf",
+            "manual.pdf",
+            "--dry-run",
+        ]
+    ]
+
+
 def test_module_help_is_forwarded(monkeypatch):
     calls: list[list[str]] = []
 

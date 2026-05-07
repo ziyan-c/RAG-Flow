@@ -9,6 +9,7 @@ from .chunking import create_chunks, write_chunks
 from .config import AppConfig
 from .indexing import upsert_colpali_vectors, upsert_text_vectors
 from .mineru import MinerUArtifacts, expected_content_json, find_content_json, infer_artifacts, run_mineru
+from .preprocessing.chunking_view import write_chunking_view_pdf
 from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
 from .sectioning import write_sectioned_json
@@ -54,6 +55,8 @@ def run_ingest(
     dry_run: bool = False,
     write_patching_view: bool = True,
     patching_view_pdf: str | Path | None = None,
+    write_chunking_view: bool = True,
+    chunking_view_pdf: str | Path | None = None,
     patch_max_new_tokens: int | None = None,
     patch_batch_size: int | None = None,
     patch_concurrency: int | None = None,
@@ -145,6 +148,17 @@ def run_ingest(
         )
         write_chunks(chunks, artifacts.chunks_json)
         print(f"Created {len(chunks)} {config.chunking.mode} chunks at {artifacts.chunks_json}")
+        if write_chunking_view and source_pdf.exists():
+            stats = write_chunking_view_pdf(
+                chunks_json=artifacts.chunks_json,
+                pdf_path=source_pdf,
+                output_pdf=chunking_view_pdf,
+            )
+            print(f"Generated chunking view PDF at {stats.output_pdf}")
+            print(f"  overlays: {stats.region_count}")
+            print(f"  chunks with overlays: {stats.chunks_with_regions}/{stats.chunk_count}")
+        elif write_chunking_view:
+            print(f"Skipping chunking view PDF because source PDF does not exist: {source_pdf}")
 
     stages = {
         "sectioning": Stage("sectioning", artifacts.sectioned_json, recover_sections),
@@ -196,6 +210,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--patch-checkpoint-interval", type=int, default=config.patching.checkpoint_interval)
     parser.add_argument("--patching-view-pdf", help="Output PDF that visualizes patching crop regions.")
     parser.add_argument("--no-patching-view", action="store_true", help="Do not write the PATCHING_VIEW PDF.")
+    parser.add_argument("--chunking-view-pdf", help="Output PDF that visualizes final chunk regions.")
+    parser.add_argument("--no-chunking-view", action="store_true", help="Do not write the CHUNKING_VIEW PDF.")
     parser.add_argument("--dry-run", action="store_true", help="Print the pipeline without running it.")
     args = parser.parse_args(argv)
 
@@ -209,6 +225,8 @@ def main(argv: list[str] | None = None) -> None:
         dry_run=args.dry_run,
         write_patching_view=not args.no_patching_view,
         patching_view_pdf=args.patching_view_pdf,
+        write_chunking_view=not args.no_chunking_view,
+        chunking_view_pdf=args.chunking_view_pdf,
         patch_max_new_tokens=args.max_new_tokens,
         patch_batch_size=args.patch_batch_size,
         patch_concurrency=args.patch_concurrency,

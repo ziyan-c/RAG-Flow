@@ -106,6 +106,7 @@ def collect_captioning_view_regions(
     field_counts: Counter[str] = Counter()
     caption_targets = 0
     budgeter = budgeter or ApproxTokenBudgeter()
+    table_continuations = small_icons.build_table_continuation_map(content_data)
 
     for idx, block in enumerate(content_data):
         if not isinstance(block, dict) or not should_caption_image_block(block):
@@ -125,6 +126,7 @@ def collect_captioning_view_regions(
             idx,
             max_context_tokens=max_context_tokens,
             budgeter=budgeter,
+            table_continuations=table_continuations,
         )
         for context_idx in selection.before_indices:
             _add_region(

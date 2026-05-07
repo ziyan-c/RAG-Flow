@@ -9,10 +9,22 @@ from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
+from .table_continuations import (
+    build_table_continuation_map,
+    table_continuation_indices,
+    table_visual_regions,
+)
 
 INLINE_ICON_KEYS = ("vlm-small-icon-inline-icon", "vlm-small-icon-inline-candidate")
 IGNORED_BLOCK_TYPES = {"header", "footer", "page_number"}
 SUPPORTED_CHUNK_MODES = ("auto", "section", "token", "page")
+
+
+@dataclass(frozen=True)
+class VisualRegion:
+    block_idx: int
+    page_idx: int
+    bbox: tuple[float, float, float, float]
 
 
 @dataclass(frozen=True)
@@ -21,11 +33,13 @@ class ChunkItem:
     page_idx: int
     block_idx: int
     bbox: tuple[float, float, float, float] | None = None
+    visual_regions: tuple[VisualRegion, ...] = ()
     images: tuple[str, ...] = ()
     tables: tuple[str, ...] = ()
     section_path: tuple[str, ...] = ()
     section_level: int | None = None
     section_source: str = ""
+    table_continuation_block_indices: tuple[int, ...] = ()
 
 
 def _join_field(value: Any) -> str:
@@ -87,9 +101,29 @@ def _block_bbox(block: dict[str, Any]) -> tuple[float, float, float, float] | No
     return (x0, y0, x1, y1)
 
 
-def _block_text_item(block: dict[str, Any], block_idx: int) -> ChunkItem | None:
+def _visual_region_for_block(block: dict[str, Any], block_idx: int) -> tuple[VisualRegion, ...]:
+    bbox = _block_bbox(block)
+    if bbox is None:
+        return ()
+    return (
+        VisualRegion(
+            block_idx=block_idx,
+            page_idx=_block_page_idx(block),
+            bbox=bbox,
+        ),
+    )
+
+
+def _block_text_item(
+    block: dict[str, Any],
+    block_idx: int,
+    *,
+    content_data: list[dict[str, Any]],
+    table_continuations: dict[int, list[int]],
+) -> ChunkItem | None:
     page_idx = _block_page_idx(block)
     bbox = _block_bbox(block)
+    visual_regions = _visual_region_for_block(block, block_idx)
     block_type = block.get("type")
     section_path = _section_path(block)
     section_level = block.get("section_level")
@@ -121,6 +155,7 @@ def _block_text_item(block: dict[str, Any], block_idx: int) -> ChunkItem | None:
             page_idx=page_idx,
             block_idx=block_idx,
             bbox=bbox,
+            visual_regions=visual_regions,
             images=images,
             section_path=section_path,
             section_level=section_level,
@@ -142,15 +177,26 @@ def _block_text_item(block: dict[str, Any], block_idx: int) -> ChunkItem | None:
         tables = (str(block["img_path"]),) if block.get("img_path") else ()
         if not text and not tables:
             return None
+        continuation_indices = tuple(table_continuations.get(block_idx, []))
+        table_regions = table_visual_regions(
+            content_data,
+            master_idx=block_idx,
+            continuation_indices=list(continuation_indices),
+        )
+        visual_regions = tuple(
+            VisualRegion(region.block_idx, region.page_idx, region.bbox) for region in table_regions
+        )
         return ChunkItem(
             text=text,
             page_idx=page_idx,
             block_idx=block_idx,
             bbox=bbox,
+            visual_regions=visual_regions,
             tables=tables,
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
+            table_continuation_block_indices=continuation_indices,
         )
 
     if block_type in {"text", "list"}:
@@ -163,6 +209,7 @@ def _block_text_item(block: dict[str, Any], block_idx: int) -> ChunkItem | None:
             page_idx=page_idx,
             block_idx=block_idx,
             bbox=bbox,
+            visual_regions=visual_regions,
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
@@ -173,10 +220,19 @@ def _block_text_item(block: dict[str, Any], block_idx: int) -> ChunkItem | None:
 
 def content_items(content_data: list[dict[str, Any]]) -> list[ChunkItem]:
     items = []
+    table_continuations = build_table_continuation_map(content_data)
+    continuation_indices = table_continuation_indices(table_continuations)
     for idx, block in enumerate(content_data):
         if not isinstance(block, dict):
             continue
-        item = _block_text_item(block, idx)
+        if idx in continuation_indices:
+            continue
+        item = _block_text_item(
+            block,
+            idx,
+            content_data=content_data,
+            table_continuations=table_continuations,
+        )
         if item is not None:
             items.append(item)
     return items
@@ -206,23 +262,46 @@ def _chunk_metadata(
     section_level: int | None = None,
     section_source: str = "",
 ) -> dict[str, Any]:
-    pages = sorted({item.page_idx for item in items})
+    pages = sorted(
+        {item.page_idx for item in items}
+        | {region.page_idx for item in items for region in item.visual_regions}
+    )
     page_start = pages[0] if pages else 0
     page_end = pages[-1] if pages else page_start
     images = _unique([image for item in items for image in item.images])
     tables = _unique([table for item in items for table in item.tables])
     bboxes_by_page: dict[str, list[list[float]]] = defaultdict(list)
+    block_indices: list[int] = []
+    table_continuations = []
     for item in items:
-        if item.bbox is None:
-            continue
-        bboxes_by_page[str(item.page_idx)].append([round(value, 3) for value in item.bbox])
+        if item.block_idx not in block_indices:
+            block_indices.append(item.block_idx)
+        for continuation_idx in item.table_continuation_block_indices:
+            if continuation_idx not in block_indices:
+                block_indices.append(continuation_idx)
+        if item.table_continuation_block_indices:
+            table_continuations.append(
+                {
+                    "master_block_idx": item.block_idx,
+                    "continuation_block_indices": list(item.table_continuation_block_indices),
+                    "continuation_page_indices": sorted(
+                        {
+                            region.page_idx
+                            for region in item.visual_regions
+                            if region.block_idx in item.table_continuation_block_indices
+                        }
+                    ),
+                }
+            )
+        for region in item.visual_regions:
+            bboxes_by_page[str(region.page_idx)].append([round(value, 3) for value in region.bbox])
     metadata: dict[str, Any] = {
         "source": source_name,
         "chunk_idx": chunk_idx,
         "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
         "chunk_mode": mode,
         "token_count": token_count,
-        "block_indices": [item.block_idx for item in items],
+        "block_indices": block_indices,
         "bboxes_by_page": dict(bboxes_by_page),
         "page_idx": page_start,
         "page_start": page_start,
@@ -231,6 +310,8 @@ def _chunk_metadata(
         "images_on_page": images,
         "tables_on_page": tables,
     }
+    if table_continuations:
+        metadata["table_continuations"] = table_continuations
     if section_path:
         metadata["section_path"] = list(section_path)
         metadata["section_title"] = section_path[-1]
@@ -392,8 +473,14 @@ def create_page_level_chunks(
     chunk_contents_by_page: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
     page_tables: dict[int, list[str]] = defaultdict(list)
+    table_continuations = build_table_continuation_map(content_data)
+    continuation_indices = table_continuation_indices(table_continuations)
 
-    for block in content_data:
+    for block_idx, block in enumerate(content_data):
+        if not isinstance(block, dict):
+            continue
+        if block_idx in continuation_indices:
+            continue
         page_idx = int(block.get("page_idx", 0))
         block_type = block.get("type")
 
@@ -427,7 +514,14 @@ def create_page_level_chunks(
             if footnote:
                 parts.append(f"[Footnote: {footnote}]")
             if parts:
-                chunk_contents_by_page[page_idx].append("\n".join(parts))
+                table_text = "\n".join(parts)
+                chunk_contents_by_page[page_idx].append(table_text)
+                for continuation_idx in table_continuations.get(block_idx, []):
+                    continuation = content_data[continuation_idx]
+                    continuation_page_idx = _block_page_idx(continuation)
+                    chunk_contents_by_page[continuation_page_idx].append(
+                        f"[Continuation of table from page {page_idx + 1}]\n{table_text}"
+                    )
             if block.get("img_path"):
                 page_tables[page_idx].append(block["img_path"])
 

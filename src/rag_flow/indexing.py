@@ -12,6 +12,9 @@ from .runtime import get_torch_device
 
 DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
+TEXT_DENSE_VECTOR_NAME = "chunk-text-dense"
+TEXT_SPARSE_VECTOR_NAME = "chunk-text-sparse"
+PAGE_COLPALI_VECTOR_NAME = "page-colpali"
 
 
 def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None) -> str:
@@ -19,11 +22,17 @@ def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None)
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, key))
 
 
+def enum_value(value: Any) -> Any:
+    return getattr(value, "value", value)
+
+
+def uses_idf_modifier(sparse_params: Any, models: Any) -> bool:
+    modifier = getattr(sparse_params, "modifier", None)
+    return enum_value(modifier) == enum_value(models.Modifier.IDF)
+
+
 def validate_collection_schema(config: AppConfig) -> None:
     from qdrant_client import QdrantClient, models
-
-    def enum_value(value: Any) -> Any:
-        return getattr(value, "value", value)
 
     client = QdrantClient(path=str(config.paths.db_path))
     info = client.get_collection(config.paths.collection_name)
@@ -34,27 +43,29 @@ def validate_collection_schema(config: AppConfig) -> None:
     if not isinstance(vectors, dict):
         errors.append("collection must use named vectors")
     else:
-        dense = vectors.get("page-dense")
-        colpali = vectors.get("page-colpali")
+        dense = vectors.get(TEXT_DENSE_VECTOR_NAME)
+        colpali = vectors.get(PAGE_COLPALI_VECTOR_NAME)
         if dense is None:
-            errors.append("missing page-dense vector")
+            errors.append(f"missing {TEXT_DENSE_VECTOR_NAME} vector")
         elif dense.size != DENSE_VECTOR_SIZE or enum_value(dense.distance) != enum_value(models.Distance.COSINE):
-            errors.append(f"page-dense must be {DENSE_VECTOR_SIZE} cosine dimensions")
+            errors.append(f"{TEXT_DENSE_VECTOR_NAME} must be {DENSE_VECTOR_SIZE} cosine dimensions")
 
         if colpali is None:
-            errors.append("missing page-colpali vector")
+            errors.append(f"missing {PAGE_COLPALI_VECTOR_NAME} vector")
         elif colpali.size != COLPALI_VECTOR_SIZE or enum_value(colpali.distance) != enum_value(models.Distance.COSINE):
-            errors.append(f"page-colpali must be {COLPALI_VECTOR_SIZE} cosine dimensions")
+            errors.append(f"{PAGE_COLPALI_VECTOR_NAME} must be {COLPALI_VECTOR_SIZE} cosine dimensions")
         else:
             multivector_config = getattr(colpali, "multivector_config", None)
             if (
                 not multivector_config
                 or enum_value(multivector_config.comparator) != enum_value(models.MultiVectorComparator.MAX_SIM)
             ):
-                errors.append("page-colpali must use MAX_SIM multivector comparison")
+                errors.append(f"{PAGE_COLPALI_VECTOR_NAME} must use MAX_SIM multivector comparison")
 
-    if not isinstance(sparse_vectors, dict) or "page-sparse" not in sparse_vectors:
-        errors.append("missing page-sparse sparse vector")
+    if not isinstance(sparse_vectors, dict) or TEXT_SPARSE_VECTOR_NAME not in sparse_vectors:
+        errors.append(f"missing {TEXT_SPARSE_VECTOR_NAME} sparse vector")
+    elif not uses_idf_modifier(sparse_vectors[TEXT_SPARSE_VECTOR_NAME], models):
+        errors.append(f"{TEXT_SPARSE_VECTOR_NAME} must use IDF sparse-vector modifier")
 
     if errors:
         details = "; ".join(errors)
@@ -76,8 +87,8 @@ def ensure_collection(config: AppConfig) -> None:
     client.create_collection(
         collection_name=collection,
         vectors_config={
-            "page-dense": models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
-            "page-colpali": models.VectorParams(
+            TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
+            PAGE_COLPALI_VECTOR_NAME: models.VectorParams(
                 size=COLPALI_VECTOR_SIZE,
                 distance=models.Distance.COSINE,
                 multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
@@ -86,7 +97,7 @@ def ensure_collection(config: AppConfig) -> None:
                 ),
             ),
         },
-        sparse_vectors_config={"page-sparse": models.SparseVectorParams()},
+        sparse_vectors_config={TEXT_SPARSE_VECTOR_NAME: models.SparseVectorParams(modifier=models.Modifier.IDF)},
     )
     client.create_payload_index(
         collection_name=collection,
@@ -150,8 +161,8 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
                 id=point_id(payload["source"], page_idx, chunk_id=chunk_id),
                 payload=payload,
                 vector={
-                    "page-dense": dense_vec.tolist(),
-                    "page-sparse": models.SparseVector(
+                    TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
+                    TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
                         indices=sparse_vec.indices.tolist(),
                         values=sparse_vec.values.tolist(),
                     ),
@@ -301,7 +312,7 @@ def upsert_colpali_vectors(
             points_to_update.append(
                 models.PointVectors(
                     id=point_id(resolved_source_name, page_idx),
-                    vector={"page-colpali": embedding.cpu().float().tolist()},
+                    vector={PAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
                 )
             )
 
@@ -325,7 +336,7 @@ def upsert_colpali_vectors(
                                     page_idx=current_page_idx,
                                     parent_page_idx=last_valid_page_idx,
                                 ),
-                                vector={"page-colpali": point.vector["page-colpali"]},
+                                vector={PAGE_COLPALI_VECTOR_NAME: point.vector[PAGE_COLPALI_VECTOR_NAME]},
                             )
                         ],
                     )
@@ -356,17 +367,17 @@ def inspect_collection(config: AppConfig, limit: int = 10) -> None:
         print("No points found.")
         return
 
-    valid = next((record for record in records if "page-colpali" in record.vector), records[0])
+    valid = next((record for record in records if PAGE_COLPALI_VECTOR_NAME in record.vector), records[0])
     print(f"Sample point: {valid.id}")
     print(f"Source: {valid.payload.get('source')} page_idx={valid.payload.get('page_idx')}")
-    for name in ["page-dense", "page-sparse", "page-colpali"]:
+    for name in [TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME, PAGE_COLPALI_VECTOR_NAME]:
         if name not in valid.vector:
             print(f"{name}: missing")
             continue
         vector = valid.vector[name]
-        if name == "page-colpali":
+        if name == PAGE_COLPALI_VECTOR_NAME:
             print(f"{name}: {len(vector)} patches x {len(vector[0])} dims")
-        elif name == "page-sparse":
+        elif name == TEXT_SPARSE_VECTOR_NAME:
             count = len(vector.get("indices", [])) if isinstance(vector, dict) else len(vector.indices)
             print(f"{name}: {count} sparse features")
         else:

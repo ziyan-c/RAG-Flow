@@ -107,6 +107,85 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
     assert "setup body" not in chunks[0]["chunk_content"]
 
 
+def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
+    content = [
+        {
+            "type": "table",
+            "page_idx": 0,
+            "bbox": [100, 500, 900, 900],
+            "table_caption": ["Table 1"],
+            "table_body": "<table><tr><td>Record Mode</td></tr></table>",
+            "table_footnote": [],
+            "section_path": ["1 Overview"],
+        },
+        {
+            "type": "table",
+            "page_idx": 1,
+            "bbox": [100, 80, 900, 300],
+            "table_caption": [],
+            "table_body": "",
+            "table_footnote": [],
+            "img_path": "",
+            "section_path": ["1 Overview"],
+        },
+    ]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    chunks = create_chunks(input_path, "manual.pdf", mode="auto", max_tokens=100, overlap_tokens=0, min_tokens=1)
+
+    assert len(chunks) == 1
+    assert chunks[0]["chunk_content"].count("Record Mode") == 1
+    metadata = chunks[0]["metadata"]
+    assert metadata["page_indices"] == [0, 1]
+    assert metadata["page_start"] == 0
+    assert metadata["page_end"] == 1
+    assert metadata["block_indices"] == [0, 1]
+    assert metadata["bboxes_by_page"] == {
+        "0": [[100.0, 500.0, 900.0, 900.0]],
+        "1": [[100.0, 80.0, 900.0, 300.0]],
+    }
+    assert metadata["table_continuations"] == [
+        {
+            "master_block_idx": 0,
+            "continuation_block_indices": [1],
+            "continuation_page_indices": [1],
+        }
+    ]
+
+
+def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path):
+    content = [
+        {
+            "type": "table",
+            "page_idx": 0,
+            "bbox": [100, 500, 900, 900],
+            "table_caption": ["Table 1"],
+            "table_body": "<table><tr><td>Record Mode</td></tr></table>",
+            "table_footnote": [],
+        },
+        {
+            "type": "table",
+            "page_idx": 1,
+            "bbox": [100, 80, 900, 300],
+            "table_caption": [],
+            "table_body": "",
+            "table_footnote": [],
+            "img_path": "",
+        },
+    ]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    chunks = create_page_level_chunks(input_path, "manual.pdf")
+
+    assert len(chunks) == 2
+    assert chunks[0]["metadata"]["page_idx"] == 0
+    assert chunks[1]["metadata"]["page_idx"] == 1
+    assert "[Continuation of table from page 1]" in chunks[1]["chunk_content"]
+    assert "Record Mode" in chunks[1]["chunk_content"]
+
+
 def test_chunking_main_dry_run_prints_settings(capsys):
     main(["--input", "missing.json", "--mode", "token", "--max-tokens", "900", "--dry-run"])
 

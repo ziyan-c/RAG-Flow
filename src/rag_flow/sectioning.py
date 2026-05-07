@@ -11,6 +11,11 @@ from typing import Any
 
 from .config import AppConfig
 from .mineru import find_content_json
+from .table_continuations import (
+    TABLE_CONTINUATION_INDICES_KEY,
+    TABLE_CONTINUATION_MASTER_IDX_KEY,
+    build_table_continuation_map,
+)
 
 
 IGNORE_TYPES = {"header", "footer", "page_number"}
@@ -444,7 +449,6 @@ def section_content(
 
     annotated: list[dict[str, Any]] = []
     current_event: SectionEvent | None = None
-    blocks_annotated = 0
     for block_idx, block in enumerate(content_data):
         for event in events_by_block.get(block_idx, []):
             current_event = event
@@ -466,11 +470,31 @@ def section_content(
                     "section_outline_index": current_event.outline_index,
                 }
             )
-            blocks_annotated += 1
         else:
             for key in SECTION_FIELD_KEYS:
                 new_block.pop(key, None)
         annotated.append(new_block)
+
+    table_continuations = build_table_continuation_map(annotated)
+    for master_idx, continuation_indices in table_continuations.items():
+        if master_idx >= len(annotated) or not isinstance(annotated[master_idx], dict):
+            continue
+        master = annotated[master_idx]
+        master[TABLE_CONTINUATION_INDICES_KEY] = list(continuation_indices)
+        for continuation_idx in continuation_indices:
+            if continuation_idx >= len(annotated) or not isinstance(annotated[continuation_idx], dict):
+                continue
+            continuation = annotated[continuation_idx]
+            for key in SECTION_FIELD_KEYS:
+                if key in master:
+                    continuation[key] = master[key]
+                else:
+                    continuation.pop(key, None)
+            continuation[TABLE_CONTINUATION_MASTER_IDX_KEY] = master_idx
+
+    blocks_annotated = sum(
+        1 for block in annotated if isinstance(block, dict) and bool(block.get("section_path"))
+    )
 
     counts = Counter(entry.match_type for entry in audit_entries)
     stats = {
@@ -486,6 +510,8 @@ def section_content(
         "fuzzy_y_matches": counts.get("fuzzy_y", 0),
         "page_fallbacks": counts.get("page_fallback", 0),
         "unmatched": counts.get("unmatched", 0),
+        "table_continuation_groups": len(table_continuations),
+        "table_continuation_blocks": sum(len(indices) for indices in table_continuations.values()),
     }
     return SectioningResult(
         content_data=annotated,
