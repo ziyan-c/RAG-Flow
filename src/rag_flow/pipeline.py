@@ -169,8 +169,18 @@ def run_ingest(
             "indexing",
             None,
             lambda: (
-                upsert_text_vectors(config, artifacts.chunks_json),
-                upsert_colpali_vectors(config, pdf_path=source_pdf, source_name=source_name),
+                upsert_text_vectors(
+                    config,
+                    artifacts.chunks_json,
+                    batch_size=config.indexing.text_batch_size,
+                ),
+                upsert_colpali_vectors(
+                    config,
+                    pdf_path=source_pdf,
+                    source_name=source_name,
+                    batch_size=config.indexing.visual_batch_size,
+                    dpi=config.indexing.visual_dpi,
+                ),
             ),
         ),
     }

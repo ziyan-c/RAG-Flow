@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
 
@@ -143,6 +143,8 @@ class RetrievalConfig:
     rrf_k: int
     visual_weight: float
     quantized_colpali: bool
+    enable_visual: bool = True
+    device: str = "auto"
 
 
 @dataclass(frozen=True)
@@ -202,6 +204,13 @@ class ChunkingConfig:
 
 
 @dataclass(frozen=True)
+class IndexingConfig:
+    text_batch_size: int = 256
+    visual_batch_size: int = 64
+    visual_dpi: int = 200
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
@@ -211,6 +220,7 @@ class AppConfig:
     patching: PatchingConfig
     captioning: CaptioningConfig
     chunking: ChunkingConfig
+    indexing: IndexingConfig = field(default_factory=IndexingConfig)
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -275,6 +285,8 @@ class AppConfig:
             rrf_k=env.int("RAG_FLOW_RRF_K", 60),
             visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 1.5),
             quantized_colpali=env.get("RAG_FLOW_QUANTIZED_COLPALI", "1") not in {"0", "false", "False"},
+            enable_visual=env.bool("RAG_FLOW_RETRIEVAL_ENABLE_VISUAL", True),
+            device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
         )
 
         server = ServerConfig(
@@ -328,6 +340,12 @@ class AppConfig:
             min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 200),
         )
 
+        indexing = IndexingConfig(
+            text_batch_size=env.int("RAG_FLOW_INDEX_TEXT_BATCH_SIZE", 256),
+            visual_batch_size=env.int("RAG_FLOW_INDEX_VISUAL_BATCH_SIZE", 64),
+            visual_dpi=env.int("RAG_FLOW_INDEX_VISUAL_DPI", 200),
+        )
+
         return cls(
             paths=paths,
             models=models,
@@ -337,4 +355,5 @@ class AppConfig:
             patching=patching,
             captioning=captioning,
             chunking=chunking,
+            indexing=indexing,
         )

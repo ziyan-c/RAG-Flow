@@ -12,14 +12,30 @@ from .runtime import get_torch_device
 
 DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
+TEXT_INDEX_BATCH_SIZE = 256
+VISUAL_INDEX_BATCH_SIZE = 64
+VISUAL_INDEX_DPI = 200
 TEXT_DENSE_VECTOR_NAME = "chunk-text-dense"
 TEXT_SPARSE_VECTOR_NAME = "chunk-text-sparse"
 PAGE_COLPALI_VECTOR_NAME = "page-colpali"
+PAYLOAD_INDEX_SPECS = (
+    ("source", "keyword"),
+    ("page_idx", "integer"),
+    ("page_start", "integer"),
+    ("page_end", "integer"),
+    ("page_indices", "integer"),
+    ("chunk_id", "keyword"),
+    ("section_title", "keyword"),
+)
 
 
 def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None) -> str:
     key = f"{source_name}_{chunk_id}" if chunk_id is not None else f"{source_name}_{page_idx}"
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, key))
+
+
+def visual_point_id(source_name: str, page_idx: int) -> str:
+    return point_id(source_name, page_idx, chunk_id=f"__visual_page__:{page_idx}")
 
 
 def enum_value(value: Any) -> Any:
@@ -29,6 +45,28 @@ def enum_value(value: Any) -> Any:
 def uses_idf_modifier(sparse_params: Any, models: Any) -> bool:
     modifier = getattr(sparse_params, "modifier", None)
     return enum_value(modifier) == enum_value(models.Modifier.IDF)
+
+
+def _payload_schema(models: Any, schema: str) -> Any:
+    if schema == "keyword":
+        return models.PayloadSchemaType.KEYWORD
+    if schema == "integer":
+        return models.PayloadSchemaType.INTEGER
+    raise ValueError(f"Unsupported payload schema: {schema}")
+
+
+def ensure_payload_indexes(client: Any, collection_name: str, models: Any) -> None:
+    for field_name, schema in PAYLOAD_INDEX_SPECS:
+        try:
+            client.create_payload_index(
+                collection_name=collection_name,
+                field_name=field_name,
+                field_schema=_payload_schema(models, schema),
+            )
+        except Exception as exc:
+            message = str(exc).lower()
+            if "already exists" not in message and "exists" not in message:
+                raise
 
 
 def validate_collection_schema(config: AppConfig) -> None:
@@ -82,6 +120,7 @@ def ensure_collection(config: AppConfig) -> None:
     collection = config.paths.collection_name
     if client.collection_exists(collection):
         validate_collection_schema(config)
+        ensure_payload_indexes(client, collection, models)
         return
 
     client.create_collection(
@@ -99,36 +138,35 @@ def ensure_collection(config: AppConfig) -> None:
         },
         sparse_vectors_config={TEXT_SPARSE_VECTOR_NAME: models.SparseVectorParams(modifier=models.Modifier.IDF)},
     )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="source",
-        field_schema=models.PayloadSchemaType.KEYWORD,
+    ensure_payload_indexes(client, collection, models)
+
+
+def _delete_existing_points_for_sources(
+    client: Any,
+    collection_name: str,
+    models: Any,
+    *,
+    source_names: set[str],
+    visual: bool,
+) -> None:
+    visual_condition = models.FieldCondition(
+        key="is_visual_page",
+        match=models.MatchValue(value=True),
     )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="page_idx",
-        field_schema=models.PayloadSchemaType.INTEGER,
-    )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="chunk_id",
-        field_schema=models.PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="section_title",
-        field_schema=models.PayloadSchemaType.KEYWORD,
-    )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="page_start",
-        field_schema=models.PayloadSchemaType.INTEGER,
-    )
-    client.create_payload_index(
-        collection_name=collection,
-        field_name="page_end",
-        field_schema=models.PayloadSchemaType.INTEGER,
-    )
+    for source_name in sorted(source_names):
+        source_condition = models.FieldCondition(
+            key="source",
+            match=models.MatchValue(value=source_name),
+        )
+        if visual:
+            point_filter = models.Filter(must=[source_condition, visual_condition])
+        else:
+            point_filter = models.Filter(must=[source_condition], must_not=[visual_condition])
+        client.delete(
+            collection_name=collection_name,
+            points_selector=models.FilterSelector(filter=point_filter),
+            wait=True,
+        )
 
 
 def load_chunks(path: str | Path) -> list[dict[str, Any]]:
@@ -136,9 +174,17 @@ def load_chunks(path: str | Path) -> list[dict[str, Any]]:
         return json.load(f)
 
 
-def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None) -> None:
+def upsert_text_vectors(
+    config: AppConfig,
+    chunks_path: str | Path | None = None,
+    *,
+    batch_size: int = TEXT_INDEX_BATCH_SIZE,
+) -> None:
     from fastembed import SparseTextEmbedding, TextEmbedding
     from qdrant_client import QdrantClient, models
+
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
 
     ensure_collection(config)
     chunks = load_chunks(chunks_path or config.paths.chunks_json)
@@ -147,32 +193,51 @@ def upsert_text_vectors(config: AppConfig, chunks_path: str | Path | None = None
 
     dense_model = TextEmbedding(config.models.dense_model)
     sparse_model = SparseTextEmbedding(config.models.sparse_model)
-    dense_embeddings = list(dense_model.embed(documents))
-    sparse_embeddings = list(sparse_model.embed(documents))
-
-    points = []
-    for doc, meta, dense_vec, sparse_vec in zip(documents, metadatas, dense_embeddings, sparse_embeddings):
-        payload = dict(meta)
-        payload["chunk_content"] = doc
-        page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
-        chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
-        points.append(
-            models.PointStruct(
-                id=point_id(payload["source"], page_idx, chunk_id=chunk_id),
-                payload=payload,
-                vector={
-                    TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
-                    TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
-                        indices=sparse_vec.indices.tolist(),
-                        values=sparse_vec.values.tolist(),
-                    ),
-                },
-            )
-        )
-
     client = QdrantClient(path=str(config.paths.db_path))
-    client.upsert(collection_name=config.paths.collection_name, points=points)
-    print(f"Upserted {len(points)} text points into {config.paths.collection_name}")
+    source_names = {str(meta["source"]) for meta in metadatas if meta.get("source")}
+    _delete_existing_points_for_sources(
+        client,
+        config.paths.collection_name,
+        models,
+        source_names=source_names,
+        visual=False,
+    )
+    upserted_chunks = 0
+    for start in range(0, len(documents), batch_size):
+        batch_documents = documents[start : start + batch_size]
+        batch_metadatas = metadatas[start : start + batch_size]
+        dense_embeddings = list(dense_model.embed(batch_documents))
+        sparse_embeddings = list(sparse_model.embed(batch_documents))
+
+        points = []
+        for doc, meta, dense_vec, sparse_vec in zip(
+            batch_documents,
+            batch_metadatas,
+            dense_embeddings,
+            sparse_embeddings,
+        ):
+            payload = dict(meta)
+            payload["chunk_content"] = doc
+            page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
+            chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
+            points.append(
+                models.PointStruct(
+                    id=point_id(payload["source"], page_idx, chunk_id=chunk_id),
+                    payload=payload,
+                    vector={
+                        TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
+                        TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
+                            indices=sparse_vec.indices.tolist(),
+                            values=sparse_vec.values.tolist(),
+                        ),
+                    },
+                )
+            )
+
+        client.upsert(collection_name=config.paths.collection_name, points=points)
+        upserted_chunks += len(points)
+
+    print(f"Upserted {upserted_chunks} text points into {config.paths.collection_name}")
 
 
 def _page_payloads_from_chunks(
@@ -198,15 +263,11 @@ def _page_payloads_from_chunks(
     for page_idx, page_chunks in by_page.items():
         first_meta = dict(page_chunks[0].get("metadata", {}))
         section_path = first_meta.get("section_path", [])
-        page_texts = []
         chunk_ids = []
         for chunk in page_chunks:
             meta = dict(chunk.get("metadata", {}))
             if meta.get("chunk_id"):
                 chunk_ids.append(str(meta["chunk_id"]))
-            text = str(chunk.get("chunk_content", "")).strip()
-            if text:
-                page_texts.append(text)
         payload: dict[str, Any] = {
             "source": source_name,
             "page_idx": page_idx,
@@ -215,7 +276,6 @@ def _page_payloads_from_chunks(
             "page_indices": [page_idx],
             "is_visual_page": True,
             "chunk_ids_on_page": chunk_ids,
-            "chunk_content": "\n\n".join(page_texts),
         }
         if section_path:
             payload["section_path"] = section_path
@@ -233,7 +293,6 @@ def _visual_page_payload(
     *,
     source_name: str,
     page_idx: int,
-    parent_page_idx: int,
 ) -> dict[str, Any]:
     payload = dict(page_payloads.get(page_idx, {}))
     if not payload:
@@ -244,17 +303,25 @@ def _visual_page_payload(
             "page_end": page_idx,
             "page_indices": [page_idx],
             "is_visual_page": True,
-            "chunk_content": (
-                "[Visual page evidence only. Text chunking did not produce text for this page.]"
-            ),
-        }
+            "chunk_ids_on_page": [],
+    }
     payload.setdefault("source", source_name)
     payload.setdefault("page_idx", page_idx)
+    payload.setdefault("page_start", page_idx)
+    payload.setdefault("page_end", page_idx)
+    payload.setdefault("page_indices", [page_idx])
     payload.setdefault("is_visual_page", True)
-    if page_idx != parent_page_idx:
-        payload.setdefault("parent_page_idx", parent_page_idx)
-        payload.setdefault("is_table_continuation", True)
+    payload.setdefault("chunk_ids_on_page", [])
     return payload
+
+
+def _page_batches(page_count: int, batch_size: int) -> list[tuple[int, int, int]]:
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    return [
+        (start_idx, start_idx + 1, min(start_idx + batch_size, page_count))
+        for start_idx in range(0, page_count, batch_size)
+    ]
 
 
 def upsert_colpali_vectors(
@@ -262,12 +329,12 @@ def upsert_colpali_vectors(
     *,
     pdf_path: str | Path | None = None,
     source_name: str | None = None,
-    batch_size: int = 8,
-    dpi: int = 200,
+    batch_size: int = VISUAL_INDEX_BATCH_SIZE,
+    dpi: int = VISUAL_INDEX_DPI,
 ) -> None:
     import torch
     from colpali_engine.models import ColPali, ColPaliProcessor
-    from pdf2image import convert_from_path
+    from pdf2image import convert_from_path, pdfinfo_from_path
     from qdrant_client import QdrantClient, models
     from tqdm import tqdm
 
@@ -284,9 +351,8 @@ def upsert_colpali_vectors(
         device_map=device,
     ).eval()
 
-    images = convert_from_path(str(pdf_path or config.paths.source_pdf), dpi=dpi)
-    skipped_pages: list[int] = []
-    last_valid_page_idx = 0
+    resolved_pdf_path = Path(pdf_path or config.paths.source_pdf)
+    page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
     try:
         page_payloads = _page_payloads_from_chunks(
             load_chunks(config.paths.chunks_json),
@@ -294,10 +360,26 @@ def upsert_colpali_vectors(
         )
     except (FileNotFoundError, json.JSONDecodeError):
         page_payloads = {}
+    _delete_existing_points_for_sources(
+        client,
+        config.paths.collection_name,
+        models,
+        source_names={resolved_source_name},
+        visual=True,
+    )
 
-    for start in tqdm(range(0, len(images), batch_size), desc="Processing pages"):
-        batch_images = images[start : start + batch_size]
-        batch_page_indices = list(range(start, start + len(batch_images)))
+    upserted_pages = 0
+    for start_idx, first_page, last_page in tqdm(
+        _page_batches(page_count, batch_size),
+        desc="Processing pages",
+    ):
+        batch_images = convert_from_path(
+            str(resolved_pdf_path),
+            dpi=dpi,
+            first_page=first_page,
+            last_page=last_page,
+        )
+        batch_page_indices = list(range(start_idx, start_idx + len(batch_images)))
 
         with torch.no_grad():
             batch_inputs = processor.process_images(batch_images).to(device)
@@ -307,44 +389,24 @@ def upsert_colpali_vectors(
             }
             embeddings = model(**batch_inputs)
 
-        points_to_update = []
+        points = []
         for page_idx, embedding in zip(batch_page_indices, embeddings):
-            points_to_update.append(
-                models.PointVectors(
-                    id=point_id(resolved_source_name, page_idx),
+            points.append(
+                models.PointStruct(
+                    id=visual_point_id(resolved_source_name, page_idx),
+                    payload=_visual_page_payload(
+                        page_payloads,
+                        source_name=resolved_source_name,
+                        page_idx=page_idx,
+                    ),
                     vector={PAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
                 )
             )
 
-        try:
-            client.update_vectors(collection_name=config.paths.collection_name, points=points_to_update)
-            last_valid_page_idx = batch_page_indices[-1]
-        except Exception:
-            for current_page_idx, point in zip(batch_page_indices, points_to_update):
-                try:
-                    client.update_vectors(collection_name=config.paths.collection_name, points=[point])
-                    last_valid_page_idx = current_page_idx
-                except Exception:
-                    client.upsert(
-                        collection_name=config.paths.collection_name,
-                        points=[
-                            models.PointStruct(
-                                id=point_id(resolved_source_name, current_page_idx),
-                                payload=_visual_page_payload(
-                                    page_payloads,
-                                    source_name=resolved_source_name,
-                                    page_idx=current_page_idx,
-                                    parent_page_idx=last_valid_page_idx,
-                                ),
-                                vector={PAGE_COLPALI_VECTOR_NAME: point.vector[PAGE_COLPALI_VECTOR_NAME]},
-                            )
-                        ],
-                    )
-                    skipped_pages.append(current_page_idx)
+        client.upsert(collection_name=config.paths.collection_name, points=points)
+        upserted_pages += len(points)
 
-    if skipped_pages:
-        print(f"Inserted {len(skipped_pages)} visual page points without matching page-level text point: {skipped_pages}")
-    print(f"ColPali vectors are ready in {config.paths.collection_name}")
+    print(f"Upserted {upserted_pages} ColPali visual page points into {config.paths.collection_name}")
 
 
 def inspect_collection(config: AppConfig, limit: int = 10) -> None:
@@ -391,19 +453,31 @@ def main(argv: list[str] | None = None) -> None:
 
     text_parser = subparsers.add_parser("text", help="Upsert dense and sparse text vectors.")
     text_parser.add_argument("--chunks", default=str(config.paths.chunks_json))
+    text_parser.add_argument("--batch-size", type=int, default=config.indexing.text_batch_size)
 
     visual_parser = subparsers.add_parser("visual", help="Upsert ColPali visual vectors.")
     visual_parser.add_argument("--pdf", default=str(config.paths.source_pdf))
-    visual_parser.add_argument("--batch-size", type=int, default=8)
-    visual_parser.add_argument("--dpi", type=int, default=200)
+    visual_parser.add_argument("--source-name", help="Source PDF name stored in visual payloads.")
+    visual_parser.add_argument("--batch-size", type=int, default=config.indexing.visual_batch_size)
+    visual_parser.add_argument("--dpi", type=int, default=config.indexing.visual_dpi)
 
     subparsers.add_parser("inspect", help="Inspect collection vector completeness.")
     args = parser.parse_args(argv)
 
     if args.command == "text":
-        upsert_text_vectors(config, args.chunks)
+        upsert_text_vectors(config, args.chunks, batch_size=args.batch_size)
     elif args.command == "visual":
-        upsert_colpali_vectors(config, pdf_path=args.pdf, batch_size=args.batch_size, dpi=args.dpi)
+        pdf_path = Path(args.pdf)
+        source_name = args.source_name
+        if source_name is None and pdf_path != config.paths.source_pdf:
+            source_name = pdf_path.name
+        upsert_colpali_vectors(
+            config,
+            pdf_path=pdf_path,
+            source_name=source_name,
+            batch_size=args.batch_size,
+            dpi=args.dpi,
+        )
     elif args.command == "inspect":
         inspect_collection(config)
 

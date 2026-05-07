@@ -35,23 +35,30 @@ class RetrievalEngine:
         self.device = None
 
     def load(self) -> None:
-        import torch
-        from colpali_engine.models import ColPali, ColPaliProcessor
         from fastembed import SparseTextEmbedding, TextEmbedding
         from qdrant_client import QdrantClient
-        from transformers import BitsAndBytesConfig
 
-        self.device = get_torch_device(
-            require_cuda=self.config.retrieval.quantized_colpali,
-            feature="Quantized ColPali retrieval",
-        )
         self.client = QdrantClient(path=str(self.config.paths.db_path))
         self.dense_model = TextEmbedding(self.config.models.dense_model)
         self.sparse_model = SparseTextEmbedding(self.config.models.sparse_model)
+        if not self.config.retrieval.enable_visual:
+            self.device = None
+            self.colpali_processor = None
+            self.colpali_model = None
+            return
+
+        import torch
+        from colpali_engine.models import ColPali, ColPaliProcessor
+        from transformers import BitsAndBytesConfig
+
+        self.device = get_torch_device(
+            feature="ColPali retrieval query encoding",
+            preferred=self.config.retrieval.device,
+        )
         self.colpali_processor = ColPaliProcessor.from_pretrained(self.config.models.colpali_model)
 
         kwargs: dict[str, Any] = {"device_map": self.device}
-        if self.config.retrieval.quantized_colpali:
+        if self.config.retrieval.quantized_colpali and self.device == "cuda":
             kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
         else:
             kwargs["torch_dtype"] = torch.bfloat16 if self.device == "cuda" else torch.float32
@@ -77,15 +84,6 @@ class RetrievalEngine:
             else list(sparse_query_obj.values)
         )
 
-        with torch.no_grad():
-            batch_query = self.colpali_processor.process_queries([query_text]).to(self.device)
-            dtype = torch.bfloat16 if self.device == "cuda" else torch.float32
-            batch_query = {
-                key: value.to(dtype) if value.is_floating_point() else value
-                for key, value in batch_query.items()
-            }
-            visual_query = self.colpali_model(**batch_query)[0].cpu().float().tolist()
-
         collection = self.config.paths.collection_name
         retrieval_k = self.config.retrieval.retrieval_k
         dense_hits = self.client.query_points(
@@ -100,20 +98,33 @@ class RetrievalEngine:
             using=TEXT_SPARSE_VECTOR_NAME,
             limit=retrieval_k,
         ).points
-        visual_hits = self.client.query_points(
-            collection_name=collection,
-            query=visual_query,
-            using=PAGE_COLPALI_VECTOR_NAME,
-            limit=retrieval_k,
-            search_params=models.SearchParams(
-                quantization=models.QuantizationSearchParams(
-                    ignore=False,
-                    rescore=True,
-                    oversampling=10.0,
+        visual_hits = []
+        if self.config.retrieval.enable_visual:
+            import torch
+
+            with torch.no_grad():
+                batch_query = self.colpali_processor.process_queries([query_text]).to(self.device)
+                dtype = torch.bfloat16 if self.device == "cuda" else torch.float32
+                batch_query = {
+                    key: value.to(dtype) if value.is_floating_point() else value
+                    for key, value in batch_query.items()
+                }
+                visual_query = self.colpali_model(**batch_query)[0].cpu().float().tolist()
+
+            visual_hits = self.client.query_points(
+                collection_name=collection,
+                query=visual_query,
+                using=PAGE_COLPALI_VECTOR_NAME,
+                limit=retrieval_k,
+                search_params=models.SearchParams(
+                    quantization=models.QuantizationSearchParams(
+                        ignore=False,
+                        rescore=True,
+                        oversampling=10.0,
+                    ),
+                    hnsw_ef=128,
                 ),
-                hnsw_ef=128,
-            ),
-        ).points
+            ).points
 
         final_ranking = self._compute_rrf(dense_hits, sparse_hits, visual_hits)
         top_hits = final_ranking[: self.config.retrieval.final_top_k]
@@ -182,6 +193,8 @@ class RetrievalEngine:
 
             unique_records = []
             for record in records:
+                if record.payload.get("is_visual_page"):
+                    continue
                 page_idx = int(record.payload["page_idx"])
                 key = (source_pdf, str(record.payload.get("chunk_id") or record.id))
                 if page_idx >= 0 and key not in seen_records:

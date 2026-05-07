@@ -244,3 +244,74 @@ def test_chunking_reads_local_env(tmp_path, monkeypatch):
     assert config.chunking.max_tokens == 900
     assert config.chunking.overlap_tokens == 100
     assert config.chunking.min_tokens == 80
+
+
+def test_retrieval_defaults(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.enable_visual is True
+    assert config.retrieval.device == "auto"
+    assert config.retrieval.quantized_colpali is True
+    assert config.retrieval.visual_weight == 1.5
+
+
+def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0",
+                "RAG_FLOW_RETRIEVAL_DEVICE=cpu",
+                "RAG_FLOW_QUANTIZED_COLPALI=0",
+                "RAG_FLOW_VISUAL_WEIGHT=0.75",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.enable_visual is False
+    assert config.retrieval.device == "cpu"
+    assert config.retrieval.quantized_colpali is False
+    assert config.retrieval.visual_weight == 0.75
+
+
+def test_indexing_defaults(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.indexing.text_batch_size == 256
+    assert config.indexing.visual_batch_size == 64
+    assert config.indexing.visual_dpi == 200
+
+
+def test_indexing_reads_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_INDEX_TEXT_BATCH_SIZE=128",
+                "RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=32",
+                "RAG_FLOW_INDEX_VISUAL_DPI=250",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.indexing.text_batch_size == 128
+    assert config.indexing.visual_batch_size == 32
+    assert config.indexing.visual_dpi == 250

@@ -352,17 +352,38 @@ Upsert text vectors:
 rag-flow index text
 ```
 
+Text indexing embeds and upserts chunks in batches. The default batch size is
+`RAG_FLOW_INDEX_TEXT_BATCH_SIZE=256`; override it with
+`rag-flow index text --batch-size <chunks>`.
+
 Upsert ColPali visual vectors:
 
 ```bash
 rag-flow index visual
 ```
 
+By default this renders and embeds `RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=64` PDF
+pages per batch at `RAG_FLOW_INDEX_VISUAL_DPI=200`. Override them with
+`rag-flow index visual --batch-size <pages> --dpi <dpi>` if the indexing machine
+needs a different speed/memory tradeoff. If you point visual indexing at a PDF
+outside the configured source, pass `--source-name <file.pdf>` so visual payloads
+match the chunk metadata source.
+
 ColPali is still a page-level visual index. When chunk output is available,
 visual page payloads inherit page/section metadata from the chunk JSON, so
 visual hits can be shown and filtered with the same section context as text
 hits. The visual embeddings themselves are not section-level; section metadata
-is auxiliary payload for retrieval context and explanation.
+is auxiliary payload for retrieval context and explanation. Visual page payloads
+store `chunk_ids_on_page` as pointers, but they do not store aggregated
+`chunk_content`; answer context is pulled from the chunk-level text points.
+Each `page-colpali` point represents exactly one rendered PDF page. It does not
+reuse the table-continuation metadata from text chunks, so cross-page table
+relations stay in chunk metadata instead of polluting the visual page index.
+Visual indexing renders and upserts the PDF in page batches to avoid loading a
+large manual as one giant image list in memory.
+The collection also indexes `page_indices`, because cross-page chunks can belong
+to several pages; this lets a visual hit on one page retrieve the text chunk that
+spans into that page.
 
 Chunking also records source block indices and page bboxes in chunk metadata.
 This makes it possible to attribute a page-level ColPali hit back to the most
@@ -387,6 +408,31 @@ Start the retriever API:
 ```bash
 rag-flow retriever
 ```
+
+Retriever visual mode is optional. Dense and sparse text search run on CPU;
+`page-colpali` visual search also uses Qdrant on CPU, but the ColPali query
+encoder is a Torch model and can run on CPU or CUDA:
+
+```env
+# Full three-way retrieval, auto-select CUDA when available.
+RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_DEVICE=auto
+
+# Force GPU visual query encoding; fail if CUDA is unavailable.
+RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_DEVICE=cuda
+
+# Force CPU visual query encoding. Useful for low-frequency local use.
+RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_DEVICE=cpu
+
+# Text-only CPU retrieval: dense + sparse, no ColPali model loaded.
+RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0
+```
+
+`RAG_FLOW_QUANTIZED_COLPALI=1` only applies when the selected retrieval device
+is CUDA. CPU visual mode loads ColPali in float32 instead of BitsAndBytes
+quantization.
 
 Start the LLM service on the remote GPU box:
 
