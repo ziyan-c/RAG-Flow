@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
+from .model_paths import resolve_model_location
 from .runtime import get_torch_device
 
 DENSE_VECTOR_SIZE = 1024
@@ -17,7 +18,7 @@ VISUAL_INDEX_BATCH_SIZE = 64
 VISUAL_INDEX_DPI = 200
 TEXT_DENSE_VECTOR_NAME = "chunk-text-dense"
 TEXT_SPARSE_VECTOR_NAME = "chunk-text-sparse"
-PAGE_COLPALI_VECTOR_NAME = "page-colpali"
+PAGE_IMAGE_COLPALI_VECTOR_NAME = "page-image-colpali"
 PAYLOAD_INDEX_SPECS = (
     ("source", "keyword"),
     ("page_idx", "integer"),
@@ -82,23 +83,23 @@ def validate_collection_schema(config: AppConfig) -> None:
         errors.append("collection must use named vectors")
     else:
         dense = vectors.get(TEXT_DENSE_VECTOR_NAME)
-        colpali = vectors.get(PAGE_COLPALI_VECTOR_NAME)
+        colpali = vectors.get(PAGE_IMAGE_COLPALI_VECTOR_NAME)
         if dense is None:
             errors.append(f"missing {TEXT_DENSE_VECTOR_NAME} vector")
         elif dense.size != DENSE_VECTOR_SIZE or enum_value(dense.distance) != enum_value(models.Distance.COSINE):
             errors.append(f"{TEXT_DENSE_VECTOR_NAME} must be {DENSE_VECTOR_SIZE} cosine dimensions")
 
         if colpali is None:
-            errors.append(f"missing {PAGE_COLPALI_VECTOR_NAME} vector")
+            errors.append(f"missing {PAGE_IMAGE_COLPALI_VECTOR_NAME} vector")
         elif colpali.size != COLPALI_VECTOR_SIZE or enum_value(colpali.distance) != enum_value(models.Distance.COSINE):
-            errors.append(f"{PAGE_COLPALI_VECTOR_NAME} must be {COLPALI_VECTOR_SIZE} cosine dimensions")
+            errors.append(f"{PAGE_IMAGE_COLPALI_VECTOR_NAME} must be {COLPALI_VECTOR_SIZE} cosine dimensions")
         else:
             multivector_config = getattr(colpali, "multivector_config", None)
             if (
                 not multivector_config
                 or enum_value(multivector_config.comparator) != enum_value(models.MultiVectorComparator.MAX_SIM)
             ):
-                errors.append(f"{PAGE_COLPALI_VECTOR_NAME} must use MAX_SIM multivector comparison")
+                errors.append(f"{PAGE_IMAGE_COLPALI_VECTOR_NAME} must use MAX_SIM multivector comparison")
 
     if not isinstance(sparse_vectors, dict) or TEXT_SPARSE_VECTOR_NAME not in sparse_vectors:
         errors.append(f"missing {TEXT_SPARSE_VECTOR_NAME} sparse vector")
@@ -127,7 +128,7 @@ def ensure_collection(config: AppConfig) -> None:
         collection_name=collection,
         vectors_config={
             TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
-            PAGE_COLPALI_VECTOR_NAME: models.VectorParams(
+            PAGE_IMAGE_COLPALI_VECTOR_NAME: models.VectorParams(
                 size=COLPALI_VECTOR_SIZE,
                 distance=models.Distance.COSINE,
                 multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
@@ -343,10 +344,16 @@ def upsert_colpali_vectors(
     device = get_torch_device(feature="ColPali visual indexing")
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
     resolved_source_name = source_name or config.paths.source_name
-
-    processor = ColPaliProcessor.from_pretrained(config.models.colpali_model)
-    model = ColPali.from_pretrained(
+    colpali_model_location = resolve_model_location(
         config.models.colpali_model,
+        explicit_path=config.models.colpali_model_path,
+        local_root=config.models.colpali_local_model_root,
+    )
+
+    print(f"ColPali model: {colpali_model_location}")
+    processor = ColPaliProcessor.from_pretrained(colpali_model_location)
+    model = ColPali.from_pretrained(
+        colpali_model_location,
         torch_dtype=dtype,
         device_map=device,
     ).eval()
@@ -369,6 +376,7 @@ def upsert_colpali_vectors(
     )
 
     upserted_pages = 0
+    printed_embedding_shape = False
     for start_idx, first_page, last_page in tqdm(
         _page_batches(page_count, batch_size),
         desc="Processing pages",
@@ -389,6 +397,13 @@ def upsert_colpali_vectors(
             }
             embeddings = model(**batch_inputs)
 
+        if not printed_embedding_shape and len(embeddings):
+            first_embedding = embeddings[0]
+            patch_count = len(first_embedding)
+            vector_size = len(first_embedding[0]) if patch_count else 0
+            print(f"{PAGE_IMAGE_COLPALI_VECTOR_NAME}: {patch_count} patches x {vector_size} dims")
+            printed_embedding_shape = True
+
         points = []
         for page_idx, embedding in zip(batch_page_indices, embeddings):
             points.append(
@@ -399,7 +414,7 @@ def upsert_colpali_vectors(
                         source_name=resolved_source_name,
                         page_idx=page_idx,
                     ),
-                    vector={PAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
+                    vector={PAGE_IMAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
                 )
             )
 
@@ -429,15 +444,15 @@ def inspect_collection(config: AppConfig, limit: int = 10) -> None:
         print("No points found.")
         return
 
-    valid = next((record for record in records if PAGE_COLPALI_VECTOR_NAME in record.vector), records[0])
+    valid = next((record for record in records if PAGE_IMAGE_COLPALI_VECTOR_NAME in record.vector), records[0])
     print(f"Sample point: {valid.id}")
     print(f"Source: {valid.payload.get('source')} page_idx={valid.payload.get('page_idx')}")
-    for name in [TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME, PAGE_COLPALI_VECTOR_NAME]:
+    for name in [TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME, PAGE_IMAGE_COLPALI_VECTOR_NAME]:
         if name not in valid.vector:
             print(f"{name}: missing")
             continue
         vector = valid.vector[name]
-        if name == PAGE_COLPALI_VECTOR_NAME:
+        if name == PAGE_IMAGE_COLPALI_VECTOR_NAME:
             print(f"{name}: {len(vector)} patches x {len(vector[0])} dims")
         elif name == TEXT_SPARSE_VECTOR_NAME:
             count = len(vector.get("indices", [])) if isinstance(vector, dict) else len(vector.indices)

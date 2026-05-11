@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from typing import Any
 
 from .config import AppConfig
-from .indexing import PAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
+from .indexing import PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
+from .model_paths import resolve_model_location
 from .runtime import get_torch_device
 
 
@@ -55,14 +56,19 @@ class RetrievalEngine:
             feature="ColPali retrieval query encoding",
             preferred=self.config.retrieval.device,
         )
-        self.colpali_processor = ColPaliProcessor.from_pretrained(self.config.models.colpali_model)
+        colpali_model_location = resolve_model_location(
+            self.config.models.colpali_model,
+            explicit_path=self.config.models.colpali_model_path,
+            local_root=self.config.models.colpali_local_model_root,
+        )
+        self.colpali_processor = ColPaliProcessor.from_pretrained(colpali_model_location)
 
         kwargs: dict[str, Any] = {"device_map": self.device}
         if self.config.retrieval.quantized_colpali and self.device == "cuda":
             kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
         else:
             kwargs["torch_dtype"] = torch.bfloat16 if self.device == "cuda" else torch.float32
-        self.colpali_model = ColPali.from_pretrained(self.config.models.colpali_model, **kwargs).eval()
+        self.colpali_model = ColPali.from_pretrained(colpali_model_location, **kwargs).eval()
 
     def retrieve(self, query_text: str) -> RetrievalResult:
         if self.client is None:
@@ -114,7 +120,7 @@ class RetrievalEngine:
             visual_hits = self.client.query_points(
                 collection_name=collection,
                 query=visual_query,
-                using=PAGE_COLPALI_VECTOR_NAME,
+                using=PAGE_IMAGE_COLPALI_VECTOR_NAME,
                 limit=retrieval_k,
                 search_params=models.SearchParams(
                     quantization=models.QuantizationSearchParams(

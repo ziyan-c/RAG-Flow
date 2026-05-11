@@ -376,7 +376,7 @@ hits. The visual embeddings themselves are not section-level; section metadata
 is auxiliary payload for retrieval context and explanation. Visual page payloads
 store `chunk_ids_on_page` as pointers, but they do not store aggregated
 `chunk_content`; answer context is pulled from the chunk-level text points.
-Each `page-colpali` point represents exactly one rendered PDF page. It does not
+Each `page-image-colpali` point represents exactly one rendered PDF page. It does not
 reuse the table-continuation metadata from text chunks, so cross-page table
 relations stay in chunk metadata instead of polluting the visual page index.
 Visual indexing renders and upserts the PDF in page batches to avoid loading a
@@ -384,6 +384,18 @@ large manual as one giant image list in memory.
 The collection also indexes `page_indices`, because cross-page chunks can belong
 to several pages; this lets a visual hit on one page retrieve the text chunk that
 spans into that page.
+`rag-flow index inspect` prints the actual ColPali shape for a sampled visual
+point, for example `page-image-colpali: 1030 patches x 128 dims`.
+
+ColPali model loading prefers local files before downloading. Set
+`RAG_FLOW_COLPALI_MODEL_PATH` to force a specific local directory, or leave it
+empty and put a model under `RAG_FLOW_COLPALI_LOCAL_MODEL_ROOT` (default
+`/root/autodl-tmp/models`). The resolver checks common layouts such as
+`vidore/colpali-v1.3-merged`, `colpali-v1.3-merged`,
+`vidore--colpali-v1.3-merged`, and Hugging Face cache directories like
+`models--vidore--colpali-v1.3-merged/snapshots/<revision>`. If none exists, it
+falls back to `RAG_FLOW_COLPALI_MODEL` and lets `from_pretrained` use the normal
+cache/download behavior.
 
 Chunking also records source block indices and page bboxes in chunk metadata.
 This makes it possible to attribute a page-level ColPali hit back to the most
@@ -410,7 +422,7 @@ rag-flow retriever
 ```
 
 Retriever visual mode is optional. Dense and sparse text search run on CPU;
-`page-colpali` visual search also uses Qdrant on CPU, but the ColPali query
+`page-image-colpali` visual search also uses Qdrant on CPU, but the ColPali query
 encoder is a Torch model and can run on CPU or CUDA:
 
 ```env

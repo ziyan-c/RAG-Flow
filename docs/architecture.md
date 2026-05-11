@@ -23,7 +23,7 @@ The retriever runs three independent searches over the same page-level point ID:
 
 - `page-dense`: multilingual E5 dense text embedding
 - `page-sparse`: Qdrant BM25 sparse embedding
-- `page-colpali`: ColPali multivector page-image embedding
+- `page-image-colpali`: ColPali multivector page-image embedding
 
 Results are fused with reciprocal rank fusion. Visual hits are weighted slightly
 higher by default because UI manuals often answer questions through screenshots,

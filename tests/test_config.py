@@ -252,10 +252,36 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
+    assert config.models.colpali_model == "vidore/colpali-v1.3-merged"
+    assert config.models.colpali_model_path is None
+    assert config.models.colpali_local_model_root.as_posix() == "/root/autodl-tmp/models"
     assert config.retrieval.enable_visual is True
     assert config.retrieval.device == "auto"
     assert config.retrieval.quantized_colpali is True
     assert config.retrieval.visual_weight == 1.5
+
+
+def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_COLPALI_MODEL=owner/model",
+                "RAG_FLOW_COLPALI_MODEL_PATH=models/colpali",
+                "RAG_FLOW_COLPALI_LOCAL_MODEL_ROOT=models",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.models.colpali_model == "owner/model"
+    assert config.models.colpali_model_path == tmp_path / "models" / "colpali"
+    assert config.models.colpali_local_model_root == tmp_path / "models"
 
 
 def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):

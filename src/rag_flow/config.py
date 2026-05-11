@@ -134,6 +134,8 @@ class ModelConfig:
     llm_api_key: str
     llm_model: str
     llm_max_tokens: int
+    colpali_model_path: Path | None = None
+    colpali_local_model_root: Path = Path("/root/autodl-tmp/models")
 
 
 @dataclass(frozen=True)
@@ -270,6 +272,10 @@ class AppConfig:
             dense_model=env.get("RAG_FLOW_DENSE_MODEL", "intfloat/multilingual-e5-large"),
             sparse_model=env.get("RAG_FLOW_SPARSE_MODEL", "Qdrant/bm25"),
             colpali_model=env.get("RAG_FLOW_COLPALI_MODEL", "vidore/colpali-v1.3-merged"),
+            colpali_model_path=env.path("RAG_FLOW_COLPALI_MODEL_PATH", "")
+            if env.get("RAG_FLOW_COLPALI_MODEL_PATH", "")
+            else None,
+            colpali_local_model_root=env.path("RAG_FLOW_COLPALI_LOCAL_MODEL_ROOT", "/root/autodl-tmp/models"),
             vlm_model=env.get("RAG_FLOW_VLM_MODEL", "Qwen/Qwen3.5-9B"),
             vlm_model_revision=env.get("RAG_FLOW_VLM_MODEL_REVISION", ""),
             trusted_remote_code_models=env.csv("RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS", "Qwen/Qwen3.5-9B"),
