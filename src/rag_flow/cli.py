@@ -126,6 +126,15 @@ def _script_env() -> dict[str, str]:
     return env
 
 
+def _apply_env_file_defaults() -> None:
+    env_file = os.environ.get("RAG_FLOW_ENV_FILE") or REPO_ENV_FILE
+    if not env_file:
+        return
+    os.environ.setdefault("RAG_FLOW_ENV_FILE", str(env_file))
+    for key, value in load_env_file(env_file).items():
+        os.environ.setdefault(key, value)
+
+
 def _print_command(command: Sequence[str]) -> None:
     print(" ".join(shlex.quote(part) for part in command))
 
@@ -208,6 +217,7 @@ def _maybe_reexec_module(command_name: str, module_args: Sequence[str]) -> bool:
 
 
 def _dispatch_module(args: argparse.Namespace) -> None:
+    _apply_env_file_defaults()
     if _maybe_reexec_module(args.command, args.args):
         return
     module_name, accepts_argv = MODULE_COMMANDS[args.command]

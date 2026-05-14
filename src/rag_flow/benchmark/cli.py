@@ -17,6 +17,11 @@ def main(argv: Sequence[str] | None = None) -> None:
 
         captioning.main(raw_args[1:])
         return
+    if raw_args[:1] == ["retrieval"]:
+        from rag_flow.benchmark import retrieval
+
+        retrieval.main(raw_args[1:])
+        return
 
     parser = argparse.ArgumentParser(prog="rag-flow benchmark", description="Run RAG Flow benchmark workflows.")
     subparsers = parser.add_subparsers(dest="benchmark_command", required=True)
@@ -25,6 +30,8 @@ def main(argv: Sequence[str] | None = None) -> None:
     patching_parser.add_argument("args", nargs=argparse.REMAINDER)
     captioning_parser = subparsers.add_parser("captioning", help="Run captioning parameter benchmark stages.")
     captioning_parser.add_argument("args", nargs=argparse.REMAINDER)
+    retrieval_parser = subparsers.add_parser("retrieval", help="Run retrieval benchmark stages.")
+    retrieval_parser.add_argument("args", nargs=argparse.REMAINDER)
 
     args = parser.parse_args(raw_args)
     if args.benchmark_command == "patching":
@@ -37,5 +44,14 @@ def main(argv: Sequence[str] | None = None) -> None:
 
         captioning.main(list(args.args))
         return
+    if args.benchmark_command == "retrieval":
+        from rag_flow.benchmark import retrieval
+
+        retrieval.main(list(args.args))
+        return
 
     raise SystemExit(f"Unknown benchmark command: {args.benchmark_command}")
+
+
+if __name__ == "__main__":
+    main()

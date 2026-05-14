@@ -128,6 +128,18 @@ def test_captioning_benchmark_command_delegates_to_benchmark_main(monkeypatch):
     assert calls == [["captioning", "prepare", "--dry-run"]]
 
 
+def test_retrieval_benchmark_command_delegates_to_benchmark_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.benchmark.cli
+
+    monkeypatch.setattr(rag_flow.benchmark.cli, "main", lambda argv: calls.append(argv))
+
+    cli.main(["benchmark", "retrieval", "run", "--dry-run"])
+
+    assert calls == [["retrieval", "run", "--dry-run"]]
+
+
 def test_caption_view_command_delegates_to_captioning_view_main(monkeypatch):
     calls: list[list[str]] = []
 

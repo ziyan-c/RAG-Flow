@@ -473,8 +473,28 @@ def create_page_level_chunks(
     chunk_contents_by_page: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
     page_tables: dict[int, list[str]] = defaultdict(list)
+    page_block_indices: dict[int, list[int]] = defaultdict(list)
+    page_bboxes: dict[int, list[list[float]]] = defaultdict(list)
+    page_sections: dict[int, tuple[tuple[str, ...], int | None, str]] = {}
     table_continuations = build_table_continuation_map(content_data)
     continuation_indices = table_continuation_indices(table_continuations)
+
+    def add_page_metadata(page_idx: int, block: dict[str, Any], block_idx: int) -> None:
+        if block_idx not in page_block_indices[page_idx]:
+            page_block_indices[page_idx].append(block_idx)
+        bbox = _block_bbox(block)
+        if bbox is not None:
+            page_bboxes[page_idx].append([round(value, 3) for value in bbox])
+        if page_idx not in page_sections:
+            section_path = _section_path(block)
+            section_level = block.get("section_level")
+            try:
+                section_level = int(section_level) if section_level is not None else None
+            except (TypeError, ValueError):
+                section_level = None
+            section_source = str(block.get("section_source", "") or "")
+            if section_path:
+                page_sections[page_idx] = (section_path, section_level, section_source)
 
     for block_idx, block in enumerate(content_data):
         if not isinstance(block, dict):
@@ -499,6 +519,7 @@ def create_page_level_chunks(
                 if footnote:
                     parts.append(f"[Image footnote: {footnote}]")
                 chunk_contents_by_page[page_idx].append("\n".join(parts))
+                add_page_metadata(page_idx, block, block_idx)
             if block.get("img_path") and not _has_inline_icon_marker(block):
                 page_images[page_idx].append(block["img_path"])
 
@@ -516,12 +537,14 @@ def create_page_level_chunks(
             if parts:
                 table_text = "\n".join(parts)
                 chunk_contents_by_page[page_idx].append(table_text)
+                add_page_metadata(page_idx, block, block_idx)
                 for continuation_idx in table_continuations.get(block_idx, []):
                     continuation = content_data[continuation_idx]
                     continuation_page_idx = _block_page_idx(continuation)
                     chunk_contents_by_page[continuation_page_idx].append(
                         f"[Continuation of table from page {page_idx + 1}]\n{table_text}"
                     )
+                    add_page_metadata(continuation_page_idx, continuation, continuation_idx)
             if block.get("img_path"):
                 page_tables[page_idx].append(block["img_path"])
 
@@ -530,21 +553,41 @@ def create_page_level_chunks(
             text = _join_field(block.get(key, [])).strip()
             if text:
                 chunk_contents_by_page[page_idx].append(text)
+                add_page_metadata(page_idx, block, block_idx)
 
     chunks: list[dict[str, Any]] = []
     for page_idx in sorted(chunk_contents_by_page):
         chunk_content = "\n\n".join(chunk_contents_by_page[page_idx]).strip()
         if not chunk_content:
             continue
+        chunk_idx = len(chunks)
+        section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
+        metadata: dict[str, Any] = {
+            "source": source_name,
+            "chunk_idx": chunk_idx,
+            "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
+            "chunk_mode": "page",
+            "token_count": estimate_token_count(chunk_content),
+            "block_indices": page_block_indices[page_idx],
+            "bboxes_by_page": {str(page_idx): page_bboxes[page_idx]} if page_bboxes[page_idx] else {},
+            "page_idx": page_idx,
+            "page_start": page_idx,
+            "page_end": page_idx,
+            "page_indices": [page_idx],
+            "images_on_page": _unique(page_images[page_idx]),
+            "tables_on_page": _unique(page_tables[page_idx]),
+        }
+        if section_path:
+            metadata["section_path"] = list(section_path)
+            metadata["section_title"] = section_path[-1]
+            if section_level is not None:
+                metadata["section_level"] = section_level
+            if section_source:
+                metadata["section_source"] = section_source
         chunks.append(
             {
                 "chunk_content": chunk_content,
-                "metadata": {
-                    "source": source_name,
-                    "page_idx": page_idx,
-                    "images_on_page": page_images[page_idx],
-                    "tables_on_page": page_tables[page_idx],
-                },
+                "metadata": metadata,
             }
         )
     return chunks
@@ -555,8 +598,8 @@ def create_chunks(
     source_name: str,
     *,
     mode: str = "auto",
-    max_tokens: int = 1500,
-    overlap_tokens: int = 200,
+    max_tokens: int = 5000,
+    overlap_tokens: int = 500,
     min_tokens: int = 200,
 ) -> list[dict[str, Any]]:
     if mode not in SUPPORTED_CHUNK_MODES:

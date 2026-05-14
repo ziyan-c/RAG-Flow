@@ -147,6 +147,13 @@ class RetrievalConfig:
     quantized_colpali: bool
     enable_visual: bool = True
     device: str = "auto"
+    route_mode: str = "auto"
+    candidate_mode: str = "direct"
+    seed_k: int = 0
+    candidate_scroll_limit: int = 30
+    neighbor_window: int = 2
+    section_bonus_scale: float = 1.0
+    page_bonus_scale: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -200,8 +207,8 @@ class CaptioningConfig:
 @dataclass(frozen=True)
 class ChunkingConfig:
     mode: str = "auto"
-    max_tokens: int = 1500
-    overlap_tokens: int = 200
+    max_tokens: int = 5000
+    overlap_tokens: int = 500
     min_tokens: int = 200
 
 
@@ -264,7 +271,7 @@ class AppConfig:
                 "RAG_FLOW_CHUNKS_JSON",
                 base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
             ),
-            db_path=env.path("RAG_FLOW_DB_PATH", "/root/qdrant-dbs/manual-db"),
+            db_path=env.path("RAG_FLOW_DB_PATH", "/root/autodl-tmp/qdrant-dbs/manual-db"),
             collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),
         )
 
@@ -286,13 +293,20 @@ class AppConfig:
         )
 
         retrieval = RetrievalConfig(
-            retrieval_k=env.int("RAG_FLOW_RETRIEVAL_K", 50),
+            retrieval_k=env.int("RAG_FLOW_RETRIEVAL_K", 30),
             final_top_k=env.int("RAG_FLOW_FINAL_TOP_K", 10),
-            rrf_k=env.int("RAG_FLOW_RRF_K", 60),
-            visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 1.5),
+            rrf_k=env.int("RAG_FLOW_RRF_K", 10),
+            visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 0.5),
             quantized_colpali=env.get("RAG_FLOW_QUANTIZED_COLPALI", "1") not in {"0", "false", "False"},
-            enable_visual=env.bool("RAG_FLOW_RETRIEVAL_ENABLE_VISUAL", True),
+            enable_visual=env.bool("RAG_FLOW_RETRIEVAL_ENABLE_VISUAL", False),
             device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
+            route_mode=env.get("RAG_FLOW_RETRIEVAL_ROUTE_MODE", "auto"),
+            candidate_mode=env.get("RAG_FLOW_RETRIEVAL_CANDIDATE_MODE", "direct"),
+            seed_k=env.int("RAG_FLOW_RETRIEVAL_SEED_K", 0),
+            candidate_scroll_limit=env.int("RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_LIMIT", 30),
+            neighbor_window=env.int("RAG_FLOW_RETRIEVAL_NEIGHBOR_WINDOW", 2),
+            section_bonus_scale=env.float("RAG_FLOW_RETRIEVAL_SECTION_BONUS_SCALE", 1.0),
+            page_bonus_scale=env.float("RAG_FLOW_RETRIEVAL_PAGE_BONUS_SCALE", 1.0),
         )
 
         server = ServerConfig(
@@ -341,14 +355,14 @@ class AppConfig:
 
         chunking = ChunkingConfig(
             mode=env.get("RAG_FLOW_CHUNK_MODE", "auto"),
-            max_tokens=env.int("RAG_FLOW_CHUNK_MAX_TOKENS", 1500),
-            overlap_tokens=env.int("RAG_FLOW_CHUNK_OVERLAP_TOKENS", 200),
+            max_tokens=env.int("RAG_FLOW_CHUNK_MAX_TOKENS", 5000),
+            overlap_tokens=env.int("RAG_FLOW_CHUNK_OVERLAP_TOKENS", 500),
             min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 200),
         )
 
         indexing = IndexingConfig(
             text_batch_size=env.int("RAG_FLOW_INDEX_TEXT_BATCH_SIZE", 256),
-            visual_batch_size=env.int("RAG_FLOW_INDEX_VISUAL_BATCH_SIZE", 64),
+            visual_batch_size=env.int("RAG_FLOW_INDEX_VISUAL_BATCH_SIZE", 8),
             visual_dpi=env.int("RAG_FLOW_INDEX_VISUAL_DPI", 200),
         )
 

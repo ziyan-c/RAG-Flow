@@ -1,0 +1,292 @@
+from __future__ import annotations
+
+from types import SimpleNamespace
+
+from rag_flow.config import RetrievalConfig
+from rag_flow.retrieval import (
+    RetrievalEngine,
+    _colpali_maxsim_score,
+    _page_proximity_bonus,
+    _payload_position_key,
+    _section_proximity_bonus,
+    _visual_chunk_alignment_score,
+    _visual_page_query_filter,
+)
+
+
+def test_visual_alignment_keeps_page_prior_on_single_page_chunk():
+    visual_payload = {
+        "is_visual_page": True,
+        "page_idx": 4,
+        "chunk_ids_on_page": ["manual-chunk-00001"],
+    }
+    chunk_payload = {
+        "chunk_id": "manual-chunk-00001",
+        "page_indices": [4],
+        "bboxes_by_page": {"4": [[100, 100, 900, 300]]},
+    }
+
+    assert _visual_chunk_alignment_score(chunk_payload, visual_payload) == 1.0
+
+
+def test_visual_alignment_attenuates_cross_page_chunks():
+    visual_payload = {
+        "is_visual_page": True,
+        "page_idx": 5,
+        "chunk_ids_on_page": ["manual-chunk-00002"],
+    }
+    chunk_payload = {
+        "chunk_id": "manual-chunk-00002",
+        "page_indices": [4, 5],
+        "bboxes_by_page": {
+            "4": [[100, 100, 900, 900]],
+            "5": [[100, 100, 300, 200]],
+        },
+    }
+
+    score = _visual_chunk_alignment_score(chunk_payload, visual_payload)
+
+    assert 0.5 < score < 1.0
+
+
+def test_visual_alignment_rejects_chunks_outside_visual_page():
+    visual_payload = {"is_visual_page": True, "page_idx": 5, "chunk_ids_on_page": ["other"]}
+    chunk_payload = {
+        "chunk_id": "manual-chunk-00003",
+        "page_indices": [6],
+        "bboxes_by_page": {"6": [[100, 100, 900, 300]]},
+    }
+
+    assert _visual_chunk_alignment_score(chunk_payload, visual_payload) == 0.0
+
+
+def test_payload_position_key_sorts_by_page_then_bbox_top_left():
+    upper = {
+        "chunk_id": "upper",
+        "chunk_idx": 2,
+        "page_indices": [3],
+        "bboxes_by_page": {"3": [[200, 100, 500, 150]]},
+    }
+    lower = {
+        "chunk_id": "lower",
+        "chunk_idx": 1,
+        "page_indices": [3],
+        "bboxes_by_page": {"3": [[100, 300, 500, 350]]},
+    }
+
+    assert _payload_position_key(upper, 3) < _payload_position_key(lower, 3)
+
+
+def test_section_and_page_proximity_bonuses_are_small_tie_breakers():
+    reference = {"page_idx": 10, "section_path": ["1 Alarm", "1.2 Event"]}
+    same_section = {"page_indices": [10], "section_path": ["1 Alarm", "1.2 Event"]}
+    child_section = {"page_indices": [11], "section_path": ["1 Alarm", "1.2 Event", "1.2.1 Icon"]}
+    other_section = {"page_indices": [20], "section_path": ["2 Storage"]}
+
+    assert _section_proximity_bonus(same_section, reference) > _section_proximity_bonus(child_section, reference)
+    assert _section_proximity_bonus(child_section, reference) > _section_proximity_bonus(other_section, reference)
+    assert _page_proximity_bonus(same_section, 10) > _page_proximity_bonus(child_section, 10)
+    assert _page_proximity_bonus(child_section, 10) > _page_proximity_bonus(other_section, 10)
+
+
+def test_rrf_keeps_route_contributions_for_visual_prior():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    dense_hit = SimpleNamespace(id="chunk-1", payload={"chunk_id": "chunk-1"})
+    visual_hit = SimpleNamespace(id="page-1", payload={"is_visual_page": True, "page_idx": 0})
+
+    ranking = engine._compute_rrf([dense_hit], [], [visual_hit])
+
+    visual = next(item for item in ranking if item["payload"].get("is_visual_page"))
+    assert visual["routes"]["visual"] == 1.5 / 61
+
+
+def test_candidate_mode_normalizes_direct_aliases():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="no-seed"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+
+    assert engine._candidate_mode() == "direct"
+
+
+def test_direct_rank_candidates_skip_visual_pages():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    final_ranking = [
+        {
+            "id": "visual-page-1",
+            "score": 0.9,
+            "payload": {"is_visual_page": True, "source": "manual.pdf", "page_idx": 3},
+            "routes": {"visual": 0.9},
+        },
+        {
+            "id": "chunk-1",
+            "score": 0.4,
+            "payload": {
+                "source": "manual.pdf",
+                "chunk_id": "chunk-1",
+                "page_idx": 3,
+                "page_indices": [3],
+            },
+            "routes": {"dense": 0.25, "sparse": 0.15},
+        },
+    ]
+
+    candidates = engine._direct_rank_candidates(final_ranking)
+
+    assert len(candidates) == 1
+    assert candidates[0]["payload"]["chunk_id"] == "chunk-1"
+    assert candidates[0]["score"] == 0.4
+    assert candidates[0]["visual_score"] == 0.0
+
+
+def test_visual_page_local_candidates_stay_on_hit_page():
+    class FakeClient:
+        def scroll(self, **kwargs):
+            return [
+                SimpleNamespace(
+                    id="chunk-a",
+                    payload={
+                        "source": "manual.pdf",
+                        "chunk_id": "chunk-a",
+                        "page_idx": 3,
+                        "page_indices": [3],
+                        "bboxes_by_page": {"3": [[10, 10, 100, 100]]},
+                    },
+                ),
+                SimpleNamespace(
+                    id="chunk-b",
+                    payload={
+                        "source": "manual.pdf",
+                        "chunk_id": "chunk-b",
+                        "page_idx": 4,
+                        "page_indices": [4],
+                        "bboxes_by_page": {"4": [[10, 10, 100, 100]]},
+                    },
+                ),
+            ], None
+
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 0.5, False, candidate_mode="visual-page-local-bbox"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    engine.client = FakeClient()
+    fake_models = SimpleNamespace(
+        FieldCondition=lambda **kwargs: SimpleNamespace(**kwargs),
+        Filter=lambda **kwargs: SimpleNamespace(**kwargs),
+        MatchValue=lambda **kwargs: SimpleNamespace(**kwargs),
+    )
+
+    candidates = engine._visual_page_local_candidates(
+        collection_name="manuals",
+        final_ranking=[],
+        visual_hits=[
+            SimpleNamespace(
+                id="visual-page-3",
+                payload={
+                    "is_visual_page": True,
+                    "source": "manual.pdf",
+                    "page_idx": 3,
+                    "chunk_ids_on_page": ["chunk-a"],
+                },
+                score=99.0,
+            )
+        ],
+        candidate_mode="visual-page-local-bbox",
+        models=fake_models,
+    )
+
+    assert [candidate["payload"]["chunk_id"] for candidate in candidates] == ["chunk-a"]
+    assert candidates[0]["visual_alignment_score"] == 1.0
+    assert candidates[0]["visual_score"] > 0.0
+
+
+def test_visual_page_query_filter_limits_colpali_to_visual_pages():
+    class FakeMatchValue:
+        def __init__(self, value):
+            self.value = value
+
+    class FakeFieldCondition:
+        def __init__(self, key, match):
+            self.key = key
+            self.match = match
+
+    class FakeFilter:
+        def __init__(self, must):
+            self.must = must
+
+    fake_models = SimpleNamespace(
+        FieldCondition=FakeFieldCondition,
+        Filter=FakeFilter,
+        MatchValue=FakeMatchValue,
+    )
+
+    point_filter = _visual_page_query_filter(fake_models)
+
+    assert point_filter.must[0].key == "is_visual_page"
+    assert point_filter.must[0].match.value is True
+
+
+def test_colpali_maxsim_scores_best_patch_per_query_token():
+    query = [[1.0, 0.0], [0.0, 1.0]]
+    page = [[1.0, 0.0], [0.0, 0.5]]
+
+    assert _colpali_maxsim_score(query, page) == 2.0
+
+
+def test_visual_page_scroll_query_sorts_by_local_maxsim():
+    class FakeClient:
+        def scroll(self, **kwargs):
+            records = [
+                SimpleNamespace(
+                    id="low",
+                    payload={"is_visual_page": True, "page_idx": 1},
+                    vector={"page-image-colpali": [[0.0, 1.0]]},
+                ),
+                SimpleNamespace(
+                    id="high",
+                    payload={"is_visual_page": True, "page_idx": 2},
+                    vector={"page-image-colpali": [[1.0, 0.0]]},
+                ),
+            ]
+            return records, None
+
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    engine.client = FakeClient()
+    fake_models = SimpleNamespace(
+        FieldCondition=lambda **kwargs: SimpleNamespace(**kwargs),
+        Filter=lambda **kwargs: SimpleNamespace(**kwargs),
+        MatchValue=lambda **kwargs: SimpleNamespace(**kwargs),
+    )
+
+    hits = engine._query_visual_pages_by_scroll(
+        collection_name="manuals",
+        visual_query=[[1.0, 0.0]],
+        limit=1,
+        models=fake_models,
+    )
+
+    assert [hit.id for hit in hits] == ["high"]
+
+
+def test_candidate_seed_hits_keep_top_visual_pages_outside_fused_top_k():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 1, 60, 1.5, False))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    final_ranking = [
+        {
+            "id": "chunk-1",
+            "score": 1.0,
+            "payload": {"chunk_id": "chunk-1"},
+            "routes": {"dense": 1.0},
+        }
+    ]
+    visual_hits = [
+        SimpleNamespace(
+            id="visual-page-1",
+            payload={"is_visual_page": True, "page_idx": 0},
+            score=42.0,
+        )
+    ]
+
+    seeds = engine._candidate_seed_hits(final_ranking, visual_hits)
+
+    assert [seed["id"] for seed in seeds] == ["chunk-1", "visual-page-1"]
+    assert seeds[1]["routes"]["visual"] == 1.5 / 61

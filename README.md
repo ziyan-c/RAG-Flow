@@ -325,8 +325,8 @@ was a no-op, chunking falls back to sequential fixed token windows. Useful
 controls:
 
 - `--mode`: `auto`, `section`, `token`, or `page`
-- `--max-tokens`: target chunk budget, default `1500`
-- `--overlap-tokens`: repeated tail context between adjacent token chunks, default `200`
+- `--max-tokens`: target chunk budget, default `5000`
+- `--overlap-tokens`: repeated tail context between adjacent token chunks, default `500`
 - `--min-tokens`: minimum size before flushing a chunk, default `200`
 
 Cross-page table continuations use the same relation as patching. The empty
@@ -362,7 +362,7 @@ Upsert ColPali visual vectors:
 rag-flow index visual
 ```
 
-By default this renders and embeds `RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=64` PDF
+By default this renders and embeds `RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=8` PDF
 pages per batch at `RAG_FLOW_INDEX_VISUAL_DPI=200`. Override them with
 `rag-flow index visual --batch-size <pages> --dpi <dpi>` if the indexing machine
 needs a different speed/memory tradeoff. If you point visual indexing at a PDF
@@ -398,10 +398,14 @@ falls back to `RAG_FLOW_COLPALI_MODEL` and lets `from_pretrained` use the normal
 cache/download behavior.
 
 Chunking also records source block indices and page bboxes in chunk metadata.
-This makes it possible to attribute a page-level ColPali hit back to the most
-likely text chunk by ranking token-wise top-k image-patch evidence with
-`chunk_score`, `token_coverage`, and `density_score`, without storing a separate
-ColPali vector for every chunk.
+The retriever uses those bboxes to keep visual evidence page-local: a ColPali
+hit first contributes a `visual_page_prior`, then the candidate chunk receives a
+conservative `visual_alignment_score` based on whether it belongs to that visual
+page and how much of a cross-page chunk actually appears on the hit page. This
+avoids blindly giving the same visual score to every chunk near the page. A
+token-wise image-patch heatmap ranker exists as an experimental helper, but it is
+not enabled in the default retriever until ColPali patch geometry can be mapped
+reliably for every model output shape.
 
 Inspect the Qdrant collection:
 
@@ -420,6 +424,23 @@ Start the retriever API:
 ```bash
 rag-flow retriever
 ```
+
+The default retrieval profile is the low-latency text-only profile selected by
+the 220-query benchmark:
+
+```env
+RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0
+RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
+RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct
+RAG_FLOW_RETRIEVAL_K=30
+RAG_FLOW_FINAL_TOP_K=10
+RAG_FLOW_RRF_K=10
+```
+
+For offline high-recall review, keep the same text-only direct mode and raise
+`RAG_FLOW_RETRIEVAL_K=80` plus `RAG_FLOW_FINAL_TOP_K=50`. Visual retrieval is
+kept optional because it can improve visual/UI query ranking, but it loads the
+ColPali query encoder and is much slower than the default text path.
 
 Retriever visual mode is optional. Dense and sparse text search run on CPU;
 `page-image-colpali` visual search also uses Qdrant on CPU, but the ColPali query

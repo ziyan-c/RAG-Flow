@@ -42,6 +42,10 @@ def test_create_page_level_chunks(tmp_path):
 
     assert len(chunks) == 2
     assert chunks[0]["metadata"]["page_idx"] == 0
+    assert chunks[0]["metadata"]["chunk_id"] == "manual-chunk-00000"
+    assert chunks[0]["metadata"]["chunk_mode"] == "page"
+    assert chunks[0]["metadata"]["page_indices"] == [0]
+    assert chunks[0]["metadata"]["block_indices"] == [0, 1]
     assert "Overview" in chunks[0]["chunk_content"]
     assert "Port 8000" in chunks[1]["chunk_content"]
     assert "Step 3 Click OK." in chunks[1]["chunk_content"]
@@ -49,6 +53,7 @@ def test_create_page_level_chunks(tmp_path):
     assert "Contact us" not in chunks[1]["chunk_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
     assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]
+    assert chunks[1]["metadata"]["block_indices"] == [2, 3]
 
 
 def test_auto_chunks_without_sections_use_token_windows(tmp_path):
@@ -182,6 +187,9 @@ def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path)
     assert len(chunks) == 2
     assert chunks[0]["metadata"]["page_idx"] == 0
     assert chunks[1]["metadata"]["page_idx"] == 1
+    assert chunks[0]["metadata"]["block_indices"] == [0]
+    assert chunks[1]["metadata"]["block_indices"] == [1]
+    assert chunks[1]["metadata"]["bboxes_by_page"] == {"1": [[100.0, 80.0, 900.0, 300.0]]}
     assert "[Continuation of table from page 1]" in chunks[1]["chunk_content"]
     assert "Record Mode" in chunks[1]["chunk_content"]
 

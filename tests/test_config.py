@@ -216,8 +216,8 @@ def test_chunking_defaults(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.chunking.mode == "auto"
-    assert config.chunking.max_tokens == 1500
-    assert config.chunking.overlap_tokens == 200
+    assert config.chunking.max_tokens == 5000
+    assert config.chunking.overlap_tokens == 500
     assert config.chunking.min_tokens == 200
 
 
@@ -255,10 +255,13 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.models.colpali_model == "vidore/colpali-v1.3-merged"
     assert config.models.colpali_model_path is None
     assert config.models.colpali_local_model_root.as_posix() == "/root/autodl-tmp/models"
-    assert config.retrieval.enable_visual is True
+    assert config.retrieval.enable_visual is False
     assert config.retrieval.device == "auto"
+    assert config.retrieval.candidate_mode == "direct"
     assert config.retrieval.quantized_colpali is True
-    assert config.retrieval.visual_weight == 1.5
+    assert config.retrieval.retrieval_k == 30
+    assert config.retrieval.rrf_k == 10
+    assert config.retrieval.visual_weight == 0.5
 
 
 def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):
@@ -294,6 +297,7 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
                 "RAG_FLOW_RETRIEVAL_DEVICE=cpu",
                 "RAG_FLOW_QUANTIZED_COLPALI=0",
                 "RAG_FLOW_VISUAL_WEIGHT=0.75",
+                "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct",
             ]
         ),
         encoding="utf-8",
@@ -305,6 +309,7 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
 
     assert config.retrieval.enable_visual is False
     assert config.retrieval.device == "cpu"
+    assert config.retrieval.candidate_mode == "direct"
     assert config.retrieval.quantized_colpali is False
     assert config.retrieval.visual_weight == 0.75
 
@@ -316,7 +321,7 @@ def test_indexing_defaults(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.indexing.text_batch_size == 256
-    assert config.indexing.visual_batch_size == 64
+    assert config.indexing.visual_batch_size == 8
     assert config.indexing.visual_dpi == 200
 
 

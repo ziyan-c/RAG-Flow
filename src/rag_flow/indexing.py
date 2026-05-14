@@ -14,7 +14,7 @@ from .runtime import get_torch_device
 DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
 TEXT_INDEX_BATCH_SIZE = 256
-VISUAL_INDEX_BATCH_SIZE = 64
+VISUAL_INDEX_BATCH_SIZE = 8
 VISUAL_INDEX_DPI = 200
 TEXT_DENSE_VECTOR_NAME = "chunk-text-dense"
 TEXT_SPARSE_VECTOR_NAME = "chunk-text-sparse"
@@ -70,11 +70,24 @@ def ensure_payload_indexes(client: Any, collection_name: str, models: Any) -> No
                 raise
 
 
-def validate_collection_schema(config: AppConfig) -> None:
+def _close_client(client: Any) -> None:
+    close = getattr(client, "close", None)
+    if close is not None:
+        close()
+
+
+def validate_collection_schema(config: AppConfig, client: Any | None = None) -> None:
     from qdrant_client import QdrantClient, models
 
-    client = QdrantClient(path=str(config.paths.db_path))
-    info = client.get_collection(config.paths.collection_name)
+    owns_client = client is None
+    if client is None:
+        client = QdrantClient(path=str(config.paths.db_path))
+    try:
+        info = client.get_collection(config.paths.collection_name)
+    finally:
+        if owns_client:
+            _close_client(client)
+
     vectors = info.config.params.vectors
     sparse_vectors = getattr(info.config.params, "sparse_vectors", {}) or {}
     errors = []
@@ -118,28 +131,31 @@ def ensure_collection(config: AppConfig) -> None:
     from qdrant_client import QdrantClient, models
 
     client = QdrantClient(path=str(config.paths.db_path))
-    collection = config.paths.collection_name
-    if client.collection_exists(collection):
-        validate_collection_schema(config)
-        ensure_payload_indexes(client, collection, models)
-        return
+    try:
+        collection = config.paths.collection_name
+        if client.collection_exists(collection):
+            validate_collection_schema(config, client=client)
+            ensure_payload_indexes(client, collection, models)
+            return
 
-    client.create_collection(
-        collection_name=collection,
-        vectors_config={
-            TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
-            PAGE_IMAGE_COLPALI_VECTOR_NAME: models.VectorParams(
-                size=COLPALI_VECTOR_SIZE,
-                distance=models.Distance.COSINE,
-                multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
-                quantization_config=models.BinaryQuantization(
-                    binary=models.BinaryQuantizationConfig(always_ram=True)
+        client.create_collection(
+            collection_name=collection,
+            vectors_config={
+                TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
+                PAGE_IMAGE_COLPALI_VECTOR_NAME: models.VectorParams(
+                    size=COLPALI_VECTOR_SIZE,
+                    distance=models.Distance.COSINE,
+                    multivector_config=models.MultiVectorConfig(comparator=models.MultiVectorComparator.MAX_SIM),
+                    quantization_config=models.BinaryQuantization(
+                        binary=models.BinaryQuantizationConfig(always_ram=True)
+                    ),
                 ),
-            ),
-        },
-        sparse_vectors_config={TEXT_SPARSE_VECTOR_NAME: models.SparseVectorParams(modifier=models.Modifier.IDF)},
-    )
-    ensure_payload_indexes(client, collection, models)
+            },
+            sparse_vectors_config={TEXT_SPARSE_VECTOR_NAME: models.SparseVectorParams(modifier=models.Modifier.IDF)},
+        )
+        ensure_payload_indexes(client, collection, models)
+    finally:
+        _close_client(client)
 
 
 def _delete_existing_points_for_sources(
