@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import Any
@@ -304,6 +305,24 @@ class RetrievalEngine:
             "visual_bbox": "visual-bbox",
             "visual-naive": "visual-naive",
             "visual_naive": "visual-naive",
+            "visual-only": "visual-only-bbox",
+            "visual_only": "visual-only-bbox",
+            "visual-only-bbox": "visual-only-bbox",
+            "visual_only_bbox": "visual-only-bbox",
+            "visual-only-naive": "visual-only-naive",
+            "visual_only_naive": "visual-only-naive",
+            "dense-visual": "dense-visual-bbox",
+            "dense_visual": "dense-visual-bbox",
+            "dense-visual-bbox": "dense-visual-bbox",
+            "dense_visual_bbox": "dense-visual-bbox",
+            "dense-visual-naive": "dense-visual-naive",
+            "dense_visual_naive": "dense-visual-naive",
+            "sparse-visual": "sparse-visual-bbox",
+            "sparse_visual": "sparse-visual-bbox",
+            "sparse-visual-bbox": "sparse-visual-bbox",
+            "sparse_visual_bbox": "sparse-visual-bbox",
+            "sparse-visual-naive": "sparse-visual-naive",
+            "sparse_visual_naive": "sparse-visual-naive",
         }
         return aliases.get(mode, mode)
 
@@ -330,13 +349,36 @@ class RetrievalEngine:
         return aliases.get(mode, mode)
 
     def _uses_dense_route(self) -> bool:
-        return self._route_mode() in {"dense", "text", "visual-bbox", "visual-naive"}
+        return self._route_mode() in {
+            "dense",
+            "text",
+            "visual-bbox",
+            "visual-naive",
+            "dense-visual-bbox",
+            "dense-visual-naive",
+        }
 
     def _uses_sparse_route(self) -> bool:
-        return self._route_mode() in {"sparse", "text", "visual-bbox", "visual-naive"}
+        return self._route_mode() in {
+            "sparse",
+            "text",
+            "visual-bbox",
+            "visual-naive",
+            "sparse-visual-bbox",
+            "sparse-visual-naive",
+        }
 
     def _uses_visual_route(self) -> bool:
-        return self.config.retrieval.enable_visual and self._route_mode() in {"visual-bbox", "visual-naive"}
+        return self.config.retrieval.enable_visual and self._route_mode() in {
+            "visual-bbox",
+            "visual-naive",
+            "visual-only-bbox",
+            "visual-only-naive",
+            "dense-visual-bbox",
+            "dense-visual-naive",
+            "sparse-visual-bbox",
+            "sparse-visual-naive",
+        }
 
     def load(self) -> None:
         from fastembed import SparseTextEmbedding, TextEmbedding
@@ -472,25 +514,41 @@ class RetrievalEngine:
                 _payload_position_key(item["payload"], item["seed_page_idx"]),
             )
         )
-        selected_candidates = scored_candidates[: self.config.retrieval.final_top_k]
+        selected_candidates: list[tuple[dict[str, Any], str]] = []
+        best_score = float(scored_candidates[0]["score"])
+        min_score = max(
+            float(self.config.retrieval.min_candidate_score),
+            best_score * max(0.0, float(self.config.retrieval.min_score_ratio)),
+        )
+        context_token_budget = max(0, int(self.config.retrieval.max_context_tokens))
+        used_context_tokens = 0
+        for candidate in scored_candidates:
+            if len(selected_candidates) >= self.config.retrieval.final_top_k:
+                break
+            if float(candidate["score"]) < min_score:
+                continue
+            context_block = self._format_context_block(candidate)
+            block_tokens = self._estimate_context_tokens(context_block)
+            if context_token_budget and used_context_tokens + block_tokens > context_token_budget:
+                continue
+            selected_candidates.append((candidate, context_block))
+            used_context_tokens += block_tokens
+
+        if not selected_candidates:
+            return RetrievalResult(
+                hit_page=1,
+                all_hits=[],
+                context="No relevant information found in the manual.",
+            )
 
         context_blocks: list[str] = []
         hit_details: list[HitDetail] = []
-        for rank, candidate in enumerate(selected_candidates, start=1):
+        for rank, (candidate, context_block) in enumerate(selected_candidates, start=1):
             payload = candidate["payload"]
             page_idx = int(payload["page_idx"])
             page_start = int(payload.get("page_start", page_idx))
             page_end = int(payload.get("page_end", page_idx))
-            page_label = f"{page_start + 1}" if page_start == page_end else f"{page_start + 1}-{page_end + 1}"
-            section = payload.get("section_title")
-            section_line = f", Section: {section}" if section else ""
-            note_prefix = ""
-            if candidate["visual_alignment_score"] > 0:
-                note_prefix = "[Visual Page Match] "
-            context_blocks.append(
-                f"[Source: {payload.get('source', '')}, Page: {page_label}{section_line}]\n"
-                f"{note_prefix}{payload.get('chunk_content', '')}"
-            )
+            context_blocks.append(context_block)
             hit_details.append(
                 HitDetail(
                     rank=rank,
@@ -529,6 +587,24 @@ class RetrievalEngine:
             all_hits=hit_details,
             context=final_context,
         )
+
+    def _format_context_block(self, candidate: dict[str, Any]) -> str:
+        payload = candidate["payload"]
+        page_idx = int(payload["page_idx"])
+        page_start = int(payload.get("page_start", page_idx))
+        page_end = int(payload.get("page_end", page_idx))
+        page_label = f"{page_start + 1}" if page_start == page_end else f"{page_start + 1}-{page_end + 1}"
+        section = payload.get("section_title")
+        section_line = f", Section: {section}" if section else ""
+        note_prefix = "[Visual Page Match] " if candidate["visual_alignment_score"] > 0 else ""
+        return (
+            f"[Source: {payload.get('source', '')}, Page: {page_label}{section_line}]\n"
+            f"{note_prefix}{payload.get('chunk_content', '')}"
+        )
+
+    def _estimate_context_tokens(self, text: str) -> int:
+        chars_per_token = max(1.0, float(self.config.retrieval.context_chars_per_token))
+        return max(1, math.ceil(len(text) / chars_per_token))
 
     def _new_candidate(
         self,
@@ -750,7 +826,8 @@ class RetrievalEngine:
                     visual_page_prior = float(hit["routes"].get("visual", hit["score"]))
                     alignment_score = (
                         _visual_chunk_naive_score(record.payload, payload)
-                        if route_mode == "visual-naive"
+                        if route_mode
+                        in {"visual-naive", "visual-only-naive", "dense-visual-naive", "sparse-visual-naive"}
                         else _visual_chunk_alignment_score(record.payload, payload)
                     )
                     candidate["visual_page_prior"] = max(candidate["visual_page_prior"], visual_page_prior)

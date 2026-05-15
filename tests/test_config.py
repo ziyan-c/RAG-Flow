@@ -257,11 +257,14 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.models.colpali_local_model_root.as_posix() == "/root/autodl-tmp/models"
     assert config.retrieval.enable_visual is False
     assert config.retrieval.device == "auto"
+    assert config.retrieval.route_mode == "text"
     assert config.retrieval.candidate_mode == "direct"
     assert config.retrieval.quantized_colpali is True
-    assert config.retrieval.retrieval_k == 30
+    assert config.retrieval.retrieval_k == 150
+    assert config.retrieval.final_top_k == 80
     assert config.retrieval.rrf_k == 10
-    assert config.retrieval.visual_weight == 0.5
+    assert config.retrieval.visual_weight == 0.75
+    assert config.retrieval.max_context_tokens == 10000
 
 
 def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):

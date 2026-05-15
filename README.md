@@ -426,19 +426,31 @@ rag-flow retriever
 ```
 
 The default retrieval profile is the low-latency text-only profile selected by
-the 220-query benchmark:
+the 220-query benchmark. It intentionally retrieves a large candidate pool, then
+uses a hard retrieved-context budget so the downstream answer model is not forced
+to consume all candidates:
 
 ```env
 RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0
 RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
 RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct
-RAG_FLOW_RETRIEVAL_K=30
-RAG_FLOW_FINAL_TOP_K=10
+RAG_FLOW_RETRIEVAL_K=150
+RAG_FLOW_FINAL_TOP_K=80
 RAG_FLOW_RRF_K=10
+RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=10000
+RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN=4.0
+RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=0
 ```
 
-For offline high-recall review, keep the same text-only direct mode and raise
-`RAG_FLOW_RETRIEVAL_K=80` plus `RAG_FLOW_FINAL_TOP_K=50`. Visual retrieval is
+`final_top_k` remains a maximum number of chunks. The token cap may return fewer
+chunks, so retrieval does not need to fill the whole 10k budget when the useful
+evidence is already covered. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional
+and relative to the top candidate score; the current default keeps it at `0`
+because the benchmark did not show a reliable quality gain from ratio pruning.
+
+For offline high-recall review, keep the same text-only direct mode and set
+`RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=0`; the benchmark high-recall profile used
+`RAG_FLOW_RETRIEVAL_K=150` plus `RAG_FLOW_FINAL_TOP_K=80`. Visual retrieval is
 kept optional because it can improve visual/UI query ranking, but it loads the
 ColPali query encoder and is much slower than the default text path.
 
