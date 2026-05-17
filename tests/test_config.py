@@ -265,6 +265,7 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.retrieval.rrf_k == 10
     assert config.retrieval.visual_weight == 0.75
     assert config.retrieval.max_context_tokens == 10000
+    assert config.retrieval.min_score_ratio == 1.0
 
 
 def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):

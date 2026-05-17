@@ -727,11 +727,15 @@ def _gold_chunk_ids(query: dict[str, Any]) -> list[str]:
     return _list_strings(query.get("gold_chunk_ids", query.get("expected_chunk_ids")))
 
 
+def _strict_gold_chunk_ids(query: dict[str, Any]) -> list[str]:
+    return _list_strings(query.get("strict_gold_chunk_ids"))
+
+
 def _primary_gold_chunk_id(query: dict[str, Any]) -> str:
     primary = str(query.get("primary_gold_chunk_id") or "").strip()
     if primary:
         return primary
-    strict = _list_strings(query.get("strict_gold_chunk_ids"))
+    strict = _strict_gold_chunk_ids(query)
     if strict:
         return strict[0]
     gold = _gold_chunk_ids(query)
@@ -758,6 +762,15 @@ def _first_correct_rank(query: dict[str, Any], hits: Sequence[dict[str, Any]]) -
     return None
 
 
+def _first_chunk_rank(chunk_ids: set[str], hits: Sequence[dict[str, Any]]) -> int | None:
+    if not chunk_ids:
+        return None
+    for rank, hit in enumerate(hits, start=1):
+        if _hit_chunk_id(hit) in chunk_ids:
+            return rank
+    return None
+
+
 def score_query_result(
     query: dict[str, Any],
     response: dict[str, Any],
@@ -769,15 +782,23 @@ def score_query_result(
         hits = []
     gold_pages = set(_gold_page_indices(query))
     gold_chunks = set(_gold_chunk_ids(query))
+    strict_chunks = set(_strict_gold_chunk_ids(query))
     primary_chunk = _primary_gold_chunk_id(query)
     first_rank = _first_correct_rank(query, hits)
+    primary_rank = _first_chunk_rank({primary_chunk} if primary_chunk else set(), hits)
+    strict_rank = _first_chunk_rank(strict_chunks, hits)
     row: dict[str, Any] = {
         "query_id": query.get("query_id", ""),
         "query_type": query.get("query_type", ""),
         "primary_gold_chunk_id": primary_chunk,
         "gold_chunk_count": len(gold_chunks),
+        "strict_gold_chunk_count": len(strict_chunks),
         "first_correct_rank": first_rank or "",
         "reciprocal_rank": (1.0 / first_rank) if first_rank else 0.0,
+        "primary_first_rank": primary_rank or "",
+        "primary_reciprocal_rank": (1.0 / primary_rank) if primary_rank else 0.0,
+        "strict_first_rank": strict_rank or "",
+        "strict_reciprocal_rank": (1.0 / strict_rank) if strict_rank else 0.0,
         "top_hit_page": response.get("hit_page", ""),
         "returned_chunk_ids": "|".join(_hit_chunk_id(hit) for hit in hits if _hit_chunk_id(hit)),
         "returned_page_indices": "|".join(
@@ -787,6 +808,9 @@ def score_query_result(
     for k in recall_ks:
         top_hits = hits[:k]
         returned_gold_chunks = {_hit_chunk_id(hit) for hit in top_hits if _hit_chunk_id(hit) in gold_chunks}
+        returned_strict_chunks = {
+            _hit_chunk_id(hit) for hit in top_hits if _hit_chunk_id(hit) in strict_chunks
+        }
         page_hit = any(
             hit.get("page_idx") is not None and int(hit.get("page_idx")) in gold_pages
             for hit in top_hits
@@ -798,6 +822,10 @@ def score_query_result(
         row[f"page_recall@{k}"] = int(page_hit)
         row[f"chunk_recall@{k}"] = int(chunk_hit)
         row[f"primary_hit@{k}"] = int(primary_hit)
+        row[f"strict_hit@{k}"] = int(bool(returned_strict_chunks))
+        row[f"strict_coverage@{k}"] = (
+            round(len(returned_strict_chunks) / len(strict_chunks), 6) if strict_chunks else 0.0
+        )
         row[f"gold_coverage@{k}"] = round(len(returned_gold_chunks) / len(gold_chunks), 6) if gold_chunks else 0.0
         row[f"recall@{k}"] = int(evidence_hit)
         relevant_count = max(1, len(gold_chunks or gold_pages))
@@ -1056,6 +1084,7 @@ def run_retrieval_benchmark(
                 "expected_context_granularity": query.get("expected_context_granularity", ""),
                 "gold_page_indices": "|".join(str(page) for page in _gold_page_indices(query)),
                 "gold_chunk_ids": "|".join(_gold_chunk_ids(query)),
+                "strict_gold_chunk_ids": "|".join(_strict_gold_chunk_ids(query)),
                 "latency_seconds": round(elapsed, 4),
                 "hit_count": len(response.get("all_hits", [])) if isinstance(response.get("all_hits"), list) else 0,
                 "context_chars": len(str(response.get("context", ""))),
@@ -1086,14 +1115,20 @@ def run_retrieval_benchmark(
                 "primary_gold_chunk_id": _primary_gold_chunk_id(query),
                 "gold_page_indices": "|".join(str(page) for page in _gold_page_indices(query)),
                 "gold_chunk_ids": "|".join(_gold_chunk_ids(query)),
+                "strict_gold_chunk_ids": "|".join(_strict_gold_chunk_ids(query)),
                 "returned_chunk_ids": score_row["returned_chunk_ids"],
                 "returned_page_indices": score_row["returned_page_indices"],
                 "first_correct_rank": score_row["first_correct_rank"],
+                "primary_first_rank": score_row["primary_first_rank"],
+                "strict_first_rank": score_row["strict_first_rank"],
                 f"primary_hit@{run_config.retrieval.final_top_k}": score_row[
                     f"primary_hit@{run_config.retrieval.final_top_k}"
                 ],
                 f"gold_coverage@{run_config.retrieval.final_top_k}": score_row[
                     f"gold_coverage@{run_config.retrieval.final_top_k}"
+                ],
+                f"strict_coverage@{run_config.retrieval.final_top_k}": score_row[
+                    f"strict_coverage@{run_config.retrieval.final_top_k}"
                 ],
                 "route_mode": run_config.retrieval.route_mode,
                 "candidate_mode": run_config.retrieval.candidate_mode,
@@ -1137,9 +1172,15 @@ def run_retrieval_benchmark(
         "primary_gold_chunk_id",
         "gold_page_indices",
         "gold_chunk_ids",
+        "strict_gold_chunk_ids",
         "gold_chunk_count",
+        "strict_gold_chunk_count",
         "first_correct_rank",
         "reciprocal_rank",
+        "primary_first_rank",
+        "primary_reciprocal_rank",
+        "strict_first_rank",
+        "strict_reciprocal_rank",
         "top_hit_page",
         "returned_chunk_ids",
         "returned_page_indices",
@@ -1177,6 +1218,8 @@ def run_retrieval_benchmark(
         *[f"page_recall@{k}" for k in recall_ks],
         *[f"chunk_recall@{k}" for k in recall_ks],
         *[f"primary_hit@{k}" for k in recall_ks],
+        *[f"strict_hit@{k}" for k in recall_ks],
+        *[f"strict_coverage@{k}" for k in recall_ks],
         *[f"gold_coverage@{k}" for k in recall_ks],
         *[f"recall@{k}" for k in recall_ks],
         *[f"ndcg@{k}" for k in recall_ks],

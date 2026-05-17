@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from rag_flow.config import RetrievalConfig
 from rag_flow.retrieval import (
     RetrievalEngine,
+    _candidate_min_score,
     _colpali_maxsim_score,
     _page_proximity_bonus,
     _payload_position_key,
@@ -12,6 +13,17 @@ from rag_flow.retrieval import (
     _visual_chunk_alignment_score,
     _visual_page_query_filter,
 )
+
+
+def test_candidate_min_score_uses_allowed_drop_ratio():
+    assert _candidate_min_score(best_score=10.0, min_candidate_score=0.0, min_score_ratio=0.0) == 10.0
+    assert _candidate_min_score(best_score=10.0, min_candidate_score=0.0, min_score_ratio=0.2) == 8.0
+    assert _candidate_min_score(best_score=10.0, min_candidate_score=0.0, min_score_ratio=0.5) == 5.0
+    assert _candidate_min_score(best_score=10.0, min_candidate_score=0.0, min_score_ratio=1.0) == 0.0
+
+
+def test_candidate_min_score_respects_absolute_floor():
+    assert _candidate_min_score(best_score=10.0, min_candidate_score=9.0, min_score_ratio=0.5) == 9.0
 
 
 def test_visual_alignment_keeps_page_prior_on_single_page_chunk():

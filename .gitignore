@@ -23,6 +23,7 @@ models/
 .local
 .local/
 .local.backup-*/
+.handoff/
 
 # Thesis keeps small data placeholders and curated experiment tables.
 !thesis/**/data/

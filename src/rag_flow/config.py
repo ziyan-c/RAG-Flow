@@ -157,7 +157,7 @@ class RetrievalConfig:
     max_context_tokens: int = 0
     context_chars_per_token: float = 4.0
     min_candidate_score: float = 0.0
-    min_score_ratio: float = 0.0
+    min_score_ratio: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -314,7 +314,7 @@ class AppConfig:
             max_context_tokens=env.int("RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS", 10000),
             context_chars_per_token=env.float("RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN", 4.0),
             min_candidate_score=env.float("RAG_FLOW_RETRIEVAL_MIN_CANDIDATE_SCORE", 0.0),
-            min_score_ratio=env.float("RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO", 0.0),
+            min_score_ratio=env.float("RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO", 1.0),
         )
 
         server = ServerConfig(

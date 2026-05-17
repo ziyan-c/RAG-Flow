@@ -233,6 +233,19 @@ def _visual_page_query_filter(models: Any) -> Any:
     )
 
 
+def _candidate_min_score(*, best_score: float, min_candidate_score: float, min_score_ratio: float) -> float:
+    """Return the minimum candidate score after final ranking.
+
+    ``min_score_ratio`` is interpreted as an allowed drop from the best score:
+    0.2 keeps candidates scoring at least 80% of the best candidate. Use 1.0
+    to disable relative filtering for non-negative RRF-style scores.
+    """
+
+    allowed_drop = min(max(0.0, min_score_ratio), 1.0)
+    relative_min_score = best_score * (1.0 - allowed_drop)
+    return max(min_candidate_score, relative_min_score)
+
+
 def _named_vector(record_vector: Any, vector_name: str) -> Any:
     if isinstance(record_vector, dict):
         return record_vector.get(vector_name)
@@ -516,9 +529,10 @@ class RetrievalEngine:
         )
         selected_candidates: list[tuple[dict[str, Any], str]] = []
         best_score = float(scored_candidates[0]["score"])
-        min_score = max(
-            float(self.config.retrieval.min_candidate_score),
-            best_score * max(0.0, float(self.config.retrieval.min_score_ratio)),
+        min_score = _candidate_min_score(
+            best_score=best_score,
+            min_candidate_score=float(self.config.retrieval.min_candidate_score),
+            min_score_ratio=float(self.config.retrieval.min_score_ratio),
         )
         context_token_budget = max(0, int(self.config.retrieval.max_context_tokens))
         used_context_tokens = 0
