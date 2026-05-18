@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Any
 
 from .config import AppConfig
-from .indexing import PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
+from .indexing import COLPALI_VECTOR_SIZE, PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
 from .model_paths import resolve_model_location
 from .runtime import get_torch_device
 
@@ -23,6 +23,8 @@ class HitDetail:
     rank: int
     page_idx: int
     page_number: int
+    page_indices: list[int]
+    page_numbers: list[int]
     score: float
     is_continuation: bool
     chunk_id: str = ""
@@ -305,6 +307,7 @@ class RetrievalEngine:
         self.colpali_processor = None
         self.colpali_model = None
         self.device = None
+        self._visual_page_cache = None
 
     def _route_mode(self) -> str:
         mode = (self.config.retrieval.route_mode or "auto").strip().lower()
@@ -562,12 +565,15 @@ class RetrievalEngine:
             page_idx = int(payload["page_idx"])
             page_start = int(payload.get("page_start", page_idx))
             page_end = int(payload.get("page_end", page_idx))
+            page_indices = _payload_page_indices(payload)
             context_blocks.append(context_block)
             hit_details.append(
                 HitDetail(
                     rank=rank,
                     page_idx=page_idx,
                     page_number=page_idx + 1,
+                    page_indices=page_indices,
+                    page_numbers=[page + 1 for page in page_indices],
                     score=float(candidate["score"]),
                     is_continuation=bool(candidate["is_continuation"]),
                     chunk_id=str(payload.get("chunk_id", "")),
@@ -883,6 +889,15 @@ class RetrievalEngine:
         limit: int,
         models: Any,
     ) -> list[Any]:
+        cached_hits = self._query_cached_visual_pages(
+            collection_name=collection_name,
+            visual_query=visual_query,
+            limit=limit,
+            models=models,
+        )
+        if cached_hits is not None:
+            return cached_hits
+
         scored_hits: list[Any] = []
         offset = None
         while True:
@@ -904,6 +919,99 @@ class RetrievalEngine:
                 break
         scored_hits.sort(key=lambda hit: hit.score, reverse=True)
         return scored_hits[:limit]
+
+    def _query_cached_visual_pages(
+        self,
+        *,
+        collection_name: str,
+        visual_query: list[list[float]],
+        limit: int,
+        models: Any,
+    ) -> list[Any] | None:
+        try:
+            import numpy as np
+        except ImportError:
+            return None
+
+        cache = self._load_visual_page_cache(collection_name=collection_name, models=models, np=np)
+        if not cache or cache["patch_matrix"].size == 0:
+            return []
+
+        query_array = np.asarray(visual_query, dtype=np.float32)
+        if query_array.ndim != 2 or query_array.shape[1] != cache["patch_matrix"].shape[1]:
+            return None
+        query_norm = np.linalg.norm(query_array, axis=1, keepdims=True)
+        query_norm[query_norm == 0] = 1.0
+        query_array = query_array / query_norm
+
+        similarities = query_array @ cache["patch_matrix"].T
+        page_count = len(cache["entries"])
+        max_by_page = np.full((query_array.shape[0], page_count), -np.inf, dtype=np.float32)
+        for query_idx in range(query_array.shape[0]):
+            np.maximum.at(max_by_page[query_idx], cache["patch_page_indices"], similarities[query_idx])
+        scores = np.where(np.isfinite(max_by_page), max_by_page, 0.0).sum(axis=0)
+        if page_count <= limit:
+            top_indices = np.argsort(-scores)
+        else:
+            partial = np.argpartition(-scores, limit - 1)[:limit]
+            top_indices = partial[np.argsort(-scores[partial])]
+        return [
+            SimpleNamespace(
+                id=cache["entries"][int(index)]["id"],
+                payload=cache["entries"][int(index)]["payload"],
+                score=float(scores[int(index)]),
+            )
+            for index in top_indices[:limit]
+        ]
+
+    def _load_visual_page_cache(self, *, collection_name: str, models: Any, np: Any) -> dict[str, Any] | None:
+        cache_key = (collection_name, self.config.paths.db_path, self.config.paths.collection_name)
+        if self._visual_page_cache and self._visual_page_cache.get("cache_key") == cache_key:
+            return self._visual_page_cache
+
+        entries: list[dict[str, Any]] = []
+        patch_matrices = []
+        patch_page_indices = []
+        offset = None
+        while True:
+            records, offset = self.client.scroll(
+                collection_name=collection_name,
+                scroll_filter=_visual_page_query_filter(models),
+                limit=64,
+                with_payload=True,
+                with_vectors=[PAGE_IMAGE_COLPALI_VECTOR_NAME],
+                offset=offset,
+            )
+            for record in records:
+                page_vectors = _named_vector(record.vector, PAGE_IMAGE_COLPALI_VECTOR_NAME)
+                if not page_vectors:
+                    continue
+                page_array = np.asarray(page_vectors, dtype=np.float32)
+                if page_array.ndim != 2 or page_array.shape[1] <= 0:
+                    continue
+                page_norm = np.linalg.norm(page_array, axis=1, keepdims=True)
+                page_norm[page_norm == 0] = 1.0
+                page_array = page_array / page_norm
+                page_index = len(entries)
+                entries.append({"id": record.id, "payload": record.payload})
+                patch_matrices.append(page_array)
+                patch_page_indices.append(np.full(page_array.shape[0], page_index, dtype=np.int32))
+            if offset is None:
+                break
+
+        if patch_matrices:
+            patch_matrix = np.vstack(patch_matrices)
+            patch_indices = np.concatenate(patch_page_indices)
+        else:
+            patch_matrix = np.empty((0, COLPALI_VECTOR_SIZE), dtype=np.float32)
+            patch_indices = np.empty((0,), dtype=np.int32)
+        self._visual_page_cache = {
+            "cache_key": cache_key,
+            "entries": entries,
+            "patch_matrix": patch_matrix,
+            "patch_page_indices": patch_indices,
+        }
+        return self._visual_page_cache
 
     def _candidate_seed_hits(self, final_ranking: list[dict[str, Any]], visual_hits: list[Any]) -> list[dict[str, Any]]:
         seed_limit = self.config.retrieval.seed_k or self.config.retrieval.final_top_k

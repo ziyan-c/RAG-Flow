@@ -20,6 +20,8 @@ class HitDetailResponse(BaseModel):
     rank: int
     page_idx: int
     page_number: int
+    page_indices: list[int] = Field(default_factory=list)
+    page_numbers: list[int] = Field(default_factory=list)
     score: float
     is_continuation: bool
     chunk_id: str = ""
@@ -80,6 +82,8 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
                     rank=hit.rank,
                     page_idx=hit.page_idx,
                     page_number=hit.page_number,
+                    page_indices=hit.page_indices,
+                    page_numbers=hit.page_numbers,
                     score=hit.score,
                     is_continuation=hit.is_continuation,
                     chunk_id=hit.chunk_id,
