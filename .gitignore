@@ -25,7 +25,5 @@ models/
 .local.backup-*/
 .handoff/
 
-# Thesis keeps small data placeholders and curated experiment tables.
-!thesis/**/data/
-!thesis/**/data/.gitkeep
-thesis/**/data/benchmark-runs/
+# Thesis is stored outside the repository and linked locally.
+/thesis
