@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Mapping
 
+from .presets import get_preset
+
 
 DEFAULT_BASE_DIR = Path(
     "/root/autodl-tmp/manuals/public/"
@@ -70,6 +72,14 @@ def load_env_file(path: str | os.PathLike[str] | None) -> dict[str, str]:
     return values
 
 
+def apply_preset_defaults(file_values: Mapping[str, str]) -> dict[str, str]:
+    preset_name = os.environ.get("RAG_FLOW_PRESET") or file_values.get("RAG_FLOW_PRESET", "")
+    if not preset_name.strip():
+        return dict(file_values)
+    preset = get_preset(preset_name)
+    return {**preset.env, **file_values, "RAG_FLOW_PRESET": preset.name}
+
+
 class EnvView:
     def __init__(self, file_values: Mapping[str, str], *, path_base: Path | None = None):
         self.file_values = file_values
@@ -120,6 +130,14 @@ class PathsConfig:
     chunks_json: Path
     db_path: Path
     collection_name: str
+
+
+@dataclass(frozen=True)
+class QdrantConfig:
+    url: str = ""
+    api_key: str = ""
+    prefer_grpc: bool = False
+    timeout: float = 30.0
 
 
 @dataclass(frozen=True)
@@ -233,12 +251,13 @@ class AppConfig:
     patching: PatchingConfig
     captioning: CaptioningConfig
     chunking: ChunkingConfig
+    qdrant: QdrantConfig = field(default_factory=QdrantConfig)
     indexing: IndexingConfig = field(default_factory=IndexingConfig)
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
         resolved_env_file = resolve_env_file(env_file)
-        file_values = load_env_file(resolved_env_file)
+        file_values = apply_preset_defaults(load_env_file(resolved_env_file))
         env = EnvView(file_values, path_base=env_path_base(resolved_env_file))
 
         base_dir = env.path("RAG_FLOW_BASE_DIR", DEFAULT_BASE_DIR)
@@ -279,6 +298,13 @@ class AppConfig:
             collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),
         )
 
+        qdrant = QdrantConfig(
+            url=env.get("RAG_FLOW_QDRANT_URL", ""),
+            api_key=env.get("RAG_FLOW_QDRANT_API_KEY", ""),
+            prefer_grpc=env.bool("RAG_FLOW_QDRANT_PREFER_GRPC", False),
+            timeout=env.float("RAG_FLOW_QDRANT_TIMEOUT", 30.0),
+        )
+
         models = ModelConfig(
             dense_model=env.get("RAG_FLOW_DENSE_MODEL", "intfloat/multilingual-e5-large"),
             sparse_model=env.get("RAG_FLOW_SPARSE_MODEL", "Qdrant/bm25"),
@@ -300,7 +326,7 @@ class AppConfig:
             retrieval_k=env.int("RAG_FLOW_RETRIEVAL_K", 150),
             final_top_k=env.int("RAG_FLOW_FINAL_TOP_K", 80),
             rrf_k=env.int("RAG_FLOW_RRF_K", 10),
-            visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 0.75),
+            visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 2.5),
             quantized_colpali=env.get("RAG_FLOW_QUANTIZED_COLPALI", "1") not in {"0", "false", "False"},
             enable_visual=env.bool("RAG_FLOW_RETRIEVAL_ENABLE_VISUAL", False),
             device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
@@ -376,6 +402,7 @@ class AppConfig:
 
         return cls(
             paths=paths,
+            qdrant=qdrant,
             models=models,
             retrieval=retrieval,
             server=server,

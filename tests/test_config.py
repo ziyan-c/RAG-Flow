@@ -249,6 +249,7 @@ def test_chunking_reads_local_env(tmp_path, monkeypatch):
 def test_retrieval_defaults(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
 
     config = AppConfig.from_env()
 
@@ -263,9 +264,82 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.retrieval.retrieval_k == 150
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.rrf_k == 10
-    assert config.retrieval.visual_weight == 0.75
+    assert config.retrieval.visual_weight == 2.5
     assert config.retrieval.max_context_tokens == 10000
     assert config.retrieval.min_score_ratio == 1.0
+
+
+def test_qdrant_server_env_is_optional(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_QDRANT_URL=http://127.0.0.1:6333",
+                "RAG_FLOW_QDRANT_API_KEY=secret",
+                "RAG_FLOW_QDRANT_PREFER_GRPC=1",
+                "RAG_FLOW_QDRANT_TIMEOUT=12.5",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.qdrant.url == "http://127.0.0.1:6333"
+    assert config.qdrant.api_key == "secret"
+    assert config.qdrant.prefer_grpc is True
+    assert config.qdrant.timeout == 12.5
+
+
+def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_PRESET=visualroute\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.enable_visual is True
+    assert config.retrieval.route_mode == "visual-naive"
+    assert config.retrieval.candidate_mode == "visual-page-local-naive"
+    assert config.retrieval.retrieval_k == 150
+    assert config.retrieval.final_top_k == 80
+    assert config.retrieval.visual_weight == 2.5
+    assert config.retrieval.max_context_tokens == 16000
+    assert config.indexing.visual_dpi == 200
+    assert config.indexing.visual_batch_size == 8
+
+
+def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_PRESET=enhanced",
+                "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=12000",
+                "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.max_context_tokens == 12000
+    assert config.retrieval.enable_visual is True
+    assert config.retrieval.route_mode == "text"
 
 
 def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):

@@ -1,6 +1,22 @@
 from __future__ import annotations
 
+import os
+
 from rag_flow import cli
+from rag_flow.presets import CONFIG_PRESETS
+
+
+PRESET_ENV_KEYS = {"RAG_FLOW_PRESET"} | {key for preset in CONFIG_PRESETS.values() for key in preset.env}
+
+
+def _clear_preset_env(monkeypatch):
+    for key in PRESET_ENV_KEYS:
+        monkeypatch.delenv(key, raising=False)
+
+
+def _clear_preset_env_now():
+    for key in PRESET_ENV_KEYS:
+        os.environ.pop(key, None)
 
 
 def test_mineru_command_delegates_to_module_main(monkeypatch):
@@ -360,6 +376,60 @@ def test_retriever_help_is_local_to_unified_cli(capsys):
     output = capsys.readouterr().out
     assert "usage: rag-flow retriever" in output
     assert "--host HOST" in output
+
+
+def test_preset_list_prints_available_presets(capsys):
+    cli.main(["preset", "list"])
+
+    output = capsys.readouterr().out
+    assert "default: Text-only online preset" in output
+    assert "enhanced: Text-only long-answer preset" in output
+    assert "visual-route: Optional ColPali visual route preset" in output
+
+
+def test_preset_env_prints_preset_values(capsys):
+    cli.main(["preset", "env", "visualroute"])
+
+    output = capsys.readouterr().out
+    assert "RAG_FLOW_PRESET=visual-route" in output
+    assert "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1" in output
+    assert "RAG_FLOW_RETRIEVAL_ROUTE_MODE=visual-naive" in output
+
+
+def test_leading_preset_argument_applies_preset_before_module_dispatch(monkeypatch):
+    calls: list[tuple[list[str], str, str]] = []
+
+    import rag_flow.mineru
+
+    _clear_preset_env(monkeypatch)
+    monkeypatch.setenv("RAG_FLOW_DISABLE_ENV_REEXEC", "1")
+    monkeypatch.setattr(
+        rag_flow.mineru,
+        "main",
+        lambda argv: calls.append(
+            (
+                argv,
+                os.environ["RAG_FLOW_PRESET"],
+                os.environ["RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS"],
+            )
+        ),
+    )
+
+    try:
+        cli.main(["--preset", "enhanced", "mineru", "doctor"])
+    finally:
+        _clear_preset_env_now()
+
+    assert calls == [(["doctor"], "enhanced", "16000")]
+
+
+def test_preset_run_command_is_removed():
+    try:
+        cli.main(["preset", "run", "visualroute", "--", "mineru", "doctor"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("preset run should not be a separate execution interface")
 
 
 def test_preprocess_command_is_removed():

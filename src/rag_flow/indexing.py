@@ -9,6 +9,7 @@ from typing import Any
 
 from .config import AppConfig
 from .model_paths import resolve_model_location
+from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
 
 DENSE_VECTOR_SIZE = 1024
@@ -77,11 +78,11 @@ def _close_client(client: Any) -> None:
 
 
 def validate_collection_schema(config: AppConfig, client: Any | None = None) -> None:
-    from qdrant_client import QdrantClient, models
+    from qdrant_client import models
 
     owns_client = client is None
     if client is None:
-        client = QdrantClient(path=str(config.paths.db_path))
+        client = create_qdrant_client(config)
     try:
         info = client.get_collection(config.paths.collection_name)
     finally:
@@ -128,9 +129,9 @@ def validate_collection_schema(config: AppConfig, client: Any | None = None) -> 
 
 
 def ensure_collection(config: AppConfig) -> None:
-    from qdrant_client import QdrantClient, models
+    from qdrant_client import models
 
-    client = QdrantClient(path=str(config.paths.db_path))
+    client = create_qdrant_client(config)
     try:
         collection = config.paths.collection_name
         if client.collection_exists(collection):
@@ -198,7 +199,7 @@ def upsert_text_vectors(
     batch_size: int = TEXT_INDEX_BATCH_SIZE,
 ) -> None:
     from fastembed import SparseTextEmbedding, TextEmbedding
-    from qdrant_client import QdrantClient, models
+    from qdrant_client import models
 
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
@@ -210,7 +211,7 @@ def upsert_text_vectors(
 
     dense_model = TextEmbedding(config.models.dense_model)
     sparse_model = SparseTextEmbedding(config.models.sparse_model)
-    client = QdrantClient(path=str(config.paths.db_path))
+    client = create_qdrant_client(config)
     source_names = {str(meta["source"]) for meta in metadatas if meta.get("source")}
     _delete_existing_points_for_sources(
         client,
@@ -352,11 +353,11 @@ def upsert_colpali_vectors(
     import torch
     from colpali_engine.models import ColPali, ColPaliProcessor
     from pdf2image import convert_from_path, pdfinfo_from_path
-    from qdrant_client import QdrantClient, models
+    from qdrant_client import models
     from tqdm import tqdm
 
     ensure_collection(config)
-    client = QdrantClient(path=str(config.paths.db_path))
+    client = create_qdrant_client(config)
     device = get_torch_device(feature="ColPali visual indexing")
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
     resolved_source_name = source_name or config.paths.source_name
@@ -441,9 +442,7 @@ def upsert_colpali_vectors(
 
 
 def inspect_collection(config: AppConfig, limit: int = 10) -> None:
-    from qdrant_client import QdrantClient
-
-    client = QdrantClient(path=str(config.paths.db_path))
+    client = create_qdrant_client(config)
     info = client.get_collection(config.paths.collection_name)
     print(f"Status: {info.status}")
     print(f"Points: {info.points_count}")

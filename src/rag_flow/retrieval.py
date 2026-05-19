@@ -8,6 +8,7 @@ from typing import Any
 from .config import AppConfig
 from .indexing import COLPALI_VECTOR_SIZE, PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
 from .model_paths import resolve_model_location
+from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
 
 
@@ -398,9 +399,8 @@ class RetrievalEngine:
 
     def load(self) -> None:
         from fastembed import SparseTextEmbedding, TextEmbedding
-        from qdrant_client import QdrantClient
 
-        self.client = QdrantClient(path=str(self.config.paths.db_path))
+        self.client = create_qdrant_client(self.config)
         if self._uses_dense_route():
             self.dense_model = TextEmbedding(self.config.models.dense_model)
         if self._uses_sparse_route():
@@ -965,7 +965,12 @@ class RetrievalEngine:
         ]
 
     def _load_visual_page_cache(self, *, collection_name: str, models: Any, np: Any) -> dict[str, Any] | None:
-        cache_key = (collection_name, self.config.paths.db_path, self.config.paths.collection_name)
+        paths = getattr(self.config, "paths", None)
+        cache_key = (
+            collection_name,
+            getattr(paths, "db_path", None),
+            getattr(paths, "collection_name", collection_name),
+        )
         if self._visual_page_cache and self._visual_page_cache.get("cache_key") == cache_key:
             return self._visual_page_cache
 

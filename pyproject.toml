@@ -22,6 +22,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+text-retrieval = [
+  "fastembed",
+]
+visual-retrieval = [
+  "bitsandbytes",
+  "colpali-engine",
+  "torch",
+  "transformers",
+]
 retrieval = [
   "bitsandbytes",
   "colpali-engine",

@@ -1,7 +1,7 @@
 # RAG Flow
 
 RAG Flow is a multimodal retrieval augmented generation pipeline for technical
-manuals. The default profile uses generic example names, and paths, model names,
+manuals. The default preset uses generic example names, and paths, model names,
 and collection names can be changed through environment variables.
 
 ## What It Does
@@ -43,12 +43,21 @@ configs/                    Per-manual env templates
 ```bash
 mkdir -p .local
 cp .env.example .local/rag-flow.env
-pip install -e ".[retrieval,preprocess]"
+pip install -e ".[text-retrieval]"
 ```
 
 The app automatically loads `.local/rag-flow.env` when commands are run from
 this repository. You can still point to another local env file with
 `RAG_FLOW_ENV_FILE=/path/to/file`.
+
+This core repository still owns its own `.local` private configuration for
+pipeline stages, source documents, model paths, and local experiments. The
+separate `rag-flow-orchestrator` repository has its own `.local` for deployment
+composition and service runtime settings.
+
+Use `pip install -e ".[retrieval,preprocess]"` for the full local visual
+retrieval and preprocessing stack. The lighter `text-retrieval` extra installs
+the default online text retrieval path without Torch, ColPali, or BitsAndBytes.
 
 For the original AutoDL-style environment, the exported conda YAML files are in
 `envs/`. They are intentionally preserved because CUDA, ColPali, MinerU, and
@@ -413,6 +422,15 @@ Inspect the Qdrant collection:
 rag-flow index inspect
 ```
 
+By default RAG-Flow opens Qdrant in Python local mode through
+`RAG_FLOW_DB_PATH`. For an orchestrated Docker/server deployment, point the same
+core retriever at a running Qdrant server instead:
+
+```env
+RAG_FLOW_QDRANT_URL=http://127.0.0.1:6333
+RAG_FLOW_COLLECTION=technical-manuals
+```
+
 Test the retrieval API:
 
 ```bash
@@ -425,7 +443,7 @@ Start the retriever API:
 rag-flow retriever
 ```
 
-The default retrieval profile is the low-latency text-only profile selected by
+The default retrieval preset is the low-latency text-only preset selected by
 the 220-query benchmark. It intentionally retrieves a large candidate pool, then
 uses a hard retrieved-context budget so the downstream answer model is not forced
 to consume all candidates:
@@ -439,20 +457,44 @@ RAG_FLOW_FINAL_TOP_K=80
 RAG_FLOW_RRF_K=10
 RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=10000
 RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN=4.0
-RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=0
+RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=1.0
 ```
 
 `final_top_k` remains a maximum number of chunks. The token cap may return fewer
 chunks, so retrieval does not need to fill the whole 10k budget when the useful
 evidence is already covered. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional
-and relative to the top candidate score; the current default keeps it at `0`
-because the benchmark did not show a reliable quality gain from ratio pruning.
+and relative to the top candidate score; the current default keeps it at `1.0`
+to disable relative filtering because the benchmark did not show a reliable
+quality gain from ratio pruning for the online preset.
 
-For offline high-recall review, keep the same text-only direct mode and set
-`RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=0`; the benchmark high-recall profile used
-`RAG_FLOW_RETRIEVAL_K=150` plus `RAG_FLOW_FINAL_TOP_K=80`. Visual retrieval is
-kept optional because it can improve visual/UI query ranking, but it loads the
-ColPali query encoder and is much slower than the default text path.
+For offline high-recall review, keep the same text-only direct mode and raise
+the retrieved-context budget. The thesis experiments used
+`RAG_FLOW_RETRIEVAL_K=150` plus `RAG_FLOW_FINAL_TOP_K=80`, with no-cap runs for
+diagnosis and capped 24k runs for a more practical review preset. Visual
+retrieval is kept optional because it can improve visual/UI query ranking, but
+it loads the ColPali query encoder and is much slower than the default text path.
+
+Named presets can apply the thesis-recommended retrieval settings without
+hand-editing the individual environment variables:
+
+```bash
+rag-flow preset list
+rag-flow preset show default
+rag-flow --preset default retriever
+rag-flow --preset enhanced chat
+rag-flow --preset visual-route test-retriever "How do I configure alarms?"
+```
+
+The shipped presets are:
+
+- `default`: text-only, `retrieval_k=150`, `final_top_k=80`, 10k retrieved-context cap.
+- `enhanced`: text-only, same retrieval backbone, 16k retrieved-context cap.
+- `high-recall`: offline text-only review preset, 24k retrieved-context cap, `min_score_ratio=1.0`.
+- `visual-route`: optional ColPali route, `visual-naive` plus `visual-page-local-naive`, 16k retrieved-context cap, `visual_weight=2.5`.
+
+You can also set `RAG_FLOW_PRESET=enhanced` in the environment file. Explicit
+environment variables still override preset defaults, so remove hand-written
+retrieval values when you want the named preset to control them fully.
 
 Retriever visual mode is optional. Dense and sparse text search run on CPU;
 `page-image-colpali` visual search also uses Qdrant on CPU, but the ColPali query
@@ -608,6 +650,10 @@ All core values are environment variables. The important ones are:
 - `RAG_FLOW_CHUNK_OVERLAP_TOKENS`
 - `RAG_FLOW_CHUNK_MIN_TOKENS`
 - `RAG_FLOW_DB_PATH`
+- `RAG_FLOW_QDRANT_URL`
+- `RAG_FLOW_QDRANT_API_KEY`
+- `RAG_FLOW_QDRANT_PREFER_GRPC`
+- `RAG_FLOW_QDRANT_TIMEOUT`
 - `RAG_FLOW_COLLECTION`
 - `RAG_FLOW_PIPELINE_ENV`
 - `RAG_FLOW_PIPELINE_PYTHON`

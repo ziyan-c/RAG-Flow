@@ -10,6 +10,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from .config import load_env_file
+from .presets import get_preset, preset_names
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -107,6 +108,27 @@ DOWNLOAD_SCRIPTS: dict[str, tuple[str, ...]] = {
 REMOTE_SCRIPTS: dict[str, tuple[str, ...]] = {
     "ssh-autodl": ("scripts", "remote", "ssh-autodl.sh"),
 }
+
+
+def _strip_leading_preset_arg(raw_args: Sequence[str]) -> tuple[list[str], str | None]:
+    args = list(raw_args)
+    if not args:
+        return args, None
+    if args[0] == "--preset":
+        if len(args) < 2:
+            raise SystemExit("--preset requires a preset name.")
+        return args[2:], args[1]
+    if args[0].startswith("--preset="):
+        return args[1:], args[0].split("=", 1)[1]
+    return args, None
+
+
+def _apply_config_preset(preset_name: str):
+    preset = get_preset(preset_name)
+    os.environ["RAG_FLOW_PRESET"] = preset.name
+    for key, value in preset.env.items():
+        os.environ[key] = value
+    return preset
 
 
 def _script_path(*parts: str) -> Path:
@@ -284,6 +306,39 @@ def _dispatch_remote(args: argparse.Namespace) -> None:
     _run_script(REMOTE_SCRIPTS[args.remote_command], args.args, dry_run=args.dry_run)
 
 
+def _dispatch_preset(args: argparse.Namespace) -> None:
+    if args.preset_command == "list":
+        for name in preset_names():
+            preset = get_preset(name)
+            aliases = f" (aliases: {', '.join(preset.aliases)})" if preset.aliases else ""
+            print(f"{preset.name}: {preset.summary}{aliases}")
+        return
+
+    preset = get_preset(args.preset_name)
+    if args.preset_command == "show":
+        print(f"{preset.name}: {preset.summary}")
+        for note in preset.notes:
+            print(f"- {note}")
+        print("")
+        for key, value in preset.env.items():
+            print(f"{key}={value}")
+        return
+
+    if args.preset_command == "env":
+        if args.export:
+            print(f"export RAG_FLOW_PRESET={shlex.quote(preset.name)}")
+        else:
+            print(f"RAG_FLOW_PRESET={preset.name}")
+        for key, value in preset.env.items():
+            if args.export:
+                print(f"export {key}={shlex.quote(value)}")
+            else:
+                print(f"{key}={value}")
+        return
+
+    raise SystemExit(f"Unknown preset command: {args.preset_command}")
+
+
 def _add_passthrough_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("args", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
 
@@ -307,6 +362,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="rag-flow",
         description="Unified command line entrypoint for RAG Flow.",
+    )
+    parser.add_argument(
+        "--preset",
+        dest="config_preset",
+        help="Apply a named retrieval/answering preset before running the command.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -408,11 +468,25 @@ def build_parser() -> argparse.ArgumentParser:
         handler=_dispatch_remote,
     )
 
+    preset_parser = subparsers.add_parser("preset", help="Inspect retrieval/answering presets.")
+    preset_subparsers = preset_parser.add_subparsers(dest="preset_command", required=True)
+    list_parser = preset_subparsers.add_parser("list", help="List available presets.")
+    list_parser.set_defaults(handler=_dispatch_preset)
+    show_parser = preset_subparsers.add_parser("show", help="Show one preset.")
+    show_parser.add_argument("preset_name")
+    show_parser.set_defaults(handler=_dispatch_preset)
+    env_parser = preset_subparsers.add_parser("env", help="Print preset environment variables.")
+    env_parser.add_argument("preset_name")
+    env_parser.add_argument("--export", action="store_true", help="Print shell export commands.")
+    env_parser.set_defaults(handler=_dispatch_preset)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> None:
     raw_args = list(sys.argv[1:] if argv is None else argv)
+    raw_args, requested_preset = _strip_leading_preset_arg(raw_args)
+    if requested_preset:
+        _apply_config_preset(requested_preset)
     if raw_args and raw_args[0] in MODULE_COMMANDS:
         command = raw_args[0]
         module_args = raw_args[1:]
@@ -427,6 +501,8 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     parser = build_parser()
     args, unknown = parser.parse_known_args(raw_args)
+    if getattr(args, "config_preset", None):
+        _apply_config_preset(args.config_preset)
     if unknown:
         if hasattr(args, "args"):
             args.args.extend(unknown)
