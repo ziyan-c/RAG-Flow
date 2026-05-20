@@ -481,6 +481,7 @@ hand-editing the individual environment variables:
 rag-flow preset list
 rag-flow preset show default
 rag-flow --preset default retriever
+rag-flow --preset tiny test-retriever "How do I configure alarms?"
 rag-flow --preset precise chat
 rag-flow --preset enhanced chat
 rag-flow --preset visual-route test-retriever "How do I configure alarms?"
@@ -490,6 +491,7 @@ The shipped presets are:
 
 - `default`: text-only, `retrieval_k=150`, `final_top_k=80`, 10k retrieved-context cap.
 - `precise`: text-only, same retrieval backbone, 5k retrieved-context cap for stricter answer context.
+- `tiny`: text-only, same retrieval backbone, 3k retrieved-context cap for smoke tests and very short answers.
 - `enhanced`: text-only, same retrieval backbone, 16k retrieved-context cap.
 - `high-recall`: offline text-only review preset, 24k retrieved-context cap, `min_score_ratio=1.0`.
 - `visual-route`: optional ColPali route, `visual-naive` plus `visual-page-local-naive`, 16k retrieved-context cap, `visual_weight=2.5`.

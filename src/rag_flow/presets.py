@@ -53,6 +53,19 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
             "Useful when precision, latency, or downstream LLM input cost matters more than broad evidence coverage.",
         ),
     ),
+    "tiny": ConfigPreset(
+        name="tiny",
+        summary="Text-only tiny preset with a 3k retrieved-context cap.",
+        env={
+            **_TEXT_DIRECT_COMMON,
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "3000",
+        },
+        aliases=("smoke", "text-3k"),
+        notes=(
+            "Intended for smoke tests, cheap routing probes, and very short answers.",
+            "May miss multi-chunk evidence; use precise/default/enhanced for normal answer quality.",
+        ),
+    ),
     "enhanced": ConfigPreset(
         name="enhanced",
         summary="Text-only long-answer preset with a 16k retrieved-context cap.",
