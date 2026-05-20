@@ -40,6 +40,19 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
             "Keeps ColPali disabled for low latency and simpler deployment.",
         ),
     ),
+    "precise": ConfigPreset(
+        name="precise",
+        summary="Text-only precise preset with a 5k retrieved-context cap.",
+        env={
+            **_TEXT_DIRECT_COMMON,
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "5000",
+        },
+        aliases=("compact", "text-5k"),
+        notes=(
+            "Uses the same text retrieval backbone as default with a smaller answer context.",
+            "Useful when precision, latency, or downstream LLM input cost matters more than broad evidence coverage.",
+        ),
+    ),
     "enhanced": ConfigPreset(
         name="enhanced",
         summary="Text-only long-answer preset with a 16k retrieved-context cap.",

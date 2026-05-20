@@ -317,6 +317,26 @@ def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
     assert config.indexing.visual_batch_size == 8
 
 
+def test_precise_preset_uses_smaller_context_cap(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_PRESET=precise\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.enable_visual is False
+    assert config.retrieval.route_mode == "text"
+    assert config.retrieval.candidate_mode == "direct"
+    assert config.retrieval.retrieval_k == 150
+    assert config.retrieval.final_top_k == 80
+    assert config.retrieval.max_context_tokens == 5000
+    assert config.retrieval.min_score_ratio == 1.0
+
+
 def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()

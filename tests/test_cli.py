@@ -383,6 +383,7 @@ def test_preset_list_prints_available_presets(capsys):
 
     output = capsys.readouterr().out
     assert "default: Text-only online preset" in output
+    assert "precise: Text-only precise preset" in output
     assert "enhanced: Text-only long-answer preset" in output
     assert "visual-route: Optional ColPali visual route preset" in output
 
