@@ -1,0 +1,1908 @@
+[
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "HDCVI Camera",
+    "section_path": [],
+    "text_chars": 31,
+    "text_excerpt": "V1.0.7\nHDCVI Camera\nUser Manual",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "hdcvi",
+      "camera"
+    ],
+    "image_count": 1,
+    "drawing_count": 0,
+    "modality": [
+      "text",
+      "image"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 1401,
+    "text_excerpt": "Foreword\nGeneral\nThis manual introduces the functions and operations of the HDCVI camera (hereinafter referred to\nas \"the device\"). Read carefully before using the device, and keep the manual safe for future\nreference.\nSafety Instructions\nThe following signal words might appear in the manual.\nSignal Words\nMeaning\nIndicates a high potential hazard which, if not avoided, will result in\ndeath or serious injury.\nIndicates a medium or low potential hazard which, if not avoided, could\nresult in slight or moderate injury.\nIndicates a potential risk which, if not avoided, could result in property\ndamage, data loss, reductions in performance, or unpredictable results.\nProvides methods to help you solve a problem or save time.\nProvides additional information as a supplement to the text.\nRevision History\nVersion\nRevision Content\nRelease Time\nV1.0.7\n●Added Linkage Tracking.\n●Updated FAQ.\nOctober 2025\nV1.0.6\nAdded Splicing Mode & Manual Linkage.\nFebruary 2025\nV1.0.5\n●Updated Important Safeguards and Warnings.\n●Added PT Preset.\n●Updated FAQ.\nAugust 2024\nV1.0.4\nUpdated Transmission Distance.\nJune 2024\nV1.0.3\nAdded PT Camera.\nMay 2023\nV1.0.2\n●Added Smart Dual Illuminators...",
+    "visual_summary": "",
+    "key_facts": [
+      "Foreword General This manual introduces the functions and operations of the HDCVI camera (hereinafter referred to as \"the device\").",
+      "Read carefully before using the device, and keep the manual safe for future reference.",
+      "Safety Instructions The following signal words might appear in the manual.",
+      "Signal Words Meaning Indicates a high potential hazard which, if not avoided, will result in death or serious injury."
+    ],
+    "keywords": [
+      "added",
+      "updated",
+      "camera",
+      "indicates",
+      "potential",
+      "which",
+      "avoided",
+      "result",
+      "august",
+      "signal",
+      "words",
+      "hazard"
+    ],
+    "image_count": 5,
+    "drawing_count": 104,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 2,
+    "page_number": 3,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 2011,
+    "text_excerpt": "Privacy Protection Notice\nAs the device user or data controller, you might collect the personal data of others such as their\nface, audio, fingerprints, and license plate number. You need to be in compliance with your local\nprivacy protection laws and regulations to protect the legitimate rights and interests of other\npeople by implementing measures which include but are not limited to: Providing clear and visible\nidentification to inform people of the existence of the surveillance area and provide required\ncontact information.\nAbout the Manual\n●The manual is for reference only. Slight differences might be found between the manual and the\nproduct.\n●We are not liable for losses incurred due to operating the product in ways that are not in\ncompliance with the manual.\n●The manual will be updated according to the latest laws and regulations of related jurisdictions.\nFor detailed information, see the paper user manual, use our CD-ROM, scan the QR code or visit\nour official website. The manual is for reference only. Slight differences might be found between\nthe electronic version and the paper version.\n●All designs and software are subject to change without prior written notice....",
+    "visual_summary": "",
+    "key_facts": [
+      "Privacy Protection Notice As the device user or data controller, you might collect the personal data of others such as their face, audio, fingerprints, and license plate number.",
+      "You need to be in compliance with your local privacy protection laws and regulations to protect the legitimate rights and interests of other people by implementing measures which include but are not limited to: Providing clear and visible identification to inform people of the existence of the surveillance area and provide required contact information.",
+      "About the Manual ●The manual is for reference only.",
+      "Slight differences might be found between the manual and the product."
+    ],
+    "keywords": [
+      "might",
+      "product",
+      "data",
+      "contact",
+      "differences",
+      "between",
+      "software",
+      "there",
+      "privacy",
+      "protection",
+      "notice",
+      "their"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 3,
+    "page_number": 4,
+    "title_hint": "Important Safeguard and Warnings",
+    "section_path": [
+      "Important Safeguard and Warnings"
+    ],
+    "text_chars": 2056,
+    "text_excerpt": "Important Safeguard and Warnings\nThis section introduces content covering the proper handling of the device, hazard prevention, and\nprevention of property damage. Read carefully before using the device, and comply with the\nguidelines when using it.\nTransportation Requirements\n●Transport the device under allowed humidity and temperature conditions.\n●Do not place heavy stress on the device, violently vibrate or immerse it in liquid during\ntransportation.\n●Pack the device with packaging provided by its manufacturer or packaging of the same quality\nbefore transporting it.\nStorage Requirements\n●Store the device under allowed humidity and temperature conditions.\n●Do not place heavy stress on the device, violently vibrate or immerse it in liquid during storage.\nInstallation Requirements\n●Strictly comply with the local electrical safety code and standards, and check whether the power\nsupply is correct before operating the device.\n●The power supply must conform to the requirements of ES1 in IEC 62368-1 standard and be no\nhigher than PS2. Note that the power supply requirements are subject to the device label.\n●Make sure that the power adapter meets the device operating voltage...",
+    "visual_summary": "",
+    "key_facts": [
+      "Important Safeguard and Warnings This section introduces content covering the proper handling of the device, hazard prevention, and prevention of property damage.",
+      "Read carefully before using the device, and comply with the guidelines when using it.",
+      "Transportation Requirements ●Transport the device under allowed humidity and temperature conditions.",
+      "●Do not place heavy stress on the device, violently vibrate or immerse it in liquid during transportation."
+    ],
+    "keywords": [
+      "power",
+      "before",
+      "requirements",
+      "during",
+      "installation",
+      "comply",
+      "place",
+      "heavy",
+      "stress",
+      "violently",
+      "vibrate",
+      "immerse"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 4,
+    "page_number": 5,
+    "title_hint": "Important Safeguard and Warnings",
+    "section_path": [
+      "Important Safeguard and Warnings"
+    ],
+    "text_chars": 1335,
+    "text_excerpt": "Operating Requirements\n●Do not connect the device to more than one power supply. Otherwise, the device might be\ndamaged.\n●PoC supply voltage is up to 52 V. Do not dismantle the device during normal operation;\notherwise it might cause danger to both device and users due to high voltage.\n●If PoC power supply is used, do not connect any other device between the device and PoC\ntransceiver including UTC, Balun, optical transceiver, distributor and convertor and so on;\notherwise, the device might get burned.\n●Use the device under allowed humidity and temperature conditions.\n●Protect the line cord and wires from being walked on or squeezed particularly at plugs, power\nsockets, and the point where they exit from the device.\n●Do not aim the device at strong light sources (such as lamplight, and sunlight) when focusing it,\nto avoid reducing the lifespan of the CMOS sensor, and causing overbrightness and flickering.\n●When using a laser beam device, avoid exposing the device surface to laser beam radiation.\n●Prevent liquid from flowing into the device to avoid damage to its internal components.\n●Do not block the ventilation opening near the device to avoid heat accumulation.\nMaintenance...",
+    "visual_summary": "",
+    "key_facts": [
+      "Operating Requirements ●Do not connect the device to more than one power supply.",
+      "Do not dismantle the device during normal operation; otherwise it might cause danger to both device and users due to high voltage.",
+      "●If PoC power supply is used, do not connect any other device between the device and PoC transceiver including UTC, Balun, optical transceiver, distributor and convertor and so on; otherwise, the device might get burned.",
+      "●Use the device under allowed humidity and temperature conditions."
+    ],
+    "keywords": [
+      "avoid",
+      "power",
+      "supply",
+      "otherwise",
+      "might",
+      "requirements",
+      "connect",
+      "voltage",
+      "transceiver",
+      "when",
+      "laser",
+      "beam"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 5,
+    "page_number": 6,
+    "title_hint": "Important Safeguard and Warnings",
+    "section_path": [
+      "Important Safeguard and Warnings"
+    ],
+    "text_chars": 5539,
+    "text_excerpt": "Table of Contents\nForeword.............................................................................................................................................................. I\nImportant Safeguard and Warnings................................................................................................................ III\n1 Overview...........................................................................................................................................................1\n1.1 Introduction........................................................................................................................................... 1\n1.2 Application............................................................................................................................................. 1\n1.3 Transmission Distance...........................................................................................................................2\n2 Cable Connection.............................................................................................................................................3\n2.1 Power...",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "port",
+      "configuration",
+      "input",
+      "camera",
+      "smart",
+      "configuring",
+      "power",
+      "output",
+      "audio",
+      "control",
+      "operating",
+      "light"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 6,
+    "page_number": 7,
+    "title_hint": "Important Safeguard and Warnings",
+    "section_path": [
+      "Important Safeguard and Warnings"
+    ],
+    "text_chars": 2835,
+    "text_excerpt": "8 Box Camera Installation................................................................................................................................25\n8.1 Lens Installation...................................................................................................................................25\n8.1.1 Installing Lens Type 1................................................................................................................25\n8.1.2 Installing Lens Type 2................................................................................................................26\n8.2 I/O Port Installation............................................................................................................................. 26\n8.2.1 Connecting Cable...................................................................................................................... 27\n8.2.2 Removing Cable.........................................................................................................................27\n8.3 Device Installation...............................................................................................................................28\n9...",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "installation",
+      "lens",
+      "fisheye",
+      "power",
+      "supply",
+      "camera",
+      "installing",
+      "type",
+      "cable",
+      "dewarp",
+      "port",
+      "connecting"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 7,
+    "page_number": 8,
+    "title_hint": "Application",
+    "section_path": [
+      "Overview",
+      "Application"
+    ],
+    "text_chars": 949,
+    "text_excerpt": "1 Overview\n1.1 Introduction\nThe devices comply with the HDCVI standard and support the transmission of video and control\nsignal over coaxial cable. The devices produce video signal with megapixel resolution and require\nconnected XVRs to achieve high-speed, long-distance, and zero-lag transmission of the signal. They\nare applicable to various scenes, such as roads, warehouses, underground parking lots, bars,\npipelines, and gas stations.\n1.2 Application\nFigure 1-1 Application scenario\nTable 1-1 Description of the application\nNo.\nName\nNo.\nName\nNo.\nName\n1\n(Optional) Lens\n8\nDisplay Screen\n15\nSplicer\n2\nHDCVI Products\n9\nDirect Connection\n16\nConvertor\n3\n(Optional) Surge\nProtection Device\n10\nIntegrated Video\nPlatform\n17\nEthernet\n4\n(Optional) Optical\nTransceiver (Send)\n11\nMatrix\n18\nSplicing Screen\n5\n(Optional) Optical\nTransceiver (Receive)\n12\nMatrix\n19\nDisplay Screen\n6\n(Optional) Distributor\n13\nSwitch\n—\n—\n7\nHCVR Products\n14\nSplicing Screen\n—\n—\n1",
+    "visual_summary": "",
+    "key_facts": [
+      "1 Overview 1.1 Introduction The devices comply with the HDCVI standard and support the transmission of video and control signal over coaxial cable.",
+      "The devices produce video signal with megapixel resolution and require connected XVRs to achieve high-speed, long-distance, and zero-lag transmission of the signal.",
+      "They are applicable to various scenes, such as roads, warehouses, underground parking lots, bars, pipelines, and gas stations.",
+      "1.2 Application Figure 1-1 Application scenario Table 1-1 Description of the application No."
+    ],
+    "keywords": [
+      "optional",
+      "screen",
+      "video",
+      "signal",
+      "application",
+      "name",
+      "devices",
+      "hdcvi",
+      "transmission",
+      "display",
+      "products",
+      "optical"
+    ],
+    "image_count": 1,
+    "drawing_count": 117,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 8,
+    "page_number": 9,
+    "title_hint": "Transmission Distance",
+    "section_path": [
+      "Overview",
+      "Transmission Distance"
+    ],
+    "text_chars": 184,
+    "text_excerpt": "1.3 Transmission Distance\nTable 1-2 Transmission distance\nCable\n720P\n1080P\n4MP/4K\nCoaxial Cable\nRG6 (75-5)\n1200 m\n800 m\n700 m\nRG59 (75-3)\n800 m\n500 m\n500 m\nUTP\nCAT6\n450 m\n300 m\n300 m\n2",
+    "visual_summary": "",
+    "key_facts": [
+      "1.3 Transmission Distance Table 1-2 Transmission distance Cable 720P 1080P 4MP/4K Coaxial Cable RG6 (75-5) 1200 m 800 m 700 m RG59 (75-3) 800 m 500 m 500 m UTP CAT6 450 m 300 m 300 m 2"
+    ],
+    "keywords": [
+      "transmission",
+      "distance",
+      "cable",
+      "coaxial",
+      "rg59",
+      "cat6"
+    ],
+    "image_count": 0,
+    "drawing_count": 48,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 9,
+    "page_number": 10,
+    "title_hint": "24 VAC Power Input Port",
+    "section_path": [
+      "Cable Connection",
+      "24 VAC Power Input Port"
+    ],
+    "text_chars": 1079,
+    "text_excerpt": "2 Cable Connection\nCable types might vary with different cameras. Please refer to the actual product.\n2.1 Power Output\nSupplies 12 VDC power.\n●Ensure that power consumption of devices connected to this port is below 2 W.\n●Ensure that supply frequency of devices connected to this port is higher than 1 MHz, such as\nsound pick-up, temperature/humidity sensor and other devices without power consumption\nchange. It might cause image flickering if this port is connected to devices with supply\nfrequency less than 1 MHz, such as fan, hall sensor, loudspeaker, motor and other\nelectromechanical devices with power consumption change.\nFigure 2-1 Power output\n2.2 12 VDC Power Input Port\nInputs 12 VDC power.\nDevice abnormity or damage could occur if power is not supplied correctly for 12 VDC power input\nport. Be sure to supply power as instructed in the manual.\nFigure 2-2 12 VDC power input port\n2.3 24 VAC Power Input Port\nInputs 24 VAC power.\nDevice abnormity or damage could occur if power is not supplied correctly. Please be sure to\nsupply power as instructed in the manual.\n3",
+    "visual_summary": "",
+    "key_facts": [
+      "2 Cable Connection Cable types might vary with different cameras.",
+      "●Ensure that power consumption of devices connected to this port is below 2 W.",
+      "●Ensure that supply frequency of devices connected to this port is higher than 1 MHz, such as sound pick-up, temperature/humidity sensor and other devices without power consumption change.",
+      "It might cause image flickering if this port is connected to devices with supply frequency less than 1 MHz, such as fan, hall sensor, loudspeaker, motor and other electromechanical devices with power consumption change."
+    ],
+    "keywords": [
+      "power",
+      "port",
+      "devices",
+      "supply",
+      "input",
+      "consumption",
+      "connected",
+      "cable",
+      "might",
+      "please",
+      "output",
+      "ensure"
+    ],
+    "image_count": 4,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 10,
+    "page_number": 11,
+    "title_hint": "DIP Switch",
+    "section_path": [
+      "Cable Connection",
+      "DIP Switch"
+    ],
+    "text_chars": 903,
+    "text_excerpt": "Figure 2-3 24 VAC power input port\n2.4 Video Output Port\nConnects to the XVR to output video signal.\n●When the device is in the condition of PoC power supply, do not connect any other device\nbetween the device and PoC XVR or PoC transceiver including UTC, Balun, optical transceiver,\ndistributor and convertor and so on; otherwise, the device might get burned.\n●PoC power supply is with high voltage. Do not dismantle the device during normal operation;\notherwise it might cause danger to both device and users due to high voltage.\nFigure 2-4 Video output port\n2.5 Audio Input Port\nConnects to sound pickup devices to receive analog audio signal.\nFigure 2-5 Audio input port\n2.6 Alarm Output Port\nConnects to external alarm devices such as siren to trigger alarms.\nFigure 2-6 Alarm output port\n2.7 DIP Switch\nDial switches to change output mode. Switch up indicates ON , and switch down indicates OFF.\n4",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-3 24 VAC power input port 2.4 Video Output Port Connects to the XVR to output video signal.",
+      "●When the device is in the condition of PoC power supply, do not connect any other device between the device and PoC XVR or PoC transceiver including UTC, Balun, optical transceiver, distributor and convertor and so on; otherwise, the device might get burned.",
+      "Do not dismantle the device during normal operation; otherwise it might cause danger to both device and users due to high voltage.",
+      "Figure 2-4 Video output port 2.5 Audio Input Port Connects to sound pickup devices to receive analog audio signal."
+    ],
+    "keywords": [
+      "port",
+      "output",
+      "power",
+      "input",
+      "video",
+      "connects",
+      "audio",
+      "alarm",
+      "switch",
+      "signal",
+      "supply",
+      "transceiver"
+    ],
+    "image_count": 5,
+    "drawing_count": 2,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 11,
+    "page_number": 12,
+    "title_hint": "HDCVI Aviation Connector",
+    "section_path": [
+      "Cable Connection",
+      "HDCVI Aviation Connector"
+    ],
+    "text_chars": 744,
+    "text_excerpt": "Figure 2-7 DIP switch\nTable 2-1 Operations of DIP switch\nSwitch 1\nSwitch 2\nOutput Mode\nOFF\nOFF\nCVI\nON\nON\nCVBS\nON\nOFF\nAHD\nOFF\nON\nTVI\n2.8 HD/SD Switch Control Cable\nWhen the HD/SD switch control cable forms a short circuit, video output mode switches from HD to\nSD. On the contrary, it will switch back to HD video output when the cable forms an open circuit.\nFigure 2-8 HD/SD switch control cable\nThe HD/SD switch control cable is available on select models.\n2.9 HDCVI Aviation Connector\nAviation connector could strengthen the connection of mobile devices and provide four ports for\nyour convenience.\nFigure 2-9 HDCVI aviation connector\nTable 2-2 HDCVI aviation connector components\nNo.\nName\nNo.\nName\n1\n(Yellow): Video\n3\n(White): Video Ground\n5",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-7 DIP switch Table 2-1 Operations of DIP switch Switch 1 Switch 2 Output Mode OFF OFF CVI ON ON CVBS ON OFF AHD OFF ON TVI 2.8 HD/SD Switch Control Cable When the HD/SD switch control cable forms a short circuit, video output mode switches from HD to SD.",
+      "On the contrary, it will switch back to HD video output when the cable forms an open circuit.",
+      "Figure 2-8 HD/SD switch control cable The HD/SD switch control cable is available on select models.",
+      "2.9 HDCVI Aviation Connector Aviation connector could strengthen the connection of mobile devices and provide four ports for your convenience."
+    ],
+    "keywords": [
+      "switch",
+      "cable",
+      "control",
+      "video",
+      "aviation",
+      "connector",
+      "output",
+      "hdcvi",
+      "mode",
+      "when",
+      "forms",
+      "circuit"
+    ],
+    "image_count": 4,
+    "drawing_count": 69,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 12,
+    "page_number": 13,
+    "title_hint": "HDCVI Aviation Connector",
+    "section_path": [
+      "Cable Connection",
+      "HDCVI Aviation Connector"
+    ],
+    "text_chars": 58,
+    "text_excerpt": "No.\nName\nNo.\nName\n2\n(Black): Power Ground\n4\n(Red): Power\n6",
+    "visual_summary": "",
+    "key_facts": [
+      "Name 2 (Black): Power Ground 4 (Red): Power 6"
+    ],
+    "keywords": [
+      "name",
+      "power",
+      "black",
+      "ground"
+    ],
+    "image_count": 0,
+    "drawing_count": 27,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 13,
+    "page_number": 14,
+    "title_hint": "Setting Audio Input",
+    "section_path": [
+      "General Configuration and Operation",
+      "Setting Audio Input"
+    ],
+    "text_chars": 727,
+    "text_excerpt": "3 General Configuration and Operation\nPower up the device and connect it to the XVR with coaxial cable, and then the live page is\ndisplayed. Then you can start configuring HDCVI cameras on the XVR.\n●The number of the coaxial ports on XVR will display at the lower-left corner of each window to\nindicate the corresponding camera.\n●Ports might vary depending on the XVR models. Please refer to the actual product.\n3.1 Entering XVR Main Menu\nProcedure\nStep 1\nRight-click on the live page, and the shortcut menu is displayed.\nStep 2\nClick Main Menu and then log in to the system. The main menu of XVR is displayed.\nFigure 3-1 XVR main menu\n3.2 Setting Audio Input\nBackground Information\nAudio input is available on select models.\n7",
+    "visual_summary": "",
+    "key_facts": [
+      "3 General Configuration and Operation Power up the device and connect it to the XVR with coaxial cable, and then the live page is displayed.",
+      "Then you can start configuring HDCVI cameras on the XVR.",
+      "●The number of the coaxial ports on XVR will display at the lower-left corner of each window to indicate the corresponding camera.",
+      "●Ports might vary depending on the XVR models."
+    ],
+    "keywords": [
+      "menu",
+      "main",
+      "then",
+      "displayed",
+      "coaxial",
+      "live",
+      "ports",
+      "models",
+      "step",
+      "audio",
+      "input",
+      "general"
+    ],
+    "image_count": 2,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 14,
+    "page_number": 15,
+    "title_hint": "Operating PTZ Control Panel",
+    "section_path": [
+      "General Configuration and Operation",
+      "Operating PTZ Control Panel"
+    ],
+    "text_chars": 507,
+    "text_excerpt": "Procedure\nStep 1\nOn the Main Menu page, select CAMERA > ENCODE > Encode.\nStep 2\nOn the Channel drop-down list, select the device that you want to configure according\nto the coaxial port No.\nStep 3\nUnder Main Stream , click More Setting.\nFigure 3-2 Encode setting\nStep 4\nEnable Audio Encode , configure the audio settings, and then click Save.\n●Audio Format : Leave it as default.\n●Audio Source : Select HDCVI.\nFigure 3-3 More setting\nStep 5\nOn the Encode page, click Apply.\n3.3 Operating PTZ Control Panel\n8",
+    "visual_summary": "",
+    "key_facts": [
+      "Procedure Step 1 On the Main Menu page, select CAMERA > ENCODE > Encode.",
+      "Step 2 On the Channel drop-down list, select the device that you want to configure according to the coaxial port No.",
+      "Step 3 Under Main Stream , click More Setting.",
+      "Figure 3-2 Encode setting Step 4 Enable Audio Encode , configure the audio settings, and then click Save."
+    ],
+    "keywords": [
+      "step",
+      "encode",
+      "audio",
+      "setting",
+      "main",
+      "configure",
+      "more",
+      "procedure",
+      "menu",
+      "camera",
+      "channel",
+      "drop-down"
+    ],
+    "image_count": 2,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 15,
+    "page_number": 16,
+    "title_hint": "Operating OSD Menu",
+    "section_path": [
+      "General Configuration and Operation",
+      "Operating PTZ Control Panel",
+      "Operating OSD Menu"
+    ],
+    "text_chars": 559,
+    "text_excerpt": "3.3.1 Operating OSD Menu\nBackground Information\n●The OSD menus might vary with different cameras. Please refer to the actual product.\n●When you use OSD menu to restore the device to default settings, the resolution, mode, frame\nrate and language of the device will not be restored.\nProcedure\nStep 1\nOn the live page, right-click the device that you want to configure. The shortcut menu is\ndisplayed.\nFigure 3-4 Shortcut menu\nStep 2\nClick PTZ and click to extend the menu.\nFigure 3-5 PTZ setting options\nStep 3\nClick \n. The MENU OPERATION panel is displayed.\n9",
+    "visual_summary": "",
+    "key_facts": [
+      "3.3.1 Operating OSD Menu Background Information ●The OSD menus might vary with different cameras.",
+      "●When you use OSD menu to restore the device to default settings, the resolution, mode, frame rate and language of the device will not be restored.",
+      "Procedure Step 1 On the live page, right-click the device that you want to configure.",
+      "Figure 3-4 Shortcut menu Step 2 Click PTZ and click to extend the menu."
+    ],
+    "keywords": [
+      "menu",
+      "step",
+      "shortcut",
+      "displayed",
+      "operating",
+      "background",
+      "information",
+      "menus",
+      "might",
+      "vary",
+      "different",
+      "cameras"
+    ],
+    "image_count": 5,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 16,
+    "page_number": 17,
+    "title_hint": "Operating Auto Focus (AF)",
+    "section_path": [
+      "General Configuration and Operation",
+      "Operating PTZ Control Panel",
+      "Operating Auto Focus (AF)"
+    ],
+    "text_chars": 591,
+    "text_excerpt": "Figure 3-6 Menu operation panel\nTable 3-1 Menu operation panel function\nButton\nFunction\nButton\nFunction\nEnter\nEnter or confirm an item\n, \nSelect item\nCancel\nExit OSD menu\n, \nChange item value\nThe OSD menu of the corresponding device is displayed on the live page. If the value of\nOSD item is \n, click Enter to go to the next level of this item. Click Return to go back to\nthe previous level. Click Cancel to exit OSD menu without saving the modifications.\nFigure 3-7 OSD menu\n3.3.2 Operating Auto Focus (AF)\nTable 3-2 Parameters of AF\nParameter\nDescription\nZoom\n●\n: Zoom out.\n●\n: Zoom in.\n10",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 3-6 Menu operation panel Table 3-1 Menu operation panel function Button Function Button Function Enter Enter or confirm an item , Select item Cancel Exit OSD menu , Change item value The OSD menu of the corresponding device is displayed on the live page.",
+      "If the value of OSD item is , click Enter to go to the next level of this item.",
+      "Click Return to go back to the previous level.",
+      "Click Cancel to exit OSD menu without saving the modifications."
+    ],
+    "keywords": [
+      "menu",
+      "item",
+      "function",
+      "enter",
+      "zoom",
+      "operation",
+      "panel",
+      "button",
+      "cancel",
+      "exit",
+      "value",
+      "level"
+    ],
+    "image_count": 9,
+    "drawing_count": 50,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 17,
+    "page_number": 18,
+    "title_hint": "Operating Auto Focus (AF)",
+    "section_path": [
+      "General Configuration and Operation",
+      "Operating PTZ Control Panel",
+      "Operating Auto Focus (AF)"
+    ],
+    "text_chars": 292,
+    "text_excerpt": "Parameter\nDescription\nFocus\n●\n: Focus far.\n●\n: Focus near.\nIris\n●\n: Auto focus.\n●\n: Open OSD menu.\nPTZ movement\nSupports eight directions.\nClick \n, and then you can control the four directions (left, right, up, and\ndown) of PTZ through mouse operation.\nClick \n to unfold PTZ control panel.\n11",
+    "visual_summary": "",
+    "key_facts": [
+      "Click , and then you can control the four directions (left, right, up, and down) of PTZ through mouse operation."
+    ],
+    "keywords": [
+      "focus",
+      "directions",
+      "control",
+      "parameter",
+      "description",
+      "near",
+      "iris",
+      "auto",
+      "open",
+      "menu",
+      "movement",
+      "supports"
+    ],
+    "image_count": 4,
+    "drawing_count": 35,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 18,
+    "page_number": 19,
+    "title_hint": "Configuring Smart Light Adjustment",
+    "section_path": [
+      "Full-Color Camera Configuration",
+      "Configuring Smart Light Adjustment"
+    ],
+    "text_chars": 1436,
+    "text_excerpt": "4 Full-Color Camera Configuration\nThis chapter introduces how to configure the working modes of smart light, including auto and\nmanual. Smart light will change the brightness of white light automatically according to the\nambient lighting condition to avoid over-exposure. Smart light is only available for full-color\ncamera.\n4.1 Enabling/Disabling Smart Light\nSmart light is enabled by default. To switch the mode of smart light, enter OSD menu (Figure 3-7 )\nand select Light > Smart Light.\n4.2 Configuring Smart Light Adjustment\nIn the smart light mode, configure the maximum brightness level of the smart light, and the device\nwill change brightness automatically according to the ambient lighting condition. You can also\nconfigure the sensitivity of the smart light.\nConfiguring Brightness Level\n1. On the OSD menu, select Light > Smart Light > Level.\n2. Select from 1 to 5 to configure the maximum brightness level.\nThe maximum brightness level is 5 by default.\n3. Click Return and then Exit to exit the configuration.\nYou can also configure the brightness level manually in Light > Manual > Level.\nConfiguring Sensitivity\n1. On the OSD menu, select Light > Smart Light > Sensitivity.\n2....",
+    "visual_summary": "",
+    "key_facts": [
+      "4 Full-Color Camera Configuration This chapter introduces how to configure the working modes of smart light, including auto and manual.",
+      "Smart light will change the brightness of white light automatically according to the ambient lighting condition to avoid over-exposure.",
+      "Smart light is only available for full-color camera.",
+      "4.1 Enabling/Disabling Smart Light Smart light is enabled by default."
+    ],
+    "keywords": [
+      "light",
+      "smart",
+      "brightness",
+      "level",
+      "configure",
+      "sensitivity",
+      "exit",
+      "configuration",
+      "default",
+      "menu",
+      "configuring",
+      "maximum"
+    ],
+    "image_count": 1,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 19,
+    "page_number": 20,
+    "title_hint": "Smart Dual Illuminators Cameras Configuration",
+    "section_path": [
+      "Smart Dual Illuminators Cameras Configuration"
+    ],
+    "text_chars": 896,
+    "text_excerpt": "5 Smart Dual Illuminators Cameras\nConfiguration\nSmart dual illuminators camera supports three light modes: Smart IR&WL , WL mode, IR mode.\nOn the OSD menu, select Illuminator, and then view the three different modes.\n●Smart IR&WL : Turn on the IR light in low ambient brightness. If SMD or IVS has been associated\nwith smart dual illuminators cameras, and when the SMD detects people and vehicles on the\nscreen, or perimeter rules are triggered by the IVS, then the camera will be controlled to turn on\nthe warm light, and the screen automatically switch to the full-color. When SMD or IVS has\ndetected that no rules are triggered by people and vehicles, the camera will turn off the warm\nlight and turn on the IR light to switch to the black & white night vision.\nFigure 5-1 Smart IR&WL\n●WL mode : If the screen is full-color in low ambient brightness, then the camera is a full-color\ncamera.\n13",
+    "visual_summary": "",
+    "key_facts": [
+      "5 Smart Dual Illuminators Cameras Configuration Smart dual illuminators camera supports three light modes: Smart IR&WL , WL mode, IR mode.",
+      "On the OSD menu, select Illuminator, and then view the three different modes.",
+      "●Smart IR&WL : Turn on the IR light in low ambient brightness.",
+      "If SMD or IVS has been associated with smart dual illuminators cameras, and when the SMD detects people and vehicles on the screen, or perimeter rules are triggered by the IVS, then the camera will be controlled to turn on the warm light, and the screen automatically switch to the full-color."
+    ],
+    "keywords": [
+      "smart",
+      "camera",
+      "light",
+      "turn",
+      "dual",
+      "illuminators",
+      "mode",
+      "then",
+      "screen",
+      "full-color",
+      "cameras",
+      "three"
+    ],
+    "image_count": 1,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 20,
+    "page_number": 21,
+    "title_hint": "Smart Dual Illuminators Cameras Configuration",
+    "section_path": [
+      "Smart Dual Illuminators Cameras Configuration"
+    ],
+    "text_chars": 142,
+    "text_excerpt": "Figure 5-2 WL mode\n●IR mode : If the screen is black & white in low ambient brightness, then the camera is an IR\ncamera.\nFigure 5-3 IR mode\n14",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 5-2 WL mode ●IR mode : If the screen is black & white in low ambient brightness, then the camera is an IR camera."
+    ],
+    "keywords": [
+      "mode",
+      "camera",
+      "screen",
+      "black",
+      "white",
+      "ambient",
+      "brightness",
+      "then"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 21,
+    "page_number": 22,
+    "title_hint": "PT Reset",
+    "section_path": [
+      "PT Camera Configuration",
+      "PT Reset"
+    ],
+    "text_chars": 960,
+    "text_excerpt": "6 PT Camera Configuration\nThis function is available on select models.\n6.1 PTZ Control\nThe newly-added PT rotation function based on the HDCVI camera supports rotating horizontally\n(0° to 355°) and vertically (0° to 90°).\nYou can click or click and hold up, down, left and right to control the PT rotation on the PTZ page,\nand then adjust the PT camera viewing angle.\nThe same operation method is applicable to XVR and DMSS.\nYou can click Speed on the PTZ page to control the rotating speed of the PT camera. The higher\nthe value, the faster the camera rotates.\nFigure 6-1 PTZ control\n6.2 PT Reset\nEvery time the camera operates self-test once powered on, to check if it can work normally by\nrotating horizontally, vertically, and then rotates back to the original status. You can also select\nAdvanced > PT Reset to reset the PT camera through the OSD menu, and then the camera rotates\nhorizontally, vertically, and then rotates back to the original status.\n15",
+    "visual_summary": "",
+    "key_facts": [
+      "6 PT Camera Configuration This function is available on select models.",
+      "6.1 PTZ Control The newly-added PT rotation function based on the HDCVI camera supports rotating horizontally (0° to 355°) and vertically (0° to 90°).",
+      "You can click or click and hold up, down, left and right to control the PT rotation on the PTZ page, and then adjust the PT camera viewing angle.",
+      "The same operation method is applicable to XVR and DMSS."
+    ],
+    "keywords": [
+      "camera",
+      "control",
+      "then",
+      "rotates",
+      "rotating",
+      "horizontally",
+      "vertically",
+      "reset",
+      "function",
+      "rotation",
+      "speed",
+      "back"
+    ],
+    "image_count": 2,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 22,
+    "page_number": 23,
+    "title_hint": "PT Preset",
+    "section_path": [
+      "PT Camera Configuration",
+      "PT Preset"
+    ],
+    "text_chars": 289,
+    "text_excerpt": "Figure 6-2 PT reset\n6.3 PT Preset\nProcedure\nStep 1\nOn the OSD menu (Figure 3-7 ), select Advanced > PT > Preset.\nFigure 6-3 PT preset (1)\nStep 2\nAdjust the PT camera to the desired position, and then select the No. between 1 and 80.\nThe number of presets is based on the actual product.\n16",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 6-2 PT reset 6.3 PT Preset Procedure Step 1 On the OSD menu (Figure 3-7 ), select Advanced > PT > Preset.",
+      "Figure 6-3 PT preset (1) Step 2 Adjust the PT camera to the desired position, and then select the No. between 1 and 80.",
+      "The number of presets is based on the actual product."
+    ],
+    "keywords": [
+      "preset",
+      "step",
+      "reset",
+      "procedure",
+      "menu",
+      "advanced",
+      "adjust",
+      "camera",
+      "desired",
+      "position",
+      "then",
+      "between"
+    ],
+    "image_count": 3,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 23,
+    "page_number": 24,
+    "title_hint": "Splicing Mode & Manual Linkage",
+    "section_path": [
+      "PT Camera Configuration",
+      "Splicing Mode & Manual Linkage"
+    ],
+    "text_chars": 829,
+    "text_excerpt": "Figure 6-4 PT preset (2)\nStep 3\nSelect Setting , and then click Enter to save this position as a preset.\nRepeat step 2 and step 3 to set multiple presets.\nYou can select a No. and use go to to call the preset.\n6.4 Splicing Mode & Manual Linkage\nBackground Information\nThis feature is only available for PT cameras with the manual linkage function.\nProcedure\nStep 1\nOn the OSD menu (Figure 3-7 ), select Splicing Mode, and then set the mode.\n●Vert Splice : The device simultaneously displays the Fixed Lens and PT Lens images.\nFigure 6-5 Vert splice\n●Panorama : The device only displays the Fixed Lens image.\nFigure 6-6 Panorama\n●Details : The device only displays the PT Lens image.\nFigure 6-7 Details\nStep 2\nSelect Vert Splice , and then click Enter.\nYou need to calibrate the device before using the manual linkage function.\n17",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 6-4 PT preset (2) Step 3 Select Setting , and then click Enter to save this position as a preset.",
+      "Repeat step 2 and step 3 to set multiple presets.",
+      "You can select a No. and use go to to call the preset.",
+      "6.4 Splicing Mode & Manual Linkage Background Information This feature is only available for PT cameras with the manual linkage function."
+    ],
+    "keywords": [
+      "step",
+      "lens",
+      "preset",
+      "then",
+      "mode",
+      "linkage",
+      "only",
+      "vert",
+      "splice",
+      "displays",
+      "enter",
+      "splicing"
+    ],
+    "image_count": 5,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 24,
+    "page_number": 25,
+    "title_hint": "Splicing Mode & Manual Linkage",
+    "section_path": [
+      "PT Camera Configuration",
+      "Splicing Mode & Manual Linkage"
+    ],
+    "text_chars": 918,
+    "text_excerpt": "Calibrate the camera after installation. Avoid calibrating in large uniform color areas (such\nas white walls, grass, cement, or glass). Do not move the device during calibration, as this\nmight impact both the success rate and accuracy.\nFigure 6-8 Calibrate\nStep 3\nSelect Calibrate , and then click Enter to start the automatic calibration.\nFigure 6-9 Calibration progress\nAfter calibration is complete, the Calib Status displays as Calibrated. If calibration fails,\nretry automatic calibration or use the manual calibration function of the XVR.\nCalibration is only supported on select models and their specific software versions of the\nXVR.\nFigure 6-10 Calibration failed\nStep 4\nSelect Manual Linkage , and then click Enter to go to the Area Setting page. Move the\narea box in the Fixed Lens image, and the PT Lens will adjust to the corresponding\nposition of the area box to ensure the accuracy of the calibration.\n18",
+    "visual_summary": "",
+    "key_facts": [
+      "Avoid calibrating in large uniform color areas (such as white walls, grass, cement, or glass).",
+      "Do not move the device during calibration, as this might impact both the success rate and accuracy.",
+      "Figure 6-8 Calibrate Step 3 Select Calibrate , and then click Enter to start the automatic calibration.",
+      "Figure 6-9 Calibration progress After calibration is complete, the Calib Status displays as Calibrated."
+    ],
+    "keywords": [
+      "calibration",
+      "calibrate",
+      "area",
+      "after",
+      "move",
+      "accuracy",
+      "step",
+      "then",
+      "enter",
+      "automatic",
+      "lens",
+      "camera"
+    ],
+    "image_count": 5,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 25,
+    "page_number": 26,
+    "title_hint": "Linkage Tracking",
+    "section_path": [
+      "PT Camera Configuration",
+      "Linkage Tracking"
+    ],
+    "text_chars": 609,
+    "text_excerpt": "Figure 6-11 Manual linkage\n6.5 Linkage Tracking\nPrerequisites\nYou need to calibrate the device before using the linkage tracking function. For details, see Step 3\nin \"6.4 Splicing Mode & Manual Linkage\".\nBackground Information\nThis feature is only available for PT cameras with the linkage tracking function.\nProcedure\nStep 1\nOn the OSD menu (Figure 3-7 ), select Splicing Mode , and then click Enter.\nSelect Vert Splice from Splicing Mode.\nStep 2\nSelect Linkage Tracking , and then click Enter to go to the Area Setting page.\nFigure 6-12 Linkage tracking\nStep 3\nEnable Area Setting , and then click Enter.\n19",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 6-11 Manual linkage 6.5 Linkage Tracking Prerequisites You need to calibrate the device before using the linkage tracking function.",
+      "For details, see Step 3 in \"6.4 Splicing Mode & Manual Linkage\".",
+      "Background Information This feature is only available for PT cameras with the linkage tracking function.",
+      "Procedure Step 1 On the OSD menu (Figure 3-7 ), select Splicing Mode , and then click Enter."
+    ],
+    "keywords": [
+      "linkage",
+      "tracking",
+      "step",
+      "splicing",
+      "mode",
+      "then",
+      "enter",
+      "function",
+      "area",
+      "setting",
+      "prerequisites",
+      "need"
+    ],
+    "image_count": 3,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 26,
+    "page_number": 27,
+    "title_hint": "Linkage Tracking",
+    "section_path": [
+      "PT Camera Configuration",
+      "Linkage Tracking"
+    ],
+    "text_chars": 150,
+    "text_excerpt": "Figure 6-13 Area setting\nStep 4\nConfigure the location or size of the tracking area on the Area Setting page.\nFigure 6-14 Location\nFigure 6-15 Size\n20",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 6-13 Area setting Step 4 Configure the location or size of the tracking area on the Area Setting page."
+    ],
+    "keywords": [
+      "area",
+      "setting",
+      "location",
+      "size",
+      "step",
+      "configure",
+      "tracking"
+    ],
+    "image_count": 3,
+    "drawing_count": 2,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 27,
+    "page_number": 28,
+    "title_hint": "Configuring Trigger Mode",
+    "section_path": [
+      "Active Deterrence Camera Configuration",
+      "Configuring Trigger Mode"
+    ],
+    "text_chars": 579,
+    "text_excerpt": "7 Active Deterrence Camera Configuration\nActive deterrence camera can warn off intruders actively with LED even before users are aware of\nthe incident. Once an intrusion is detected, the LED will be turned on to alert the intruder.\n7.1 Detection Range of PIR Detector\nThe horizontal detection range of the sensor is 100° or 110°.\nFigure 7-1 Horizontal detection range\nThe vertical detection distance of the sensor is 2 m–10 m, 1 m–14 m or 1 m–12 m.\nFigure 7-2 Vertical detection distance\n7.2 Configuring Trigger Mode\nOn the OSD menu (Figure 3-7 ), select Alert > Trigger Mode.\n21",
+    "visual_summary": "",
+    "key_facts": [
+      "7 Active Deterrence Camera Configuration Active deterrence camera can warn off intruders actively with LED even before users are aware of the incident.",
+      "Once an intrusion is detected, the LED will be turned on to alert the intruder.",
+      "7.1 Detection Range of PIR Detector The horizontal detection range of the sensor is 100° or 110°.",
+      "Figure 7-1 Horizontal detection range The vertical detection distance of the sensor is 2 m–10 m, 1 m–14 m or 1 m–12 m."
+    ],
+    "keywords": [
+      "detection",
+      "range",
+      "active",
+      "deterrence",
+      "camera",
+      "alert",
+      "horizontal",
+      "sensor",
+      "vertical",
+      "distance",
+      "trigger",
+      "mode"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 28,
+    "page_number": 29,
+    "title_hint": "Configuring Smart Dual Illuminators Active Deterrence Camera",
+    "section_path": [
+      "Active Deterrence Camera Configuration",
+      "Configuring Smart Dual Illuminators Active Deterrence Camera"
+    ],
+    "text_chars": 1453,
+    "text_excerpt": "●If you select Camera Set, the sound and light alarm will be triggered in the device.\n●If you select XVR Set, the sound and light alarm will be triggered in the XVR.\nFor details, see XVR user’s manual.\n7.3 Configuring Light Warning and Audio Alarm\nThis function is available only when the trigger mode is set to Camera Set.\n●On the OSD menu (Figure 3-7 ), select Alert . Set Light Warning to ON, and then enter the item.\nFor Mode , you can select from Lighting to Flash. If you select Flash, you can set the Flash\nFrequency to Low, Medium or High.\nFor Alert Duration , you can adjust from 5 seconds to 60 seconds.\n●On the Audio Alert item, set it to ON, and then enter the item.\nIn the Audio item, you can select from 3 audios.\nIn the Volume item, you can select from Low, Medium and High.\nIn the Alert Duration , you can adjust from 5 seconds to 60 seconds.\n7.4 Configuring Smart Dual Illuminators Active Deterrence\nCamera\nBackground Information\nFor details on configuring smart dual illuminators, see \"5 Smart Dual Illuminators Cameras\nConfiguration\".\nProcedure\nStep 1\nSelect Main Menu > Alert, and then set Audio Alert to ON.\nStep 2\nSet the Volume and Alert Duration.\nThe shortest of alert...",
+    "visual_summary": "",
+    "key_facts": [
+      "●If you select Camera Set, the sound and light alarm will be triggered in the device.",
+      "●If you select XVR Set, the sound and light alarm will be triggered in the XVR.",
+      "7.3 Configuring Light Warning and Audio Alarm This function is available only when the trigger mode is set to Camera Set.",
+      "●On the OSD menu (Figure 3-7 ), select Alert ."
+    ],
+    "keywords": [
+      "alert",
+      "audio",
+      "item",
+      "light",
+      "alarm",
+      "duration",
+      "seconds",
+      "camera",
+      "configuring",
+      "warning",
+      "then",
+      "flash"
+    ],
+    "image_count": 1,
+    "drawing_count": 14,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 29,
+    "page_number": 30,
+    "title_hint": "Configuring Smart Dual Illuminators Active Deterrence Camera",
+    "section_path": [
+      "Active Deterrence Camera Configuration",
+      "Configuring Smart Dual Illuminators Active Deterrence Camera"
+    ],
+    "text_chars": 240,
+    "text_excerpt": "Figure 7-3 Main menu\nFigure 7-4 Alert\nFigure 7-5 Audio alert\nStep 4\nSelect Main Menu > Alert, and then set Light Warning to ON.\nStep 5\nSet the Flash Freq and Alert Duration.\nThe shortest of alert duration is 5 s, and the longest is 60 s.\n23",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 7-3 Main menu Figure 7-4 Alert Figure 7-5 Audio alert Step 4 Select Main Menu > Alert, and then set Light Warning to ON.",
+      "Step 5 Set the Flash Freq and Alert Duration.",
+      "The shortest of alert duration is 5 s, and the longest is 60 s."
+    ],
+    "keywords": [
+      "alert",
+      "main",
+      "menu",
+      "step",
+      "duration",
+      "audio",
+      "then",
+      "light",
+      "warning",
+      "flash",
+      "freq",
+      "shortest"
+    ],
+    "image_count": 4,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 30,
+    "page_number": 31,
+    "title_hint": "Configuring Smart Dual Illuminators Active Deterrence Camera",
+    "section_path": [
+      "Active Deterrence Camera Configuration",
+      "Configuring Smart Dual Illuminators Active Deterrence Camera"
+    ],
+    "text_chars": 27,
+    "text_excerpt": "Figure 7-6 Light warning\n24",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "light",
+      "warning"
+    ],
+    "image_count": 1,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 31,
+    "page_number": 32,
+    "title_hint": "Installing Lens Type 1",
+    "section_path": [
+      "Box Camera Installation",
+      "Lens Installation",
+      "Installing Lens Type 1"
+    ],
+    "text_chars": 1425,
+    "text_excerpt": "8 Box Camera Installation\n●The device is not equipped with lens when it is delivered out of factory and you need to install\nlens.\n●Do not remove the electrostatic adsorption film on the surface of transparent cover before\ninstallation and debugging are completed, which is to avoid damage during installation.\n●Install the lens onto the device in time after unpacking, which is to avoid the device module\nbeing exposed in humid environment for a long time.\n●The mounting surface shall be thick enough to sustain at least 3 times of the device weight.\n●Install the C/CS adapter ring to the camera if you are using C mount lens.\n●The following installation figure is for reference only.\n8.1 Lens Installation\n8.1.1 Installing Lens Type 1\nProcedure\nStep 1\nRemove the protection cap from the device. Align the lens to the lens position of the\ndevice (Install the C/CS adapter ring to the device if you are using C mount lens). Turn\nclockwise to secure the lens firmly.\nStep 2\nInsert the socket of the lens cable into the auto iris lens connector on the side panel of the\ndevice. Skip this step if you are using auto iris lens.\nStep 3\nFasten the screw near the focusing ring, and then turn...",
+    "visual_summary": "",
+    "key_facts": [
+      "8 Box Camera Installation ●The device is not equipped with lens when it is delivered out of factory and you need to install lens.",
+      "●Do not remove the electrostatic adsorption film on the surface of transparent cover before installation and debugging are completed, which is to avoid damage during installation.",
+      "●Install the lens onto the device in time after unpacking, which is to avoid the device module being exposed in humid environment for a long time.",
+      "●The mounting surface shall be thick enough to sustain at least 3 times of the device weight."
+    ],
+    "keywords": [
+      "lens",
+      "installation",
+      "ring",
+      "step",
+      "focusing",
+      "install",
+      "using",
+      "camera",
+      "remove",
+      "surface",
+      "completed",
+      "which"
+    ],
+    "image_count": 2,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 32,
+    "page_number": 33,
+    "title_hint": "I/O Port Installation",
+    "section_path": [
+      "Box Camera Installation",
+      "I/O Port Installation"
+    ],
+    "text_chars": 841,
+    "text_excerpt": "8.1.2 Installing Lens Type 2\nBackground Information\n●1: Red sign.\n●2: Lens-dismounting button.\nFigure 8-2 Front panel\nProcedure\nStep 1\nRemove the protection cover on the device lens, align the red sign of the lens with the\nred sign ① on the device, rotate the buckle clockwise until the lens-dismounting button\n② bounces upward, and then the lens is installed.\nStep 2\nLoosen the screw on the focusing ring, rotate the focusing ring outward to focus\nmanually until you get clear video. Skip this step if you are using lens that supports auto\nfocusing.\n●1: Screw.\n●2: Focusing ring.\nFigure 8-3 Lens installation (2)\nStep 3\nAfter focusing, tighten the screw on the focusing ring and fix the focusing ring.\nTo dismount the lens, press lens-dismounting button ②, rotate the lens anticlockwise,\nand release the bucket.\n8.2 I/O Port Installation\n26",
+    "visual_summary": "",
+    "key_facts": [
+      "8.1.2 Installing Lens Type 2 Background Information ●1: Red sign.",
+      "Figure 8-2 Front panel Procedure Step 1 Remove the protection cover on the device lens, align the red sign of the lens with the red sign ① on the device, rotate the buckle clockwise until the lens-dismounting button ② bounces upward, and then the lens is installed.",
+      "Step 2 Loosen the screw on the focusing ring, rotate the focusing ring outward to focus manually until you get clear video.",
+      "Skip this step if you are using lens that supports auto focusing."
+    ],
+    "keywords": [
+      "lens",
+      "focusing",
+      "ring",
+      "step",
+      "sign",
+      "lens-dismounting",
+      "button",
+      "rotate",
+      "screw",
+      "until",
+      "installation",
+      "installing"
+    ],
+    "image_count": 3,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 33,
+    "page_number": 34,
+    "title_hint": "Removing Cable",
+    "section_path": [
+      "Box Camera Installation",
+      "I/O Port Installation",
+      "Removing Cable"
+    ],
+    "text_chars": 486,
+    "text_excerpt": "8.2.1 Connecting Cable\nProcedure\nStep 1\nPress and hold the mini screwdriver to press the button on the hole groove of the cable to\nbe connected.\nStep 2\nInsert the cable into the hole groove.\nStep 3\nRelease the screwdriver.\nFigure 8-4 Install cable\n8.2.2 Removing Cable\nProcedure\nStep 1\nUse the mini screwdriver to press the button on the hole groove of the cable to be\nconnected.\nStep 2\nPull out the cable from the hole groove.\nStep 3\nRelease the screwdriver.\nFigure 8-5 Remove cable\n27",
+    "visual_summary": "",
+    "key_facts": [
+      "8.2.1 Connecting Cable Procedure Step 1 Press and hold the mini screwdriver to press the button on the hole groove of the cable to be connected.",
+      "Step 2 Insert the cable into the hole groove.",
+      "Figure 8-4 Install cable 8.2.2 Removing Cable Procedure Step 1 Use the mini screwdriver to press the button on the hole groove of the cable to be connected.",
+      "Step 2 Pull out the cable from the hole groove."
+    ],
+    "keywords": [
+      "cable",
+      "step",
+      "screwdriver",
+      "hole",
+      "groove",
+      "press",
+      "procedure",
+      "mini",
+      "button",
+      "connected",
+      "release",
+      "connecting"
+    ],
+    "image_count": 2,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 34,
+    "page_number": 35,
+    "title_hint": "Device Installation",
+    "section_path": [
+      "Box Camera Installation",
+      "Device Installation"
+    ],
+    "text_chars": 1290,
+    "text_excerpt": "8.3 Device Installation\nBackground Information\nThe device is delivered without mounting bracket and screw. You need to purchase them\nseparately.\nFigure 8-6 Device components\nTable 8-1 Device components\nNo.\nName\nNo.\nName\n1\nLens\n5\nMounting bracket\n2\nFront panel\n6\nSelf-tapping screw\n3\nFixing screw\n7\nExpansion bolt\n4\nBracket adjusting screw\n8\nMounting surface\nProcedure\nStep 1\nFix the mounting bracket ⑤ on the mounting surface ⑧.\n1. Mark the bracket mounting hole positions on the mounting surface ⑧, drill four holes\non the marked positions, insert four expansion bolts ⑦ into the mounting holes and\nthen tighten.\n2. Align the four screw holes on the bottom of the mounting bracket ⑤ with the\nexpansion bolts, insert four self-tapping screws ⑥ and then tighten.\nStep 2\nFix the device on the mounting bracket ⑤.\nAlign the mounting hole positions on the bottom of device casing with the mounting\nholes positions on the mounting bracket ⑤, and then install the device on the mounting\nbracket with fixing screw ③.\nStep 3\nAdjust camera monitoring angle.\nUse a wrench to loosen the adjusting screw ④, adjust camera to the location which needs\nto be monitored, and then use wrench to tighten bracket...",
+    "visual_summary": "",
+    "key_facts": [
+      "8.3 Device Installation Background Information The device is delivered without mounting bracket and screw.",
+      "Figure 8-6 Device components Table 8-1 Device components No.",
+      "Name 1 Lens 5 Mounting bracket 2 Front panel 6 Self-tapping screw 3 Fixing screw 7 Expansion bolt 4 Bracket adjusting screw 8 Mounting surface Procedure Step 1 Fix the mounting bracket ⑤ on the mounting surface ⑧.",
+      "Mark the bracket mounting hole positions on the mounting surface ⑧, drill four holes on the marked positions, insert four expansion bolts ⑦ into the mounting holes and then tighten."
+    ],
+    "keywords": [
+      "mounting",
+      "bracket",
+      "screw",
+      "step",
+      "positions",
+      "four",
+      "holes",
+      "then",
+      "expansion",
+      "adjusting",
+      "surface",
+      "tighten"
+    ],
+    "image_count": 2,
+    "drawing_count": 59,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 35,
+    "page_number": 36,
+    "title_hint": "Device Installation",
+    "section_path": [
+      "Box Camera Installation",
+      "Device Installation"
+    ],
+    "text_chars": 116,
+    "text_excerpt": "After device installation and cable connection, you can view monitoring image through\nstorage device such as XVR.\n29",
+    "visual_summary": "",
+    "key_facts": [
+      "After device installation and cable connection, you can view monitoring image through storage device such as XVR."
+    ],
+    "keywords": [
+      "after",
+      "installation",
+      "cable",
+      "connection",
+      "view",
+      "monitoring",
+      "image",
+      "through",
+      "storage",
+      "such"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 36,
+    "page_number": 37,
+    "title_hint": "Fisheye Dewarp on the Live Page",
+    "section_path": [
+      "Fisheye Camera Configuration",
+      "Fisheye Dewarp on the Live Page"
+    ],
+    "text_chars": 910,
+    "text_excerpt": "9 Fisheye Camera Configuration\nThe fisheye camera (panoramic camera) has wide monitoring angle but its video is distorted. The\ndewarp function can provide the proper and vivid video suitable for human eyes. Fisheye function\nshould be configured at XVR.\nThis function is available on select models.\n9.1 Fisheye Dewarp on the Live Page\nProcedure\nStep 1\nOn the XVR shortcut menu, select Fisheye.\nStep 2\nSet fisheye Fit Mode and Show Mode.\nFigure 9-1 Fisheye menu\nTable 9-1 Parameters of fisheye\nFit Mode\nIcon\nDescription\nCeiling mount (\n)\nGround mount (\n)\n360° panorama original window\n1 dewarp window and 1 panorama expanded window\n2 panorama expanded windows\n1 360° panorama window and 3 dewarp windows\n1 360° panorama window and 4 dewarp windows\n4 dewarp windows and 1 panorama expanded window\n1 360° panorama window and 8 dewarp windows\nWall mount (\n)\n360° panorama original window\nPanorama expanded window\n30",
+    "visual_summary": "",
+    "key_facts": [
+      "9 Fisheye Camera Configuration The fisheye camera (panoramic camera) has wide monitoring angle but its video is distorted.",
+      "The dewarp function can provide the proper and vivid video suitable for human eyes.",
+      "Fisheye function should be configured at XVR.",
+      "9.1 Fisheye Dewarp on the Live Page Procedure Step 1 On the XVR shortcut menu, select Fisheye."
+    ],
+    "keywords": [
+      "panorama",
+      "window",
+      "fisheye",
+      "dewarp",
+      "windows",
+      "expanded",
+      "camera",
+      "function",
+      "mode",
+      "mount",
+      "video",
+      "step"
+    ],
+    "image_count": 13,
+    "drawing_count": 59,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 37,
+    "page_number": 38,
+    "title_hint": "Fisheye Dewarp During Playback",
+    "section_path": [
+      "Fisheye Camera Configuration",
+      "Fisheye Dewarp During Playback"
+    ],
+    "text_chars": 992,
+    "text_excerpt": "Fit Mode\nIcon\nDescription\n1 panorama unfolding window and 3 dewarp windows\n1 panorama unfolding window and 4 dewarp windows\n1 panorama unfolding window and 8 dewarp windows\n●The dewarp modes might vary for different installation modes.\n●For the non-fisheye channel, a prompt is displayed to remind you that dewarp\nfunction is not supported.\n●Some series products support 180° dewarp which can only be wall mounted. The\nactual product shall prevail.\nFigure 9-2 Fisheye show mode\nYou can use the mouse to drag the color areas on the left original screen or the\nrectangular screens on the right to change the monitoring ranges. (Not supported for wall\nmount.)\n9.2 Fisheye Dewarp During Playback\nWhen playing back the fisheye recorded video, you can use dewarp function to adjust video.\nProcedure\nStep 1\nOn the XVR main menu, click SEARCH.\nStep 2\nSelect 1-window playback mode and corresponding fisheye channel, and then click \n to\nplay.\nStep 3\nRight-click \n to go to the dewarp playback page.\n31",
+    "visual_summary": "",
+    "key_facts": [
+      "Fit Mode Icon Description 1 panorama unfolding window and 3 dewarp windows 1 panorama unfolding window and 4 dewarp windows 1 panorama unfolding window and 8 dewarp windows ●The dewarp modes might vary for different installation modes.",
+      "●For the non-fisheye channel, a prompt is displayed to remind you that dewarp function is not supported.",
+      "●Some series products support 180° dewarp which can only be wall mounted.",
+      "Figure 9-2 Fisheye show mode You can use the mouse to drag the color areas on the left original screen or the rectangular screens on the right to change the monitoring ranges. (Not supported for wall mount.) 9.2 Fisheye Dewarp During Playback When playing back the fisheye recorded video, you can use dewarp function to adjust video."
+    ],
+    "keywords": [
+      "dewarp",
+      "window",
+      "fisheye",
+      "mode",
+      "panorama",
+      "unfolding",
+      "windows",
+      "playback",
+      "step",
+      "modes",
+      "channel",
+      "function"
+    ],
+    "image_count": 7,
+    "drawing_count": 33,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 38,
+    "page_number": 39,
+    "title_hint": "PoC Power Supply",
+    "section_path": [
+      "FAQ",
+      "PoC Power Supply"
+    ],
+    "text_chars": 934,
+    "text_excerpt": "10 FAQ\n10.1 Flicker\nFlicker is a phenomenon where the screen flickers with stripes due to a mismatch between the\ndevice's frame rate and the frequency of light sources (such as lighting) in the environment. To\nresolve the flickering phenomenon, you can follow these steps:\nProcedure\nStep 1\nOn the OSD menu (Figure 3-7 ), select Exposure > Anti-flicker.\nStep 2\nSwitch parameter options and choose the best parameters based on the image effect.\nDifferent devices might support different parameter options. Please refer to the actual\npage for the available options.\nFigure 10-1 Anti-flicker (1)\nFigure 10-2 Anti-flicker (2)\n10.2 PoC Power Supply\nPoC XVR supports PoC function.\n●When the device is in the condition of PoC power supply, do not connect any other device\nbetween the device and PoC XVR or PoC transceiver such as UTC, Balun, optical transceiver,\ndistributor and convertor and so on, otherwise, the device might get burned.\n32",
+    "visual_summary": "",
+    "key_facts": [
+      "10 FAQ 10.1 Flicker Flicker is a phenomenon where the screen flickers with stripes due to a mismatch between the device's frame rate and the frequency of light sources (such as lighting) in the environment.",
+      "To resolve the flickering phenomenon, you can follow these steps: Procedure Step 1 On the OSD menu (Figure 3-7 ), select Exposure > Anti-flicker.",
+      "Step 2 Switch parameter options and choose the best parameters based on the image effect.",
+      "Different devices might support different parameter options."
+    ],
+    "keywords": [
+      "anti-flicker",
+      "options",
+      "flicker",
+      "phenomenon",
+      "between",
+      "such",
+      "step",
+      "parameter",
+      "different",
+      "might",
+      "power",
+      "supply"
+    ],
+    "image_count": 4,
+    "drawing_count": 5,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 39,
+    "page_number": 40,
+    "title_hint": "Centralized Power Supply",
+    "section_path": [
+      "FAQ",
+      "Centralized Power Supply"
+    ],
+    "text_chars": 2213,
+    "text_excerpt": "●PoC power supply is with high voltage. Do not dismantle the device during normal operation;\notherwise it might cause danger to both device and users due to high voltage.\n●Do not connect the non-PoC camera to a PoC XVR, otherwise it might damage the camera.\nPoC camera can be divided into AT camera and AF camera. Power consumption of AT camera is less\nthan 12 W, and power consumption of AF camera is less than 6 W.\nYou need to check the maximum power of PoC before use. Assuming that the maximum power of\none XVR is 48 W, the XVR can connect AT cameras up to 48/12=4 and AF cameras up to 48/6=8.\n10.3 Long Distance Power Supply\nIn many scenarios, our clients adopt long distance power supply, transmitting 12 VDC to cameras\nlocated over 100 m. Such long distance power supply might cause problems.\nQ1: Recurrent restart of devices or even ICR Failure.\nPossible reasons: The long power supply cable leads to a large voltage drop on the equipment\npower supply cable, and turning on the IR light at night leads to a further increase of the voltage\ndrop, resulting in restart of the device. After the device is restarted, the ICR is switched to the Day\nmode by default. By judging the ambient light...",
+    "visual_summary": "",
+    "key_facts": [
+      "Do not dismantle the device during normal operation; otherwise it might cause danger to both device and users due to high voltage.",
+      "●Do not connect the non-PoC camera to a PoC XVR, otherwise it might damage the camera.",
+      "PoC camera can be divided into AT camera and AF camera.",
+      "Power consumption of AT camera is less than 12 W, and power consumption of AF camera is less than 6 W."
+    ],
+    "keywords": [
+      "power",
+      "supply",
+      "camera",
+      "voltage",
+      "long",
+      "restart",
+      "night",
+      "distance",
+      "cable",
+      "leads",
+      "drop",
+      "light"
+    ],
+    "image_count": 0,
+    "drawing_count": 2,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 40,
+    "page_number": 41,
+    "title_hint": "Connector Waterproof Protection",
+    "section_path": [
+      "FAQ",
+      "Connector Waterproof Protection"
+    ],
+    "text_chars": 1424,
+    "text_excerpt": "Figure 10-3 Principle of centralized power supply\nThere are two paths for the power output of CAM4: Return path 1 and return path 2. Reflow 2 first\nflows to CAM1, and then flows to the power supply from power supply ground of CAM1. In this\nway, the reflow of power supply ground CAM4 affects the video ground of CAM1, resulting in\ninterference stripes on the screen. And CAM4 also interferes with CAM2 and CAM3.\nIn the same way, CAM1, CAM2 or CAM3 affects other cameras besides itself.\nThe main reason for the interference of centralized power supply is that the power supply ground\nof camera is not isolated. To solve this problem: Use dual-power devices with isolation of power\nsupply ground; equip low-power devices with power isolators to block the return path 2 low-power\ndevices can also use power isolators to block the return path 2; use isolated power supplies for each\nchannel, or power the device separately, which are the two recommended methods.\n10.5 Connector Waterproof Protection\nHDCVI cameras need to be well waterproofed and protected. After installation, wrap the BNC\nconnector and power connector tightly with insulated or waterproofed tape to prevent water and\nexternal...",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 10-3 Principle of centralized power supply There are two paths for the power output of CAM4: Return path 1 and return path 2.",
+      "Reflow 2 first flows to CAM1, and then flows to the power supply from power supply ground of CAM1.",
+      "In this way, the reflow of power supply ground CAM4 affects the video ground of CAM1, resulting in interference stripes on the screen.",
+      "In the same way, CAM1, CAM2 or CAM3 affects other cameras besides itself."
+    ],
+    "keywords": [
+      "power",
+      "supply",
+      "ground",
+      "return",
+      "path",
+      "cam1",
+      "cam4",
+      "devices",
+      "connector",
+      "metal",
+      "centralized",
+      "reflow"
+    ],
+    "image_count": 1,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 41,
+    "page_number": 42,
+    "title_hint": "Connector Waterproof Protection",
+    "section_path": [
+      "FAQ",
+      "Connector Waterproof Protection"
+    ],
+    "text_chars": 34,
+    "text_excerpt": "Figure 10-4 Waterproof measures\n35",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "waterproof",
+      "measures"
+    ],
+    "image_count": 1,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 42,
+    "page_number": 43,
+    "title_hint": "Maintenance",
+    "section_path": [
+      "Maintenance"
+    ],
+    "text_chars": 1470,
+    "text_excerpt": "11 Maintenance\nIn order to maintain the image quality and proper functioning of the device, please read the\nfollowing maintenance instructions carefully and hold rigid adherence.\nDisassembly and Desiccant Replacement\n●Carefully follow the instructions in the manual when performing any disassembly operation\nabout the device; otherwise, it might cause water leakage or poor image quality due to\nunprofessional disassemble.\n●Please contact after-sale service for desiccant replacement if there is condensed fog found on\nthe lens after unpacking or when the desiccant turns green. (Not all models are included with\nthe desiccant).\nMaintaining Lens and Lens Protector\n●The lens and lens protector are covered with antireflection coating, which could be\ncontaminated or damaged and result in lens scratches or haze images when being touched with\ndust, grease, fingerprints and other similar substances.\n●Do not touch the image sensor (CCD or CMOS) directly. Dust and dirt could be removed with air\nblower, or you can wipe the lens gently with soft cloth that moistened with alcohol.\nMaintaining Device Body\n●Device body can be cleaned with soft dry cloth, which can also be used to remove...",
+    "visual_summary": "",
+    "key_facts": [
+      "11 Maintenance In order to maintain the image quality and proper functioning of the device, please read the following maintenance instructions carefully and hold rigid adherence.",
+      "Disassembly and Desiccant Replacement ●Carefully follow the instructions in the manual when performing any disassembly operation about the device; otherwise, it might cause water leakage or poor image quality due to unprofessional disassemble.",
+      "●Please contact after-sale service for desiccant replacement if there is condensed fog found on the lens after unpacking or when the desiccant turns green. (Not all models are included with the desiccant).",
+      "Maintaining Lens and Lens Protector ●The lens and lens protector are covered with antireflection coating, which could be contaminated or damaged and result in lens scratches or haze images when being touched with dust, grease, fingerprints and other similar substances."
+    ],
+    "keywords": [
+      "lens",
+      "desiccant",
+      "when",
+      "body",
+      "image",
+      "which",
+      "could",
+      "maintenance",
+      "quality",
+      "please",
+      "instructions",
+      "carefully"
+    ],
+    "image_count": 1,
+    "drawing_count": 2,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 43,
+    "page_number": 44,
+    "title_hint": "Appendix 1 Security Recommendation",
+    "section_path": [
+      "Appendix 1 Security Recommendation"
+    ],
+    "text_chars": 2359,
+    "text_excerpt": "Appendix 1 Security Recommendation\n1. Account Management\na. Use Strong Passwords\n●The length should not be less than 8 characters.\n●Include at least two types of characters; character types include upper and lower case\nletters, numbers and symbols.\n●Do not contain the account name or the account name in reverse order.\n●Do not use continuous characters, such as 123, abc, etc.\n●Do not use overlapped characters, such as 111, aaa, etc.\nb. Change Password Regularly\nIt is suggested to change passwords regularly to reduce the risk of being guessed or cracked.\nc. Assign Accounts and Permissions Reasonably\nAccording to business and management needs, reasonably add new users, and reasonably\nallocate a minimum set of permissions for them.\nd. Enable Account Lock\nThe account lock feature is enabled by default, and it is recommended to keep it on to\nguarantee the account security. If an attacker attempts to log in with the wrong password\nseveral times, the corresponding account and the source IP address will be locked.\ne. Set and Update Passwords Reset Information Timely\nThe platform supports password reset function. To reduce the risk of being attacked, please\nset up related information for...",
+    "visual_summary": "",
+    "key_facts": [
+      "Use Strong Passwords ●The length should not be less than 8 characters.",
+      "●Include at least two types of characters; character types include upper and lower case letters, numbers and symbols.",
+      "●Do not contain the account name or the account name in reverse order.",
+      "●Do not use continuous characters, such as 123, abc, etc."
+    ],
+    "keywords": [
+      "account",
+      "enable",
+      "password",
+      "passwords",
+      "characters",
+      "suggested",
+      "recommended",
+      "security",
+      "such",
+      "reduce",
+      "reasonably",
+      "address"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "page_idx": 44,
+    "page_number": 45,
+    "title_hint": "Appendix 1 Security Recommendation",
+    "section_path": [
+      "Appendix 1 Security Recommendation"
+    ],
+    "text_chars": 1153,
+    "text_excerpt": "The network should be isolated by partitioning the video monitoring network and the office\nnetwork on the switch and router to different VLANs. This prevents attackers from using the\noffice network to launch Pivoting attacks on the video monitoring network.\n4. Security Auditing\na. Check Online Users\nIt is recommended to check online users irregularly to identify whether there are illegal users\nlogging in.\nb. View the Platform Log\nBy viewing the log, you can get the IP information of the attempt to log in to the platform\nand the key operation information of the logged-in user.\n5. Physical Protection\nIt is suggested to perform physical protection to the device that has installed the platform. For\nexample, place the device in a special computer room and cabinet, and implement well-done\naccess control permission and key management to prevent unauthorized personnel from\ncarrying out physical contacts such as damaging hardware.\n6. Perimeter Security\nIt is suggested to deploy perimeter security products and take necessary measures such as\nauthorized access, access control, and intrusion prevention to protect the software platform\nsecurity.\n38",
+    "visual_summary": "",
+    "key_facts": [
+      "The network should be isolated by partitioning the video monitoring network and the office network on the switch and router to different VLANs.",
+      "This prevents attackers from using the office network to launch Pivoting attacks on the video monitoring network.",
+      "Check Online Users It is recommended to check online users irregularly to identify whether there are illegal users logging in. b.",
+      "View the Platform Log By viewing the log, you can get the IP information of the attempt to log in to the platform and the key operation information of the logged-in user."
+    ],
+    "keywords": [
+      "network",
+      "security",
+      "platform",
+      "users",
+      "physical",
+      "access",
+      "video",
+      "monitoring",
+      "office",
+      "check",
+      "online",
+      "information"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  }
+]

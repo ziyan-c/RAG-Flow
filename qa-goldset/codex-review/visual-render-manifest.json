@@ -1,0 +1,326 @@
+[
+  {
+    "qa_id": "qa-0001",
+    "question": "What are the main external dimensions shown for the S3006 switch in the dimensions drawing?",
+    "answer": "The drawing marks the switch at 115.5 mm [4.55 in] wide, 84.7 mm [3.33 in] deep, with an additional 88.2 mm [3.47 in] body-depth mark, and 27.0 mm [1.06 in] high.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_DIMENSIONS_p1.png",
+    "support": "Width is marked as 115.5 mm [4.55 in]. Depth is marked as 84.7 mm [3.33 in], with another body-depth dimension of 88.2 mm [3.47 in]. Height is marked as 27.0 mm [1.06 in]."
+  },
+  {
+    "qa_id": "qa-0002",
+    "question": "Which dimension in the S3006 dimensions drawing gives the device height?",
+    "answer": "The height is shown as 27.0 mm, or 1.06 inches.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_DIMENSIONS_p1.png",
+    "support": "Height is marked as 27.0 mm [1.06 in]."
+  },
+  {
+    "qa_id": "qa-0003",
+    "question": "Why should a RAG answerer inspect the rendered S3006 dimensions PDF instead of relying only on extracted text?",
+    "answer": "The useful information is the dimension drawing itself: the page consists mainly of visual measurement arrows and labels, so layout and labels from the rendered page are needed.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_DIMENSIONS_p1.png",
+    "support": "Dimension drawing for the S3006-4ET-36/S3006 desktop switch, showing width 115.5 mm [4.55 in], depth 84.7 mm [3.33 in], body depth 88.2 mm [3.47 in], and height 27.0 mm [1.06 in]."
+  },
+  {
+    "qa_id": "qa-0004",
+    "question": "What unit pair is used in the S3006 dimensions drawing?",
+    "answer": "The drawing gives dimensions in millimeters with inch equivalents in brackets.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_DIMENSIONS_p1.png",
+    "support": "Dimension drawing for the S3006-4ET-36/S3006 desktop switch, showing width 115.5 mm [4.55 in], depth 84.7 mm [3.33 in], body depth 88.2 mm [3.47 in], and height 27.0 mm [1.06 in]."
+  },
+  {
+    "qa_id": "qa-0005",
+    "question": "How is the S3006 installation method represented in its installation-method PDF?",
+    "answer": "It is represented as a five-step visual sequence with numbered diagrams rather than a prose procedure.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_INSTALLATION_METHOD_EN_p1.png",
+    "support": "The installation method is represented as five numbered visual steps."
+  },
+  {
+    "qa_id": "qa-0006",
+    "question": "How many numbered visual steps are shown in the S3006 installation-method sheet?",
+    "answer": "The sheet shows five numbered visual steps.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_INSTALLATION_METHOD_EN_p1.png",
+    "support": "The installation method is represented as five numbered visual steps."
+  },
+  {
+    "qa_id": "qa-0007",
+    "question": "What kind of evidence is needed to answer questions about the order of the S3006 installation method?",
+    "answer": "The rendered installation diagram is needed, because the order is conveyed by numbered visuals.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_INSTALLATION_METHOD_EN_p1.png",
+    "support": "Five-step visual installation method for mounting the S3006 switch, shown as numbered diagrams rather than explanatory prose."
+  },
+  {
+    "qa_id": "qa-0008",
+    "question": "Is the S3006 installation-method sheet mainly a text instruction page or a visual instruction page?",
+    "answer": "It is mainly a visual instruction page.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_INSTALLATION_METHOD_EN_p1.png",
+    "support": "Five-step visual installation method for mounting the S3006 switch, shown as numbered diagrams rather than explanatory prose."
+  },
+  {
+    "qa_id": "qa-0009",
+    "question": "What is the purpose of the S3006-4ET-36 PORT PDF in the source set?",
+    "answer": "It is a visual port-layout reference for the S3006 switch, used to identify physical port and connector arrangement.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+  },
+  {
+    "qa_id": "qa-0010",
+    "question": "Why is the S3006 port diagram marked as requiring visual evidence?",
+    "answer": "The page has no useful extractable text; the relevant information is the rendered port layout.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+  },
+  {
+    "qa_id": "qa-0011",
+    "question": "What should a retrieval system return for a question about the physical arrangement of S3006 ports?",
+    "answer": "It should return the port diagram page, because the front panel shows PoE ports 1-4, uplink ports 5 and 6, status indicators, and the rear DC IN/grounding layout.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "PoE ports 1-4 are labeled Port 1-4: 10/100Mbps (PoE). Ports 5 and 6 are marked as uplink ports. A PWR indicator appears at the far right of the front panel. The rear view shows a grounding point and a DC IN jack."
+  },
+  {
+    "qa_id": "qa-0012",
+    "question": "Which S3006 source PDF is the best evidence for physical port-layout questions?",
+    "answer": "The S3006-4ET-36_PORT.pdf file is the best evidence for physical port-layout questions.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+  },
+  {
+    "qa_id": "qa-0013",
+    "question": "Which S3006 ports are marked as uplink ports in the port diagram?",
+    "answer": "Ports 5 and 6 are marked as uplink ports.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "PoE ports 1-4 are labeled Port 1-4: 10/100Mbps (PoE). Ports 5 and 6 are marked as uplink ports."
+  },
+  {
+    "qa_id": "qa-0014",
+    "question": "What connectors or indicators are shown on the rear view of the S3006 port diagram?",
+    "answer": "The rear view shows a grounding point and a DC IN power jack.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "PoE ports 1-4 are labeled Port 1-4: 10/100Mbps (PoE). Ports 5 and 6 are marked as uplink ports. The rear view shows a grounding point and a DC IN jack."
+  },
+  {
+    "qa_id": "qa-0015",
+    "question": "Which wall-mount accessory is shown for the HAC-HF3231E/HAC-HF3805G-style installation sheet?",
+    "answer": "The wall-mount accessory shown is PFB121W.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3231E_Installation_20171121_p1.png",
+    "support": "Wall Mount is associated with PFB121W."
+  },
+  {
+    "qa_id": "qa-0016",
+    "question": "Which ceiling-mount accessory is shown in the HAC-HF3231E installation sheet?",
+    "answer": "The ceiling-mount accessory shown is PFB110W.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3231E_Installation_20171121_p1.png",
+    "support": "Ceiling Mount is associated with PFB110W."
+  },
+  {
+    "qa_id": "qa-0017",
+    "question": "What two mounting categories does the HAC-HF3231E installation sheet compare?",
+    "answer": "It compares Wall Mount and Ceiling Mount options.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3231E_Installation_20171121_p1.png",
+    "support": "Wall Mount is associated with PFB121W. Ceiling Mount is associated with PFB110W."
+  },
+  {
+    "qa_id": "qa-0018",
+    "question": "Why is the HAC-HF3231E installation sheet useful for visual retrieval tests?",
+    "answer": "It is a compact visual compatibility sheet where the answer depends on reading labels from the rendered page.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3231E_Installation_20171121_p1.png",
+    "support": "Mounting accessory compatibility sheet for HAC-HF3231E/HAC-HF3805G-style cameras, showing wall mount and ceiling mount options."
+  },
+  {
+    "qa_id": "qa-0019",
+    "question": "What type of document is HAC-HF3805G_Dimention_20171128.pdf?",
+    "answer": "It is a dimension drawing for the HAC-HF3805G camera.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+  },
+  {
+    "qa_id": "qa-0020",
+    "question": "Why should dimension questions for HAC-HF3805G_Dimention_20171128.pdf use rendered-page evidence?",
+    "answer": "The page has effectively no extractable text, so the dimensional information is carried by the visual/vector drawing.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+  },
+  {
+    "qa_id": "qa-0021",
+    "question": "What should be retrieved for a question asking about HAC-HF3805G physical dimensions?",
+    "answer": "The HAC-HF3805G dimension drawing page should be retrieved; it contains the 144.5 mm main length, 134 mm body length, 82 mm front width, and 73.7 mm front height markings.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+  },
+  {
+    "qa_id": "qa-0022",
+    "question": "Is HAC-HF3805G_Dimention_20171128.pdf primarily a prose manual or a visual drawing?",
+    "answer": "It is primarily a visual dimension drawing.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+  },
+  {
+    "qa_id": "qa-0023",
+    "question": "What main length values are shown in the HAC-HF3805G dimension drawing?",
+    "answer": "The drawing shows a main length of 144.5 mm [5.69 in] and a body length of 134 mm [5.28 in].",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Main length is marked 144.5 mm [5.69 in]. Body length is marked 134 mm [5.28 in]."
+  },
+  {
+    "qa_id": "qa-0024",
+    "question": "What front-view width and height are marked in the HAC-HF3805G dimension drawing?",
+    "answer": "The front view marks 82 mm [3.23 in] wide and 73.7 mm [2.9 in] high.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "The front view marks 82 mm [3.23 in] by 73.7 mm [2.9 in]."
+  },
+  {
+    "qa_id": "qa-0025",
+    "question": "Which early labels appear on the first page of the HDCVI Box Camera Installation Guide?",
+    "answer": "The first page includes visual labels such as 1A, 1B, 1C, 2.1, 2.1.1, 2.1.2, 2.1.3, and 2.1.4.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p1.png",
+    "support": "Steps 1A, 1B, and 1C show lens attachment/removal sequence details. Step 2.1 is the wall-mount branch. Step 2.1.1 shows drilling/marking for the wall bracket. Step 2.1.2 shows fastening the wall bracket. Step 2.1.3 shows mounting the camera onto the bracket. Step 2.1.4 shows the completed wall-mounted camera. Step 2.2 begins the ceiling-mount branch."
+  },
+  {
+    "qa_id": "qa-0026",
+    "question": "In the HDCVI Box Camera Installation Guide, which branch begins with step 2.1?",
+    "answer": "Step 2.1 begins the wall-mount branch.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p1.png",
+    "support": "Step 2.1 is the wall-mount branch. Step 2.1.1 shows drilling/marking for the wall bracket. Step 2.1.2 shows fastening the wall bracket. Step 2.1.3 shows mounting the camera onto the bracket. Step 2.1.4 shows the completed wall-mounted camera. Step 2.2 begins the ceiling-mount branch."
+  },
+  {
+    "qa_id": "qa-0027",
+    "question": "What document code is visible on the second page of the HDCVI Box Camera Installation Guide?",
+    "answer": "The visible document code is 1.2.51.32.16704-000.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p2.png",
+    "support": "Steps 3.1, 3.2, and 3.3 show camera enclosure/cover installation. The document code on the second page is 1.2.51.32.16704-000."
+  },
+  {
+    "qa_id": "qa-0028",
+    "question": "Which later step groups appear on the second page of the HDCVI Box Camera Installation Guide?",
+    "answer": "The second page continues with 2.2.x steps and later 3.x and 4.x steps.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p2.png",
+    "support": "Steps 2.2.2 and 2.2.3 continue the ceiling-mount branch. Steps 3.1, 3.2, and 3.3 show camera enclosure/cover installation. Steps 4.1 through 4.4 show camera angle/image adjustment. The document code on the second page is 1.2.51.32.16704-000."
+  },
+  {
+    "qa_id": "qa-0029",
+    "question": "Why does the HDCVI Box Camera Installation Guide need visual QA coverage?",
+    "answer": "Its procedure is mostly diagrammatic, so the ordering and labels are on the rendered pages rather than in normal prose.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p2.png",
+    "support": "Second page of the visual HDCVI box camera installation guide. It continues the ceiling-mount branch with 2.2.2 and 2.2.3, then shows enclosure/cover installation steps 3.1, 3.2, and 3.3, and camera angle/image adjustment steps 4.1 through 4.4. The page footer shows document code 1.2.51.32.16704-000."
+  },
+  {
+    "qa_id": "qa-0030",
+    "question": "How many pages of visual evidence does the HDCVI Box Camera Installation Guide provide in this source set?",
+    "answer": "It provides two pages of diagrammatic installation evidence.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p2.png",
+    "support": "Second page of the visual HDCVI box camera installation guide. It continues the ceiling-mount branch with 2.2.2 and 2.2.3, then shows enclosure/cover installation steps 3.1, 3.2, and 3.3, and camera angle/image adjustment steps 4.1 through 4.4. The page footer shows document code 1.2.51.32.16704-000."
+  },
+  {
+    "qa_id": "qa-0053",
+    "question": "Which HAC-HF3805G-related sources should be used for mounting compatibility versus physical dimensions?",
+    "answer": "Use the HAC-HF3231E installation sheet for wall/ceiling mount compatibility and the HAC-HF3805G dimension drawing for physical dimensions.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3231E_Installation_20171121_p1.png",
+    "support": "Mounting accessory compatibility sheet for HAC-HF3231E/HAC-HF3805G-style cameras, showing wall mount and ceiling mount options."
+  },
+  {
+    "qa_id": "qa-0053",
+    "question": "Which HAC-HF3805G-related sources should be used for mounting compatibility versus physical dimensions?",
+    "answer": "Use the HAC-HF3231E installation sheet for wall/ceiling mount compatibility and the HAC-HF3805G dimension drawing for physical dimensions.",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HAC-HF3805G_Dimention_20171128_p1.png",
+    "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+  },
+  {
+    "qa_id": "qa-0054",
+    "question": "Which S3006 visual source should answer size questions and which should answer port-layout questions?",
+    "answer": "The S3006 dimensions PDF should answer size questions, while the S3006 port diagram should answer port-layout questions.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_DIMENSIONS_p1.png",
+    "support": "Dimension drawing for the S3006-4ET-36/S3006 desktop switch, showing width 115.5 mm [4.55 in], depth 84.7 mm [3.33 in], body depth 88.2 mm [3.47 in], and height 27.0 mm [1.06 in]."
+  },
+  {
+    "qa_id": "qa-0054",
+    "question": "Which S3006 visual source should answer size questions and which should answer port-layout questions?",
+    "answer": "The S3006 dimensions PDF should answer size questions, while the S3006 port diagram should answer port-layout questions.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_PORT_p1.png",
+    "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+  },
+  {
+    "qa_id": "qa-0055",
+    "question": "Which S3006 source is better for installation sequence diagrams and which is better for prose installation and operation context?",
+    "answer": "The installation-method sheet is better for visual step sequence diagrams, while the switch user manual is better for prose installation and operation context.",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/S3006-4ET-36_INSTALLATION_METHOD_EN_p1.png",
+    "support": "The installation method is represented as five numbered visual steps. The document relies on diagrams, so the step order must be read from the rendered page."
+  },
+  {
+    "qa_id": "qa-0056",
+    "question": "Which HDCVI source should answer diagrammatic installation-step questions and which should answer general camera operation questions?",
+    "answer": "The HDCVI Box Camera Installation Guide should answer diagrammatic installation-step questions, while the HDCVI Camera User Manual should answer general operation questions.",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "render": "qa-goldset/codex-review/renders/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng_p1.png",
+    "support": "First page of a visual HDCVI box camera installation guide. It shows lens attachment steps 1A, 1B, 1C; wall-mount positioning as 2.1; drilling/marking as 2.1.1; fastening the bracket to the wall as 2.1.2; mounting the camera on the wall bracket as 2.1.3; and the completed wall-mounted view as 2.1.4. It also starts ceiling-mount steps 2.2 and 2.2.1."
+  }
+]

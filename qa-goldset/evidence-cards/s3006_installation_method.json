@@ -1,0 +1,30 @@
+[
+  {
+    "pdf_id": "s3006_installation_method",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "file_name": "S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_installation_method",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "页 1",
+    "section_path": [
+      "页 1"
+    ],
+    "text_chars": 9,
+    "text_excerpt": "1\n3\n5\n2\n4",
+    "visual_summary": "Five-step visual installation method for mounting the S3006 switch, shown as numbered diagrams rather than explanatory prose.",
+    "key_facts": [
+      "The installation method is represented as five numbered visual steps.",
+      "The document relies on diagrams, so the step order must be read from the rendered page."
+    ],
+    "keywords": [],
+    "image_count": 0,
+    "drawing_count": 2264,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

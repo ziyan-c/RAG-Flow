@@ -13,6 +13,7 @@ from .preprocessing.chunking_view import write_chunking_view_pdf
 from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
 from .sectioning import write_sectioned_json
+from .source_paths import source_name_for_pdf, source_root_from_input_path
 
 STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
 
@@ -64,7 +65,12 @@ def run_ingest(
 ) -> MinerUArtifacts:
     selected_stages = _stage_slice(from_stage, to_stage)
     source_pdf = Path(pdf_path or config.mineru.input_path)
-    source_name = config.paths.source_name if source_pdf == config.paths.source_pdf else source_pdf.name
+    source_name = source_name_for_pdf(
+        source_pdf,
+        configured_source_pdf=config.paths.source_pdf,
+        configured_source_name=config.paths.source_name,
+        source_root=source_root_from_input_path(config.mineru.input_path),
+    )
     mineru_ran = False
 
     content_json = None

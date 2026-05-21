@@ -11,6 +11,13 @@ from .config import AppConfig
 from .model_paths import resolve_model_location
 from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
+from .source_paths import (
+    normalize_source_name,
+    source_breadcrumb,
+    source_name_for_pdf,
+    source_payload_fields,
+    source_root_from_input_path,
+)
 
 DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
@@ -21,7 +28,9 @@ TEXT_DENSE_VECTOR_NAME = "chunk-text-dense"
 TEXT_SPARSE_VECTOR_NAME = "chunk-text-sparse"
 PAGE_IMAGE_COLPALI_VECTOR_NAME = "page-image-colpali"
 PAYLOAD_INDEX_SPECS = (
-    ("source", "keyword"),
+    ("source_relpath", "keyword"),
+    ("source_filename", "keyword"),
+    ("breadcrumb", "keyword"),
     ("page_idx", "integer"),
     ("page_start", "integer"),
     ("page_end", "integer"),
@@ -75,6 +84,19 @@ def _close_client(client: Any) -> None:
     close = getattr(client, "close", None)
     if close is not None:
         close()
+
+
+def _source_cleanup_names(source_name: str) -> set[str]:
+    fields = source_payload_fields(source_name)
+    names = {fields["source_relpath"]}
+    source_filename = fields.get("source_filename")
+    if source_filename:
+        names.add(source_filename)
+    return names
+
+
+def _payload_source_relpath(payload: dict[str, Any]) -> str:
+    return normalize_source_name(payload.get("source_relpath") or payload.get("source") or "")
 
 
 def validate_collection_schema(config: AppConfig, client: Any | None = None) -> None:
@@ -172,14 +194,15 @@ def _delete_existing_points_for_sources(
         match=models.MatchValue(value=True),
     )
     for source_name in sorted(source_names):
-        source_condition = models.FieldCondition(
-            key="source",
-            match=models.MatchValue(value=source_name),
-        )
+        source_conditions = [
+            models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_name)),
+            # Legacy cleanup only: older payloads used `source` as the document id.
+            models.FieldCondition(key="source", match=models.MatchValue(value=source_name)),
+        ]
         if visual:
-            point_filter = models.Filter(must=[source_condition, visual_condition])
+            point_filter = models.Filter(should=source_conditions, must=[visual_condition])
         else:
-            point_filter = models.Filter(must=[source_condition], must_not=[visual_condition])
+            point_filter = models.Filter(should=source_conditions, must_not=[visual_condition])
         client.delete(
             collection_name=collection_name,
             points_selector=models.FilterSelector(filter=point_filter),
@@ -212,7 +235,12 @@ def upsert_text_vectors(
     dense_model = TextEmbedding(config.models.dense_model)
     sparse_model = SparseTextEmbedding(config.models.sparse_model)
     client = create_qdrant_client(config)
-    source_names = {str(meta["source"]) for meta in metadatas if meta.get("source")}
+    source_names = {
+        cleanup_name
+        for meta in metadatas
+        if _payload_source_relpath(meta)
+        for cleanup_name in _source_cleanup_names(_payload_source_relpath(meta))
+    }
     _delete_existing_points_for_sources(
         client,
         config.paths.collection_name,
@@ -235,12 +263,15 @@ def upsert_text_vectors(
             sparse_embeddings,
         ):
             payload = dict(meta)
+            source_relpath = _payload_source_relpath(payload)
+            payload.update(source_payload_fields(source_relpath))
+            payload.pop("source", None)
             payload["chunk_content"] = doc
             page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
             chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
             points.append(
                 models.PointStruct(
-                    id=point_id(payload["source"], page_idx, chunk_id=chunk_id),
+                    id=point_id(source_relpath, page_idx, chunk_id=chunk_id),
                     payload=payload,
                     vector={
                         TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
@@ -266,7 +297,7 @@ def _page_payloads_from_chunks(
     by_page: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for chunk in chunks:
         meta = dict(chunk.get("metadata", {}))
-        if meta.get("source") != source_name:
+        if _payload_source_relpath(meta) != normalize_source_name(source_name):
             continue
         pages = meta.get("page_indices")
         if not isinstance(pages, list) or not pages:
@@ -287,7 +318,7 @@ def _page_payloads_from_chunks(
             if meta.get("chunk_id"):
                 chunk_ids.append(str(meta["chunk_id"]))
         payload: dict[str, Any] = {
-            "source": source_name,
+            **source_payload_fields(source_name),
             "page_idx": page_idx,
             "page_start": page_idx,
             "page_end": page_idx,
@@ -302,6 +333,10 @@ def _page_payloads_from_chunks(
                 payload["section_level"] = first_meta["section_level"]
             if first_meta.get("section_source"):
                 payload["section_source"] = first_meta["section_source"]
+        payload["breadcrumb"] = first_meta.get("breadcrumb") or source_breadcrumb(source_name, section_path)
+        for key in ("source_relpath", "source_filename"):
+            if first_meta.get(key):
+                payload[key] = first_meta[key]
         payloads[page_idx] = payload
     return payloads
 
@@ -315,7 +350,7 @@ def _visual_page_payload(
     payload = dict(page_payloads.get(page_idx, {}))
     if not payload:
         payload = {
-            "source": source_name,
+            **source_payload_fields(source_name),
             "page_idx": page_idx,
             "page_start": page_idx,
             "page_end": page_idx,
@@ -323,7 +358,7 @@ def _visual_page_payload(
             "is_visual_page": True,
             "chunk_ids_on_page": [],
     }
-    payload.setdefault("source", source_name)
+    payload.update({key: value for key, value in source_payload_fields(source_name).items() if not payload.get(key)})
     payload.setdefault("page_idx", page_idx)
     payload.setdefault("page_start", page_idx)
     payload.setdefault("page_end", page_idx)
@@ -360,7 +395,13 @@ def upsert_colpali_vectors(
     client = create_qdrant_client(config)
     device = get_torch_device(feature="ColPali visual indexing")
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
-    resolved_source_name = source_name or config.paths.source_name
+    resolved_pdf_path = Path(pdf_path or config.paths.source_pdf)
+    resolved_source_name = source_name or source_name_for_pdf(
+        resolved_pdf_path,
+        configured_source_pdf=config.paths.source_pdf,
+        configured_source_name=config.paths.source_name,
+        source_root=source_root_from_input_path(config.mineru.input_path),
+    )
     colpali_model_location = resolve_model_location(
         config.models.colpali_model,
         explicit_path=config.models.colpali_model_path,
@@ -375,7 +416,6 @@ def upsert_colpali_vectors(
         device_map=device,
     ).eval()
 
-    resolved_pdf_path = Path(pdf_path or config.paths.source_pdf)
     page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
     try:
         page_payloads = _page_payloads_from_chunks(
@@ -388,7 +428,7 @@ def upsert_colpali_vectors(
         client,
         config.paths.collection_name,
         models,
-        source_names={resolved_source_name},
+        source_names=_source_cleanup_names(resolved_source_name),
         visual=True,
     )
 
@@ -461,7 +501,7 @@ def inspect_collection(config: AppConfig, limit: int = 10) -> None:
 
     valid = next((record for record in records if PAGE_IMAGE_COLPALI_VECTOR_NAME in record.vector), records[0])
     print(f"Sample point: {valid.id}")
-    print(f"Source: {valid.payload.get('source')} page_idx={valid.payload.get('page_idx')}")
+    print(f"Source: {valid.payload.get('source_relpath')} page_idx={valid.payload.get('page_idx')}")
     for name in [TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME, PAGE_IMAGE_COLPALI_VECTOR_NAME]:
         if name not in valid.vector:
             print(f"{name}: missing")
@@ -498,9 +538,12 @@ def main(argv: list[str] | None = None) -> None:
         upsert_text_vectors(config, args.chunks, batch_size=args.batch_size)
     elif args.command == "visual":
         pdf_path = Path(args.pdf)
-        source_name = args.source_name
-        if source_name is None and pdf_path != config.paths.source_pdf:
-            source_name = pdf_path.name
+        source_name = args.source_name or source_name_for_pdf(
+            pdf_path,
+            configured_source_pdf=config.paths.source_pdf,
+            configured_source_name=config.paths.source_name,
+            source_root=source_root_from_input_path(config.mineru.input_path),
+        )
         upsert_colpali_vectors(
             config,
             pdf_path=pdf_path,

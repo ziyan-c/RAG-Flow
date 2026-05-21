@@ -1,0 +1,31 @@
+[
+  {
+    "pdf_id": "s3006_port_diagram",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "file_name": "S3006-4ET-36_PORT.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_port_diagram",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "页 1",
+    "section_path": [
+      "页 1"
+    ],
+    "text_chars": 0,
+    "text_excerpt": "",
+    "visual_summary": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack.",
+    "key_facts": [
+      "PoE ports 1-4 are labeled Port 1-4: 10/100Mbps (PoE).",
+      "Ports 5 and 6 are marked as uplink ports.",
+      "A PWR indicator appears at the far right of the front panel.",
+      "The rear view shows a grounding point and a DC IN jack."
+    ],
+    "keywords": [],
+    "image_count": 0,
+    "drawing_count": 2245,
+    "modality": [
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

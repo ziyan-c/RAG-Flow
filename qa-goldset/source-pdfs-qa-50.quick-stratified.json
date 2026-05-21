@@ -1,0 +1,1244 @@
+[
+  {
+    "question": "Why should a RAG answerer inspect the rendered S3006 dimensions PDF instead of relying only on extracted text?",
+    "answer": "The useful information is the dimension drawing itself: the page consists mainly of visual measurement arrows and labels, so layout and labels from the rendered page are needed.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_dimensions",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Dimension drawing for the S3006-4ET-36/S3006 desktop switch, showing width 115.5 mm [4.55 in], depth 84.7 mm [3.33 in], body depth 88.2 mm [3.47 in], and height 27.0 mm [1.06 in]."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0003"
+  },
+  {
+    "question": "What is the purpose of the S3006-4ET-36 PORT PDF in the source set?",
+    "answer": "It is a visual port-layout reference for the S3006 switch, used to identify physical port and connector arrangement.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_port_diagram",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0009"
+  },
+  {
+    "question": "Which S3006 source PDF is the best evidence for physical port-layout questions?",
+    "answer": "The S3006-4ET-36_PORT.pdf file is the best evidence for physical port-layout questions.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_port_diagram",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Port layout diagram for the S3006 switch. The front panel shows a Default Extend DIP area at the left, PoE ports 1-4 labeled Port 1-4: 10/100Mbps (PoE), uplink ports 5 and 6 labeled Port 5-6: 10/100Mbps, Link/Act and PoE indicators above the ports, and a PWR indicator at the far right. The rear view shows a grounding point and a DC IN power jack."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0012"
+  },
+  {
+    "question": "What two mounting categories does the HAC-HF3231E installation sheet compare?",
+    "answer": "It compares Wall Mount and Ceiling Mount options.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_hf3231e_installation",
+        "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Wall Mount is associated with PFB121W. Ceiling Mount is associated with PFB110W."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0017"
+  },
+  {
+    "question": "Is HAC-HF3805G_Dimention_20171128.pdf primarily a prose manual or a visual drawing?",
+    "answer": "It is primarily a visual dimension drawing.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_hf3805g_dimension",
+        "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0022"
+  },
+  {
+    "question": "What main length values are shown in the HAC-HF3805G dimension drawing?",
+    "answer": "The drawing shows a main length of 144.5 mm [5.69 in] and a body length of 134 mm [5.28 in].",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_hf3805g_dimension",
+        "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "Main length is marked 144.5 mm [5.69 in]. Body length is marked 134 mm [5.28 in]."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0023"
+  },
+  {
+    "question": "What document code is visible on the second page of the HDCVI Box Camera Installation Guide?",
+    "answer": "The visible document code is 1.2.51.32.16704-000.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_box_install_guide",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "diagram",
+        "support": "Steps 3.1, 3.2, and 3.3 show camera enclosure/cover installation. The document code on the second page is 1.2.51.32.16704-000."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0027"
+  },
+  {
+    "question": "Why does the HDCVI Box Camera Installation Guide need visual QA coverage?",
+    "answer": "Its procedure is mostly diagrammatic, so the ordering and labels are on the rendered pages rather than in normal prose.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_box_install_guide",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "diagram",
+        "support": "Second page of the visual HDCVI box camera installation guide. It continues the ceiling-mount branch with 2.2.2 and 2.2.3, then shows enclosure/cover installation steps 3.1, 3.2, and 3.3, and camera angle/image adjustment steps 4.1 through 4.4. The page footer shows document code 1.2.51.32.16704-000."
+      }
+    ],
+    "question_type": "visual",
+    "requires_visual": true,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0029"
+  },
+  {
+    "question": "What point does the open-source notice make about linking this file with other works?",
+    "answer": "It states that linking this file with other works does not by itself cause the resulting work to be covered by the GNU General Public License, while the source code for this file must still be made available.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_open_source_notice",
+        "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "text",
+        "support": "and link it with other works to produce a work based on this file, this file does not by itself cause the resulting work to be covered by the GNU General Public License. However the source code for this file must still be made available in accordance with section (3) of the GNU General Public License v2."
+      }
+    ],
+    "question_type": "safety_or_notice",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0033"
+  },
+  {
+    "question": "How does the notice characterize BSD-style licenses?",
+    "answer": "It characterizes BSD-style licenses as having extremely minimal restrictions and allowing software to be modified and used in proprietary software with source code kept secret.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_open_source_notice",
+        "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+        "page_idx": 2,
+        "page_number": 3,
+        "modality": "text",
+        "support": "Due to the extremely minimal restrictions of BSD-style licenses, software released under such licenses can be freely modified and used in proprietary (i.e., commercial) software for which the source code is kept secret."
+      }
+    ],
+    "question_type": "safety_or_notice",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0034"
+  },
+  {
+    "question": "What is the high-level product positioning of the S3006-4ET-60 datasheet?",
+    "answer": "It describes a highly reliable unmanaged PoE switch with a high-performance switching engine, large buffer memory, and optimized transmission performance.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_datasheet",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "table",
+        "support": "Series Overview Highly reliable, the unmanaged PoE switch is equipped with a high performance switching engine, has large buffer memory and optimizes transmission performance."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0035"
+  },
+  {
+    "question": "What PoE pin assignment is stated for the S3006-4ET-60?",
+    "answer": "The datasheet states 1,2,4,5 as V+ and 3,6,7,8 as V-.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_datasheet",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "table",
+        "support": "PoE PoE Yes PoE Power Port 1-4≤30 W, total≤60 W PoE Protocol IEEE 802.3af; IEEE 802.3at PoE Pin Assignment 1,2,4,5 (V+),3,6,7,8 (V-) Long Distance PoE Transmission Yes Hardware DIP Switch Long Distance PoE: The transmission distance of ports 1–4 can reach up to 250 meters."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0038"
+  },
+  {
+    "question": "What scanning system is specified for the DH-HAC-HF3805G?",
+    "answer": "The scanning system is Progressive.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_hf3805g_datasheet",
+        "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "table",
+        "support": "www.dahuasecurity.com\nUltra Series | DH-HAC-HF3805G\nTechnical Specification\nCamera\nImage Sensor\n4/3\" CMOS \nEffective Pixels\n3840(H)×2160(V), 8MP\nScanning System\nProgressive\nElectronic Shutter Speed\n1/3s~1/100,000s\nMinimum Illumination\n0.001Lux/F1.2(Color,1/3s,30IRE)\n0.0005Lux/F0.95 (Color,1/3s,30IRE)\n0.003Lux/F0.95 (Color,1/30s,30IRE)\n0.0003Lux/F0.95 (B/W,1/3s,30IRE)\n0.002Lux/F0.95 (B/W,1/30s,30IRE)\nS/N..."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0043"
+  },
+  {
+    "question": "Which ordering information entry identifies the PAL version of the 8MP boxed camera?",
+    "answer": "The PAL version is DH-HAC-HF3805GP, described as an 8Megapixel Ultra WDR Boxed Camera, PAL.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hac_hf3805g_datasheet",
+        "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+        "page_idx": 2,
+        "page_number": 3,
+        "modality": "table",
+        "support": "All rights reserved. www.dahuasecurity.com Ordering Information Type Part Number Description 8MP Camera DH-HAC-HF3805GP 8Megapixel Ultra WDR Boxed Camera, PAL DH-HAC-HF3805GN 8Megapixel Ultra WDR Boxed Camera, NTSC Accessories PFB121W Wall Mount Bracket PFB110W Wall Mount Bracket PFH610V 14” Vandal-proof Housing PFM810 POC Transceiver Dimensions (mm/inch) Dimensions (mm/inch) Optional: PFM800-4MP Passive HDCVI..."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0045"
+  },
+  {
+    "question": "What privacy categories are mentioned in both DSS PC and Web client manuals?",
+    "answer": "Both mention personal data such as face, audio, fingerprints, and license plate number.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 2,
+        "page_number": 3,
+        "modality": "text",
+        "support": "Privacy Protection Notice As the device user or data controller, you might collect the personal data of others such as their face, audio, fingerprints, and license plate number."
+      },
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 2,
+        "page_number": 3,
+        "modality": "text",
+        "support": "Privacy Protection Notice As the device user or data controller, you might collect the personal data of others such as their face, audio, fingerprints, and license plate number."
+      }
+    ],
+    "question_type": "multi_pdf_comparison",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": true,
+    "difficulty": "medium",
+    "id": "qa-0049"
+  },
+  {
+    "question": "Which DSS documents in the source set are explicitly tied to V8.8.0?",
+    "answer": "The DSS Ultimate Quick Deployment Manual, Web Client User Manual, and PC Client User Manual are all tied to V8.8.0.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_quick_deployment",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "text",
+        "support": "ZHEJIANG DAHUA VISION TECHNOLOGY CO., LTD.\nV8.8.0\nDSS Ultimate\nQuick Deployment Manual"
+      },
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "text",
+        "support": "ZHEJIANG DAHUA VISION TECHNOLOGY CO., LTD.\nV8.8.0\nDSS Ultimate Web Client\nUser Manual"
+      }
+    ],
+    "question_type": "multi_pdf_comparison",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": true,
+    "difficulty": "medium",
+    "id": "qa-0050"
+  },
+  {
+    "question": "How do the HDCVI camera user manual and DH-HAC-HF3805G datasheet differ in focus?",
+    "answer": "The user manual explains camera functions and operations, while the datasheet emphasizes the specific DH-HAC-HF3805G hardware features and specifications.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+      "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "text",
+        "support": "Foreword General This manual introduces the functions and operations of the HDCVI camera (hereinafter referred to as \"the device\")."
+      },
+      {
+        "pdf_id": "hac_hf3805g_datasheet",
+        "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "text",
+        "support": "System Overview DH-HAC-HFW3805G adopts high performance ISP and advanced 4/3\" 8MP image sensor, which can bring vaster coverage and superiorer image details in 7/24 with the 4K resolution."
+      }
+    ],
+    "question_type": "multi_pdf_comparison",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": true,
+    "difficulty": "medium",
+    "id": "qa-0052"
+  },
+  {
+    "question": "Which S3006 source is better for installation sequence diagrams and which is better for prose installation and operation context?",
+    "answer": "The installation-method sheet is better for visual step sequence diagrams, while the switch user manual is better for prose installation and operation context.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+      "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "s3006_installation_method",
+        "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+        "page_idx": 0,
+        "page_number": 1,
+        "modality": "diagram",
+        "support": "The installation method is represented as five numbered visual steps. The document relies on diagrams, so the step order must be read from the rendered page."
+      },
+      {
+        "pdf_id": "switch_user_manual",
+        "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "text",
+        "support": "Foreword General This manual introduces the installation, functions and operations of the 4&8 port unmanaged switch (hereinafter referred to as \"the switch\")."
+      }
+    ],
+    "question_type": "multi_pdf_comparison",
+    "requires_visual": true,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": true,
+    "difficulty": "medium",
+    "id": "qa-0055"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 127?",
+    "answer": "4.3.2.11 Searching for and Filtering People View certain people and their information by searching for keywords or filtering the type of information to be displayed, such as name, ID, card number, ID number, plate number, company, department, email and more.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 126,
+        "page_number": 127,
+        "modality": "text",
+        "support": "4.3.2.11 Searching for and Filtering People View certain people and their information by searching for keywords or filtering the type of information to be displayed, such as name, ID, card number, ID number, plate number, company, department, email and more."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0068"
+  },
+  {
+    "question": "According to page 440 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "The real-time alarms receive arming alarms and alarms reported from devices since going to the command center watchtower module.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 439,
+        "page_number": 440,
+        "modality": "text",
+        "support": "The real-time alarms receive arming alarms and alarms reported from devices since going to the command center watchtower module."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0076"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 436?",
+    "answer": "●Display settings: Supports showing or hiding license plates and speed, switching satellite map, and point clustering on the map (that is, the system clusters adjacent channels into one point according to the map scale, and identifies the number of channels with numbers).",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 435,
+        "page_number": 436,
+        "modality": "text",
+        "support": "●Display settings: Supports showing or hiding license plates and speed, switching satellite map, and point clustering on the map (that is, the system clusters adjacent channels into one point according to the map scale, and identifies the number of channels with numbers)."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0080"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 17?",
+    "answer": "●For best performance, we recommend adding additional hard drives to store pictures.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 16,
+        "page_number": 17,
+        "modality": "text",
+        "support": "●For best performance, we recommend adding additional hard drives to store pictures."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0081"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 98?",
+    "answer": "●Loop mode: Linked live videos will be displayed on windows of a video wall according to the order of windows.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 97,
+        "page_number": 98,
+        "modality": "text",
+        "support": "●Loop mode: Linked live videos will be displayed on windows of a video wall according to the order of windows."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0086"
+  },
+  {
+    "question": "What structured detail or configuration point is documented on page 138 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "For details, see \"4.3 Personnel and Vehicle Management\".",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 137,
+        "page_number": 138,
+        "modality": "text",
+        "support": "For details, see \"4.3 Personnel and Vehicle Management\"."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0090"
+  },
+  {
+    "question": "According to page 38 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "●For distributed deployment, make sure that the external network IP of sub servers and main servers are the same, and the IP must be a public network IP.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 37,
+        "page_number": 38,
+        "modality": "text",
+        "support": "●For distributed deployment, make sure that the external network IP of sub servers and main servers are the same, and the IP must be a public network IP."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0094"
+  },
+  {
+    "question": "What structured detail or configuration point is documented on page 137 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "Once the prompt rules are triggered, the server will receive the event and then send the alerts to the event center.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 136,
+        "page_number": 137,
+        "modality": "text",
+        "support": "Once the prompt rules are triggered, the server will receive the event and then send the alerts to the event center."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0095"
+  },
+  {
+    "question": "What structured detail or configuration point is documented on page 444 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "Each patroller assigned to the incident can choose to accept or decline it, and the system supports collaborative handling of the incident by multiple patrollers.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 443,
+        "page_number": 444,
+        "modality": "text",
+        "support": "Each patroller assigned to the incident can choose to accept or decline it, and the system supports collaborative handling of the incident by multiple patrollers."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0105"
+  },
+  {
+    "question": "According to page 406 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "If a vehicle has exited but it is displayed as inside the parking lot, click to record it as exited the parking lot, or you can select multiple vehicles, and then click Force Exit to record them as exited the parking lot in batches.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 405,
+        "page_number": 406,
+        "modality": "text",
+        "support": "If a vehicle has exited but it is displayed as inside the parking lot, click to record it as exited the parking lot, or you can select multiple vehicles, and then click Force Exit to record them as exited the parking lot in batches."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0107"
+  },
+  {
+    "question": "What structured detail or configuration point is documented on page 122 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "●Normal light colors should be used (without whitening, yellowing, and backlight).",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 121,
+        "page_number": 122,
+        "modality": "text",
+        "support": "●Normal light colors should be used (without whitening, yellowing, and backlight)."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0109"
+  },
+  {
+    "question": "According to page 314 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "It includes picture, exposure, backlight, day/night mode, focus and zoom, defog, and...",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 313,
+        "page_number": 314,
+        "modality": "text",
+        "support": "It includes picture, exposure, backlight, day/night mode, focus and zoom, defog, and..."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0111"
+  },
+  {
+    "question": "Which two evidence snippets should be combined from pages 126 and 127 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf for a cross-page retrieval check?",
+    "answer": "Page 126: Enter the platform login password, and set the encryption password. Page 127: One MPT device can be configured with up to 1 face arming group and 1 vehicle arming group.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 125,
+        "page_number": 126,
+        "modality": "text",
+        "support": "Enter the platform login password, and set the encryption password."
+      },
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 126,
+        "page_number": 127,
+        "modality": "text",
+        "support": "One MPT device can be configured with up to 1 face arming group and 1 vehicle arming group."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0117"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 244?",
+    "answer": "When an incident in the patrol area occurs, incident dispatchers can coordinate the patrollers in the patrol area to respond to the incident.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 243,
+        "page_number": 244,
+        "modality": "text",
+        "support": "When an incident in the patrol area occurs, incident dispatchers can coordinate the patrollers in the patrol area to respond to the incident."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0118"
+  },
+  {
+    "question": "According to page 122 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "4.3.2.11 Searching for and Filtering People View certain people and their information by searching for keywords or filtering the type of information to be displayed, such as name, ID, card number, ID number, plate number, company, department, email and more.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 121,
+        "page_number": 122,
+        "modality": "text",
+        "support": "4.3.2.11 Searching for and Filtering People View certain people and their information by searching for keywords or filtering the type of information to be displayed, such as name, ID, card number, ID number, plate number, company, department, email and more."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0121"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 357?",
+    "answer": "●Display settings: Supports showing or hiding license plates and speed, switching satellite map, and point clustering on the map (that is, the system clusters adjacent channels into one point according to the map scale, and identifies the number of channels with numbers).",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 356,
+        "page_number": 357,
+        "modality": "text",
+        "support": "●Display settings: Supports showing or hiding license plates and speed, switching satellite map, and point clustering on the map (that is, the system clusters adjacent channels into one point according to the map scale, and identifies the number of channels with numbers)."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0123"
+  },
+  {
+    "question": "According to page 241 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "In the Event Source area, select the event source type, event, and event source that are consistent with those defined in 7.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 240,
+        "page_number": 241,
+        "modality": "text",
+        "support": "In the Event Source area, select the event source type, event, and event source that are consistent with those defined in 7."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0126"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 123?",
+    "answer": "4.3.2.12 Configuring Access Rule An access rule defines the permission and effective time of that permission to lift or door channels.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 122,
+        "page_number": 123,
+        "modality": "text",
+        "support": "4.3.2.12 Configuring Access Rule An access rule defines the permission and effective time of that permission to lift or door channels."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0131"
+  },
+  {
+    "question": "Which two evidence snippets should be combined from pages 308 and 309 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf for a cross-page retrieval check?",
+    "answer": "Page 308: Person/ID/Access Point/ Access Point/Company/ Department/Card No. Page 309: How records are synchronized: If records on a device was automatically synchronized to the platform, then the platform will synchronize all records from the time of the latest record from the last automatic synchronization to the time that you set.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 307,
+        "page_number": 308,
+        "modality": "text",
+        "support": "Person/ID/Access Point/ Access Point/Company/ Department/Card No."
+      },
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 308,
+        "page_number": 309,
+        "modality": "text",
+        "support": "How records are synchronized: If records on a device was automatically synchronized to the platform, then the platform will synchronize all records from the time of the latest record from the last automatic synchronization to the time that you set."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0133"
+  },
+  {
+    "question": "According to page 42 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "●When you set Device Category to Video Wall Control, and you are using the Dual NIC Mode, WAN Mode, or both modes, you need to select the network in which the device works according to the actual situation.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 41,
+        "page_number": 42,
+        "modality": "text",
+        "support": "●When you set Device Category to Video Wall Control, and you are using the Dual NIC Mode, WAN Mode, or both modes, you need to select the network in which the device works according to the actual situation."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0134"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 430?",
+    "answer": "7.4.15 Configuring Network Device Protocol When adding a third-party network device that supports the SNMP protocol (such as a switch), you must upload the SNMP protocol of the network device to the DSS platform first.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 429,
+        "page_number": 430,
+        "modality": "text",
+        "support": "7.4.15 Configuring Network Device Protocol When adding a third-party network device that supports the SNMP protocol (such as a switch), you must upload the SNMP protocol of the network device to the DSS platform first."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0147"
+  },
+  {
+    "question": "In Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 9?",
+    "answer": "1 Overview DSS platform supports cloud storage deployment, multiple sites deployment, distributed deployment, hot standby, N+M deployment, and LAN to WAN mapping.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_quick_deployment",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+        "page_idx": 8,
+        "page_number": 9,
+        "modality": "text",
+        "support": "1 Overview DSS platform supports cloud storage deployment, multiple sites deployment, distributed deployment, hot standby, N+M deployment, and LAN to WAN mapping."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0160"
+  },
+  {
+    "question": "According to page 6 of Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf, what key point is stated?",
+    "answer": "●Place the device in a location that children cannot easily access.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_quick_deployment",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+        "page_idx": 5,
+        "page_number": 6,
+        "modality": "text",
+        "support": "●Place the device in a location that children cannot easily access."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0162"
+  },
+  {
+    "question": "According to page 35 of HDCVI_Camera_User_Manual_V1.0.7.pdf, what key point is stated?",
+    "answer": "Use a wrench to loosen the adjusting screw ④, adjust camera to the location which needs to be monitored, and then use wrench to tighten bracket...",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 34,
+        "page_number": 35,
+        "modality": "text",
+        "support": "Use a wrench to loosen the adjusting screw ④, adjust camera to the location which needs to be monitored, and then use wrench to tighten bracket..."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0174"
+  },
+  {
+    "question": "In HDCVI_Camera_User_Manual_V1.0.7.pdf, what operational instruction or note is documented on page 2?",
+    "answer": "February 2025 V1.0.5 ●Updated Important Safeguards and Warnings.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "text",
+        "support": "February 2025 V1.0.5 ●Updated Important Safeguards and Warnings."
+      }
+    ],
+    "question_type": "procedure",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0178"
+  },
+  {
+    "question": "Which two evidence snippets should be combined from pages 18 and 19 of HDCVI_Camera_User_Manual_V1.0.7.pdf for a cross-page retrieval check?",
+    "answer": "Page 18: Click , and then you can control the four directions (left, right, up, and down) of PTZ through mouse operation. Page 19: 4.2 Configuring Smart Light Adjustment In the smart light mode, configure the maximum brightness level of the smart light, and the device will change brightness automatically according to the ambient lighting condition.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 17,
+        "page_number": 18,
+        "modality": "text",
+        "support": "Click , and then you can control the four directions (left, right, up, and down) of PTZ through mouse operation."
+      },
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 18,
+        "page_number": 19,
+        "modality": "text",
+        "support": "4.2 Configuring Smart Light Adjustment In the smart light mode, configure the maximum brightness level of the smart light, and the device will change brightness automatically according to the ambient lighting condition."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0184"
+  },
+  {
+    "question": "What structured detail or configuration point is documented on page 20 of HDCVI_Camera_User_Manual_V1.0.7.pdf?",
+    "answer": "If SMD or IVS has been associated with smart dual illuminators cameras, and when the SMD detects people and vehicles on the screen, or perimeter rules are triggered by the IVS, then the camera will be controlled to turn on the warm light, and the screen automatically switch to the full-color.",
+    "source_pdfs": [
+      "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "hdcvi_camera_manual",
+        "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+        "page_idx": 19,
+        "page_number": 20,
+        "modality": "text",
+        "support": "If SMD or IVS has been associated with smart dual illuminators cameras, and when the SMD detects people and vehicles on the screen, or perimeter rules are triggered by the IVS, then the camera will be controlled to turn on the warm light, and the screen automatically switch to the full-color."
+      }
+    ],
+    "question_type": "table_or_spec",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "medium",
+    "id": "qa-0185"
+  },
+  {
+    "question": "Which two evidence snippets should be combined from pages 4 and 5 of Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf for a cross-page retrieval check?",
+    "answer": "Page 4: Important Safeguards and Warnings This section introduces content covering the proper handling of the device, hazard prevention, and prevention of property damage. Page 5: ●Do not drop or splash liquid onto the device, and make sure that there is no object filled with liquid on the device to prevent liquid from flowing into it.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "switch_user_manual",
+        "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+        "page_idx": 3,
+        "page_number": 4,
+        "modality": "text",
+        "support": "Important Safeguards and Warnings This section introduces content covering the proper handling of the device, hazard prevention, and prevention of property damage."
+      },
+      {
+        "pdf_id": "switch_user_manual",
+        "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+        "page_idx": 4,
+        "page_number": 5,
+        "modality": "text",
+        "support": "●Do not drop or splash liquid onto the device, and make sure that there is no object filled with liquid on the device to prevent liquid from flowing into it."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0190"
+  },
+  {
+    "question": "According to page 3 of Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf, what key point is stated?",
+    "answer": "●All trademarks, registered trademarks and company names in the manual are properties of their respective owners.",
+    "source_pdfs": [
+      "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "switch_user_manual",
+        "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+        "page_idx": 2,
+        "page_number": 3,
+        "modality": "text",
+        "support": "●All trademarks, registered trademarks and company names in the manual are properties of their respective owners."
+      }
+    ],
+    "question_type": "fact",
+    "requires_visual": false,
+    "requires_multiple_pages": false,
+    "requires_multiple_pdfs": false,
+    "difficulty": "easy",
+    "id": "qa-0191"
+  },
+  {
+    "question": "For PC client account access and live-view use, what evidence should be combined from pages 22 and 2 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "Page 22: Database repair If you cannot log in to the client because the database is abnormal, you can try to repair it manually. Page 2: Frequently Used Functions Icon/Parameter Description View the details of an item.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 21,
+        "page_number": 22,
+        "modality": "text",
+        "support": "Database repair If you cannot log in to the client because the database is abnormal, you can try to repair it manually."
+      },
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 1,
+        "page_number": 2,
+        "modality": "text",
+        "support": "Frequently Used Functions Icon/Parameter Description View the details of an item."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0198"
+  },
+  {
+    "question": "For PC client alarm handling and recording context, what evidence should be combined from pages 12 and 296 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "Page 12: The multi-site function allows you to incorporate multiple DSS platforms into one, and you can perform operations such as viewing live video, playing back recorded videos, viewing real-time and historical events, and more of multiple platforms on one platform. Page 296: Click or double-click a record to expand the record information, and then you can: ○Click to automatically open the video recording of 10 seconds before the event (if there is no recording in the previous 10 seconds, it will associate the event with the recording closest to the event time). ○Click to go to the Target Search page, and search for images by image. ○Click to add the face or vehicle to the arming...",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 11,
+        "page_number": 12,
+        "modality": "text",
+        "support": "The multi-site function allows you to incorporate multiple DSS platforms into one, and you can perform operations such as viewing live video, playing back recorded videos, viewing real-time and historical events, and more of multiple platforms on one platform."
+      },
+      {
+        "pdf_id": "dss_pc_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 295,
+        "page_number": 296,
+        "modality": "text",
+        "support": "Click or double-click a record to expand the record information, and then you can: ○Click to automatically open the video recording of 10 seconds before the event (if there is no recording in the previous 10 seconds, it will associate the event with the recording closest to the event time). ○Click to go to the Target Search page, and search for images by image. ○Click to add the face or vehicle to the arming..."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0199"
+  },
+  {
+    "question": "For Web client login and alarm workflow context, what evidence should be combined from pages 21 and 11 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf?",
+    "answer": "Page 21: Database repair If you cannot log in to the client because the database is abnormal, you can try to repair it manually. Page 11: The multi-site function allows you to incorporate multiple DSS platforms into one, and you can perform operations such as viewing live video, playing back recorded videos, viewing real-time and historical events, and more of multiple platforms on one platform.",
+    "source_pdfs": [
+      "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+    ],
+    "evidence": [
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 20,
+        "page_number": 21,
+        "modality": "text",
+        "support": "Database repair If you cannot log in to the client because the database is abnormal, you can try to repair it manually."
+      },
+      {
+        "pdf_id": "dss_web_manual",
+        "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+        "page_idx": 10,
+        "page_number": 11,
+        "modality": "text",
+        "support": "The multi-site function allows you to incorporate multiple DSS platforms into one, and you can perform operations such as viewing live video, playing back recorded videos, viewing real-time and historical events, and more of multiple platforms on one platform."
+      }
+    ],
+    "question_type": "cross_page",
+    "requires_visual": false,
+    "requires_multiple_pages": true,
+    "requires_multiple_pdfs": false,
+    "difficulty": "hard",
+    "id": "qa-0200"
+  }
+]

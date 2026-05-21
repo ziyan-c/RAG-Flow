@@ -1,0 +1,1200 @@
+[
+  {
+    "pdf_id": "dss_pc_manual",
+    "path": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "pc_client_user_manual",
+    "target_questions": 58,
+    "page_count": 540,
+    "text_chars": 852777,
+    "avg_text_chars_per_page": 1579.2,
+    "image_pages": 540,
+    "drawing_pages": 538,
+    "visual_priority": false,
+    "toc_count": 634,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " Foreword",
+        "page_number": 2
+      },
+      {
+        "level": 1,
+        "title": "1  Overview",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 1.1 Introduction",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 1.2 Highlights",
+        "page_number": 12
+      },
+      {
+        "level": 1,
+        "title": "2  Installation and Deployment",
+        "page_number": 13
+      },
+      {
+        "level": 2,
+        "title": " 2.1 Cloud Storage Deployment",
+        "page_number": 16
+      },
+      {
+        "level": 3,
+        "title": " 2.1.1 Installing Cloud Storage Server",
+        "page_number": 16
+      },
+      {
+        "level": 3,
+        "title": " 2.1.2 Installing DSS Platform",
+        "page_number": 16
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.1 Server Requirements",
+        "page_number": 16
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.2 Installing Management Tool",
+        "page_number": 18
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.3 Configuring Server IP Address",
+        "page_number": 19
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.4 Management Tool",
+        "page_number": 20
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.5 DSS PC Client",
+        "page_number": 22
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.1 Installing DSS PC Client",
+        "page_number": 22
+      },
+      {
+        "level": 6,
+        "title": " DSS Client Requirements",
+        "page_number": 22
+      },
+      {
+        "level": 6,
+        "title": " Downloading and Installing DSS Client",
+        "page_number": 22
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.2 Logging in to DSS PC Client",
+        "page_number": 23
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.3 Home Page of DSS PC Client",
+        "page_number": 25
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.6 Licensing",
+        "page_number": 27
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.6.1 Applying for a License",
+        "page_number": 27
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.6.2 Activating License",
+        "page_number": 27
+      },
+      {
+        "level": 6,
+        "title": " Online Activation",
+        "page_number": 27
+      },
+      {
+        "level": 6,
+        "title": " Offline Activation",
+        "page_number": 29
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.7 Enabling Cloud Storage Nodes",
+        "page_number": 31
+      },
+      {
+        "level": 2,
+        "title": " 2.2 Multiple Sites Deployment",
+        "page_number": 31
+      },
+      {
+        "level": 2,
+        "title": " 2.3 Distributed Deployment",
+        "page_number": 32
+      },
+      {
+        "level": 3,
+        "title": " 2.3.1 Installing Main Server",
+        "page_number": 32
+      },
+      {
+        "level": 3,
+        "title": " 2.3.2 Installing Sub Server",
+        "page_number": 33
+      },
+      {
+        "level": 2,
+        "title": " 2.4 Hot Standby",
+        "page_number": 34
+      },
+      {
+        "level": 2,
+        "title": " 2.5 Cascade",
+        "page_number": 34
+      },
+      {
+        "level": 2,
+        "title": " 2.6 N+M",
+        "page_number": 34
+      },
+      {
+        "level": 2,
+        "title": " 2.7 Configuring LAN or WAN",
+        "page_number": 37
+      },
+      {
+        "level": 3,
+        "title": " 2.7.1 Configuring Router",
+        "page_number": 37
+      },
+      {
+        "level": 3,
+        "title": " 2.7.2 Mapping IP or Domain Name",
+        "page_number": 37
+      },
+      {
+        "level": 2,
+        "title": " 2.8 Virtualization Deployment",
+        "page_number": 38
+      },
+      {
+        "level": 2,
+        "title": " 2.9 Installing Plugin",
+        "page_number": 39
+      },
+      {
+        "level": 1,
+        "title": "3  Basic Configurations",
+        "page_number": 40
+      },
+      {
+        "level": 2,
+        "title": " 3.1 Managing Resources",
+        "page_number": 40
+      },
+      {
+        "level": 3,
+        "title": " 3.1.1 Adding an Organization",
+        "page_number": 40
+      },
+      {
+        "level": 3,
+        "title": " 3.1.2 Managing Devices",
+        "page_number": 41
+      }
+    ]
+  },
+  {
+    "pdf_id": "dss_web_manual",
+    "path": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "web_client_user_manual",
+    "target_questions": 48,
+    "page_count": 447,
+    "text_chars": 712187,
+    "avg_text_chars_per_page": 1593.3,
+    "image_pages": 447,
+    "drawing_pages": 445,
+    "visual_priority": false,
+    "toc_count": 538,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " Foreword",
+        "page_number": 2
+      },
+      {
+        "level": 1,
+        "title": "1  Overview",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 1.1 Introduction",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 1.2 Highlights",
+        "page_number": 11
+      },
+      {
+        "level": 1,
+        "title": "2  Installation and Deployment",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 2.1 Cloud Storage Deployment",
+        "page_number": 15
+      },
+      {
+        "level": 3,
+        "title": " 2.1.1 Installing Cloud Storage Server",
+        "page_number": 15
+      },
+      {
+        "level": 3,
+        "title": " 2.1.2 Installing DSS Platform",
+        "page_number": 15
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.1 Server Requirements",
+        "page_number": 15
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.2 Installing Management Tool",
+        "page_number": 17
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.3 Configuring Server IP Address",
+        "page_number": 18
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.4 Management Tool",
+        "page_number": 19
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.5 DSS Web Client",
+        "page_number": 21
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.1 Logging in to DSS Web Client",
+        "page_number": 21
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.2 Installing Certificate of DSS Web Client",
+        "page_number": 22
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.5.3 Home Page of DSS Web Client",
+        "page_number": 23
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.6 Licensing",
+        "page_number": 24
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.6.1 Applying for a License",
+        "page_number": 24
+      },
+      {
+        "level": 5,
+        "title": " 2.1.2.6.2 Activating License",
+        "page_number": 25
+      },
+      {
+        "level": 6,
+        "title": " Online Activation",
+        "page_number": 25
+      },
+      {
+        "level": 6,
+        "title": " Offline Activation",
+        "page_number": 26
+      },
+      {
+        "level": 4,
+        "title": " 2.1.2.7 Enabling Cloud Storage Nodes",
+        "page_number": 28
+      },
+      {
+        "level": 2,
+        "title": " 2.2 Multiple Sites Deployment",
+        "page_number": 29
+      },
+      {
+        "level": 2,
+        "title": " 2.3 Distributed Deployment",
+        "page_number": 30
+      },
+      {
+        "level": 3,
+        "title": " 2.3.1 Installing Main Server",
+        "page_number": 30
+      },
+      {
+        "level": 3,
+        "title": " 2.3.2 Installing Sub Server",
+        "page_number": 30
+      },
+      {
+        "level": 2,
+        "title": " 2.4 Hot Standby",
+        "page_number": 31
+      },
+      {
+        "level": 2,
+        "title": " 2.5 Cascade",
+        "page_number": 31
+      },
+      {
+        "level": 2,
+        "title": " 2.6 N+M",
+        "page_number": 32
+      },
+      {
+        "level": 2,
+        "title": " 2.7 Configuring LAN or WAN",
+        "page_number": 35
+      },
+      {
+        "level": 3,
+        "title": " 2.7.1 Configuring Router",
+        "page_number": 35
+      },
+      {
+        "level": 3,
+        "title": " 2.7.2 Mapping IP or Domain Name",
+        "page_number": 35
+      },
+      {
+        "level": 2,
+        "title": " 2.8 Virtualization Deployment",
+        "page_number": 36
+      },
+      {
+        "level": 2,
+        "title": " 2.9 Installing Plugin",
+        "page_number": 37
+      },
+      {
+        "level": 1,
+        "title": "3  Basic Configurations",
+        "page_number": 38
+      },
+      {
+        "level": 2,
+        "title": " 3.1 Managing Resources",
+        "page_number": 38
+      },
+      {
+        "level": 3,
+        "title": " 3.1.1 Adding an Organization",
+        "page_number": 38
+      },
+      {
+        "level": 3,
+        "title": " 3.1.2 Managing Devices",
+        "page_number": 39
+      },
+      {
+        "level": 4,
+        "title": " 3.1.2.1 Searching for Online Devices",
+        "page_number": 39
+      },
+      {
+        "level": 4,
+        "title": " 3.1.2.2 Initializing Devices",
+        "page_number": 39
+      }
+    ]
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "path": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "target_questions": 15,
+    "page_count": 50,
+    "text_chars": 70007,
+    "avg_text_chars_per_page": 1400.1,
+    "image_pages": 50,
+    "drawing_pages": 48,
+    "visual_priority": false,
+    "toc_count": 42,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " Foreword",
+        "page_number": 2
+      },
+      {
+        "level": 1,
+        "title": " Important Safeguards and Warnings",
+        "page_number": 4
+      },
+      {
+        "level": 1,
+        "title": "1  Overview",
+        "page_number": 9
+      },
+      {
+        "level": 1,
+        "title": "2  Cloud Storage Deployment",
+        "page_number": 13
+      },
+      {
+        "level": 2,
+        "title": " 2.1 Installing Cloud Storage Server",
+        "page_number": 13
+      },
+      {
+        "level": 2,
+        "title": " 2.2 Installing DSS Platform",
+        "page_number": 13
+      },
+      {
+        "level": 3,
+        "title": " 2.2.1 Server Requirements",
+        "page_number": 13
+      },
+      {
+        "level": 3,
+        "title": " 2.2.2 Installing Management Tool",
+        "page_number": 14
+      },
+      {
+        "level": 3,
+        "title": " 2.2.3 Configuring Server IP Address",
+        "page_number": 16
+      },
+      {
+        "level": 3,
+        "title": " 2.2.4 Management Tool",
+        "page_number": 16
+      },
+      {
+        "level": 3,
+        "title": " 2.2.5 DSS PC Client",
+        "page_number": 19
+      },
+      {
+        "level": 4,
+        "title": " 2.2.5.1 Installing DSS PC Client",
+        "page_number": 19
+      },
+      {
+        "level": 5,
+        "title": " 2.2.5.1.1 DSS Client Requirements",
+        "page_number": 19
+      },
+      {
+        "level": 5,
+        "title": " 2.2.5.1.2 Downloading and Installing DSS Client",
+        "page_number": 19
+      },
+      {
+        "level": 4,
+        "title": " 2.2.5.2 Logging in to DSS PC Client",
+        "page_number": 20
+      },
+      {
+        "level": 4,
+        "title": " 2.2.5.3 Home Page of DSS PC Client",
+        "page_number": 22
+      },
+      {
+        "level": 3,
+        "title": " 2.2.6 DSS Web Client",
+        "page_number": 24
+      },
+      {
+        "level": 4,
+        "title": " 2.2.6.1 Logging in to DSS Web Client",
+        "page_number": 24
+      },
+      {
+        "level": 4,
+        "title": " 2.2.6.2 Installing Certificate of DSS Web Client",
+        "page_number": 25
+      },
+      {
+        "level": 4,
+        "title": " 2.2.6.3 Home Page of DSS Web Client",
+        "page_number": 26
+      },
+      {
+        "level": 3,
+        "title": " 2.2.7 Licensing",
+        "page_number": 27
+      },
+      {
+        "level": 4,
+        "title": " 2.2.7.1 Applying for a License",
+        "page_number": 27
+      },
+      {
+        "level": 4,
+        "title": " 2.2.7.2 Activating License",
+        "page_number": 28
+      },
+      {
+        "level": 5,
+        "title": " 2.2.7.2.1 Online Activation",
+        "page_number": 28
+      },
+      {
+        "level": 5,
+        "title": " 2.2.7.2.2 Offline Activation",
+        "page_number": 29
+      },
+      {
+        "level": 3,
+        "title": " 2.2.8 Enabling Cloud Storage Nodes",
+        "page_number": 31
+      },
+      {
+        "level": 1,
+        "title": "3  Distributed Deployment",
+        "page_number": 33
+      },
+      {
+        "level": 2,
+        "title": " 3.1 Installing Main Server",
+        "page_number": 33
+      },
+      {
+        "level": 2,
+        "title": " 3.2 Installing Sub Server",
+        "page_number": 33
+      },
+      {
+        "level": 3,
+        "title": " 3.2.1 Sub Server Requirements",
+        "page_number": 33
+      },
+      {
+        "level": 3,
+        "title": " 3.2.2 Installation Steps",
+        "page_number": 33
+      },
+      {
+        "level": 1,
+        "title": "4  Multiple Sites Deployment",
+        "page_number": 35
+      },
+      {
+        "level": 1,
+        "title": "5  Hot Standby",
+        "page_number": 36
+      },
+      {
+        "level": 1,
+        "title": "6  Cascade",
+        "page_number": 37
+      },
+      {
+        "level": 1,
+        "title": "7  N+M",
+        "page_number": 38
+      },
+      {
+        "level": 1,
+        "title": "8  Configuring LAN or WAN",
+        "page_number": 42
+      },
+      {
+        "level": 2,
+        "title": " 8.1 Configuring Router",
+        "page_number": 42
+      },
+      {
+        "level": 2,
+        "title": " 8.2 Mapping IP or Domain Name",
+        "page_number": 42
+      },
+      {
+        "level": 1,
+        "title": "9  Virtualization Deployment",
+        "page_number": 43
+      },
+      {
+        "level": 1,
+        "title": "10  Installing Plugin",
+        "page_number": 44
+      }
+    ]
+  },
+  {
+    "pdf_id": "hdcvi_camera_manual",
+    "path": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "file_name": "HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "camera_user_manual",
+    "target_questions": 21,
+    "page_count": 45,
+    "text_chars": 45976,
+    "avg_text_chars_per_page": 1021.7,
+    "image_pages": 36,
+    "drawing_pages": 44,
+    "visual_priority": false,
+    "toc_count": 56,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " Foreword",
+        "page_number": 2
+      },
+      {
+        "level": 1,
+        "title": " Important Safeguard and Warnings",
+        "page_number": 4
+      },
+      {
+        "level": 1,
+        "title": "1  Overview",
+        "page_number": 8
+      },
+      {
+        "level": 2,
+        "title": " 1.1 Introduction",
+        "page_number": 8
+      },
+      {
+        "level": 2,
+        "title": " 1.2 Application",
+        "page_number": 8
+      },
+      {
+        "level": 2,
+        "title": " 1.3 Transmission Distance",
+        "page_number": 9
+      },
+      {
+        "level": 1,
+        "title": "2  Cable Connection",
+        "page_number": 10
+      },
+      {
+        "level": 2,
+        "title": " 2.1 Power Output",
+        "page_number": 10
+      },
+      {
+        "level": 2,
+        "title": " 2.2 12 VDC Power Input Port",
+        "page_number": 10
+      },
+      {
+        "level": 2,
+        "title": " 2.3 24 VAC Power Input Port",
+        "page_number": 10
+      },
+      {
+        "level": 2,
+        "title": " 2.4 Video Output Port",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 2.5 Audio Input Port",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 2.6 Alarm Output Port",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 2.7 DIP Switch",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 2.8 HD/SD Switch Control Cable",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 2.9 HDCVI Aviation Connector",
+        "page_number": 12
+      },
+      {
+        "level": 1,
+        "title": "3  General Configuration and Operation",
+        "page_number": 14
+      },
+      {
+        "level": 2,
+        "title": " 3.1 Entering XVR Main Menu",
+        "page_number": 14
+      },
+      {
+        "level": 2,
+        "title": " 3.2 Setting Audio Input",
+        "page_number": 14
+      },
+      {
+        "level": 2,
+        "title": " 3.3 Operating PTZ Control Panel",
+        "page_number": 15
+      },
+      {
+        "level": 3,
+        "title": " 3.3.1 Operating OSD Menu",
+        "page_number": 16
+      },
+      {
+        "level": 3,
+        "title": " 3.3.2 Operating Auto Focus (AF)",
+        "page_number": 17
+      },
+      {
+        "level": 1,
+        "title": "4  Full-Color Camera Configuration",
+        "page_number": 19
+      },
+      {
+        "level": 2,
+        "title": " 4.1 Enabling/Disabling Smart Light",
+        "page_number": 19
+      },
+      {
+        "level": 2,
+        "title": " 4.2 Configuring Smart Light Adjustment",
+        "page_number": 19
+      },
+      {
+        "level": 1,
+        "title": "5  Smart Dual Illuminators Cameras Configuration",
+        "page_number": 20
+      },
+      {
+        "level": 1,
+        "title": "6  PT Camera Configuration",
+        "page_number": 22
+      },
+      {
+        "level": 2,
+        "title": " 6.1 PTZ Control",
+        "page_number": 22
+      },
+      {
+        "level": 2,
+        "title": " 6.2 PT Reset",
+        "page_number": 22
+      },
+      {
+        "level": 2,
+        "title": " 6.3 PT Preset",
+        "page_number": 23
+      },
+      {
+        "level": 2,
+        "title": " 6.4 Splicing Mode & Manual Linkage",
+        "page_number": 24
+      },
+      {
+        "level": 2,
+        "title": " 6.5 Linkage Tracking",
+        "page_number": 26
+      },
+      {
+        "level": 1,
+        "title": "7  Active Deterrence Camera Configuration",
+        "page_number": 28
+      },
+      {
+        "level": 2,
+        "title": " 7.1 Detection Range of PIR Detector",
+        "page_number": 28
+      },
+      {
+        "level": 2,
+        "title": " 7.2 Configuring Trigger Mode",
+        "page_number": 28
+      },
+      {
+        "level": 2,
+        "title": " 7.3 Configuring Light Warning and Audio Alarm",
+        "page_number": 29
+      },
+      {
+        "level": 2,
+        "title": " 7.4 Configuring Smart Dual Illuminators Active Deterrence Camera",
+        "page_number": 29
+      },
+      {
+        "level": 1,
+        "title": "8  Box Camera Installation",
+        "page_number": 32
+      },
+      {
+        "level": 2,
+        "title": " 8.1 Lens Installation",
+        "page_number": 32
+      },
+      {
+        "level": 3,
+        "title": " 8.1.1 Installing Lens Type 1",
+        "page_number": 32
+      }
+    ]
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "path": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "target_questions": 13,
+    "page_count": 16,
+    "text_chars": 20460,
+    "avg_text_chars_per_page": 1278.8,
+    "image_pages": 11,
+    "drawing_pages": 15,
+    "visual_priority": false,
+    "toc_count": 18,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " Foreword",
+        "page_number": 2
+      },
+      {
+        "level": 1,
+        "title": " Important Safeguards and Warnings",
+        "page_number": 4
+      },
+      {
+        "level": 1,
+        "title": "1  Overview",
+        "page_number": 7
+      },
+      {
+        "level": 2,
+        "title": " 1.1 Introduction",
+        "page_number": 7
+      },
+      {
+        "level": 2,
+        "title": " 1.2 Features",
+        "page_number": 7
+      },
+      {
+        "level": 1,
+        "title": "2  Port and Indicator",
+        "page_number": 8
+      },
+      {
+        "level": 2,
+        "title": " 2.1 Front Panel",
+        "page_number": 8
+      },
+      {
+        "level": 2,
+        "title": " 2.2 Rear Panel",
+        "page_number": 9
+      },
+      {
+        "level": 1,
+        "title": "3  Installation",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 3.1 Preparation",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 3.2 Desktop Mount",
+        "page_number": 11
+      },
+      {
+        "level": 2,
+        "title": " 3.3 Wall Mount",
+        "page_number": 11
+      },
+      {
+        "level": 1,
+        "title": "4  Wiring",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 4.1 Connecting GND Cable",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 4.2 Connecting Power Cord",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 4.3 Connecting Ethernet Port",
+        "page_number": 12
+      },
+      {
+        "level": 2,
+        "title": " 4.4 Connecting PoE Port",
+        "page_number": 13
+      },
+      {
+        "level": 1,
+        "title": " Appendix 1 Security Recommendation",
+        "page_number": 14
+      }
+    ]
+  },
+  {
+    "pdf_id": "s3006_datasheet",
+    "path": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "file_name": "S3006-4ET-60_datasheet_20251106.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "datasheet",
+    "target_questions": 8,
+    "page_count": 3,
+    "text_chars": 4294,
+    "avg_text_chars_per_page": 1431.3,
+    "image_pages": 3,
+    "drawing_pages": 3,
+    "visual_priority": false,
+    "toc_count": 8,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": " ",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Series Overview",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Functions",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Transmission Performance",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Ordering Information",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Installation",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Dimensions (mm[inch])",
+        "page_number": 0
+      },
+      {
+        "level": 1,
+        "title": "Panels",
+        "page_number": 0
+      }
+    ]
+  },
+  {
+    "pdf_id": "hac_hf3805g_datasheet",
+    "path": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "file_name": "DH-HAC-HF3805G-datasheet3.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "datasheet",
+    "target_questions": 8,
+    "page_count": 3,
+    "text_chars": 6829,
+    "avg_text_chars_per_page": 2276.3,
+    "image_pages": 2,
+    "drawing_pages": 3,
+    "visual_priority": false,
+    "toc_count": 0,
+    "toc_sample": []
+  },
+  {
+    "pdf_id": "hac_open_source_notice",
+    "path": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "file_name": "DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "open_source_notice",
+    "target_questions": 4,
+    "page_count": 3,
+    "text_chars": 5647,
+    "avg_text_chars_per_page": 1882.3,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": false,
+    "toc_count": 0,
+    "toc_sample": []
+  },
+  {
+    "pdf_id": "hdcvi_box_install_guide",
+    "path": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "file_name": "HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_installation_guide",
+    "target_questions": 5,
+    "page_count": 2,
+    "text_chars": 150,
+    "avg_text_chars_per_page": 75.0,
+    "image_pages": 0,
+    "drawing_pages": 2,
+    "visual_priority": true,
+    "toc_count": 0,
+    "toc_sample": []
+  },
+  {
+    "pdf_id": "hac_hf3231e_installation",
+    "path": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "file_name": "HAC-HF3231E_Installation_20171121.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_mounting_compatibility",
+    "target_questions": 4,
+    "page_count": 1,
+    "text_chars": 40,
+    "avg_text_chars_per_page": 40.0,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": true,
+    "toc_count": 0,
+    "toc_sample": []
+  },
+  {
+    "pdf_id": "hac_hf3805g_dimension",
+    "path": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "file_name": "HAC-HF3805G_Dimention_20171128.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_dimension_drawing",
+    "target_questions": 4,
+    "page_count": 1,
+    "text_chars": 0,
+    "avg_text_chars_per_page": 0.0,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": true,
+    "toc_count": 0,
+    "toc_sample": []
+  },
+  {
+    "pdf_id": "s3006_dimensions",
+    "path": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "file_name": "S3006-4ET-36_DIMENSIONS.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_dimension_drawing",
+    "target_questions": 4,
+    "page_count": 1,
+    "text_chars": 58,
+    "avg_text_chars_per_page": 58.0,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": true,
+    "toc_count": 5,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": "页面 1",
+        "page_number": 1
+      },
+      {
+        "level": 2,
+        "title": "视图",
+        "page_number": -1
+      },
+      {
+        "level": 3,
+        "title": "new_view_1",
+        "page_number": 1
+      },
+      {
+        "level": 3,
+        "title": "左侧_2",
+        "page_number": 1
+      },
+      {
+        "level": 3,
+        "title": "顶部_5",
+        "page_number": 1
+      }
+    ]
+  },
+  {
+    "pdf_id": "s3006_installation_method",
+    "path": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "file_name": "S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_installation_method",
+    "target_questions": 4,
+    "page_count": 1,
+    "text_chars": 9,
+    "avg_text_chars_per_page": 9.0,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": true,
+    "toc_count": 1,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": "页 1",
+        "page_number": 1
+      }
+    ]
+  },
+  {
+    "pdf_id": "s3006_port_diagram",
+    "path": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "file_name": "S3006-4ET-36_PORT.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_port_diagram",
+    "target_questions": 4,
+    "page_count": 1,
+    "text_chars": 0,
+    "avg_text_chars_per_page": 0.0,
+    "image_pages": 0,
+    "drawing_pages": 1,
+    "visual_priority": true,
+    "toc_count": 1,
+    "toc_sample": [
+      {
+        "level": 1,
+        "title": "页 1",
+        "page_number": 1
+      }
+    ]
+  }
+]

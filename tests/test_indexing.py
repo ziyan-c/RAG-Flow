@@ -9,6 +9,7 @@ from rag_flow.indexing import (
     _delete_existing_points_for_sources,
     _page_batches,
     _page_payloads_from_chunks,
+    _source_cleanup_names,
     _visual_page_payload,
     point_id,
     uses_idf_modifier,
@@ -32,7 +33,7 @@ def test_page_payloads_from_chunks_carry_section_metadata():
         {
             "chunk_content": "Section text",
             "metadata": {
-                "source": "manual.pdf",
+                "source_relpath": "manual.pdf",
                 "chunk_id": "manual-chunk-00001",
                 "page_idx": 2,
                 "page_indices": [2],
@@ -40,6 +41,7 @@ def test_page_payloads_from_chunks_carry_section_metadata():
                 "section_title": "1.1 Login",
                 "section_level": 2,
                 "section_source": "pdf_outline_exact",
+                "breadcrumb": "manual.pdf > 1 Overview > 1.1 Login",
             },
         }
     ]
@@ -48,14 +50,38 @@ def test_page_payloads_from_chunks_carry_section_metadata():
 
     assert payloads[2]["section_path"] == ["1 Overview", "1.1 Login"]
     assert payloads[2]["section_title"] == "1.1 Login"
+    assert payloads[2]["breadcrumb"] == "manual.pdf > 1 Overview > 1.1 Login"
     assert payloads[2]["chunk_ids_on_page"] == ["manual-chunk-00001"]
     assert "chunk_content" not in payloads[2]
+
+
+def test_page_payloads_from_chunks_carry_source_path_metadata():
+    chunks = [
+        {
+            "chunk_content": "Section text",
+            "metadata": {
+                "source_relpath": "DSS/manual.pdf",
+                "source_filename": "manual.pdf",
+                "breadcrumb": "DSS > manual.pdf",
+                "chunk_id": "manual-chunk-00001",
+                "page_idx": 2,
+                "page_indices": [2],
+            },
+        }
+    ]
+
+    payloads = _page_payloads_from_chunks(chunks, source_name="DSS/manual.pdf")
+
+    assert payloads[2]["source_relpath"] == "DSS/manual.pdf"
+    assert payloads[2]["source_filename"] == "manual.pdf"
+    assert payloads[2]["breadcrumb"] == "DSS > manual.pdf"
 
 
 def test_visual_page_payload_is_page_only_payload():
     payload = _visual_page_payload({}, source_name="manual.pdf", page_idx=5)
 
-    assert payload["source"] == "manual.pdf"
+    assert payload["source_relpath"] == "manual.pdf"
+    assert "source" not in payload
     assert payload["page_idx"] == 5
     assert payload["page_start"] == 5
     assert payload["page_end"] == 5
@@ -65,6 +91,14 @@ def test_visual_page_payload_is_page_only_payload():
     assert "chunk_content" not in payload
     assert "parent_page_idx" not in payload
     assert "is_table_continuation" not in payload
+
+
+def test_visual_page_payload_derives_source_path_metadata():
+    payload = _visual_page_payload({}, source_name="DSS/manual.pdf", page_idx=5)
+
+    assert payload["source_relpath"] == "DSS/manual.pdf"
+    assert payload["source_filename"] == "manual.pdf"
+    assert payload["breadcrumb"] == "DSS > manual.pdf"
 
 
 def test_page_batches_use_pdf_one_based_ranges():
@@ -90,6 +124,18 @@ def test_sparse_schema_requires_idf_modifier():
 
 def test_page_indices_payload_index_is_declared():
     assert ("page_indices", "integer") in PAYLOAD_INDEX_SPECS
+
+
+def test_source_path_payload_indexes_are_declared():
+    assert ("source", "keyword") not in PAYLOAD_INDEX_SPECS
+    assert ("source_relpath", "keyword") in PAYLOAD_INDEX_SPECS
+    assert ("source_filename", "keyword") in PAYLOAD_INDEX_SPECS
+    assert ("breadcrumb", "keyword") in PAYLOAD_INDEX_SPECS
+
+
+def test_source_cleanup_names_include_legacy_filename_alias():
+    assert _source_cleanup_names("DSS/manual.pdf") == {"DSS/manual.pdf", "manual.pdf"}
+    assert _source_cleanup_names("manual.pdf") == {"manual.pdf"}
 
 
 def test_delete_existing_points_for_sources_separates_text_and_visual(tmp_path):

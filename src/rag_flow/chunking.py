@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
+from .source_paths import source_breadcrumb, source_payload_fields
 from .table_continuations import (
     build_table_continuation_map,
     table_continuation_indices,
@@ -35,6 +36,7 @@ class ChunkItem:
     bbox: tuple[float, float, float, float] | None = None
     visual_regions: tuple[VisualRegion, ...] = ()
     images: tuple[str, ...] = ()
+    image_answering_evidence: tuple[dict[str, Any], ...] = ()
     tables: tuple[str, ...] = ()
     section_path: tuple[str, ...] = ()
     section_level: int | None = None
@@ -114,6 +116,36 @@ def _visual_region_for_block(block: dict[str, Any], block_idx: int) -> tuple[Vis
     )
 
 
+def _image_answering_evidence_for_block(
+    block: dict[str, Any],
+    block_idx: int,
+    *,
+    page_idx: int,
+    bbox: tuple[float, float, float, float] | None,
+    caption: str,
+) -> dict[str, Any] | None:
+    if not block.get("img_path") or _has_inline_icon_marker(block):
+        return None
+    evidence: dict[str, Any] = {
+        "img_path": str(block["img_path"]),
+        "block_idx": block_idx,
+        "page_idx": page_idx,
+    }
+    if bbox is not None:
+        evidence["bbox"] = [round(value, 3) for value in bbox]
+    if caption:
+        evidence["image_caption"] = caption
+    for key in (
+        "image_answering_policy",
+        "image_answering_confidence",
+        "image_answering_reason",
+    ):
+        value = str(block.get(key, "") or "").strip()
+        if value:
+            evidence[key] = value
+    return evidence
+
+
 def _block_text_item(
     block: dict[str, Any],
     block_idx: int,
@@ -148,6 +180,14 @@ def _block_text_item(
             parts.append(f"[Image footnote: {footnote}]")
         text = "\n".join(parts).strip()
         images = (str(block["img_path"]),) if block.get("img_path") and not _has_inline_icon_marker(block) else ()
+        evidence = _image_answering_evidence_for_block(
+            block,
+            block_idx,
+            page_idx=page_idx,
+            bbox=bbox,
+            caption=caption,
+        )
+        image_answering_evidence = (evidence,) if evidence else ()
         if not text and not images:
             return None
         return ChunkItem(
@@ -157,6 +197,7 @@ def _block_text_item(
             bbox=bbox,
             visual_regions=visual_regions,
             images=images,
+            image_answering_evidence=image_answering_evidence,
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
@@ -269,6 +310,12 @@ def _chunk_metadata(
     page_start = pages[0] if pages else 0
     page_end = pages[-1] if pages else page_start
     images = _unique([image for item in items for image in item.images])
+    image_answering_evidence = [
+        evidence
+        for item in items
+        for evidence in item.image_answering_evidence
+        if evidence.get("img_path")
+    ]
     tables = _unique([table for item in items for table in item.tables])
     bboxes_by_page: dict[str, list[list[float]]] = defaultdict(list)
     block_indices: list[int] = []
@@ -295,8 +342,9 @@ def _chunk_metadata(
             )
         for region in item.visual_regions:
             bboxes_by_page[str(region.page_idx)].append([round(value, 3) for value in region.bbox])
+    source_fields = source_payload_fields(source_name)
     metadata: dict[str, Any] = {
-        "source": source_name,
+        **source_fields,
         "chunk_idx": chunk_idx,
         "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
         "chunk_mode": mode,
@@ -310,6 +358,9 @@ def _chunk_metadata(
         "images_on_page": images,
         "tables_on_page": tables,
     }
+    metadata["breadcrumb"] = source_breadcrumb(source_fields["source_relpath"], section_path)
+    if image_answering_evidence:
+        metadata["image_answering_evidence"] = image_answering_evidence
     if table_continuations:
         metadata["table_continuations"] = table_continuations
     if section_path:
@@ -332,10 +383,12 @@ def _make_chunk(
     section_level: int | None = None,
     section_source: str = "",
 ) -> dict[str, Any]:
-    parts = [item.text for item in items if item.text]
+    breadcrumb = source_breadcrumb(source_name, section_path)
+    parts = [f"[Breadcrumb: {breadcrumb}]"]
     if section_path:
         heading = " > ".join(section_path)
-        parts.insert(0, f"[Section: {heading}]")
+        parts.append(f"[Section: {heading}]")
+    parts.extend(item.text for item in items if item.text)
     chunk_content = "\n\n".join(parts).strip()
     token_count = estimate_token_count(chunk_content)
     return {
@@ -472,6 +525,7 @@ def create_page_level_chunks(
 
     chunk_contents_by_page: dict[int, list[str]] = defaultdict(list)
     page_images: dict[int, list[str]] = defaultdict(list)
+    page_image_answering_evidence: dict[int, list[dict[str, Any]]] = defaultdict(list)
     page_tables: dict[int, list[str]] = defaultdict(list)
     page_block_indices: dict[int, list[int]] = defaultdict(list)
     page_bboxes: dict[int, list[list[float]]] = defaultdict(list)
@@ -522,6 +576,15 @@ def create_page_level_chunks(
                 add_page_metadata(page_idx, block, block_idx)
             if block.get("img_path") and not _has_inline_icon_marker(block):
                 page_images[page_idx].append(block["img_path"])
+                evidence = _image_answering_evidence_for_block(
+                    block,
+                    block_idx,
+                    page_idx=page_idx,
+                    bbox=_block_bbox(block),
+                    caption=caption,
+                )
+                if evidence:
+                    page_image_answering_evidence[page_idx].append(evidence)
 
         elif block_type == "table":
             caption = _join_field(block.get("table_caption", [])).strip()
@@ -557,13 +620,19 @@ def create_page_level_chunks(
 
     chunks: list[dict[str, Any]] = []
     for page_idx in sorted(chunk_contents_by_page):
-        chunk_content = "\n\n".join(chunk_contents_by_page[page_idx]).strip()
+        section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
+        breadcrumb = source_breadcrumb(source_name, section_path)
+        content_parts = [f"[Breadcrumb: {breadcrumb}]"]
+        if section_path:
+            content_parts.append(f"[Section: {' > '.join(section_path)}]")
+        content_parts.extend(chunk_contents_by_page[page_idx])
+        chunk_content = "\n\n".join(content_parts).strip()
         if not chunk_content:
             continue
         chunk_idx = len(chunks)
-        section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
+        source_fields = source_payload_fields(source_name)
         metadata: dict[str, Any] = {
-            "source": source_name,
+            **source_fields,
             "chunk_idx": chunk_idx,
             "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
             "chunk_mode": "page",
@@ -577,6 +646,9 @@ def create_page_level_chunks(
             "images_on_page": _unique(page_images[page_idx]),
             "tables_on_page": _unique(page_tables[page_idx]),
         }
+        metadata["breadcrumb"] = source_breadcrumb(source_fields["source_relpath"], section_path)
+        if page_image_answering_evidence[page_idx]:
+            metadata["image_answering_evidence"] = page_image_answering_evidence[page_idx]
         if section_path:
             metadata["section_path"] = list(section_path)
             metadata["section_title"] = section_path[-1]

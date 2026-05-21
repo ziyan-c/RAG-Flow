@@ -1,0 +1,35 @@
+[
+  {
+    "pdf_id": "s3006_dimensions",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "file_name": "S3006-4ET-36_DIMENSIONS.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "visual_dimension_drawing",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "顶部_5",
+    "section_path": [
+      "页面 1",
+      "视图",
+      "顶部_5"
+    ],
+    "text_chars": 58,
+    "text_excerpt": "mm [inch]\n115.5 [4.55]\n84.7 [3.33]\n88.2 [3.47]\n27.0 [1.06]",
+    "visual_summary": "Dimension drawing for the S3006-4ET-36/S3006 desktop switch, showing width 115.5 mm [4.55 in], depth 84.7 mm [3.33 in], body depth 88.2 mm [3.47 in], and height 27.0 mm [1.06 in].",
+    "key_facts": [
+      "Width is marked as 115.5 mm [4.55 in].",
+      "Depth is marked as 84.7 mm [3.33 in], with another body-depth dimension of 88.2 mm [3.47 in].",
+      "Height is marked as 27.0 mm [1.06 in]."
+    ],
+    "keywords": [
+      "inch"
+    ],
+    "image_count": 0,
+    "drawing_count": 1201,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

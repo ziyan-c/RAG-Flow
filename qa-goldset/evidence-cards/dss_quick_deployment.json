@@ -1,0 +1,2186 @@
+[
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "ZHEJIANG DAHUA VISION TECHNOLOGY CO., LTD.",
+    "section_path": [],
+    "text_chars": 86,
+    "text_excerpt": "ZHEJIANG DAHUA VISION TECHNOLOGY CO., LTD.\nV8.8.0\nDSS Ultimate\nQuick Deployment Manual",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "zhejiang",
+      "dahua",
+      "vision",
+      "technology",
+      "quick",
+      "deployment"
+    ],
+    "image_count": 1,
+    "drawing_count": 0,
+    "modality": [
+      "text",
+      "image"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 2521,
+    "text_excerpt": "Foreword\nSafety Instructions\nThe following signal words might appear in the manual.\nSignal Words\nMeaning\nIndicates a high potential hazard which, if not avoided, will result in\ndeath or serious injury.\nIndicates a medium or low potential hazard which, if not avoided,\ncould result in slight or moderate injury.\nIndicates a potential risk which, if not avoided, could result in\nproperty damage, data loss, reductions in performance, or\nunpredictable results.\nProvides methods to help you solve a problem or save time.\nProvides additional information as a supplement to the text.\nPrivacy Protection Notice\nAs the device user or data controller, you might collect the personal data of others such as their\nface, audio, fingerprints, and license plate number. You need to be in compliance with your local\nprivacy protection laws and regulations to protect the legitimate rights and interests of other\npeople by implementing measures which include but are not limited: Providing clear and visible\nidentification to inform people of the existence of the surveillance area and provide required\ncontact information.\nAbout the Manual\n●The manual is for reference only. Slight differences might be found...",
+    "visual_summary": "",
+    "key_facts": [
+      "Foreword Safety Instructions The following signal words might appear in the manual.",
+      "Signal Words Meaning Indicates a high potential hazard which, if not avoided, will result in death or serious injury.",
+      "Indicates a medium or low potential hazard which, if not avoided, could result in slight or moderate injury.",
+      "Indicates a potential risk which, if not avoided, could result in property damage, data loss, reductions in performance, or unpredictable results."
+    ],
+    "keywords": [
+      "might",
+      "which",
+      "result",
+      "data",
+      "product",
+      "indicates",
+      "potential",
+      "avoided",
+      "slight",
+      "information",
+      "contact",
+      "differences"
+    ],
+    "image_count": 6,
+    "drawing_count": 37,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 2,
+    "page_number": 3,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 114,
+    "text_excerpt": "●If there is any uncertainty or controversy, we reserve the right of final explanation.\nQuick Deployment Manual\nII",
+    "visual_summary": "",
+    "key_facts": [
+      "●If there is any uncertainty or controversy, we reserve the right of final explanation."
+    ],
+    "keywords": [
+      "there",
+      "uncertainty",
+      "controversy",
+      "reserve",
+      "right",
+      "final",
+      "explanation",
+      "quick",
+      "deployment"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 3,
+    "page_number": 4,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 1842,
+    "text_excerpt": "Important Safeguards and Warnings\nThis section introduces content covering the proper handling of the device, hazard prevention, and\nprevention of property damage. Read carefully before using the device, and comply with the\nguidelines when using it.\nTransportation Requirements\nTransport the device under allowed humidity and temperature conditions.\nStorage Requirements\nStore the device under allowed humidity and temperature conditions.\nInstallation Requirements\n●\n Electrical Hazard\nPreventive measures: Make sure the power is off when you put your hand into the device.\n●Stability Hazard\nPossible result: The rack might fall down and cause serious personal injury.\nPreventive measures (including but not limited to):\nBefore extending the rack to the installation position, read the installation instructions.\nWhen the device is installed on the slide rail, do not place any load on it.\nDo not retract the slide rail while the device is installed on it.\n●Do not connect the power adapter to the device while the adapter is powered on.\n●Strictly comply with the local electric safety code and standards. Make sure the ambient voltage\nis stable and meets the power supply requirements of the...",
+    "visual_summary": "",
+    "key_facts": [
+      "Important Safeguards and Warnings This section introduces content covering the proper handling of the device, hazard prevention, and prevention of property damage.",
+      "Read carefully before using the device, and comply with the guidelines when using it.",
+      "Transportation Requirements Transport the device under allowed humidity and temperature conditions.",
+      "Storage Requirements Store the device under allowed humidity and temperature conditions."
+    ],
+    "keywords": [
+      "power",
+      "requirements",
+      "adapter",
+      "when",
+      "supply",
+      "hazard",
+      "installation",
+      "standards",
+      "voltage",
+      "must",
+      "prevention",
+      "read"
+    ],
+    "image_count": 5,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 4,
+    "page_number": 5,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 2497,
+    "text_excerpt": "We recommend using the power adapter provided with the device.\nWhen selecting the power adapter, the power supply requirements (such as rated voltage)\nare subject to the device label.\n●\n Rotating Fan Blades Hazard\nAvoid touching the fan blades, especially when they are moving.\n●\n Before installation, disconnect all the power cords.\n●Do not place the device in a place exposed to sunlight or near heat sources.\n●Keep the device away from dampness, dust, and soot.\n●Put the device in a well-ventilated place, and do not block its ventilation.\n●Install the server on a stable surface to prevent it from falling.\n●Use power cords that conform to your local requirements, and are rated specifications.\n●The device is a class I electrical appliance. Make sure that the power supply of the device is\nconnected to a power socket with protective earthing.\n●Use power cords that conform to your local requirements, and are rated specifications.\n●Before connecting the power supply, make sure the input voltage matches the server power\nrequirement.\n●When installing the device, make sure that the power plug and appliance coupler can be easily\nreached to cut off power.\n●Install the server in an area that...",
+    "visual_summary": "",
+    "key_facts": [
+      "We recommend using the power adapter provided with the device.",
+      "When selecting the power adapter, the power supply requirements (such as rated voltage) are subject to the device label.",
+      "● Rotating Fan Blades Hazard Avoid touching the fan blades, especially when they are moving.",
+      "● Before installation, disconnect all the power cords."
+    ],
+    "keywords": [
+      "power",
+      "requirements",
+      "batteries",
+      "battery",
+      "when",
+      "supply",
+      "rated",
+      "voltage",
+      "before",
+      "cords",
+      "place",
+      "keep"
+    ],
+    "image_count": 6,
+    "drawing_count": 9,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 5,
+    "page_number": 6,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 2637,
+    "text_excerpt": "Do not dispose the batteries in fire or a hot oven, or mechanically crush or cut the batteries\nto avoid an explosion.\nDo not leave the batteries in environments with extremely high temperatures to avoid\nexplosions and leakage of flammable liquid or gas.\nDo not subject the batteries to extremely low air pressure to avoid explosions and the\nleakage of flammable liquid or gas.\n●In a domestic environment this may cause radio interference in which case you may be required\nto take adequate measures.\n●The device is heavy and needs to be carried by several persons together to avoid personal\ninjuries.\n●Place the device in a location that children cannot easily access.\n●Check whether the power supply is correct before use.\n●Do not unplug the power cord on the side of the device while the adapter is powered on.\n●Operate the device within the rated range of power input and output.\n●Use the device under allowed humidity and temperature conditions.\n●Do not drop or splash liquid onto the device, and make sure that there is no object filled with\nliquid on the Device to prevent liquid from flowing into it.\n●Do not disassemble the device without professional instruction.\n●Your configurations...",
+    "visual_summary": "",
+    "key_facts": [
+      "Do not dispose the batteries in fire or a hot oven, or mechanically crush or cut the batteries to avoid an explosion.",
+      "Do not leave the batteries in environments with extremely high temperatures to avoid explosions and leakage of flammable liquid or gas.",
+      "Do not subject the batteries to extremely low air pressure to avoid explosions and the leakage of flammable liquid or gas.",
+      "●In a domestic environment this may cause radio interference in which case you may be required to take adequate measures."
+    ],
+    "keywords": [
+      "batteries",
+      "power",
+      "avoid",
+      "liquid",
+      "explosion",
+      "environment",
+      "make",
+      "sure",
+      "file",
+      "might",
+      "module",
+      "dispose"
+    ],
+    "image_count": 4,
+    "drawing_count": 10,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 6,
+    "page_number": 7,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 558,
+    "text_excerpt": "●The device casing provides protection for internal components. Use a screwdriver to loosen the\nscrews before detaching the casing. Make sure to put the casing back on and secure it in its\noriginal place before powering on and using the device.\n●It is prohibited for non-professionals and unauthorized personnel to open the device casing.\n●The appliance coupler is a disconnection device. Keep it at a convenient angle when using it.\nBefore repairing or performing maintenance on the device, first disconnect the appliance\ncoupler.\nQuick Deployment Manual\nVI",
+    "visual_summary": "",
+    "key_facts": [
+      "●The device casing provides protection for internal components.",
+      "Use a screwdriver to loosen the screws before detaching the casing.",
+      "Make sure to put the casing back on and secure it in its original place before powering on and using the device.",
+      "●It is prohibited for non-professionals and unauthorized personnel to open the device casing."
+    ],
+    "keywords": [
+      "casing",
+      "before",
+      "using",
+      "appliance",
+      "coupler",
+      "provides",
+      "protection",
+      "internal",
+      "components",
+      "screwdriver",
+      "loosen",
+      "screws"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 7,
+    "page_number": 8,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 4542,
+    "text_excerpt": "Table of Contents\nForeword.............................................................................................................................................................. I\nImportant Safeguards and Warnings.............................................................................................................. III\n1 Overview..........................................................................................................................................................1\n2 Cloud Storage Deployment............................................................................................................................ 5\n2.1 Installing Cloud Storage Server............................................................................................................5\n2.2 Installing DSS Platform......................................................................................................................... 5\n2.2.1 Server Requirements...................................................................................................................5\n2.2.2 Installing Management...",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "installing",
+      "server",
+      "deployment",
+      "cloud",
+      "storage",
+      "configuring",
+      "requirements",
+      "management",
+      "tool",
+      "appendix",
+      "contents",
+      "foreword"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 8,
+    "page_number": 9,
+    "title_hint": "Overview",
+    "section_path": [
+      "Overview"
+    ],
+    "text_chars": 869,
+    "text_excerpt": "1 Overview\nDSS platform supports cloud storage deployment, multiple sites deployment, distributed\ndeployment, hot standby, N+M deployment, and LAN to WAN mapping.\nCloud Storage Deployment\nSuitable for scenarios requiring high storage or scalable storage. Cloud storage deployment stores\nvideos, images, and evidence files in the cloud. It reduces local hardware costs, supports on-\ndemand scaling, ensures data security, and meets flexible multi-scenario storage needs.\nFigure 1-1 Cloud storage deployment\nMultiple Sites Deployment\nIf you have multiple platforms, you can connect one or more platforms to your current one, so that\nyou can view the resources from them directly on your main platform, including viewing real-time\nvideos from video channels, searching for viewing real-time and historical events, and downloading\nrecorded videos.\nQuick Deployment Manual\n1",
+    "visual_summary": "",
+    "key_facts": [
+      "1 Overview DSS platform supports cloud storage deployment, multiple sites deployment, distributed deployment, hot standby, N+M deployment, and LAN to WAN mapping.",
+      "Cloud Storage Deployment Suitable for scenarios requiring high storage or scalable storage.",
+      "Cloud storage deployment stores videos, images, and evidence files in the cloud.",
+      "It reduces local hardware costs, supports on- demand scaling, ensures data security, and meets flexible multi-scenario storage needs."
+    ],
+    "keywords": [
+      "deployment",
+      "storage",
+      "cloud",
+      "multiple",
+      "videos",
+      "platform",
+      "supports",
+      "sites",
+      "platforms",
+      "your",
+      "viewing",
+      "real-time"
+    ],
+    "image_count": 2,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 9,
+    "page_number": 10,
+    "title_hint": "Overview",
+    "section_path": [
+      "Overview"
+    ],
+    "text_chars": 339,
+    "text_excerpt": "Figure 1-2 Multiple sites deployment\nDistributed Deployment\nSuitable for medium to large projects. Sub servers are used to share system load, so that more\ndevices can be accessed. The sub servers register to the main server, and the main server centrally\nmanages the sub servers.\nFigure 1-3 Distributed deployment\nQuick Deployment Manual\n2",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 1-2 Multiple sites deployment Distributed Deployment Suitable for medium to large projects.",
+      "Sub servers are used to share system load, so that more devices can be accessed.",
+      "The sub servers register to the main server, and the main server centrally manages the sub servers.",
+      "Figure 1-3 Distributed deployment Quick Deployment Manual 2"
+    ],
+    "keywords": [
+      "deployment",
+      "servers",
+      "distributed",
+      "main",
+      "server",
+      "multiple",
+      "sites",
+      "suitable",
+      "medium",
+      "large",
+      "projects",
+      "used"
+    ],
+    "image_count": 3,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 10,
+    "page_number": 11,
+    "title_hint": "Overview",
+    "section_path": [
+      "Overview"
+    ],
+    "text_chars": 650,
+    "text_excerpt": "Hot Standby\nUsed with systems that require high stability. The standby server takes over the system when the\nactive server malfunctions (such as with power-off and network disconnection). You can switch\nback to the original active server after it recovers.\nFigure 1-4 Hot standby\nN+M\nEach sub server has a standby server to maintain stability. When a sub server malfunctions, the\nsystem replaces it with an idle standby server. When the malfunctioning server normalizes, you can\nmanually switch back to it. If you do not manually switch them, the system will automatically make\nthe switch if the standby server malfunctions.\nQuick Deployment Manual\n3",
+    "visual_summary": "",
+    "key_facts": [
+      "Hot Standby Used with systems that require high stability.",
+      "The standby server takes over the system when the active server malfunctions (such as with power-off and network disconnection).",
+      "You can switch back to the original active server after it recovers.",
+      "Figure 1-4 Hot standby N+M Each sub server has a standby server to maintain stability."
+    ],
+    "keywords": [
+      "server",
+      "standby",
+      "switch",
+      "when",
+      "malfunctions",
+      "stability",
+      "active",
+      "back",
+      "manually",
+      "used",
+      "systems",
+      "require"
+    ],
+    "image_count": 2,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 11,
+    "page_number": 12,
+    "title_hint": "Overview",
+    "section_path": [
+      "Overview"
+    ],
+    "text_chars": 757,
+    "text_excerpt": "Figure 1-5 N+M\nLAN to WAN Mapping\nPerform port mapping when:\n●The server of the platform and devices are on a local area network, and the DSS client in on the\ninternet. To make sure that the DSS client can access the platform server, you need to map the\nplatform IP to the Internet.\n●The platform is on a local area network, and the devices are on the Internet. If you want to add\ndevices to the platform through automatic registration, you need to map the IP address and\nports of the platform to the Internet. For devices on the Internet, the platform can add them by\ntheir IP addresses and ports.\nThe management tool does not differentiate service LAN ports and WAN ports. Make sure that the\nWAN ports and LAN ports are the same.\nQuick Deployment Manual\n4",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 1-5 N+M LAN to WAN Mapping Perform port mapping when: ●The server of the platform and devices are on a local area network, and the DSS client in on the internet.",
+      "To make sure that the DSS client can access the platform server, you need to map the platform IP to the Internet.",
+      "●The platform is on a local area network, and the devices are on the Internet.",
+      "If you want to add devices to the platform through automatic registration, you need to map the IP address and ports of the platform to the Internet."
+    ],
+    "keywords": [
+      "platform",
+      "ports",
+      "internet",
+      "devices",
+      "mapping",
+      "server",
+      "local",
+      "area",
+      "network",
+      "make",
+      "sure",
+      "need"
+    ],
+    "image_count": 3,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 12,
+    "page_number": 13,
+    "title_hint": "Server Requirements",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Server Requirements"
+    ],
+    "text_chars": 1195,
+    "text_excerpt": "2 Cloud Storage Deployment\n2.1 Installing Cloud Storage Server\nFor details on deploying the cloud storage server, see the server deployment manual.\n2.2 Installing DSS Platform\n2.2.1 Server Requirements\nMain server requirements\nTable 2-1 DSS Ultimate hardware requirements for main server\nParameter\nHardware Requirement\nOperating System\nRecommended\nrequirements\n●CPU: 2 × Intel® Xeon® Silver 4509Y 2.6 GHz\n8 Core Processor\n●RAM: 64 GB\n●Network card: 10 × Ethernet ports@1000\nMbps\n●Hard drive type: Enterprise Class SSD\n●DSS installation directory space: at least 500\nGB (independent disk installation)\n●Microsoft® Windows\nServer 2019 Standard (64-\nbit)\n●Microsoft® Windows\nServer 2022 Standard (64-\nbit)\n●Microsoft® Windows\nServer 2025 Standard (64-\nbit)\n●Microsoft® Windows 10\n20H2 Pro (64-bit)\n●Microsoft® Windows 11\n21H2 Pro (64-bit)\n●Microsoft® Windows 11\n24H2 Pro (64-bit)\nMinimum\nrequirements\n●CPU: 2 × Intel® Xeon® Silver 4509Y 2.6 GHz\n8 Core Processor\n●RAM: 32 GB\n●Network card: 6 × Ethernet ports@1000\nMbps\n●Hard drive type: 7200 RPM Enterprise Class\nHDD\n●DSS installation directory space: at least 500\nGB (independent disk installation)\nSub server requirements\nQuick Deployment Manual\n5",
+    "visual_summary": "",
+    "key_facts": [
+      "2 Cloud Storage Deployment 2.1 Installing Cloud Storage Server For details on deploying the cloud storage server, see the server deployment manual."
+    ],
+    "keywords": [
+      "server",
+      "requirements",
+      "microsoft",
+      "windows",
+      "installation",
+      "cloud",
+      "storage",
+      "deployment",
+      "standard",
+      "installing",
+      "main",
+      "hardware"
+    ],
+    "image_count": 1,
+    "drawing_count": 28,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 13,
+    "page_number": 14,
+    "title_hint": "Installing Management Tool",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Installing Management Tool"
+    ],
+    "text_chars": 1757,
+    "text_excerpt": "Table 2-2 DSS Ultimate hardware requirements for sub server\nParameter\nHardware Requirement\nOperating System\nRecommended\nrequirements\n●CPU: 2 × Intel® Xeon® Silver 4509Y 2.6 GHz\n8 Core Processor\n●RAM: 32 GB\n●Network card: 6 × Ethernet ports@1000\nMbps\n●Hard drive type: 7200 RPM Enterprise Class\nHDD\n●DSS installation directory space: at least 500\nGB (independent disk installation)\n●Microsoft® Windows\nServer 2019 Standard\n(64-bit)\n●Microsoft® Windows\nServer 2022 Standard\n(64-bit)\n●Microsoft® Windows\nServer 2025 Standard\n(64-bit)\n●Microsoft® Windows 10\n20H2 Pro (64-bit)\n●Microsoft® Windows 11\n21H2 Pro (64-bit)\n●Microsoft® Windows 11\n24H2 Pro (64-bit)\n●Face recognition images, videos, and files cannot be stored on the system disk and DSS\ninstallation disk. We recommend you store these files on cloud storage.\n●For best performance, we recommend adding additional hard drives to store pictures.\n2.2.2 Installing Management Tool\nPrerequisites\n●You have downloaded the installation package from the official website or received it from our\nsales or technical support.\n●You have prepared a server that meets the hardware requirements described in \"2.2.1 Server\nRequirements\".\nProcedure\nStep...",
+    "visual_summary": "",
+    "key_facts": [
+      "We recommend you store these files on cloud storage.",
+      "●For best performance, we recommend adding additional hard drives to store pictures.",
+      "2.2.2 Installing Management Tool Prerequisites ●You have downloaded the installation package from the official website or received it from our sales or technical support.",
+      "●You have prepared a server that meets the hardware requirements described in \"2.2.1 Server Requirements\"."
+    ],
+    "keywords": [
+      "server",
+      "microsoft",
+      "windows",
+      "installation",
+      "step",
+      "requirements",
+      "then",
+      "hardware",
+      "disk",
+      "standard",
+      "agreement",
+      "next"
+    ],
+    "image_count": 3,
+    "drawing_count": 31,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 14,
+    "page_number": 15,
+    "title_hint": "Installing Management Tool",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Installing Management Tool"
+    ],
+    "text_chars": 1513,
+    "text_excerpt": "Figure 2-1 Select a platform type\nStep 6\nEnable Store Face Snapshot Records as needed, and then click Next.\nWhen it is not selected, the platform will not display or store face snapshot records that\ndo not include comparison records.\nIf you select it, the face snapshot records will be saved. Use this function ethically and\nsecurely in accordance with applicable laws.\nStep 7\nClick Browse, and then select an installation path.\nIf the Install button is gray, check whether the installation path and space required meet\nthe requirements. The total space required is displayed on the page.\nWe do not recommend installing the management tool on disk C, because features such\nas face recognition require higher disk performance.\nStep 8\nClick Install.\nThe installation process takes about 4 to 8 minutes. Do not cut off the power or close the\nprogram.\nStep 9\nClick Run after the installation completes.\nStep 10\nConfigure Windows settings, and then click Next.\nYou can click Enable System Network Settings or Enable System Time Settings to set\nthe network parameters or system time respectively.\nStep 11\nConfigure the network parameters.\n1. Configure the IP address of the network card.\n●Dual NIC will...",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-1 Select a platform type Step 6 Enable Store Face Snapshot Records as needed, and then click Next.",
+      "When it is not selected, the platform will not display or store face snapshot records that do not include comparison records.",
+      "If you select it, the face snapshot records will be saved.",
+      "Use this function ethically and securely in accordance with applicable laws."
+    ],
+    "keywords": [
+      "network",
+      "step",
+      "face",
+      "records",
+      "installation",
+      "platform",
+      "enable",
+      "snapshot",
+      "then",
+      "configure",
+      "settings",
+      "time"
+    ],
+    "image_count": 5,
+    "drawing_count": 12,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 15,
+    "page_number": 16,
+    "title_hint": "Management Tool",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Management Tool"
+    ],
+    "text_chars": 1758,
+    "text_excerpt": "network card for services on the Internet; or use both network cards for accessing\ndevices on a local area network, and then map one of them to the Internet.\n2. (Optional) Enable WAN Mode , enter a WAN IP address or a domain name, and then\nclick Next.\nIf the platform is in a local network, use this function to connect it to the Internet so\nthat you can access it from outside the local network.\nStep 12\nSelect the Cloud Storage , and then click Finish.\n●If the available RAM of the server is less than 4 GB, you can only use basic functions\nrelated to video. If it is less than 2.5 GB, you cannot use any function.\nFor a distributed server, if the available RAM of the server is less than 4 GB, you cannot\nuse any function.\n●Select the corresponding storage mode based on your business requirements and\nusage scenarios. Please note that once the storage mode is selected, it cannot be\nchanged arbitrarily later.\nRelated Operations\n●To uninstall the platform, log in to the server, go to \"..\\DSS\\DSS Server\\uninstall\", double-click\nuninst.exe, and then follow the on-screen instructions to uninstall the program.\n●To update the system, directly install the new program. The system supports...",
+    "visual_summary": "",
+    "key_facts": [
+      "network card for services on the Internet; or use both network cards for accessing devices on a local area network, and then map one of them to the Internet.",
+      "2. (Optional) Enable WAN Mode , enter a WAN IP address or a domain name, and then click Next.",
+      "If the platform is in a local network, use this function to connect it to the Internet so that you can access it from outside the local network.",
+      "Step 12 Select the Cloud Storage , and then click Finish."
+    ],
+    "keywords": [
+      "server",
+      "network",
+      "then",
+      "address",
+      "services",
+      "internet",
+      "local",
+      "mode",
+      "function",
+      "storage",
+      "less",
+      "than"
+    ],
+    "image_count": 4,
+    "drawing_count": 8,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 16,
+    "page_number": 17,
+    "title_hint": "Management Tool",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Management Tool"
+    ],
+    "text_chars": 911,
+    "text_excerpt": "Figure 2-2 Management tool\nTable 2-3 Interface description\nNo.\nFunction\nDescription\n1\nServer information\nDisplays the IP address and type of the platform.\n2\nStatus of services\nThere are 5 statuses of services, including starting, unavailable,\nstopping, running, and stopped.\n●The unavailable status only depends on the status of the SMC\nservice. If the SMC service is not properly running, the overall\nstatus will be unavailable.\n●Running means that all services are running normally.\n3\nInformation for port\nmapping\nDisplays the ports that you need to map for various functions.\nSelect one or more functions, the ports you must map will be\ndisplayed on the right. Click \n to export them to your computer\nso that you can check on them easily.\n4\nDownload clients and\nlogs\n●Client: Displays how to download the PC client and App.\n●Logs: Download the operation logs of the management tool.\nQuick Deployment Manual\n9",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-2 Management tool Table 2-3 Interface description No.",
+      "Function Description 1 Server information Displays the IP address and type of the platform.",
+      "2 Status of services There are 5 statuses of services, including starting, unavailable, stopping, running, and stopped.",
+      "●The unavailable status only depends on the status of the SMC service."
+    ],
+    "keywords": [
+      "status",
+      "running",
+      "displays",
+      "services",
+      "unavailable",
+      "download",
+      "logs",
+      "management",
+      "tool",
+      "description",
+      "information",
+      "service"
+    ],
+    "image_count": 3,
+    "drawing_count": 44,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 17,
+    "page_number": 18,
+    "title_hint": "Management Tool",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Management Tool"
+    ],
+    "text_chars": 2593,
+    "text_excerpt": "No.\nFunction\nDescription\n5\nConfigurations and\nview information of\nthe platform\n●Windows configuration: Click Windows Config , and then\nclick Enable System Network Settings or Enable System\nTime Settings to configure the network or time of the\nWindows operating system respectively.\n●Network: Configure the network card mode, IP address, and\nthe WAN mode. If the server has two network cards, you can\nselect Dual NIC mode, configure two IP addresses, and then\nthe platform will be able to connect to two networks and\naccess the devices on each one. If the platform is in a local\nnetwork and the devices are on the internet, or you need to\naccess the platform that is in a local network from the\nInternet, you can enable WAN Mode and map the IP address\nof the platform to a WAN IP address or a domain name.\n●Security: Select a TLS protocol version when you access the\nwebpage of the platform through a browser. Only TLS1.3 and\nTLS1.2 protocols are supported. TLS1.1 and earlier versions are\nno longer supported. We recommend using a browser that\nsupports TLS1.3 or TLS1.2. After configuration, follow the on-\nscreen instructions to configure the TLS protocol version in\nthe IE browser so that you...",
+    "visual_summary": "",
+    "key_facts": [
+      "Function Description 5 Configurations and view information of the platform ●Windows configuration: Click Windows Config , and then click Enable System Network Settings or Enable System Time Settings to configure the network or time of the Windows operating system respectively.",
+      "●Network: Configure the network card mode, IP address, and the WAN mode.",
+      "If the server has two network cards, you can select Dual NIC mode, configure two IP addresses, and then the platform will be able to connect to two networks and access the devices on each one.",
+      "If the platform is in a local network and the devices are on the internet, or you need to access the platform that is in a local network from the Internet, you can enable WAN Mode and map the IP address of the platform to a WAN IP address or a domain name."
+    ],
+    "keywords": [
+      "platform",
+      "services",
+      "network",
+      "mode",
+      "then",
+      "tls1",
+      "reset",
+      "password",
+      "view",
+      "configure",
+      "server",
+      "access"
+    ],
+    "image_count": 3,
+    "drawing_count": 38,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 18,
+    "page_number": 19,
+    "title_hint": "Downloading and Installing DSS Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS PC Client",
+      "Installing DSS PC Client",
+      "Downloading and Installing DSS Client"
+    ],
+    "text_chars": 1616,
+    "text_excerpt": "No.\nFunction\nDescription\nDatabase repair\nIf you cannot log in to the client because the database is\nabnormal, you can try to repair it manually. Click \n of the\nMySQL service, and follow the instructions. Based on the items\nchecked, the platform will determine whether repair or\nrestoration is needed. If repair fails, you can try restoring the\ndatabase. During restoration, the platform will back up the\ndatabase. Please make sure that there is enough space.\nOtherwise, restoration will fail. Click \n to view all backup files.\n●This operation cannot be performed in hot standby.\n●To restore the database, the platform needs to use port 3306.\nIf a process is using the port, you need to terminate it first.\n2.2.5 DSS PC Client\nInstall the DSS client before licensing it.\n2.2.5.1 Installing DSS PC Client\nYou can visit the system through the DSS Client for remote monitoring.\n2.2.5.1.1 DSS Client Requirements\nPress the Windows key, type dxdiag , and then click \n. On the System page, the information of\nyour computer is displayed.\nTo install DSS Client, prepare a computer in accordance with the following requirements.\nTable 2-4 Hardware requirements\nParameters\nDescription\nRecommended...",
+    "visual_summary": "",
+    "key_facts": [
+      "Function Description Database repair If you cannot log in to the client because the database is abnormal, you can try to repair it manually.",
+      "Click of the MySQL service, and follow the instructions.",
+      "Based on the items checked, the platform will determine whether repair or restoration is needed.",
+      "If repair fails, you can try restoring the database."
+    ],
+    "keywords": [
+      "database",
+      "repair",
+      "platform",
+      "requirements",
+      "restoration",
+      "description",
+      "cannot",
+      "make",
+      "sure",
+      "port",
+      "install",
+      "installing"
+    ],
+    "image_count": 5,
+    "drawing_count": 40,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 19,
+    "page_number": 20,
+    "title_hint": "Logging in to DSS PC Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS PC Client",
+      "Logging in to DSS PC Client"
+    ],
+    "text_chars": 1628,
+    "text_excerpt": "●The platform also supports installation by MSI package. Visit https://\nsoftware.dahuasecurity.com/en/download/ and download the MSI package of the\nplatform version you need. Please be advised that you cannot overwrite the PC client\ninstalled with an exe package, and vice versa. Also, the PC client installed with an MSI\npackage does not support automatic update. You must download the package of the\nnew version an install it manually.\n●Click User Manual at the lower right to download the user manual.\nIf you save the program, go to Step 3.\nIf you run the program, go to Step 4.\nStep 3\nDouble-click the DSS Client program.\nStep 4\nSelect the checkbox of I have read and agree to the DSS agreement and then click\nNext.\nStep 5\nSelect a path for installation, and then click Install.\nThe installation progress is displayed. It takes about 5 minutes to complete.\n2.2.5.2 Logging in to DSS PC Client\nProcedure\nStep 1\nDouble-click \n on the desktop.\nStep 2\nSelect a language and user type.\nNormal users are added on the platform manually. Domain users are imported from a\ndomain.\nIf you want to log in using a domain user account, you must import the domain user first.\nFor details, see the user...",
+    "visual_summary": "",
+    "key_facts": [
+      "●The platform also supports installation by MSI package.",
+      "Visit https:// software.dahuasecurity.com/en/download/ and download the MSI package of the platform version you need.",
+      "Please be advised that you cannot overwrite the PC client installed with an exe package, and vice versa.",
+      "Also, the PC client installed with an MSI package does not support automatic update."
+    ],
+    "keywords": [
+      "step",
+      "domain",
+      "platform",
+      "package",
+      "download",
+      "installation",
+      "must",
+      "program",
+      "name",
+      "also",
+      "version",
+      "installed"
+    ],
+    "image_count": 3,
+    "drawing_count": 12,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 20,
+    "page_number": 21,
+    "title_hint": "Logging in to DSS PC Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS PC Client",
+      "Logging in to DSS PC Client"
+    ],
+    "text_chars": 1756,
+    "text_excerpt": "Figure 2-3 Login\nStep 4\nClick anywhere else on the page to start initializing the platform.\nFor first-time login, you will be automatically directed to the initialization process.\nIf you are not logging in for the first time, enter the IP address or domain name, port\nnumber of the platform, username, and password, and then click Login.\n1. The default user is system. Enter and confirm the password, and then click Next.\nThe password must consist of 8 to 32 non-blank characters and contain at least two\ntypes of characters: Uppercase, lowercase, number, and special character (excluding '\n\" ; : &).\n2. Select your security questions and enter their answers, and then click OK.\nThe client will automatically log in to the platform by using the password you just set.\n●Keep the security questions and answers properly. Otherwise, your password\ncannot be recovered if you forget it. If you forget your password, you can click\nForgot password? to reset it by answering your security questions.\n●Selecting Remember Password and Auto Login will enable automatic login after\nyou log out, and then log in again; when selecting only Remember Password,\nthen you do not have to enter the password, but...",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-3 Login Step 4 Click anywhere else on the page to start initializing the platform.",
+      "For first-time login, you will be automatically directed to the initialization process.",
+      "If you are not logging in for the first time, enter the IP address or domain name, port number of the platform, username, and password, and then click Login.",
+      "Enter and confirm the password, and then click Next."
+    ],
+    "keywords": [
+      "password",
+      "login",
+      "then",
+      "your",
+      "enter",
+      "security",
+      "platform",
+      "automatically",
+      "questions",
+      "selecting",
+      "remember",
+      "when"
+    ],
+    "image_count": 4,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 21,
+    "page_number": 22,
+    "title_hint": "Home Page of DSS PC Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS PC Client",
+      "Home Page of DSS PC Client"
+    ],
+    "text_chars": 1257,
+    "text_excerpt": "a. Go to \n > System Parameters > Security Config, enable Two-Factor\nAuthentication, and then select authentication by email or authenticator.\n●Email: Make sure that the email server is configured correctly, and the login user\nhas configured an email address to receive the verification code.\n●Authenticator: You need to have Microsoft or Google authenticator installed on\nyour phone.\nb. Go to \n > User > Role Users > User Management, and then enable Two-Factor\nAuthentication when editing the user.\nc. To log in, you must enter your login password, the verification code received in\nyour email (if email authentication is selected), or a random verification code (if\nauthenticator authentication is selected).\nIf authentication fails, you can log in by answering security questions or by\nresetting your system password to disable two-factor authentication.\nRelated Operations\nSelect CA Certificate Authentication to enable client certification verification.\n●Verification successful: You can log in to the client normally.\n●Verification failed: Click Upload to upload the CA certificate. After the certificate is successfully\nimported, you can log in to the client normally.\n2.2.5.3 Home Page of...",
+    "visual_summary": "",
+    "key_facts": [
+      "Go to > System Parameters > Security Config, enable Two-Factor Authentication, and then select authentication by email or authenticator.",
+      "●Email: Make sure that the email server is configured correctly, and the login user has configured an email address to receive the verification code.",
+      "●Authenticator: You need to have Microsoft or Google authenticator installed on your phone. b.",
+      "Go to > User > Role Users > User Management, and then enable Two-Factor Authentication when editing the user. c."
+    ],
+    "keywords": [
+      "authentication",
+      "email",
+      "verification",
+      "authenticator",
+      "your",
+      "enable",
+      "two-factor",
+      "code",
+      "certificate",
+      "security",
+      "then",
+      "configured"
+    ],
+    "image_count": 3,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 22,
+    "page_number": 23,
+    "title_hint": "Home Page of DSS PC Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS PC Client",
+      "Home Page of DSS PC Client"
+    ],
+    "text_chars": 1892,
+    "text_excerpt": "Table 2-5 Parameter description\nNo.\nName\nFunction\n1\nTab\nDisplays the names of all tabs that are opened.\n●When opening multiple function modules, you can right-click the\ntab, and then select Close to close the current module, or select\nClose Others to other windows other than the current one.\n●For the monitoring center module, you can:\nOpen up to 16 tabs.\nRight-click the tab, and then click Rename to rename the\nmodule name.\nDrag the monitoring center window to form a separate window\nfor multi-screen viewing.\nThe operations are valid only for the client that opens currently.\n2\nApplications\n●\n: Application options including monitoring center, access\nmanagement, intelligent analysis and vehicle entrance control.\n●\n: Configuration options.\n3\nSystem settings\n●\n: Enable or disable alarm audio.\n●\n: Displays number of alarms. Click the icon to go to Event\nCenter.\n●Click \n to view system messages, such as the information of a\ndevice was edited or deleted. The permissions of a user will\ndetermine what messages can be seen. For example, if user A does\nnot have the permission of device A, then user A will not get the\nmessage when device A is deleted.\n●Click \n to view the download file...",
+    "visual_summary": "",
+    "key_facts": [
+      "Name Function 1 Tab Displays the names of all tabs that are opened.",
+      "●When opening multiple function modules, you can right-click the tab, and then select Close to close the current module, or select Close Others to other windows other than the current one.",
+      "●For the monitoring center module, you can: Open up to 16 tabs.",
+      "Right-click the tab, and then click Rename to rename the module name."
+    ],
+    "keywords": [
+      "then",
+      "center",
+      "password",
+      "name",
+      "close",
+      "module",
+      "monitoring",
+      "number",
+      "view",
+      "information",
+      "download",
+      "change"
+    ],
+    "image_count": 10,
+    "drawing_count": 52,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 23,
+    "page_number": 24,
+    "title_hint": "Logging in to DSS Web Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS Web Client",
+      "Logging in to DSS Web Client"
+    ],
+    "text_chars": 1856,
+    "text_excerpt": "No.\nName\nFunction\n5\nManagement\n●Customize quick HTTP commands.\n●Manage broadcast operations and audio resources of IP speakers.\n●Engage in a group talk.\n●Use the API debugging tool for function debugging through the\nwebpage\n●Go to Task Center to search for and download task records.\n●Download videos.\n●Check local images and videos.\n●Settings for video, snapshot, video wall, alarm, security and\nshortcut keys.\n●View and manage logs.\n●View user manual.\nFor details of the Management section, see the user manual.\n2.2.6 DSS Web Client\n2.2.6.1 Logging in to DSS Web Client\nProcedure\nStep 1\nEnter https://platform IP address in the browser address bar, and then press Enter.\nIf it prompts Your connection is not private, select Advanced > Proceed to\nxx.xx.xx.xxx (unsafe) (xx.xx.xx.xxx refers to the platform IP address).\nStep 2\nSelect a language and user type.\nNormal users are added on the platform manually. Domain users are imported from a\ndomain.\nIf you want to log in using a domain user account, you must import the domain user first.\nFor details, see the user manual.\nStep 3\nClick anywhere else on the page to start initializing the platform.\nFor first-time login, you will be automatically...",
+    "visual_summary": "",
+    "key_facts": [
+      "Name Function 5 Management ●Customize quick HTTP commands.",
+      "●Manage broadcast operations and audio resources of IP speakers.",
+      "●Use the API debugging tool for function debugging through the webpage ●Go to Task Center to search for and download task records.",
+      "●Settings for video, snapshot, video wall, alarm, security and shortcut keys."
+    ],
+    "keywords": [
+      "platform",
+      "enter",
+      "domain",
+      "address",
+      "then",
+      "password",
+      "step",
+      "name",
+      "function",
+      "management",
+      "quick",
+      "manage"
+    ],
+    "image_count": 2,
+    "drawing_count": 28,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 24,
+    "page_number": 25,
+    "title_hint": "Installing Certificate of DSS Web Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS Web Client",
+      "Installing Certificate of DSS Web Client"
+    ],
+    "text_chars": 2621,
+    "text_excerpt": "●Keep the security questions and answers properly. Otherwise, your password\ncannot be recovered if you forget it. If you forget your password, you can click\nForgot password? to reset it by answering your security questions.\n●Selecting Remember Password and Auto Login will enable automatic login after\nyou log out, and then log in again; when selecting only Remember Password,\nthen you do not have to enter the password, but need to click Login when log in\nagain; when selecting only Auto Login, the system will select Remember\nPassword and log in automatically.\n●If you fail to log in twice consecutively, the system will display a random\nverification code, which is required for subsequent logins. If you fail to log in 5\ntimes consecutively, your account will be locked.\nSupports two-factor authentication, that is, a verification method that enhances\naccount security by requiring a password (first factor) and a verification code (second\nfactor) to log in.\na. Go to \n > System Parameters > Security Config, enable Two-Factor\nAuthentication, and then select authentication by email or authenticator.\n●Email: Make sure that the email server is configured correctly, and the login user\nhas...",
+    "visual_summary": "",
+    "key_facts": [
+      "●Keep the security questions and answers properly.",
+      "Otherwise, your password cannot be recovered if you forget it.",
+      "If you forget your password, you can click Forgot password? to reset it by answering your security questions.",
+      "●Selecting Remember Password and Auto Login will enable automatic login after you log out, and then log in again; when selecting only Remember Password, then you do not have to enter the password, but need to click Login when log in again; when selecting only Auto Login, the system will select Remember Password and log in automatically."
+    ],
+    "keywords": [
+      "password",
+      "your",
+      "authentication",
+      "security",
+      "login",
+      "verification",
+      "email",
+      "then",
+      "need",
+      "code",
+      "certificate",
+      "when"
+    ],
+    "image_count": 4,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 25,
+    "page_number": 26,
+    "title_hint": "Home Page of DSS Web Client",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "DSS Web Client",
+      "Home Page of DSS Web Client"
+    ],
+    "text_chars": 1008,
+    "text_excerpt": "Application\nIf you have not downloaded and installed the CA certificate, click Download in the on-screen\nprompt, so that you can download the certificate to the path defined in your browser.\nAfter decompressing the installation package, follow the instructions in readme.pdf to install the CA\ncertificate. After successful installation, log in to the web client again.\n●This action is intended for general users. Before performing this action, make sure that the CA\ncertificate has been self-created or imported on the main platform.\n●If you cannot use the certificate after multiple installations, uninstall the existing certificate and\nthen reinstall it.\n2.2.6.3 Home Page of DSS Web Client\nFigure 2-5 Homepage\nTable 2-6 Parameter description\nNo.\nName\nFunction\n1\nTab\nDisplays the names of all tabs that are opened.\n2\nApplications\n●\n: Application options including monitoring center, access\nmanagement, intelligent analysis and vehicle entrance control.\n●\n: Configuration options.\nQuick Deployment Manual\n18",
+    "visual_summary": "",
+    "key_facts": [
+      "Application If you have not downloaded and installed the CA certificate, click Download in the on-screen prompt, so that you can download the certificate to the path defined in your browser.",
+      "After decompressing the installation package, follow the instructions in readme.pdf to install the CA certificate.",
+      "After successful installation, log in to the web client again.",
+      "Before performing this action, make sure that the CA certificate has been self-created or imported on the main platform."
+    ],
+    "keywords": [
+      "certificate",
+      "after",
+      "application",
+      "download",
+      "installation",
+      "action",
+      "options",
+      "have",
+      "downloaded",
+      "installed",
+      "on-screen",
+      "prompt"
+    ],
+    "image_count": 5,
+    "drawing_count": 31,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 26,
+    "page_number": 27,
+    "title_hint": "Applying for a License",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Licensing",
+      "Applying for a License"
+    ],
+    "text_chars": 2158,
+    "text_excerpt": "No.\nName\nFunction\n3\nSystem settings\n●\n: Enable or disable alarm audio.\n●\n: Displays number of alarms. Click the icon to go to Event\nCenter.\n●Click \n to view system messages, such as the information of a\ndevice was edited or deleted. The permissions of a user will\ndetermine what messages can be seen. For example, if user A does\nnot have the permission of device A, then user A will not get the\nmessage when device A is deleted.\n●Click \n to download the PC client or web plugin.\n●Click \n to connect to other platforms as sites to your current\nplatform.\n●\n: User information. Click the icon, and then you can change\npassword, log out the client, and view the version information.\nClick Change Password to change user password.\nClick Log Out to exit client.\nClick About to view version information.\n●Click \n to display the client in full screen; click the icon again, or\npress Esc to exit full-screen mode.\n4\nOverview\n●The number of devices in total, offline and online.\n●The number of total, processed and pending events.\n5\nManagement\n●Engage in a group talk.\n●Use the API debugging tool for function debugging through the\nwebpage\n●Go to Task Center to search for and download task...",
+    "visual_summary": "",
+    "key_facts": [
+      "Name Function 3 System settings ● : Enable or disable alarm audio.",
+      "●Click to view system messages, such as the information of a device was edited or deleted.",
+      "The permissions of a user will determine what messages can be seen.",
+      "For example, if user A does not have the permission of device A, then user A will not get the message when device A is deleted."
+    ],
+    "keywords": [
+      "license",
+      "view",
+      "number",
+      "information",
+      "activate",
+      "icon",
+      "your",
+      "platform",
+      "change",
+      "password",
+      "function",
+      "settings"
+    ],
+    "image_count": 8,
+    "drawing_count": 40,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 27,
+    "page_number": 28,
+    "title_hint": "Online Activation",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Licensing",
+      "Activating License",
+      "Online Activation"
+    ],
+    "text_chars": 2098,
+    "text_excerpt": "Ultimate, scroll to the bottom, click Apply, and then follow the instructions. You can only use a trial\nlicense on a server once.\n2.2.7.2 Activating License\nThe following images of the page might slightly differ from the actual pages.\n2.2.7.2.1 Online Activation\nPrerequisites\n●You have received your license. If not, see \"2.2.7.1 Applying for a License\".\nA license is used to confirm the features and number of channels you purchased. To get a formal\nlicense, contact our sales personnel. To apply for a trial license, visit our website and find DSS\nUltimate, and then follow the application instructions.\n●The platform server can access the Internet.\n●To activate hot standby, you need to deploy hot standby first. For details, see the\nDSSReplicatorPlus4.0 Configuration Guide. If you have any questions, contact technical support.\nBackground Information\n●When hot standby is activated, the hardware information of the active and standby servers is\nobtained at the same time. You do not need to activate the servers separately, which simplifies\nthe activation operation.\n●When the active server is activated, the standby server obtains short-term license from the\nactive server every 30...",
+    "visual_summary": "",
+    "key_facts": [
+      "Ultimate, scroll to the bottom, click Apply, and then follow the instructions.",
+      "You can only use a trial license on a server once.",
+      "2.2.7.2 Activating License The following images of the page might slightly differ from the actual pages.",
+      "2.2.7.2.1 Online Activation Prerequisites ●You have received your license."
+    ],
+    "keywords": [
+      "license",
+      "standby",
+      "server",
+      "active",
+      "then",
+      "servers",
+      "activate",
+      "activated",
+      "activation",
+      "used",
+      "step",
+      "apply"
+    ],
+    "image_count": 3,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 28,
+    "page_number": 29,
+    "title_hint": "Offline Activation",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Licensing",
+      "Activating License",
+      "Offline Activation"
+    ],
+    "text_chars": 1168,
+    "text_excerpt": "Figure 2-6 Select a method\nStep 4\nEnter your new Activation Code.\nStep 5\nClick Activate Now.\nStep 6\nOn the License page, view your license details.\nYou can purchase a subscription license. The license expiration date can be viewed on the\nLicense page after purchase.\n2.2.7.2.2 Offline Activation\nBackground Information\n●When hot standby is activated, the hardware information of the active and standby servers is\nobtained at the same time. You do not need to activate the servers separately, which simplifies\nthe activation operation.\n●When the active server is activated, the standby server obtains short-term license from the\nactive server every 30 minutes, so that the standby server is always activated, as long as the\nservers are always connected; if the servers are disconnected, or the hot standby is uninstalled\nor stopped, the active server can be used normally, but the standby server will not be able to\nshort-term license regularly. In this case, the standby server will expire within the specified time\nof the last license.\n●If the hot standby is uninstalled, the active and standby servers can be activated and used\nseparately.\nQuick Deployment Manual\n21",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 2-6 Select a method Step 4 Enter your new Activation Code.",
+      "Step 6 On the License page, view your license details.",
+      "The license expiration date can be viewed on the License page after purchase.",
+      "2.2.7.2.2 Offline Activation Background Information ●When hot standby is activated, the hardware information of the active and standby servers is obtained at the same time."
+    ],
+    "keywords": [
+      "standby",
+      "license",
+      "server",
+      "active",
+      "servers",
+      "activated",
+      "step",
+      "activation",
+      "your",
+      "activate",
+      "purchase",
+      "information"
+    ],
+    "image_count": 2,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 29,
+    "page_number": 30,
+    "title_hint": "Offline Activation",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Licensing",
+      "Activating License",
+      "Offline Activation"
+    ],
+    "text_chars": 1048,
+    "text_excerpt": "Prerequisites\n●You have received your license. If not, see \"2.2.7.1 Applying for a License\".\nA license is used to confirm the features and number of channels you purchased. To get a formal\nlicense, contact our sales personnel. To apply for a trial license, visit our website and find DSS\nPro, and then follow the application instructions.\n●To activate hot standby, you must deploy hot standby first. For details, see the\nDSSReplicatorPlus4.0 Configuration Guide. If you have any questions, contact technical support.\nProcedure\nStep 1\nOn the Home page, click \n, and then in System Config, select License.\nStep 2\nClick Offline Activate License , select Offline Activate License, then click OK.\nStep 3\nSelect an activation method. Select Normal Active to complete the process. If you\nupgraded the system from Express to DSS Pro, and Express has a paid license, then select\nUpgrade from Express instead.\nFigure 2-7 Select a method\nStep 4\nEnter your new Activation Code.\nStep 5\nClick Export to export the license request file.\nQuick Deployment Manual\n22",
+    "visual_summary": "",
+    "key_facts": [
+      "Prerequisites ●You have received your license.",
+      "If not, see \"2.2.7.1 Applying for a License\".",
+      "A license is used to confirm the features and number of channels you purchased.",
+      "To get a formal license, contact our sales personnel."
+    ],
+    "keywords": [
+      "license",
+      "step",
+      "then",
+      "activate",
+      "express",
+      "have",
+      "your",
+      "contact",
+      "standby",
+      "offline",
+      "activation",
+      "method"
+    ],
+    "image_count": 3,
+    "drawing_count": 8,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 30,
+    "page_number": 31,
+    "title_hint": "Enabling Cloud Storage Nodes",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Enabling Cloud Storage Nodes"
+    ],
+    "text_chars": 1410,
+    "text_excerpt": "Step 6\nGenerate license file.\n1. Move the request file to a computer with Internet access.\n2. On that computer, open the system email that contains your license, and then click the\nattached web page address or DSS License Management to go to the license\nmanagement page.\n3. Select DSS , and then click Activate License.\n4. Click Upload , select the license request file, and then when you are prompted\nuploaded successfully, click Activate.\nThe success page is displayed, where a download prompt is displayed asking you to\nsave the license activation file.\nFigure 2-8 Upload license request file\n5. On the success page, click Save to save the file, and then move the file back to the\ncomputer where you exported the license request file.\n6. On the Offline Activate License page, click Import, and then follow the on-screen\ninstructions to import the license activation file.\nStep 7\nOn the License page, view your license details.\nYou can purchase a subscription license. The license expiration date can be viewed on the\nLicense page after purchase.\n2.2.8 Enabling Cloud Storage Nodes\nPrerequisites\nIn the page of DSS Config, register the cloud storage node to the central node.\nProcedure\nStep...",
+    "visual_summary": "",
+    "key_facts": [
+      "Move the request file to a computer with Internet access.",
+      "On that computer, open the system email that contains your license, and then click the attached web page address or DSS License Management to go to the license management page.",
+      "Select DSS , and then click Activate License.",
+      "Click Upload , select the license request file, and then when you are prompted uploaded successfully, click Activate."
+    ],
+    "keywords": [
+      "license",
+      "file",
+      "then",
+      "step",
+      "request",
+      "computer",
+      "activate",
+      "save",
+      "cloud",
+      "storage",
+      "config",
+      "move"
+    ],
+    "image_count": 4,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 31,
+    "page_number": 32,
+    "title_hint": "Enabling Cloud Storage Nodes",
+    "section_path": [
+      "Cloud Storage Deployment",
+      "Installing DSS Platform",
+      "Enabling Cloud Storage Nodes"
+    ],
+    "text_chars": 140,
+    "text_excerpt": "Wait a few minutes while the server is being enabled. When successfully enabled, the\nserver status shows Running.\nQuick Deployment Manual\n24",
+    "visual_summary": "",
+    "key_facts": [
+      "Wait a few minutes while the server is being enabled.",
+      "When successfully enabled, the server status shows Running."
+    ],
+    "keywords": [
+      "server",
+      "enabled",
+      "wait",
+      "minutes",
+      "while",
+      "being",
+      "when",
+      "successfully",
+      "status",
+      "shows",
+      "running",
+      "quick"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 32,
+    "page_number": 33,
+    "title_hint": "Installation Steps",
+    "section_path": [
+      "Distributed Deployment",
+      "Installing Sub Server",
+      "Installation Steps"
+    ],
+    "text_chars": 1527,
+    "text_excerpt": "3 Distributed Deployment\n3.1 Installing Main Server\nFor details about how to install the main server, see the previous chapter or section.\nStorage mode supports disk storage or cloud storage based on actual business needs and usage\nscenarios.\nAfter sub servers are deployed, log in to the main server, and then you can view the status of the\nsub servers.\n3.2 Installing Sub Server\nThis section introduces how to install sub servers and register them to the main server.\n3.2.1 Sub Server Requirements\nRequirements for sub server are as follows:\nTable 3-1 DSS Ultimate hardware requirements for sub server\nParameter\nHardware Requirement\nOperating System\nRecommended\nrequirements\n●CPU: 2 × Intel® Xeon® Silver 4509Y 2.6 GHz\n8 Core Processor\n●RAM: 32 GB\n●Network card: 6 × Ethernet ports@1000\nMbps\n●Hard drive type: 7200 RPM Enterprise Class\nHDD\n●DSS installation directory space: at least\n500 GB (independent disk installation)\n●Microsoft® Windows\nServer 2019 Standard (64-\nbit)\n●Microsoft® Windows\nServer 2022 Standard (64-\nbit)\n●Microsoft® Windows\nServer 2025 Standard (64-\nbit)\n●Microsoft® Windows 10\n20H2 Pro (64-bit)\n●Microsoft® Windows 11\n21H2 Pro (64-bit)\n●Microsoft® Windows 11\n24H2 Pro...",
+    "visual_summary": "",
+    "key_facts": [
+      "3 Distributed Deployment 3.1 Installing Main Server For details about how to install the main server, see the previous chapter or section.",
+      "Storage mode supports disk storage or cloud storage based on actual business needs and usage scenarios.",
+      "After sub servers are deployed, log in to the main server, and then you can view the status of the sub servers.",
+      "3.2 Installing Sub Server This section introduces how to install sub servers and register them to the main server."
+    ],
+    "keywords": [
+      "server",
+      "microsoft",
+      "windows",
+      "main",
+      "requirements",
+      "storage",
+      "servers",
+      "installation",
+      "standard",
+      "deployment",
+      "installing",
+      "install"
+    ],
+    "image_count": 2,
+    "drawing_count": 24,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 33,
+    "page_number": 34,
+    "title_hint": "Installation Steps",
+    "section_path": [
+      "Distributed Deployment",
+      "Installing Sub Server",
+      "Installation Steps"
+    ],
+    "text_chars": 1672,
+    "text_excerpt": "Procedure\nStep 1\nDouble-click the DSS installer \n.\nThe name of the installer includes version number and date. Please confirm before\ninstallation.\nStep 2\nClick agreement, read through the agreement, and then accept it.\nStep 3\nSelect the agreement check box, and then click Next.\nStep 4\nSelect Sub for server type, and then click Next.\nStep 5\nClick Browse, and then select the installation path.\nIf the Install button is gray, check whether your installation path and space meet the\nrequirements. The total space required is displayed on the page.\nWe recommend you do not install the platform into drive C because features such as face\nrecognition require higher disk performance.\nStep 6\nClick Install.\nThe installation process takes about 5 to 10 minutes. Do not cut off the power or close the\nprogram.\nStep 7\nClick Run when the installation finishes.\nStep 8\nClick Enable System Network Settings or Enable System Time Settings to configure\nthe network or time of the Windows operating system respectively.\nStep 9\nSelect a network mode and the network card, and then click Next Step.\nDual NIC will be available if the server has two network cards. This is useful when you\nneed to access devices on...",
+    "visual_summary": "",
+    "key_facts": [
+      "Procedure Step 1 Double-click the DSS installer .",
+      "The name of the installer includes version number and date.",
+      "Step 2 Click agreement, read through the agreement, and then accept it.",
+      "Step 3 Select the agreement check box, and then click Next."
+    ],
+    "keywords": [
+      "step",
+      "then",
+      "server",
+      "network",
+      "installation",
+      "agreement",
+      "next",
+      "install",
+      "platform",
+      "enable",
+      "double-click",
+      "installer"
+    ],
+    "image_count": 5,
+    "drawing_count": 19,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 34,
+    "page_number": 35,
+    "title_hint": "Multiple Sites Deployment",
+    "section_path": [
+      "Multiple Sites Deployment"
+    ],
+    "text_chars": 1606,
+    "text_excerpt": "4 Multiple Sites Deployment\nIf you have multiple platforms, you can connect one or more platforms to your current one, so that\nyou can view the resources from them directly on your main platform, including viewing real-time\nvideos from video channels, searching for real-time and historical events, and downloading\nrecorded videos. The information of the platforms is linked to the user logged in to the main\nplatform. When the user log in to the main platform again, the main platform will automatically\nconnect to the other platforms.\nPrerequisites\n●The versions of platforms must be the same.\n●The user of the connecting site must have permissions of adding sites, and the user of the\nconnected site must have permissions of the added site.\nPermissions can be configured by selecting User > Role Management, and then selecting the\npermissions in Business Function when adding roles.\nBackground Information\nWe recommend that users of the added site disable the two-factor authentication function;\notherwise, they will need to authenticate every time they log in to the client.\nProcedure\nStep 1\nLog in to the DSS Client.\nStep 2\nClick \n on the upper-right corner, and then click Add Site.\nStep...",
+    "visual_summary": "",
+    "key_facts": [
+      "4 Multiple Sites Deployment If you have multiple platforms, you can connect one or more platforms to your current one, so that you can view the resources from them directly on your main platform, including viewing real-time videos from video channels, searching for real-time and historical events, and downloading recorded videos.",
+      "The information of the platforms is linked to the user logged in to the main platform.",
+      "When the user log in to the main platform again, the main platform will automatically connect to the other platforms.",
+      "Prerequisites ●The versions of platforms must be the same."
+    ],
+    "keywords": [
+      "site",
+      "platforms",
+      "main",
+      "platform",
+      "real-time",
+      "permissions",
+      "search",
+      "have",
+      "view",
+      "videos",
+      "historical",
+      "events"
+    ],
+    "image_count": 5,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 35,
+    "page_number": 36,
+    "title_hint": "Hot Standby",
+    "section_path": [
+      "Hot Standby"
+    ],
+    "text_chars": 159,
+    "text_excerpt": "5 Hot Standby\nFor detailed steps, see DSSReplicatorPlus4.0 Configuration Guide. If you have any problems, contact\ntechnical support.\nQuick Deployment Manual\n28",
+    "visual_summary": "",
+    "key_facts": [
+      "5 Hot Standby For detailed steps, see DSSReplicatorPlus4.0 Configuration Guide.",
+      "If you have any problems, contact technical support."
+    ],
+    "keywords": [
+      "standby",
+      "detailed",
+      "steps",
+      "dssreplicatorplus4",
+      "configuration",
+      "guide",
+      "have",
+      "problems",
+      "contact",
+      "technical",
+      "support",
+      "quick"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 36,
+    "page_number": 37,
+    "title_hint": "Cascade",
+    "section_path": [
+      "Cascade"
+    ],
+    "text_chars": 1097,
+    "text_excerpt": "6 Cascade\nAttach a DSS platform to another DSS platform, and then you can view videos of the sub platform\nfrom the main platform. You can create up to 3 cascade levels.\nPrerequisites\nMake sure that all the platforms on the system were already installed.\nBackground Information\n●You only need to configure the sub DSS information on the main DSS information.\n●DSS 7116, the paid version of DSS Express, DSS Pro, and DSS Ultimate can be added as a sub\nplatform.\n●We recommend that users of the sub platform disable the two-factor authentication function;\notherwise, they will need to authenticate every time they log in to the client.\nProcedure\nStep 1\nLog in to the parent DSS client. On the Home page, click \n > System Deployment.\nStep 2\nClick \n.\nStep 3\nClick Add, and then configure parameters.\n●Organization: Select an organization for the added platform, so that the resources of\nthe platform will be attached to the organization of the current platform.\n●IP Address, Port, Username and Password: Enter corresponding information of the\nadded platform.\nStep 4\nClick OK.\nQuick Deployment Manual\n29",
+    "visual_summary": "",
+    "key_facts": [
+      "6 Cascade Attach a DSS platform to another DSS platform, and then you can view videos of the sub platform from the main platform.",
+      "Prerequisites Make sure that all the platforms on the system were already installed.",
+      "Background Information ●You only need to configure the sub DSS information on the main DSS information.",
+      "●DSS 7116, the paid version of DSS Express, DSS Pro, and DSS Ultimate can be added as a sub platform."
+    ],
+    "keywords": [
+      "platform",
+      "information",
+      "step",
+      "added",
+      "organization",
+      "cascade",
+      "then",
+      "main",
+      "need",
+      "configure",
+      "they",
+      "deployment"
+    ],
+    "image_count": 3,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 37,
+    "page_number": 38,
+    "title_hint": "N+M",
+    "section_path": [
+      "N+M"
+    ],
+    "text_chars": 935,
+    "text_excerpt": "7 N+M\nOn the main server, enable the sub server, and then configure the N+M (primary + standby)\nrelationship.\nPrerequisites\n●Deploy all the servers you need.\n●All N+M nodes (including the central node) must be on the same network segment.\nBackground Information\n●If the N node (active node) experiences a power outage or network disconnection, the M node\n(standby node) requires 60–70 seconds to complete takeover.\n●If the N node experiences service failure, supports manual switching to take over the node.\n●When the N node returns to normal, the system will not automatically switch to the M node.\nManual switching is required.\nProcedure\nStep 1\nLog in to the parent DSS client. On the Home page, click \n > System Deployment.\nStep 2\nClick \n.\nStep 3\nClick \n to enable the sub servers.\nStep 4\nConfigure a standby server.\n1. Click \n of a sub server.\n2. Select Standby Server for Server Type, and then click OK.\nQuick Deployment Manual\n30",
+    "visual_summary": "",
+    "key_facts": [
+      "7 N+M On the main server, enable the sub server, and then configure the N+M (primary + standby) relationship.",
+      "Prerequisites ●Deploy all the servers you need.",
+      "●All N+M nodes (including the central node) must be on the same network segment.",
+      "Background Information ●If the N node (active node) experiences a power outage or network disconnection, the M node (standby node) requires 60–70 seconds to complete takeover."
+    ],
+    "keywords": [
+      "node",
+      "server",
+      "standby",
+      "step",
+      "enable",
+      "then",
+      "configure",
+      "servers",
+      "network",
+      "experiences",
+      "switching",
+      "deployment"
+    ],
+    "image_count": 5,
+    "drawing_count": 7,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 38,
+    "page_number": 39,
+    "title_hint": "N+M",
+    "section_path": [
+      "N+M"
+    ],
+    "text_chars": 334,
+    "text_excerpt": "Figure 7-1 Configure a standby server\nStep 5\nConfigure the sub-standby relationship in either of the following ways.\n●Go to the Server Configuration page of the sub server to select a standby server.\n1. Click \n of a sub server.\n2. On the Select Standby Server(s) section, select one or more standby servers.\nQuick Deployment Manual\n31",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 7-1 Configure a standby server Step 5 Configure the sub-standby relationship in either of the following ways.",
+      "●Go to the Server Configuration page of the sub server to select a standby server.",
+      "On the Select Standby Server(s) section, select one or more standby servers."
+    ],
+    "keywords": [
+      "server",
+      "standby",
+      "configure",
+      "step",
+      "sub-standby",
+      "relationship",
+      "either",
+      "following",
+      "ways",
+      "configuration",
+      "more",
+      "servers"
+    ],
+    "image_count": 3,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 39,
+    "page_number": 40,
+    "title_hint": "N+M",
+    "section_path": [
+      "N+M"
+    ],
+    "text_chars": 261,
+    "text_excerpt": "Figure 7-2 Select a standby server\n3. Click OK.\n●Go to the Server Configuration page of the standby server to select a sub server.\n1. Click \n of a standby server.\n2. On the Select Sub Server(s) section, select one or more sub servers.\nQuick Deployment Manual\n32",
+    "visual_summary": "",
+    "key_facts": [
+      "●Go to the Server Configuration page of the standby server to select a sub server.",
+      "On the Select Sub Server(s) section, select one or more sub servers."
+    ],
+    "keywords": [
+      "server",
+      "standby",
+      "configuration",
+      "more",
+      "servers",
+      "quick",
+      "deployment"
+    ],
+    "image_count": 3,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 40,
+    "page_number": 41,
+    "title_hint": "N+M",
+    "section_path": [
+      "N+M"
+    ],
+    "text_chars": 70,
+    "text_excerpt": "Figure 7-3 Select a sub server\n3. Click OK.\nQuick Deployment Manual\n33",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "server",
+      "quick",
+      "deployment"
+    ],
+    "image_count": 2,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 41,
+    "page_number": 42,
+    "title_hint": "Mapping IP or Domain Name",
+    "section_path": [
+      "Configuring LAN or WAN",
+      "Mapping IP or Domain Name"
+    ],
+    "text_chars": 1437,
+    "text_excerpt": "8 Configuring LAN or WAN\nIn some business scenarios, such as mobile deployment, it is necessary to configure LAN or WAN\nnetwork port mapping. Before configuring LAN or WAN, ensure that the server has been fully\ndeployed.\n8.1 Configuring Router\nFor the list of the ports that need to be mapped, see \"Appendix 1 Service Module Introduction\".\n●Make sure that the WAN ports are consistent with LAN ports.\n●If there is a sub server, the sub server and the main server must be mapped to the same public IP\naddress, but distinguished by different ports.\n8.2 Mapping IP or Domain Name\nIf the platform is deployed in a local network, you can map the IP address of the server to a fixed\nWAN IP or a domain name, and then log in to the server using the WAN IP or domain name.\nThe page might vary between the main server and the sub server. This section uses the main server\npage as an example.\nProcedure\nStep 1\nLog in to DSS server, and then double-click \n.\nStep 2\nClick the \n on the upper-right corner, and then select Network.\nStep 3\nEnable WAN mode, enter a WAN IP address or a domain name, and then click OK.\n●If you want to use a domain name, you need to make related configurations on the\ndomain name...",
+    "visual_summary": "",
+    "key_facts": [
+      "8 Configuring LAN or WAN In some business scenarios, such as mobile deployment, it is necessary to configure LAN or WAN network port mapping.",
+      "Before configuring LAN or WAN, ensure that the server has been fully deployed.",
+      "8.1 Configuring Router For the list of the ports that need to be mapped, see \"Appendix 1 Service Module Introduction\".",
+      "●Make sure that the WAN ports are consistent with LAN ports."
+    ],
+    "keywords": [
+      "server",
+      "domain",
+      "name",
+      "network",
+      "then",
+      "ports",
+      "main",
+      "step",
+      "configuring",
+      "deployment",
+      "make",
+      "address"
+    ],
+    "image_count": 4,
+    "drawing_count": 9,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 42,
+    "page_number": 43,
+    "title_hint": "Virtualization Deployment",
+    "section_path": [
+      "Virtualization Deployment"
+    ],
+    "text_chars": 2793,
+    "text_excerpt": "9 Virtualization Deployment\nWe usually apply virtualization deployment to better utilize hardware resources. In virtualization\ndeployment, physical servers usually do not load virtual servers with all their allocated resources,\nand do not load virtual servers and the resources they need at the same time. However, the DSS\nplatform frequently acquires the video streams from cameras for live view and storage, which puts\nhigh pressure on the CPU, memory, network, and storage. The benefits of virtualization deployment\ndisappear when the DSS platform is running on a virtual server. Therefore, we do not recommend\nthat you deploy the DSS platform on a virtual server. We recommend that you install an operating\nsystem on a physical server and directly deploy the DSS platform on the server to achieve optimal\nand reliable performance.\nIf you have to deploy the DSS server on a virtual server, pay attention to the following content\nduring deployment.\nOperating System for Virtual Server\n●VMware®ESXi™ 7.x\n●Microsoft® Hyper-V with Windows Server 2019\nPC Client\nWhen the PC client is running on a virtual server, the biggest issue is that the PC client cannot use\nthe GPU to decode videos....",
+    "visual_summary": "",
+    "key_facts": [
+      "9 Virtualization Deployment We usually apply virtualization deployment to better utilize hardware resources.",
+      "In virtualization deployment, physical servers usually do not load virtual servers with all their allocated resources, and do not load virtual servers and the resources they need at the same time.",
+      "However, the DSS platform frequently acquires the video streams from cameras for live view and storage, which puts high pressure on the CPU, memory, network, and storage.",
+      "The benefits of virtualization deployment disappear when the DSS platform is running on a virtual server."
+    ],
+    "keywords": [
+      "server",
+      "virtual",
+      "deployment",
+      "resources",
+      "recommend",
+      "virtualization",
+      "physical",
+      "servers",
+      "allocated",
+      "platform",
+      "running",
+      "performance"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 43,
+    "page_number": 44,
+    "title_hint": "Installing Plugin",
+    "section_path": [
+      "Installing Plugin"
+    ],
+    "text_chars": 1518,
+    "text_excerpt": "10 Installing Plugin\nYou can add more functions to the platform by installing plugins.\nPrerequisites\n●Download the installation package from the official website.\n●Purchase a license that allows you to use the functions of the plugin.\nBackground Information\nYou must make sure that the plugin versions installed on all servers are the same. Otherwise, the\nmain server will not be able to balance the workload to other servers. For example, if the main\nserver installs plugin version A, and the sub server the plugin version B, only the plugin on the main\nserver will work properly, and all data can only be processed on the main server. The main server\ncannot use the resources of the sub server.\nProcedure\nStep 1\nComplete cloud storage deployment.\nStep 2\nDouble-click the installation package of the plugin.\nStep 3\nClick the software license agreement, and then read the agreement.\nStep 4\nSelect the check box to accept the agreement, and then click Next.\nStep 5\nClick Install.\nThe plugin is installed to the same directory as the management tool by default. It cannot\nbe changed.\nRelated Operations\n●To uninstall the plugin, log in to the server, go to \"..\\DSS\\DSS Server\\Uninstall\"...",
+    "visual_summary": "",
+    "key_facts": [
+      "10 Installing Plugin You can add more functions to the platform by installing plugins.",
+      "Prerequisites ●Download the installation package from the official website.",
+      "●Purchase a license that allows you to use the functions of the plugin.",
+      "Background Information You must make sure that the plugin versions installed on all servers are the same."
+    ],
+    "keywords": [
+      "plugin",
+      "server",
+      "main",
+      "step",
+      "servers",
+      "data",
+      "cannot",
+      "agreement",
+      "then",
+      "related",
+      "uninstall",
+      "installing"
+    ],
+    "image_count": 2,
+    "drawing_count": 9,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 44,
+    "page_number": 45,
+    "title_hint": "Appendix 1 Service Module Introduction",
+    "section_path": [
+      "Appendix 1 Service Module Introduction"
+    ],
+    "text_chars": 1797,
+    "text_excerpt": "Appendix 1 Service Module Introduction\nAppendix Table 1-1Service module introduction\nService Name\nFunction Description\nNGINX Proxy Service\nNGINX\nProvides access to the platform.\nSystem Management\nService\nSMC\nManages services and provides access to various\nfunctions.\nEmergency and Traffic\nManagement Service\nMBS\nManages emergency cases and handles traffic\nmanagement services.\nRedis Data Cache\nService\nREDIS\nStores data that is frequently accessed.\nMySQL Database\nService\nMySQL\nStores data for a long time.\nSystem Config Service\nCFGS\nMonitors system resources and synchronizes\nconfigurations across the distributed\nenvironment.\nMQ Push Notifications\nService\nMQ\nPushes messages among clients and platforms.\nMedia Gateway Service MGW\nAcquires video streams for video walls.\nProtocol Conversion\nProxy Service\nPCPS\nAccesses third-party video devices.\nDevice Management\nService\nDMS\nAccesses video devices.\nDevice Auto\nRegistration Service\nARS\nAccesses devices added through automatic\nregistration.\nAlarm Controller and\nLED Device Access\nService\nARCMS\nAccesses alarm controllers and LED devices.\nDevice Search Service\nSOSO\nSearches for and obtains configurations from\ndevices in local networks.\nDevice...",
+    "visual_summary": "",
+    "key_facts": [
+      "Appendix 1 Service Module Introduction Appendix Table 1-1Service module introduction Service Name Function Description NGINX Proxy Service NGINX Provides access to the platform.",
+      "System Management Service SMC Manages services and provides access to various functions.",
+      "Emergency and Traffic Management Service MBS Manages emergency cases and handles traffic management services.",
+      "Redis Data Cache Service REDIS Stores data that is frequently accessed."
+    ],
+    "keywords": [
+      "service",
+      "devices",
+      "management",
+      "manages",
+      "video",
+      "accesses",
+      "access",
+      "data",
+      "among",
+      "registration",
+      "appendix",
+      "module"
+    ],
+    "image_count": 1,
+    "drawing_count": 145,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 45,
+    "page_number": 46,
+    "title_hint": "Appendix 1 Service Module Introduction",
+    "section_path": [
+      "Appendix 1 Service Module Introduction"
+    ],
+    "text_chars": 681,
+    "text_excerpt": "Service Name\nFunction Description\nAccess Control\nManagement Service\nACDG\nManages ACMS.\nAccess Control\nManagement Service\nACMS\nAccesses access control devices.\nVideo Storage Service\nSS\nStores and forwards recorded videos on the\nplatform.\nVideo Decoding to\nWall Service\nVMS\nAccesses decoders outputs videos to video walls.\nObject Storage Service\nOSS\nStores files of the platform.\nObject Storage Service\nOSSM\nManages the object storage service.\nMedia Forwarding\nService\nMTS\nForwards real-time video streams.\nThird-party Plug-in\nManagement System\nTPMS\nService for managing third-party protocols.\nLicense Management\nService\nLAMS\nService for managing licenses.\nQuick Deployment Manual\n38",
+    "visual_summary": "",
+    "key_facts": [
+      "Service Name Function Description Access Control Management Service ACDG Manages ACMS.",
+      "Access Control Management Service ACMS Accesses access control devices.",
+      "Video Storage Service SS Stores and forwards recorded videos on the platform.",
+      "Video Decoding to Wall Service VMS Accesses decoders outputs videos to video walls."
+    ],
+    "keywords": [
+      "service",
+      "management",
+      "video",
+      "storage",
+      "access",
+      "control",
+      "object",
+      "manages",
+      "acms",
+      "accesses",
+      "stores",
+      "forwards"
+    ],
+    "image_count": 1,
+    "drawing_count": 75,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 46,
+    "page_number": 47,
+    "title_hint": "Appendix 2 Security Commitment and Recommendation",
+    "section_path": [
+      "Appendix 2 Security Commitment and Recommendation"
+    ],
+    "text_chars": 3193,
+    "text_excerpt": "Appendix 2 Security Commitment and\nRecommendation\nZhejiang Dahua Vision Technology Co., Ltd. (hereinafter referred to as \"Dahua\") places great\nemphasis on cybersecurity and privacy protection. We continuously allocate special funds to\nenhance employees’ awareness and capabilities in security, and ensure sufficient security\nprotection for our products. Dahua has established a professional security team to provide\ncomprehensive security empowerment and control throughout the entire product lifecycle,\nincluding design, development, testing, production, delivery, and maintenance. Dahua products\nadhere to the principle of minimum necessary data collection, service minimization, strict\nprohibition of backdoors, and the disabling of unnecessary and insecure services (such as Telnet).\nWe continuously introduce innovative security technologies to bolster the security capabilities of\nour products. Additionally, we go above and beyond by providing global users with security alarm\nand 24/7 security emergency response services. This approach ensures that we are better\nsafeguarding their security rights and interests. At the same time, Dahua encourages users,\npartners, suppliers, government...",
+    "visual_summary": "",
+    "key_facts": [
+      "Appendix 2 Security Commitment and Recommendation Zhejiang Dahua Vision Technology Co., Ltd. (hereinafter referred to as \"Dahua\") places great emphasis on cybersecurity and privacy protection.",
+      "We continuously allocate special funds to enhance employees’ awareness and capabilities in security, and ensure sufficient security protection for our products.",
+      "Dahua has established a professional security team to provide comprehensive security empowerment and control throughout the entire product lifecycle, including design, development, testing, production, delivery, and maintenance.",
+      "Dahua products adhere to the principle of minimum necessary data collection, service minimization, strict prohibition of backdoors, and the disabling of unnecessary and insecure services (such as Telnet)."
+    ],
+    "keywords": [
+      "security",
+      "account",
+      "dahua",
+      "users",
+      "password",
+      "characters",
+      "protection",
+      "products",
+      "such",
+      "time",
+      "passwords",
+      "reasonably"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 47,
+    "page_number": 48,
+    "title_hint": "Appendix 2 Security Commitment and Recommendation",
+    "section_path": [
+      "Appendix 2 Security Commitment and Recommendation"
+    ],
+    "text_chars": 1893,
+    "text_excerpt": "It is recommended to enable the account binding IP/MAC mechanism to further improve access\nsecurity.\nService Configuration\n1. Enable HTTPS\nWe suggest you to enable HTTPS, so that you visit Web service through a secure communication\nchannel.\n2. Disable Unnecessary Services and Choose Secure Modes\nIf not needed, it is recommended to turn off some services such as SNMP, SMTP, etc., to reduce\nrisks.\nIf necessary, it is highly recommended that you use safe modes, including but not limited to the\nfollowing services:\n●SMTP: Choose TLS to access mailbox server.\n●FTP: Choose SFTP, and set up strong passwords.\nNetwork Configuration\n1. Enable Firewall Allowlist\nWe suggest you to enable allowlist function to prevent everyone, except those with specified IP\naddresses, from accessing the system. Therefore, please be sure to add your computer’s IP\naddress and the accompanying equipment’s IP address to the allowlist.\n2. Network Isolation\nThe network should be isolated by partitioning the video monitoring network and the office\nnetwork on the switch and router to different VLANs. This prevents attackers from using the\noffice network to launch Pivoting attacks on the video monitoring...",
+    "visual_summary": "",
+    "key_facts": [
+      "It is recommended to enable the account binding IP/MAC mechanism to further improve access security.",
+      "Enable HTTPS We suggest you to enable HTTPS, so that you visit Web service through a secure communication channel.",
+      "Disable Unnecessary Services and Choose Secure Modes If not needed, it is recommended to turn off some services such as SNMP, SMTP, etc., to reduce risks.",
+      "If necessary, it is highly recommended that you use safe modes, including but not limited to the following services: ●SMTP: Choose TLS to access mailbox server."
+    ],
+    "keywords": [
+      "network",
+      "enable",
+      "recommended",
+      "access",
+      "suggest",
+      "services",
+      "choose",
+      "allowlist",
+      "users",
+      "platform",
+      "physical",
+      "security"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 48,
+    "page_number": 49,
+    "title_hint": "Appendix 2 Security Commitment and Recommendation",
+    "section_path": [
+      "Appendix 2 Security Commitment and Recommendation"
+    ],
+    "text_chars": 239,
+    "text_excerpt": "Perimeter Security\nWe suggest that you deploy perimeter security products and take necessary measures such as\nauthorized access, access control, and intrusion prevention to protect the software platform\nsecurity.\nQuick Deployment Manual\n41",
+    "visual_summary": "",
+    "key_facts": [
+      "Perimeter Security We suggest that you deploy perimeter security products and take necessary measures such as authorized access, access control, and intrusion prevention to protect the software platform security."
+    ],
+    "keywords": [
+      "security",
+      "perimeter",
+      "access",
+      "suggest",
+      "deploy",
+      "products",
+      "take",
+      "necessary",
+      "measures",
+      "such",
+      "authorized",
+      "control"
+    ],
+    "image_count": 1,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "dss_quick_deployment",
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "file_name": "Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "product_group": "DSS",
+    "document_type": "quick_deployment_manual",
+    "page_idx": 49,
+    "page_number": 50,
+    "title_hint": "Appendix 2 Security Commitment and Recommendation",
+    "section_path": [
+      "Appendix 2 Security Commitment and Recommendation"
+    ],
+    "text_chars": 0,
+    "text_excerpt": "",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [],
+    "image_count": 1,
+    "drawing_count": 0,
+    "modality": [
+      "image"
+    ],
+    "needs_visual_review": true
+  }
+]

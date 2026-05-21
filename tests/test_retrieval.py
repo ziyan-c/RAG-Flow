@@ -120,6 +120,27 @@ def test_candidate_mode_normalizes_direct_aliases():
     assert engine._candidate_mode() == "direct"
 
 
+def test_context_block_includes_breadcrumb_when_chunk_content_lacks_it():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    block = engine._format_context_block(
+        {
+            "visual_alignment_score": 0.0,
+            "payload": {
+                "source_relpath": "DSS/manual.pdf",
+                "page_idx": 4,
+                "page_start": 4,
+                "page_end": 4,
+                "section_path": ["1 Overview", "1.1 Login"],
+                "section_title": "1.1 Login",
+                "chunk_content": "Login body",
+            },
+        }
+    )
+
+    assert "[Breadcrumb: DSS > manual.pdf > 1 Overview > 1.1 Login]" in block
+
+
 def test_direct_rank_candidates_skip_visual_pages():
     config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
@@ -127,14 +148,14 @@ def test_direct_rank_candidates_skip_visual_pages():
         {
             "id": "visual-page-1",
             "score": 0.9,
-            "payload": {"is_visual_page": True, "source": "manual.pdf", "page_idx": 3},
+            "payload": {"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 3},
             "routes": {"visual": 0.9},
         },
         {
             "id": "chunk-1",
             "score": 0.4,
             "payload": {
-                "source": "manual.pdf",
+                "source_relpath": "manual.pdf",
                 "chunk_id": "chunk-1",
                 "page_idx": 3,
                 "page_indices": [3],
@@ -158,7 +179,7 @@ def test_visual_page_local_candidates_stay_on_hit_page():
                 SimpleNamespace(
                     id="chunk-a",
                     payload={
-                        "source": "manual.pdf",
+                        "source_relpath": "manual.pdf",
                         "chunk_id": "chunk-a",
                         "page_idx": 3,
                         "page_indices": [3],
@@ -168,7 +189,7 @@ def test_visual_page_local_candidates_stay_on_hit_page():
                 SimpleNamespace(
                     id="chunk-b",
                     payload={
-                        "source": "manual.pdf",
+                        "source_relpath": "manual.pdf",
                         "chunk_id": "chunk-b",
                         "page_idx": 4,
                         "page_indices": [4],
@@ -194,7 +215,7 @@ def test_visual_page_local_candidates_stay_on_hit_page():
                 id="visual-page-3",
                 payload={
                     "is_visual_page": True,
-                    "source": "manual.pdf",
+                    "source_relpath": "manual.pdf",
                     "page_idx": 3,
                     "chunk_ids_on_page": ["chunk-a"],
                 },

@@ -298,4 +298,29 @@ def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     )
 
     chunks = json.loads(artifacts.chunks_json.read_text(encoding="utf-8"))
-    assert chunks[0]["metadata"]["source"] == "other.pdf"
+    assert chunks[0]["metadata"]["source_relpath"] == "other.pdf"
+    assert "source" not in chunks[0]["metadata"]
+
+
+def test_run_ingest_uses_source_root_relative_chunk_source(tmp_path):
+    docs = tmp_path / "source-pdfs"
+    config = make_config(tmp_path, input_path=docs)
+    source_pdf = docs / "DSS" / "manual.pdf"
+    content_json = tmp_path / "mineru-output" / "DSS" / "manual" / "auto" / "manual_content_list.json"
+    captioned_json = content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    captioned_json.parent.mkdir(parents=True)
+    content_json.write_text("[]", encoding="utf-8")
+    captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")
+
+    artifacts = run_ingest(
+        config,
+        pdf_path=source_pdf,
+        from_stage="chunking",
+        to_stage="chunking",
+        skip_existing=False,
+    )
+
+    chunks = json.loads(artifacts.chunks_json.read_text(encoding="utf-8"))
+    assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
+    assert chunks[0]["metadata"]["source_filename"] == "manual.pdf"
+    assert "source" not in chunks[0]["metadata"]

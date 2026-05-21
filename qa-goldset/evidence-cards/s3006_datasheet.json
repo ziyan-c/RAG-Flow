@@ -1,0 +1,133 @@
+[
+  {
+    "pdf_id": "s3006_datasheet",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "file_name": "S3006-4ET-60_datasheet_20251106.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "datasheet",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "Panels",
+    "section_path": [
+      "Panels"
+    ],
+    "text_chars": 2737,
+    "text_excerpt": "Series Overview\nHighly reliable, the unmanaged PoE switch is equipped with a high\nperformance switching engine, has large buffer memory and optimizes\ntransmission performance. The device supports long distance PoE, and\nthe PoE port provides up to 30 W, making it suitable for small and\nmedium sized settings that require PoE power supplies. It can operate\nin temperatures ranging -10°C to 55°C. It also features EMC and has\nprotection against overvoltage, overcurrent, static electricity, lightning\nstrikes, pulses and other types of interference.\nFunctions\nPlug and Play\nHassle-free, it does not require any configuration. Simply use after it is\npowered on.\nEasy Installation\nBoth desktop and wall mount installation are supported, making it\nsuitable for a wide variety of scenarios.\nLong Distance PoE\nThe transmission distance of a PoE port can be up to 250 m, meeting\nthe requirement of wired transmission (bandwidth reduced to 10\nMbps).\nWide Operating Temperature\nSupports working at ambient temperatures of –10 °C to +55 °C, and\nhas built-in professional lightning-proof circuits that effectively reduce\nthe impact of thunderstorms on network systems and improve system\nrobustness, allowing...",
+    "visual_summary": "",
+    "key_facts": [
+      "Series Overview Highly reliable, the unmanaged PoE switch is equipped with a high performance switching engine, has large buffer memory and optimizes transmission performance.",
+      "The device supports long distance PoE, and the PoE port provides up to 30 W, making it suitable for small and medium sized settings that require PoE power supplies.",
+      "It can operate in temperatures ranging -10°C to 55°C.",
+      "It also features EMC and has protection against overvoltage, overcurrent, static electricity, lightning strikes, pulses and other types of interference."
+    ],
+    "keywords": [
+      "port",
+      "desktop",
+      "mount",
+      "transmission",
+      "power",
+      "operating",
+      "temperature",
+      "unmanaged",
+      "switch",
+      "supports",
+      "distance",
+      "suitable"
+    ],
+    "image_count": 6,
+    "drawing_count": 141,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "s3006_datasheet",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "file_name": "S3006-4ET-60_datasheet_20251106.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "datasheet",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "Panels",
+    "section_path": [
+      "Panels"
+    ],
+    "text_chars": 1297,
+    "text_excerpt": "PoE\nPoE\nYes\nPoE Power\nPort 1-4≤30 W, total≤60 W\nPoE Protocol\nIEEE 802.3af; IEEE 802.3at\nPoE Pin Assignment\n1,2,4,5 (V+),3,6,7,8 (V-)\nLong Distance PoE\nTransmission\nYes\nHardware\nDIP Switch\nLong Distance PoE: The transmission distance of ports\n1–4 can reach up to 250 meters. The negotiation speed\ncan be reduced to 10 Mbps.\nPerformance\nPacket Buffer Size\n768 Kbit\nJumbo Frame\n2048 Byte\nMAC Table Size\n2K\nCommunication Standard\nIEEE 802.3; IEEE 802.3u; IEEE 802.3x\nGeneral\nPacking List\n1 × User Manual\n1 × Legal and Regulatory Information\n1 × Power Cord\n1 × Power Adapter\nTransmission Performance\nSwitch power supply voltage 54V.\nCAT6. Max. DC resistance < 8 Ω/100 m\nCable(m)\nLoad Capacity(W)\nBandwidth(Mbps)\nIEEE802.3bt 90W\n100\n71.3\n100\n150\n62\n10\n200\n51\n10\n250\n40\n10\nHi-PoE 60W\n100\n46\n100\n150\n42\n10\n200\n37\n10\n250\n32\n10\nIEEE802.3at 30W\n100\n25.5\n100\n150\n25.5\n10\n200\n25.5\n10\n250\n24\n10\nNote: Data from this table was collected by Dahua test lab and is for reference only. The\nactual transmission distance may vary due to power consumption of connected devices\nor the cable type and status.\nOrdering Information\nType\nModel\nDescription\nPoE Switch\nDH-S3006-4ET-60\n6-Port Unmanaged Desktop\nSwitch with...",
+    "visual_summary": "",
+    "key_facts": [
+      "PoE PoE Yes PoE Power Port 1-4≤30 W, total≤60 W PoE Protocol IEEE 802.3af; IEEE 802.3at PoE Pin Assignment 1,2,4,5 (V+),3,6,7,8 (V-) Long Distance PoE Transmission Yes Hardware DIP Switch Long Distance PoE: The transmission distance of ports 1–4 can reach up to 250 meters.",
+      "The negotiation speed can be reduced to 10 Mbps.",
+      "Performance Packet Buffer Size 768 Kbit Jumbo Frame 2048 Byte MAC Table Size 2K Communication Standard IEEE 802.3; IEEE 802.3u; IEEE 802.3x General Packing List 1 × User Manual 1 × Legal and Regulatory Information 1 × Power Cord 1 × Power Adapter Transmission Performance Switch power supply voltage 54V.",
+      "DC resistance < 8 Ω/100 m Cable(m) Load Capacity(W) Bandwidth(Mbps) IEEE802.3bt 90W 100 71.3 100 150 62 10 200 51 10 250 40 10 Hi-PoE 60W 100 46 100 150 42 10 200 37 10 250 32 10 IEEE802.3at 30W 100 25.5 100 150 25.5 10 200 25.5 10 250 24 10 Note: Data from this table was collected by Dahua test lab and is for reference only."
+    ],
+    "keywords": [
+      "power",
+      "ieee",
+      "switch",
+      "distance",
+      "transmission",
+      "port",
+      "long",
+      "mbps",
+      "performance",
+      "size",
+      "information",
+      "cable"
+    ],
+    "image_count": 2,
+    "drawing_count": 263,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "s3006_datasheet",
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "file_name": "S3006-4ET-60_datasheet_20251106.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "datasheet",
+    "page_idx": 2,
+    "page_number": 3,
+    "title_hint": "Panels",
+    "section_path": [
+      "Panels"
+    ],
+    "text_chars": 260,
+    "text_excerpt": "Panels\nDesktop PoE Switch | DH-S3006-4ET-60\nRev 002.000\n© 2025 Dahua. All rights reserved. Design and speciﬁcatons are subject to change without notce.\nPictures in the document are for reference only, and the actual product shall prevail.\nwww.dahuasecurity.com",
+    "visual_summary": "",
+    "key_facts": [
+      "Panels Desktop PoE Switch | DH-S3006-4ET-60 Rev 002.000 © 2025 Dahua.",
+      "Design and speciﬁcatons are subject to change without notce.",
+      "Pictures in the document are for reference only, and the actual product shall prevail. www.dahuasecurity.com"
+    ],
+    "keywords": [
+      "panels",
+      "desktop",
+      "switch",
+      "dh-s3006-4et-60",
+      "dahua",
+      "rights",
+      "reserved",
+      "design",
+      "speci",
+      "catons",
+      "subject",
+      "change"
+    ],
+    "image_count": 1,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  }
+]

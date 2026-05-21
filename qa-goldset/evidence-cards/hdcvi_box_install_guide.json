@@ -1,0 +1,66 @@
+[
+  {
+    "pdf_id": "hdcvi_box_install_guide",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "file_name": "HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_installation_guide",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "HDCVI Box Camera Installation Guide V1.0.0",
+    "section_path": [],
+    "text_chars": 91,
+    "text_excerpt": "1A\nHDCVI Box Camera Installation Guide V1.0.0\n6\n1B\n1C\n2.1\n2.1.1\n2.1.3\n2.1.4\n2.1.2\n2.2\n2.2.1",
+    "visual_summary": "First page of a visual HDCVI box camera installation guide. It shows lens attachment steps 1A, 1B, 1C; wall-mount positioning as 2.1; drilling/marking as 2.1.1; fastening the bracket to the wall as 2.1.2; mounting the camera on the wall bracket as 2.1.3; and the completed wall-mounted view as 2.1.4. It also starts ceiling-mount steps 2.2 and 2.2.1.",
+    "key_facts": [
+      "Steps 1A, 1B, and 1C show lens attachment/removal sequence details.",
+      "Step 2.1 is the wall-mount branch.",
+      "Step 2.1.1 shows drilling/marking for the wall bracket.",
+      "Step 2.1.2 shows fastening the wall bracket.",
+      "Step 2.1.3 shows mounting the camera onto the bracket.",
+      "Step 2.1.4 shows the completed wall-mounted camera.",
+      "Step 2.2 begins the ceiling-mount branch."
+    ],
+    "keywords": [
+      "hdcvi",
+      "camera",
+      "installation",
+      "guide"
+    ],
+    "image_count": 0,
+    "drawing_count": 27880,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "hdcvi_box_install_guide",
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "file_name": "HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_installation_guide",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng",
+    "section_path": [],
+    "text_chars": 59,
+    "text_excerpt": "1.2.51.32.16704-000\n2.2.3\n2.2.2\n3.1\n3.2\n3.3\n4.3\n4.4\n4.2\n4.1",
+    "visual_summary": "Second page of the visual HDCVI box camera installation guide. It continues the ceiling-mount branch with 2.2.2 and 2.2.3, then shows enclosure/cover installation steps 3.1, 3.2, and 3.3, and camera angle/image adjustment steps 4.1 through 4.4. The page footer shows document code 1.2.51.32.16704-000.",
+    "key_facts": [
+      "Steps 2.2.2 and 2.2.3 continue the ceiling-mount branch.",
+      "Steps 3.1, 3.2, and 3.3 show camera enclosure/cover installation.",
+      "Steps 4.1 through 4.4 show camera angle/image adjustment.",
+      "The document code on the second page is 1.2.51.32.16704-000."
+    ],
+    "keywords": [],
+    "image_count": 0,
+    "drawing_count": 45192,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

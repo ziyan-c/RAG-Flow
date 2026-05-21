@@ -10,6 +10,7 @@ from .indexing import COLPALI_VECTOR_SIZE, PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_
 from .model_paths import resolve_model_location
 from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
+from .source_paths import normalize_source_name, source_breadcrumb
 
 
 SECTION_EXACT_BONUS = 0.02
@@ -58,13 +59,17 @@ def _as_int(value: Any, default: int = 0) -> int:
 
 
 def _payload_chunk_key(payload: dict[str, Any]) -> tuple[str, str]:
-    source = str(payload.get("source", ""))
+    source = _payload_source_relpath(payload)
     chunk_id = payload.get("chunk_id")
     if chunk_id is None:
         chunk_id = payload.get("id")
     if chunk_id is None:
         chunk_id = f"chunk_idx:{payload.get('chunk_idx', '')}"
     return source, str(chunk_id)
+
+
+def _payload_source_relpath(payload: dict[str, Any]) -> str:
+    return normalize_source_name(payload.get("source_relpath") or payload.get("source") or "")
 
 
 def _payload_page_indices(payload: dict[str, Any]) -> list[int]:
@@ -617,9 +622,15 @@ class RetrievalEngine:
         section = payload.get("section_title")
         section_line = f", Section: {section}" if section else ""
         note_prefix = "[Visual Page Match] " if candidate["visual_alignment_score"] > 0 else ""
+        chunk_content = str(payload.get("chunk_content", ""))
+        breadcrumb = str(
+            payload.get("breadcrumb")
+            or source_breadcrumb(_payload_source_relpath(payload), _section_path(payload))
+        )
+        breadcrumb_line = "" if chunk_content.lstrip().startswith("[Breadcrumb:") else f"[Breadcrumb: {breadcrumb}]\n"
         return (
-            f"[Source: {payload.get('source', '')}, Page: {page_label}{section_line}]\n"
-            f"{note_prefix}{payload.get('chunk_content', '')}"
+            f"[Source: {_payload_source_relpath(payload)}, Page: {page_label}{section_line}]\n"
+            f"{note_prefix}{breadcrumb_line}{chunk_content}"
         )
 
     def _estimate_context_tokens(self, text: str) -> int:
@@ -672,7 +683,7 @@ class RetrievalEngine:
             payload = hit["payload"]
             if payload.get("is_visual_page"):
                 continue
-            source_pdf = str(payload.get("source", ""))
+            source_pdf = _payload_source_relpath(payload)
             seed_page_idx = _payload_page_indices(payload)[0] if _payload_page_indices(payload) else _as_int(payload.get("page_idx", 0))
             key = _payload_chunk_key(payload)
             candidate = candidates.setdefault(
@@ -713,7 +724,7 @@ class RetrievalEngine:
             visual_payload = hit.payload
             if not visual_payload.get("is_visual_page"):
                 continue
-            source_pdf = str(visual_payload.get("source", ""))
+            source_pdf = _payload_source_relpath(visual_payload)
             page_idx = _as_int(visual_payload.get("page_idx", visual_payload.get("page_start", 0)))
             route_score = self.config.retrieval.visual_weight * (
                 1.0 / (self.config.retrieval.rrf_k + rank + 1)
@@ -721,7 +732,7 @@ class RetrievalEngine:
             records, _ = self.client.scroll(
                 collection_name=collection_name,
                 scroll_filter=models.Filter(
-                    must=[models.FieldCondition(key="source", match=models.MatchValue(value=source_pdf))],
+                    must=[models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_pdf))],
                     should=[
                         models.FieldCondition(key="page_idx", match=models.MatchValue(value=page_idx)),
                         models.FieldCondition(key="page_indices", match=models.MatchValue(value=page_idx)),
@@ -777,7 +788,7 @@ class RetrievalEngine:
         for rank, hit in enumerate(top_hits):
             payload = hit["payload"]
             original_hit_page = int(payload["page_idx"])
-            source_pdf = payload["source"]
+            source_pdf = _payload_source_relpath(payload)
 
             logical_center_page = int(payload.get("parent_page_idx", original_hit_page))
             should_conditions = [
@@ -809,7 +820,7 @@ class RetrievalEngine:
             records, _ = self.client.scroll(
                 collection_name=collection_name,
                 scroll_filter=models.Filter(
-                    must=[models.FieldCondition(key="source", match=models.MatchValue(value=source_pdf))],
+                    must=[models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_pdf))],
                     should=should_conditions,
                 ),
                 limit=max(1, self.config.retrieval.candidate_scroll_limit),

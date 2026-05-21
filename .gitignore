@@ -27,3 +27,4 @@ models/
 
 # Thesis is stored outside the repository and linked locally.
 /thesis
+/thesis-v1-archive

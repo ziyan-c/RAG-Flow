@@ -23,7 +23,11 @@ def test_create_page_level_chunks(tmp_path):
             "image_caption": ["Login"],
             "image_footnote": ["Step 3 Click OK."],
             "image_description_vlm": "A login screen.",
+            "image_answering_policy": "image_recommended",
+            "image_answering_confidence": "medium",
+            "image_answering_reason": "Visible labels may matter.",
             "img_path": "images/login.png",
+            "bbox": [100, 100, 400, 300],
         },
         {
             "type": "image",
@@ -44,14 +48,28 @@ def test_create_page_level_chunks(tmp_path):
     assert chunks[0]["metadata"]["page_idx"] == 0
     assert chunks[0]["metadata"]["chunk_id"] == "manual-chunk-00000"
     assert chunks[0]["metadata"]["chunk_mode"] == "page"
+    assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf"
     assert chunks[0]["metadata"]["page_indices"] == [0]
     assert chunks[0]["metadata"]["block_indices"] == [0, 1]
+    assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf]")
     assert "Overview" in chunks[0]["chunk_content"]
     assert "Port 8000" in chunks[1]["chunk_content"]
     assert "Step 3 Click OK." in chunks[1]["chunk_content"]
     assert "User Manual" not in chunks[1]["chunk_content"]
     assert "Contact us" not in chunks[1]["chunk_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
+    assert chunks[1]["metadata"]["image_answering_evidence"] == [
+        {
+            "img_path": "images/login.png",
+            "block_idx": 3,
+            "page_idx": 1,
+            "bbox": [100.0, 100.0, 400.0, 300.0],
+            "image_caption": "Login",
+            "image_answering_policy": "image_recommended",
+            "image_answering_confidence": "medium",
+            "image_answering_reason": "Visible labels may matter.",
+        }
+    ]
     assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]
     assert chunks[1]["metadata"]["block_indices"] == [2, 3]
 
@@ -69,6 +87,8 @@ def test_auto_chunks_without_sections_use_token_windows(tmp_path):
 
     assert len(chunks) == 3
     assert all(chunk["metadata"]["chunk_mode"] == "token" for chunk in chunks)
+    assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf"
+    assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf]")
     assert chunks[0]["metadata"]["page_indices"] == [0]
     assert chunks[0]["metadata"]["bboxes_by_page"] == {"0": [[10.0, 10.0, 100.0, 30.0]]}
     assert chunks[0]["metadata"]["block_indices"] == [0]
@@ -107,6 +127,9 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
     assert len(chunks) == 2
     assert chunks[0]["metadata"]["chunk_mode"] == "section"
     assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
+    assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf > 1 Overview"
+    assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf > 1 Overview]")
+    assert "[Section: 1 Overview]" in chunks[0]["chunk_content"]
     assert chunks[0]["metadata"]["bboxes_by_page"]["0"] == [[10.0, 10.0, 200.0, 30.0], [10.0, 40.0, 200.0, 80.0]]
     assert chunks[1]["metadata"]["section_path"] == ["2 Setup"]
     assert "setup body" not in chunks[0]["chunk_content"]

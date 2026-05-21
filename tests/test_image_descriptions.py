@@ -4,11 +4,13 @@ from types import SimpleNamespace
 import pytest
 
 from rag_flow.preprocessing.image_descriptions import (
+    ImageDescriptionLLMOutput,
     captioned_json_path_for,
     checkpoint_path_for,
     collect_context_token_stats,
     collect_image_description_stats,
     get_surrounding_text_context,
+    image_description_response_format,
     request_image_description_from_llm,
     resize_image_for_captioning,
     resolve_image_description_artifacts,
@@ -197,7 +199,16 @@ def test_request_image_description_from_llm_sends_openai_vision_payload():
             return SimpleNamespace(
                 choices=[
                     SimpleNamespace(
-                        message=SimpleNamespace(content="<think>skip</think>\nA button toolbar screenshot.")
+                        message=SimpleNamespace(
+                            content=json.dumps(
+                                {
+                                    "image_description_vlm": "A button toolbar screenshot.",
+                                    "image_answering_policy": "image_recommended",
+                                    "image_answering_confidence": "high",
+                                    "image_answering_reason": "Visible button labels matter for answering.",
+                                }
+                            )
+                        )
                     )
                 ]
             )
@@ -213,12 +224,33 @@ def test_request_image_description_from_llm_sends_openai_vision_payload():
         max_tokens=8000,
     )
 
-    assert output == "A button toolbar screenshot."
+    assert output.image_description_vlm == "A button toolbar screenshot."
+    assert output.image_answering_policy == "image_recommended"
+    assert output.image_answering_confidence == "high"
     assert completions.kwargs["model"] == "local-vlm"
     assert completions.kwargs["max_tokens"] == 8000
     assert completions.kwargs["temperature"] == 0
+    assert completions.kwargs["response_format"] == image_description_response_format()
     assert completions.kwargs["extra_body"]["chat_template_kwargs"]["enable_thinking"] is False
     content = completions.kwargs["messages"][0]["content"]
     assert content[0]["type"] == "image_url"
     assert content[0]["image_url"]["url"] == image_to_data_url(FakeImage())
     assert content[1] == {"type": "text", "text": "Describe image"}
+
+
+def test_image_description_llm_output_validates_structured_json():
+    output = ImageDescriptionLLMOutput.model_validate_json(
+        """
+        {
+          "image_description_vlm": "A dense UI screenshot with tabs and action buttons.",
+          "image_answering_policy": "image_recommended",
+          "image_answering_confidence": "medium",
+          "image_answering_reason": "Visible labels and layout may matter for answering."
+        }
+        """
+    )
+
+    assert output.image_description_vlm == "A dense UI screenshot with tabs and action buttons."
+    assert output.image_answering_policy == "image_recommended"
+    assert output.image_answering_confidence == "medium"
+    assert output.image_answering_reason == "Visible labels and layout may matter for answering."

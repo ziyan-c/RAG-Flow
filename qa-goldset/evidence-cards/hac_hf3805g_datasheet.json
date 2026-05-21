@@ -1,0 +1,120 @@
+[
+  {
+    "pdf_id": "hac_hf3805g_datasheet",
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "file_name": "DH-HAC-HF3805G-datasheet3.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "datasheet",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "Ultra Series | DH-HAC-HF3805G",
+    "section_path": [],
+    "text_chars": 4548,
+    "text_excerpt": "Ultra Series | DH-HAC-HF3805G\n System Overview\nDH-HAC-HFW3805G adopts high performance ISP and advanced 4/3\" \n8MP image sensor, which can bring vaster coverage and superiorer image \ndetails in 7/24 with the 4K resolution,even in extreme lowlight conditions \nit also can provide outstanding visibility and excellent 24 hours colorful \nimage.That makes it easy to collect evidence and effective retrospective \nanalysis.As the world's 1st 4K-coaxial HD camera Dahua HDCVI technology \novercome the common bottleneck of coaxial signal transmission \nbandwidth.Whether \nfor \nnew-build \nor \nupgrading,existing \nanalog \ninfrastructure can be well reused.Just change the 4K frontward camera \nand backend encoder you can enjoy the 4K visual feast in application.\n \n Functions\n4K Technology \n4K technology as a revolutionary breakthrough in image,which enhance \nthe expressive image of essence,allowing users to experience the best \npicture quality brought about by the visual feast.For the purposes of 4K \nsurveillance with four times the 1080P resolution,presented to the user \nwith more details.Under the same scenario by raising the amount of pixels \nwith the larger sensor it will reduce the total...",
+    "visual_summary": "",
+    "key_facts": [
+      "Functions 4K Technology 4K technology as a revolutionary breakthrough in image,which enhance the expressive image of essence,allowing users to experience the best picture quality brought about by the visual feast.For the purposes of 4K surveillance with four times the 1080P resolution,presented to the user with more details.Under the same scenario by raising the amount of pixels with the larger sensor it will...",
+      "M43 Lens Mount As we all knows lens is one of the key components that affects the surveillence image quality.For providing the best image to our customers we designed innovatively with M43 lens interface on HF3805G which is used on SLR cameras normally.So it is compatible with all kinds of M43 mount lens include prime lens and vari-focal length lens on the market according to different distance identification.",
+      "Starlight+ With the adoption of large-size pixel sensor and smart image process algorithm,HAC-HF3805G is able to provide incomparable performance even under extreme lowlight environment.The starlight feature allows more colourful feature details to be captured and accurate color to be recognized at night or in scenes with limited illumination.",
+      "Multi-outputs The camera supports video outputs simultaneously with a HDMI and a BNC connector.In addition HDMI port can output 4K&4MP@30fps video to monitor or link to HDMI decorder directly without a backend.Multi-outputs facilitates construction in such situations as debugging with a tester."
+    ],
+    "keywords": [
+      "hdcvi",
+      "technology",
+      "image",
+      "camera",
+      "lens",
+      "video",
+      "coaxial",
+      "transmission",
+      "starlight",
+      "hdmi",
+      "cable",
+      "even"
+    ],
+    "image_count": 2,
+    "drawing_count": 23,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hac_hf3805g_datasheet",
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "file_name": "DH-HAC-HF3805G-datasheet3.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "datasheet",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "www.dahuasecurity.com",
+    "section_path": [],
+    "text_chars": 1724,
+    "text_excerpt": "www.dahuasecurity.com\nUltra Series | DH-HAC-HF3805G\nTechnical Specification\nCamera\nImage Sensor\n4/3\" CMOS \nEffective Pixels\n3840(H)×2160(V), 8MP\nScanning System\nProgressive\nElectronic Shutter Speed\n1/3s~1/100,000s\nMinimum Illumination\n0.001Lux/F1.2(Color,1/3s,30IRE)\n0.0005Lux/F0.95 (Color,1/3s,30IRE)\n0.003Lux/F0.95 (Color,1/30s,30IRE)\n0.0003Lux/F0.95 (B/W,1/3s,30IRE)\n0.002Lux/F0.95 (B/W,1/30s,30IRE)\nS/N Ratio\nMore than 65dB\nIR Distance\nNA\nIR On/Off Control\nNA\nIR LEDs\nNA\nAudio In\nBuilt- in Mic\nLens\nLens Type\nExternal\nMount Type\nM43-mount\nFocal Length\nNA\nMax Aperture\nNA\nAngle of View\nNA\nFocus Control\nN/A\nClose Focus Distance\nNA\nPan / Tilt / Rotation\nPan/Tilt/Rotation\nPan: NA\nTilt: NA\nRotation: NA\nVideo\nResolution\n8MP (3840×2160)\nFrame Rate\nPAL:4K@12.5fps;4M@25fps\nNTSC:4K@15fps;4M@30fps\nVideo Output\n1-channel HDMI video output & 1-channel BNC \nvideo output\nDay/Night\nAuto (Electronic) / Manual\nOSD Menu\nMulti-language\nBLC Mode\nBLC / HLC / WDR\nWDR\n140dB\nGain Control\nAGC\nNoise Reduction\n2D/3D\nWhite Balance\nAuto / Manual\nSmart IR\nNA\n \nCertifications\nCertifications\nCE (EN55032, EN55024, EN50130-4)\nFCC (CFR 47 FCC Part 15 subpartB, ANSI C63.4-2014)\nUL (UL60950-1+CAN/CSA C22.2...",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "video",
+      "color",
+      "than",
+      "control",
+      "audio",
+      "tilt",
+      "rotation",
+      "output",
+      "channel",
+      "electronic",
+      "distance",
+      "lens"
+    ],
+    "image_count": 0,
+    "drawing_count": 263,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "hac_hf3805g_datasheet",
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "file_name": "DH-HAC-HF3805G-datasheet3.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "datasheet",
+    "page_idx": 2,
+    "page_number": 3,
+    "title_hint": "Ultra Series | DH-HAC-HF3805G",
+    "section_path": [],
+    "text_chars": 557,
+    "text_excerpt": "Ultra Series | DH-HAC-HF3805G\nRev 001.001\n© 2016 Dahua®. All rights reserved. \nwww.dahuasecurity.com\nOrdering Information\nType\nPart Number\nDescription\n8MP Camera\nDH-HAC-HF3805GP\n8Megapixel Ultra WDR Boxed \nCamera, PAL\nDH-HAC-HF3805GN\n8Megapixel Ultra WDR Boxed \nCamera, NTSC\nAccessories\nPFB121W\nWall Mount Bracket\nPFB110W\nWall Mount Bracket\nPFH610V\n14” Vandal-proof Housing\nPFM810\nPOC Transceiver\nDimensions (mm/inch)\nDimensions (mm/inch)\nOptional:\nPFM800-4MP\nPassive HDCVI Balun\nPFB110W\nWall Mount Bracket\nPFB121W\nWall Mount Bracket\nPFH610V\nOutdoor Housing",
+    "visual_summary": "",
+    "key_facts": [
+      "Ultra Series | DH-HAC-HF3805G Rev 001.001 © 2016 Dahua®.",
+      "All rights reserved. www.dahuasecurity.com Ordering Information Type Part Number Description 8MP Camera DH-HAC-HF3805GP 8Megapixel Ultra WDR Boxed Camera, PAL DH-HAC-HF3805GN 8Megapixel Ultra WDR Boxed Camera, NTSC Accessories PFB121W Wall Mount Bracket PFB110W Wall Mount Bracket PFH610V 14” Vandal-proof Housing PFM810 POC Transceiver Dimensions (mm/inch) Dimensions (mm/inch) Optional: PFM800-4MP Passive HDCVI..."
+    ],
+    "keywords": [
+      "wall",
+      "mount",
+      "bracket",
+      "ultra",
+      "camera",
+      "megapixel",
+      "boxed",
+      "pfb121w",
+      "pfb110w",
+      "pfh610v",
+      "housing",
+      "dimensions"
+    ],
+    "image_count": 4,
+    "drawing_count": 244,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  }
+]

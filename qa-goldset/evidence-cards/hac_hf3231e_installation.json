@@ -1,0 +1,34 @@
+[
+  {
+    "pdf_id": "hac_hf3231e_installation",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "file_name": "HAC-HF3231E_Installation_20171121.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_mounting_compatibility",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "Wall Mount",
+    "section_path": [],
+    "text_chars": 40,
+    "text_excerpt": "Wall Mount\nCeiling Mount\nPFB110W\nPFB121W",
+    "visual_summary": "Mounting accessory compatibility sheet for HAC-HF3231E/HAC-HF3805G-style cameras, showing wall mount and ceiling mount options.",
+    "key_facts": [
+      "Wall Mount is associated with PFB121W.",
+      "Ceiling Mount is associated with PFB110W."
+    ],
+    "keywords": [
+      "mount",
+      "wall",
+      "ceiling",
+      "pfb110w",
+      "pfb121w"
+    ],
+    "image_count": 0,
+    "drawing_count": 2898,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

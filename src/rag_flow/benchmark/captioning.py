@@ -24,6 +24,9 @@ from rag_flow.benchmark.patching import (
 from rag_flow.config import AppConfig
 from rag_flow.preprocessing.captioning_view import write_captioning_view_pdf
 from rag_flow.preprocessing.image_descriptions import (
+    IMAGE_ANSWERING_CONFIDENCE_KEY,
+    IMAGE_ANSWERING_POLICY_KEY,
+    IMAGE_ANSWERING_REASON_KEY,
     ApproxTokenBudgeter,
     add_image_descriptions,
     collect_surrounding_context_selection,
@@ -653,6 +656,9 @@ def _strip_existing_descriptions(content_data: list[dict[str, Any]]) -> None:
     for block in content_data:
         if isinstance(block, dict):
             block.pop("image_description_vlm", None)
+            block.pop(IMAGE_ANSWERING_POLICY_KEY, None)
+            block.pop(IMAGE_ANSWERING_CONFIDENCE_KEY, None)
+            block.pop(IMAGE_ANSWERING_REASON_KEY, None)
 
 
 def _warmup_captioning_request(
@@ -687,7 +693,9 @@ def _warmup_captioning_request(
             budgeter=budgeter,
         )
         prompt = (
-            "Warmup captioning request. Describe the image briefly and faithfully.\n\n"
+            "Warmup captioning request. Describe the image briefly and faithfully, "
+            "then judge whether the original image should accompany the description "
+            "for future answering.\n\n"
             f"### Text Context:\n{context}"
         )
         request_image_description_from_llm(

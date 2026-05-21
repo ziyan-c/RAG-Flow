@@ -282,7 +282,11 @@ rag-flow caption --artifact-dir /root/autodl-tmp/manuals/public/example-technica
 
 Captioning calls the local OpenAI-compatible SGLang service configured by
 `RAG_FLOW_LLM_BASE_URL` / `RAG_FLOW_LLM_MODEL`, so start it first with
-`rag-flow serve llm-sglang`. It resumes from
+`rag-flow serve llm-sglang`. It writes the plain image description to
+`image_description_vlm`, and also writes `image_answering_policy`,
+`image_answering_confidence`, and `image_answering_reason` so downstream
+answering code can decide whether the original image should be supplied with
+the retrieved text. It resumes from
 `*_PATCHED_CAPTIONED.checkpoint.json` when available, writes a checkpoint after
 each LLM batch by default, and skips image blocks that already have
 `image_description_vlm`. Captioning context is taken from nearby text blocks
@@ -376,7 +380,7 @@ pages per batch at `RAG_FLOW_INDEX_VISUAL_DPI=200`. Override them with
 `rag-flow index visual --batch-size <pages> --dpi <dpi>` if the indexing machine
 needs a different speed/memory tradeoff. If you point visual indexing at a PDF
 outside the configured source, pass `--source-name <file.pdf>` so visual payloads
-match the chunk metadata source.
+match the chunk metadata `source_relpath`.
 
 ColPali is still a page-level visual index. When chunk output is available,
 visual page payloads inherit page/section metadata from the chunk JSON, so

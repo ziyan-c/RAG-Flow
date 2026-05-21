@@ -1,0 +1,685 @@
+[
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "Ethernet Switch (4&8-Port",
+    "section_path": [],
+    "text_chars": 72,
+    "text_excerpt": "V1.0.1\nEthernet Switch (4&8-Port\nUnmanaged Desktop Switch)\nUser's Manual",
+    "visual_summary": "",
+    "key_facts": [
+      "V1.0.1 Ethernet Switch (4&8-Port Unmanaged Desktop Switch) User's Manual"
+    ],
+    "keywords": [
+      "switch",
+      "ethernet",
+      "port",
+      "unmanaged",
+      "desktop"
+    ],
+    "image_count": 1,
+    "drawing_count": 0,
+    "modality": [
+      "text",
+      "image"
+    ],
+    "needs_visual_review": true
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 1,
+    "page_number": 2,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 1902,
+    "text_excerpt": "Foreword\nGeneral\nThis manual introduces the installation, functions and operations of the 4&8 port unmanaged\nswitch (hereinafter referred to as \"the switch\"). Read carefully before using the device, and keep the\nmanual safe for future reference.\nSafety Instructions\nThe following signal words might appear in the manual.\nSignal Words\nMeaning\nIndicates a high potential hazard which, if not avoided, will result in\ndeath or serious injury.\nIndicates a medium or low potential hazard which, if not avoided,\ncould result in slight or moderate injury.\nIndicates a potential risk which, if not avoided, could result in\nproperty damage, data loss, reductions in performance, or\nunpredictable results.\nProvides methods to help you solve a problem or save time.\nProvides additional information as a supplement to the text.\nRevision History\nVersion\nRevision Content\nRelease Time\nV1.0.1\nContent Improvement.\nOctober 2024\nV1.0.0\nFirst release.\nOctober 2024\nPrivacy Protection Notice\nAs the device user or data controller, you might collect the personal data of others such as their\nface, fingerprints, and license plate number. You need to be in compliance with your local privacy\nprotection laws and...",
+    "visual_summary": "",
+    "key_facts": [
+      "Foreword General This manual introduces the installation, functions and operations of the 4&8 port unmanaged switch (hereinafter referred to as \"the switch\").",
+      "Read carefully before using the device, and keep the manual safe for future reference.",
+      "Safety Instructions The following signal words might appear in the manual.",
+      "Signal Words Meaning Indicates a high potential hazard which, if not avoided, will result in death or serious injury."
+    ],
+    "keywords": [
+      "which",
+      "might",
+      "indicates",
+      "potential",
+      "avoided",
+      "result",
+      "data",
+      "information",
+      "switch",
+      "reference",
+      "signal",
+      "words"
+    ],
+    "image_count": 5,
+    "drawing_count": 62,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 2,
+    "page_number": 3,
+    "title_hint": "Foreword",
+    "section_path": [
+      "Foreword"
+    ],
+    "text_chars": 1048,
+    "text_excerpt": "visit our official website. The manual is for reference only. Slight differences might be found\nbetween the electronic version and the paper version.\n●All designs and software are subject to change without prior written notice. Product updates\nmight result in some differences appearing between the actual product and the manual. Please\ncontact customer service for the latest program and supplementary documentation.\n●There might be errors in the print or deviations in the description of the functions, operations\nand technical data. If there is any doubt or dispute, we reserve the right of final explanation.\n●Upgrade the reader software or try other mainstream reader software if the manual (in PDF\nformat) cannot be opened.\n●All trademarks, registered trademarks and company names in the manual are properties of their\nrespective owners.\n●Please visit our website, contact the supplier or customer service if any problems occur while\nusing the device.\n●If there is any uncertainty or controversy, we reserve the right of final explanation.\nII",
+    "visual_summary": "",
+    "key_facts": [
+      "Slight differences might be found between the electronic version and the paper version.",
+      "●All designs and software are subject to change without prior written notice.",
+      "Product updates might result in some differences appearing between the actual product and the manual.",
+      "Please contact customer service for the latest program and supplementary documentation."
+    ],
+    "keywords": [
+      "might",
+      "software",
+      "there",
+      "visit",
+      "website",
+      "differences",
+      "between",
+      "version",
+      "product",
+      "please",
+      "contact",
+      "customer"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 3,
+    "page_number": 4,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 2109,
+    "text_excerpt": "Important Safeguards and Warnings\nThis section introduces content covering the proper handling of the device, hazard prevention, and\nprevention of property damage. Read carefully before using the device, and comply with the\nguidelines when using it.\nTransportation Requirements\nTransport the device under allowed humidity and temperature conditions.\nStorage Requirements\nStore the device under allowed humidity and temperature conditions.\nInstallation Requirements\n●Do not connect the power adapter to the device while the adapter is powered on.\n●Strictly comply with the local electrical safety code and standards. Make sure that the ambient\nvoltage is stable and meets the power supply requirements of the device.\n●Personnel working at heights must take all necessary measures to ensure personal safety\nincluding wearing a helmet and safety belts.\n●Do not place the device in a place exposed to sunlight or near heat sources.\n●Keep the device away from dampness, dust, and soot.\n●Put the device in a well-ventilated place, and do not block its ventilation.\n●Use an adapter or cabinet power supply provided by the manufacturer.\n●The power supply must conform to the requirements of ES1 in IEC...",
+    "visual_summary": "",
+    "key_facts": [
+      "Important Safeguards and Warnings This section introduces content covering the proper handling of the device, hazard prevention, and prevention of property damage.",
+      "Read carefully before using the device, and comply with the guidelines when using it.",
+      "Transportation Requirements Transport the device under allowed humidity and temperature conditions.",
+      "Storage Requirements Store the device under allowed humidity and temperature conditions."
+    ],
+    "keywords": [
+      "power",
+      "requirements",
+      "supply",
+      "adapter",
+      "safety",
+      "make",
+      "sure",
+      "must",
+      "place",
+      "than",
+      "prevention",
+      "damage"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 4,
+    "page_number": 5,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 1140,
+    "text_excerpt": "Operation Requirements\n●Do not disassemble the device without professional instruction.\n●Operate the device within the rated range of power input and output.\n●Make sure that the power supply is correct before use.\n●Make sure the device is powered off before disassembling wires to avoid personal injury.\n●Do not unplug the power cord on the side of the device while the adapter is powered on.\n●Use the device under allowed humidity and temperature conditions.\n●Do not drop or splash liquid onto the device, and make sure that there is no object filled with\nliquid on the device to prevent liquid from flowing into it.\n●Operating temperature:–10 °C to +55 °C (+14 °F to +131 °F).\n●This is a class A product. In a domestic environment this may cause radio interference in which\ncase you may be required to take adequate measures.\n●Do not block the ventilator of the device with objects, such as a newspaper, table cloth or\ncurtain.\n●Do not place an open flame on the device, such as a lit candle.\nMaintenance Requirements\n●Power off the device before maintenance.\n●Mark key components on the maintenance circuit diagram with warning signs.\nIV",
+    "visual_summary": "",
+    "key_facts": [
+      "Operation Requirements ●Do not disassemble the device without professional instruction.",
+      "●Operate the device within the rated range of power input and output.",
+      "●Make sure that the power supply is correct before use.",
+      "●Make sure the device is powered off before disassembling wires to avoid personal injury."
+    ],
+    "keywords": [
+      "power",
+      "make",
+      "sure",
+      "before",
+      "liquid",
+      "maintenance",
+      "requirements",
+      "powered",
+      "temperature",
+      "such",
+      "operation",
+      "disassemble"
+    ],
+    "image_count": 2,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 5,
+    "page_number": 6,
+    "title_hint": "Important Safeguards and Warnings",
+    "section_path": [
+      "Important Safeguards and Warnings"
+    ],
+    "text_chars": 2848,
+    "text_excerpt": "Table of Contents\nForeword.............................................................................................................................................................. I\nImportant Safeguards and Warnings.............................................................................................................. III\n1 Overview...........................................................................................................................................................1\n1.1 Introduction........................................................................................................................................... 1\n1.2 Features.................................................................................................................................................. 1\n2 Port and Indicator............................................................................................................................................2\n2.1 Front Panel............................................................................................................................................. 2\n2.2 Rear...",
+    "visual_summary": "",
+    "key_facts": [],
+    "keywords": [
+      "connecting",
+      "port",
+      "panel",
+      "mount",
+      "contents",
+      "foreword",
+      "important",
+      "safeguards",
+      "warnings",
+      "overview",
+      "introduction",
+      "features"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 6,
+    "page_number": 7,
+    "title_hint": "Features",
+    "section_path": [
+      "Overview",
+      "Features"
+    ],
+    "text_chars": 1139,
+    "text_excerpt": "1 Overview\n1.1 Introduction\nThe Switch is a layer-2 commercial switch. It has a high-performance switching engine and a large\nbuffer memory to ensure smooth video stream transmission. With a full-metal and fanless design,\nthe Switch features great heat dissipation capability on the shell surface, and is able to work in\nenvironments that range from –10 °C to +55 °C (+14 °F to +131 °F). With its DIP design, it can\nprovide a variety of working modes for different scenarios.\nThe Switch is applicable for use in a variety of scenarios, such as in the home and office, on server\nfarms, and in small malls.\n1.2 Features\n●4/8 × 100/1000 Mbps Ethernet port.\n●Uplink ports include electrical port.\n●All PoE ports support IEEE802.3af and IEEE802.3at.\n●250 m long-distance PoE transmission, which can be enabled by DIP switch. (Available on\ncertain models.)\nIn Extend Mode, the transmission distance of the PoE port is up to 250 m but the transmission\nrate drops to 10 Mbps. The actual transmission distance might vary due to power consumption\nof connected devices or the cable type and status.\n●Fanless.\n●Supports desktop mount and wall mount.\n1",
+    "visual_summary": "",
+    "key_facts": [
+      "1 Overview 1.1 Introduction The Switch is a layer-2 commercial switch.",
+      "It has a high-performance switching engine and a large buffer memory to ensure smooth video stream transmission.",
+      "With a full-metal and fanless design, the Switch features great heat dissipation capability on the shell surface, and is able to work in environments that range from –10 °C to +55 °C (+14 °F to +131 °F).",
+      "With its DIP design, it can provide a variety of working modes for different scenarios."
+    ],
+    "keywords": [
+      "switch",
+      "transmission",
+      "port",
+      "fanless",
+      "design",
+      "features",
+      "variety",
+      "scenarios",
+      "mbps",
+      "ports",
+      "ieee802",
+      "distance"
+    ],
+    "image_count": 1,
+    "drawing_count": 2,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 7,
+    "page_number": 8,
+    "title_hint": "Front Panel",
+    "section_path": [
+      "Port and Indicator",
+      "Front Panel"
+    ],
+    "text_chars": 861,
+    "text_excerpt": "2 Port and Indicator\n2.1 Front Panel\nThe following figure is for reference only, and might differ from the actual product.\nFront panel (4 PoE ports)\nFigure 2-1 Front panel (4 PoE ports)\nTable 2-1 Port description\nNo.\nDescription\n1\nExtend Mode: Extends the maximum transmission distance to 250 m, but\nreduces average transmission speed to 10 Mbps.\nThe actual transmission distance might vary due to power consumption of\nconnected devices or the cable type and status.\n2\nSingle-port connection or data transmission status indicator (Link/Act).\n●On: Connected to the device.\n●Off: Not connected to device.\n●Flashes: Data transmission is in progress.\n3\nPoE port status indicator.\n●On: Powered by PoE.\n●Off: Not powered by PoE.\n4\nPower indicator.\n●On: Power on.\n●Off: Power off.\n5\n10/100 Mbps self-adaptive Ethernet ports.\n6\n10/100 Mbps self-adaptive uplink ports.\n2",
+    "visual_summary": "",
+    "key_facts": [
+      "2 Port and Indicator 2.1 Front Panel The following figure is for reference only, and might differ from the actual product.",
+      "Front panel (4 PoE ports) Figure 2-1 Front panel (4 PoE ports) Table 2-1 Port description No.",
+      "Description 1 Extend Mode: Extends the maximum transmission distance to 250 m, but reduces average transmission speed to 10 Mbps.",
+      "The actual transmission distance might vary due to power consumption of connected devices or the cable type and status."
+    ],
+    "keywords": [
+      "transmission",
+      "indicator",
+      "ports",
+      "power",
+      "port",
+      "front",
+      "panel",
+      "mbps",
+      "connected",
+      "status",
+      "might",
+      "actual"
+    ],
+    "image_count": 2,
+    "drawing_count": 41,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 8,
+    "page_number": 9,
+    "title_hint": "Rear Panel",
+    "section_path": [
+      "Port and Indicator",
+      "Rear Panel"
+    ],
+    "text_chars": 849,
+    "text_excerpt": "Front panel (8 PoE ports)\nFigure 2-2 Front panel (8 PoE ports)\nTable 2-2 Port description\nNo.\nDescription\n1\nExtend Mode: Extends the maximum transmission distance to 250 m, but\nreduces average transmission speed to 10 Mbps.\nThe actual transmission distance might vary due to power consumption of\nconnected devices or the cable type and status.\n2\nSingle-port connection or data transmission status indicator (Link/Act).\n●On: Connected to the device.\n●Off: Not connected to device.\n●Flashes: Data transmission is in progress.\n3\nPoE port status indicator.\n●On: Powered by PoE.\n●Off: Not powered by PoE.\n4\nPower indicator.\n●On: Power on.\n●Off: Power off.\n5\n10/100/1000 Mbps self-adaptive Ethernet ports.\n6\n10/100/1000 Mbps self-adaptive uplink ports.\n2.2 Rear Panel\nThe following figure is for reference only, and might differ from the actual product.\n3",
+    "visual_summary": "",
+    "key_facts": [
+      "Front panel (8 PoE ports) Figure 2-2 Front panel (8 PoE ports) Table 2-2 Port description No.",
+      "Description 1 Extend Mode: Extends the maximum transmission distance to 250 m, but reduces average transmission speed to 10 Mbps.",
+      "The actual transmission distance might vary due to power consumption of connected devices or the cable type and status.",
+      "2 Single-port connection or data transmission status indicator (Link/Act)."
+    ],
+    "keywords": [
+      "transmission",
+      "ports",
+      "power",
+      "panel",
+      "mbps",
+      "connected",
+      "status",
+      "indicator",
+      "front",
+      "port",
+      "description",
+      "distance"
+    ],
+    "image_count": 2,
+    "drawing_count": 41,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 9,
+    "page_number": 10,
+    "title_hint": "Rear Panel",
+    "section_path": [
+      "Port and Indicator",
+      "Rear Panel"
+    ],
+    "text_chars": 375,
+    "text_excerpt": "Rear panel (4 PoE ports)\nFigure 2-3 Rear panel (4 PoE ports)\nTable 2-3 Port description\nNo.\nDescription\n1\nGround terminal.\nAvailable for certain models.\n2\nPower port, supports 48-57 VDC.\nRear panel (8 PoE ports)\nFigure 2-4 Rear panel (8 PoE ports)\nTable 2-4 Port description\nNo.\nDescription\n1\nGround terminal.\nAvailable for certain models.\n2\nPower port, supports 48-57 VDC.\n4",
+    "visual_summary": "",
+    "key_facts": [
+      "Rear panel (4 PoE ports) Figure 2-3 Rear panel (4 PoE ports) Table 2-3 Port description No.",
+      "Rear panel (8 PoE ports) Figure 2-4 Rear panel (8 PoE ports) Table 2-4 Port description No."
+    ],
+    "keywords": [
+      "rear",
+      "panel",
+      "ports",
+      "port",
+      "description",
+      "ground",
+      "terminal",
+      "available",
+      "certain",
+      "models",
+      "power",
+      "supports"
+    ],
+    "image_count": 3,
+    "drawing_count": 41,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 10,
+    "page_number": 11,
+    "title_hint": "Wall Mount",
+    "section_path": [
+      "Installation",
+      "Wall Mount"
+    ],
+    "text_chars": 1051,
+    "text_excerpt": "3 Installation\n3.1 Preparation\n●Select an appropriate installation method as needed.\n●Install the Switch on a solid and flat surface.\n●Leave around 10 cm of open space around the Switch for heat dissipation and to ensure good\nventilation.\n3.2 Desktop Mount\nThe Switch supports desktop mount. You can directly place it on a solid and flat desktop.\n3.3 Wall Mount\nProcedure\nStep 1\nDrill two M4 screws into the wall. The distance between the screws needs to match that of\nthe wall-mount holes of the Switch.\n●Screws do not come with the package. Purchase them as needed.\n●Make sure that the distance between the screws is the same as the distance between\nthe wall-mount holes (the distance of the 4-port unmanaged desktop switch is 74.7\nmm (2.94 inches) and the distance of the 8-port unmanaged desktop switch is 104.2\nmm (4.1 inches).\n●Leave a space of at least 4 mm between the wall and the head of the screws.\nStep 2\nAlign the wall-mount holes on the back cover of the Switch with the screws, and hang the\nSwitch on the screws.\nFigure 3-1 Wall mount\n5",
+    "visual_summary": "",
+    "key_facts": [
+      "3 Installation 3.1 Preparation ●Select an appropriate installation method as needed.",
+      "●Install the Switch on a solid and flat surface.",
+      "●Leave around 10 cm of open space around the Switch for heat dissipation and to ensure good ventilation.",
+      "3.2 Desktop Mount The Switch supports desktop mount."
+    ],
+    "keywords": [
+      "switch",
+      "screws",
+      "desktop",
+      "distance",
+      "mount",
+      "wall",
+      "between",
+      "wall-mount",
+      "holes",
+      "installation",
+      "needed",
+      "solid"
+    ],
+    "image_count": 2,
+    "drawing_count": 4,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 11,
+    "page_number": 12,
+    "title_hint": "Connecting Ethernet Port",
+    "section_path": [
+      "Wiring",
+      "Connecting Ethernet Port"
+    ],
+    "text_chars": 1367,
+    "text_excerpt": "4 Wiring\n4.1 Connecting GND Cable\nNormal GND connection of the Device is the important guarantee for Device lightning protection\nand anti-interference.\nProcedure\nStep 1\nRemove the ground screw on the Device and place it properly. Pass the ground screw\nthrough the round hole of the OT terminal of the ground cable. Turn the ground screw\nclockwise with a cross screwdriver to fasten the OT terminal of the ground cable.\nStep 2\nWind the other end of the ground cable into a circle with needle-nose pliers.\nStep 3\nConnect the other end of the ground cable to the ground bar, turn the hex nut clockwise\nwith a wrench to fasten the other end of the ground cable to the ground terminal.\nFigure 4-1 Connect GND\n4.2 Connecting Power Cord\nBackground Information\nMake sure that the Switch is reliably grounded before connecting the power cord.\nProcedure\nStep 1\nConnect one end of the power cord into the power jack of the device accurately.\nStep 2\nConnect the other end of the power cord to the external power socket.\n4.3 Connecting Ethernet Port\nThe Ethernet port is a standard RJ-45 port. With its self-adaptation function, it can be automatically\nconfigured to full duplex/half-duplex operation mode. It...",
+    "visual_summary": "",
+    "key_facts": [
+      "4 Wiring 4.1 Connecting GND Cable Normal GND connection of the Device is the important guarantee for Device lightning protection and anti-interference.",
+      "Procedure Step 1 Remove the ground screw on the Device and place it properly.",
+      "Pass the ground screw through the round hole of the OT terminal of the ground cable.",
+      "Turn the ground screw clockwise with a cross screwdriver to fasten the OT terminal of the ground cable."
+    ],
+    "keywords": [
+      "ground",
+      "cable",
+      "power",
+      "step",
+      "connect",
+      "connecting",
+      "terminal",
+      "other",
+      "cord",
+      "screw",
+      "port",
+      "procedure"
+    ],
+    "image_count": 1,
+    "drawing_count": 6,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 12,
+    "page_number": 13,
+    "title_hint": "Connecting PoE Port",
+    "section_path": [
+      "Wiring",
+      "Connecting PoE Port"
+    ],
+    "text_chars": 620,
+    "text_excerpt": "Figure 4-2 Ethernet port pin number\nFigure 4-3 Pin description\nThe cable connection of RJ-45 connector conforms to the 568B standard (1-orange white, 2-orange,\n3-green white, 4-blue, 5-blue white, 6-green, 7-brown white, 8-brown).\n4.4 Connecting PoE Port\nYou can directly connect the Device PoE Ethernet port to the switch PoE Ethernet port through\nnetwork cable to achieve synchronized network connection and power supply. With Extend Mode \ndisabled, the maximum distance between the switch and the device is about 100 m.\nWhen connecting to a non-PoE device, the device needs to be used with an isolated power supply.\n7",
+    "visual_summary": "",
+    "key_facts": [
+      "Figure 4-2 Ethernet port pin number Figure 4-3 Pin description The cable connection of RJ-45 connector conforms to the 568B standard (1-orange white, 2-orange, 3-green white, 4-blue, 5-blue white, 6-green, 7-brown white, 8-brown).",
+      "4.4 Connecting PoE Port You can directly connect the Device PoE Ethernet port to the switch PoE Ethernet port through network cable to achieve synchronized network connection and power supply.",
+      "With Extend Mode disabled, the maximum distance between the switch and the device is about 100 m.",
+      "When connecting to a non-PoE device, the device needs to be used with an isolated power supply."
+    ],
+    "keywords": [
+      "port",
+      "white",
+      "ethernet",
+      "cable",
+      "connection",
+      "orange",
+      "green",
+      "blue",
+      "brown",
+      "connecting",
+      "switch",
+      "network"
+    ],
+    "image_count": 4,
+    "drawing_count": 3,
+    "modality": [
+      "text",
+      "image",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 13,
+    "page_number": 14,
+    "title_hint": "Appendix 1 Security Recommendation",
+    "section_path": [
+      "Appendix 1 Security Recommendation"
+    ],
+    "text_chars": 2529,
+    "text_excerpt": "Appendix 1 Security Recommendation\nAccount Management\n1. Use complex passwords\nPlease refer to the following suggestions to set passwords:\n●The length should not be less than 8 characters;\n●Include at least two types of characters: upper and lower case letters, numbers and symbols;\n●Do not contain the account name or the account name in reverse order;\n●Do not use continuous characters, such as 123, abc, etc.;\n●Do not use repeating characters, such as 111, aaa, etc.\n2. Change passwords periodically\nIt is recommended to periodically change the device password to reduce the risk of being\nguessed or cracked.\n3. Allocate accounts and permissions appropriately\nAppropriately add users based on service and management requirements and assign minimum\npermission sets to users.\n4. Enable account lockout function\nThe account lockout function is enabled by default. You are advised to keep it enabled to\nprotect account security. After multiple failed password attempts, the corresponding account\nand source IP address will be locked.\n5. Set and update password reset information in a timely manner\nThe device supports password reset function. To reduce the risk of this function being used...",
+    "visual_summary": "",
+    "key_facts": [
+      "Appendix 1 Security Recommendation Account Management 1.",
+      "Use complex passwords Please refer to the following suggestions to set passwords: ●The length should not be less than 8 characters; ●Include at least two types of characters: upper and lower case letters, numbers and symbols; ●Do not contain the account name or the account name in reverse order; ●Do not use continuous characters, such as 123, abc, etc.; ●Do not use repeating characters, such as 111, aaa, etc.",
+      "Change passwords periodically It is recommended to periodically change the device password to reduce the risk of being guessed or cracked.",
+      "Allocate accounts and permissions appropriately Appropriately add users based on service and management requirements and assign minimum permission sets to users."
+    ],
+    "keywords": [
+      "account",
+      "recommended",
+      "passwords",
+      "change",
+      "reduce",
+      "function",
+      "services",
+      "choose",
+      "characters",
+      "password",
+      "risk",
+      "being"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 14,
+    "page_number": 15,
+    "title_hint": "Appendix 1 Security Recommendation",
+    "section_path": [
+      "Appendix 1 Security Recommendation"
+    ],
+    "text_chars": 2396,
+    "text_excerpt": "Network Configuration\n1. Enable Allow list\nIt is recommended that you turn on the allow list function, and only allow IP in the allow list to\naccess the device. Therefore, please be sure to add your computer IP address and supporting\ndevice IP address to the allow list.\n2. MAC address binding\nIt is recommended that you bind the IP address of the gateway to the MAC address on the\ndevice to reduce the risk of ARP spoofing.\n3. Build a secure network environment\nIn order to better ensure the security of devices and reduce potential cyber risks, the following\nare recommended:\n●Disable the port mapping function of the router to avoid direct access to the intranet devices\nfrom external network;\n●According to the actual network needs, partition the network: if there is no communication\ndemand between the two subnets, it is recommended to use VLAN, gateway and other\nmethods to partition the network to achieve network isolation;\n●Stablish 802.1x access authentication system to reduce the risk of illegal terminal access to\nthe private network.\nSecurity Auditing\n1. Check online users\nIt is recommended to check online users regularly to identify illegal users.\n2. Check device log\nBy viewing...",
+    "visual_summary": "",
+    "key_facts": [
+      "Enable Allow list It is recommended that you turn on the allow list function, and only allow IP in the allow list to access the device.",
+      "Therefore, please be sure to add your computer IP address and supporting device IP address to the allow list.",
+      "MAC address binding It is recommended that you bind the IP address of the gateway to the MAC address on the device to reduce the risk of ARP spoofing.",
+      "Check online users It is recommended to check online users regularly to identify illegal users."
+    ],
+    "keywords": [
+      "network",
+      "recommended",
+      "devices",
+      "allow",
+      "access",
+      "address",
+      "list",
+      "function",
+      "security",
+      "users",
+      "time",
+      "enable"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  },
+  {
+    "pdf_id": "switch_user_manual",
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "file_name": "Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "product_group": "S3006-4ET-60",
+    "document_type": "switch_user_manual",
+    "page_idx": 15,
+    "page_number": 16,
+    "title_hint": "Appendix 1 Security Recommendation",
+    "section_path": [
+      "Appendix 1 Security Recommendation"
+    ],
+    "text_chars": 154,
+    "text_excerpt": "and key management in place to prevent unauthorized personnel from damaging hardware and\nother peripheral equipment (e.g. USB flash disk, serial port).\n10",
+    "visual_summary": "",
+    "key_facts": [
+      "and key management in place to prevent unauthorized personnel from damaging hardware and other peripheral equipment (e.g."
+    ],
+    "keywords": [
+      "management",
+      "place",
+      "prevent",
+      "unauthorized",
+      "personnel",
+      "damaging",
+      "hardware",
+      "other",
+      "peripheral",
+      "equipment",
+      "flash",
+      "disk"
+    ],
+    "image_count": 0,
+    "drawing_count": 1,
+    "modality": [
+      "text",
+      "diagram"
+    ],
+    "needs_visual_review": false
+  }
+]

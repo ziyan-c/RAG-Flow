@@ -8,14 +8,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
+
+from pydantic import BaseModel, ConfigDict
 
 from rag_flow.config import AppConfig
 from rag_flow.preprocessing.small_icons import (
     image_to_data_url,
     resolve_icon_patch_artifacts,
     resolve_icon_patch_batch,
-    strip_reasoning_text,
 )
 from rag_flow.table_continuations import build_table_continuation_map, table_master_by_continuation
 
@@ -38,6 +39,9 @@ INLINE_ICON_SKIP_KEYS = {
 DEFAULT_CAPTION_MAX_NEW_TOKENS = 8000
 DEFAULT_CAPTION_MAX_CONTEXT_TOKENS = 10000
 CJK_RE = re.compile(r"[\u3400-\u9fff\uf900-\ufaff]")
+IMAGE_ANSWERING_POLICY_KEY = "image_answering_policy"
+IMAGE_ANSWERING_CONFIDENCE_KEY = "image_answering_confidence"
+IMAGE_ANSWERING_REASON_KEY = "image_answering_reason"
 
 
 @dataclass(frozen=True)
@@ -87,6 +91,20 @@ class ContextBlockSelection:
     before_indices: tuple[int, ...]
     current_indices: tuple[int, ...]
     after_indices: tuple[int, ...]
+
+
+class ImageDescriptionLLMOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    image_description_vlm: str
+    image_answering_policy: Literal[
+        "caption_only",
+        "image_optional",
+        "image_recommended",
+        "image_required",
+    ]
+    image_answering_confidence: Literal["high", "medium", "low"]
+    image_answering_reason: str
 
 
 class TextBudgeter(Protocol):
@@ -650,6 +668,17 @@ def assert_captioning_llm_available(client: Any, *, base_url: str) -> None:
         ) from exc
 
 
+def image_description_response_format() -> dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "image_description_output",
+            "strict": True,
+            "schema": ImageDescriptionLLMOutput.model_json_schema(),
+        },
+    }
+
+
 def request_image_description_from_llm(
     *,
     client: Any,
@@ -657,7 +686,7 @@ def request_image_description_from_llm(
     image: Any,
     prompt: str,
     max_tokens: int,
-) -> str:
+) -> ImageDescriptionLLMOutput:
     try:
         from openai import APIConnectionError, APIStatusError, APITimeoutError
     except ModuleNotFoundError:
@@ -680,6 +709,7 @@ def request_image_description_from_llm(
             ],
             max_tokens=max_tokens,
             temperature=0,
+            response_format=image_description_response_format(),
             extra_body={
                 "chat_template_kwargs": {"enable_thinking": False},
                 "separate_reasoning": True,
@@ -696,7 +726,7 @@ def request_image_description_from_llm(
     content = response.choices[0].message.content
     if not content:
         raise RuntimeError("Captioning LLM returned an empty response.")
-    return strip_reasoning_text(content)
+    return ImageDescriptionLLMOutput.model_validate_json(content)
 
 
 def _caption_request_metric_base(req: dict[str, Any], *, batch_id: int) -> dict[str, Any]:
@@ -730,7 +760,7 @@ def _run_image_description_request(
     max_tokens: int,
     batch_id: int,
     metrics_sink: Any | None,
-) -> tuple[str, dict[str, Any]]:
+) -> tuple[ImageDescriptionLLMOutput, dict[str, Any]]:
     started_at = time.time()
     started_perf = time.perf_counter()
     event = _caption_request_metric_base(req, batch_id=batch_id)
@@ -766,7 +796,7 @@ def _run_image_description_request(
             "status": "ok",
             "error_type": None,
             "error": None,
-            "output_chars": len(output),
+            "output_chars": len(output.model_dump_json()),
         }
     )
     return output, event
@@ -896,7 +926,7 @@ def add_image_descriptions(
         stats.batches_processed += 1
 
         batch_id = stats.batches_processed
-        for req, raw_output, request_event in iter_image_description_results(
+        for req, output, request_event in iter_image_description_results(
             requests,
             client=llm_client,
             model=model_name,
@@ -905,13 +935,20 @@ def add_image_descriptions(
             batch_id=batch_id,
             metrics_sink=metrics_sink,
         ):
-            output = raw_output.strip()
-            written = False
-            if output:
-                content_data[req["idx"]]["image_description_vlm"] = output
-                stats.captioned_count += 1
-                written = True
-            request_event.update({"decision": "captioned" if written else "empty", "written": written})
+            block = content_data[req["idx"]]
+            block["image_description_vlm"] = output.image_description_vlm
+            block[IMAGE_ANSWERING_POLICY_KEY] = output.image_answering_policy
+            block[IMAGE_ANSWERING_CONFIDENCE_KEY] = output.image_answering_confidence
+            block[IMAGE_ANSWERING_REASON_KEY] = output.image_answering_reason
+            stats.captioned_count += 1
+            request_event.update(
+                {
+                    "decision": "captioned",
+                    "written": True,
+                    "image_answering_policy": output.image_answering_policy,
+                    "image_answering_confidence": output.image_answering_confidence,
+                }
+            )
             _emit_metric(metrics_sink, "request", request_event)
 
         if checkpoint_interval > 0 and stats.batches_processed % checkpoint_interval == 0:
@@ -968,8 +1005,21 @@ def add_image_descriptions(
                 "technical terms, feature names, and purpose. Do not repeat unrelated context or "
                 "invent details that are not visible. Explain what the interface, diagram, chart, "
                 "or screenshot shows, the visible labels or states that matter, and why it appears "
-                "in the manual. Keep the answer concise when the image is simple, but be complete "
-                "for dense technical diagrams or UI screenshots. Do not include greetings."
+                "in the manual. Keep the description concise when the image is simple, but be "
+                "complete for dense technical diagrams or UI screenshots.\n\n"
+                "Also judge whether the generated text description is enough for a future answering "
+                "LLM, or whether the original image should be supplied alongside the description. "
+                "Use `caption_only` when the text description should be enough, `image_optional` "
+                "when the image might help but should not be sent by default, `image_recommended` "
+                "when the image should usually be sent if this evidence is retrieved, and "
+                "`image_required` when the description cannot reliably replace the image.\n\n"
+                "Return a JSON object matching the required response schema:\n"
+                "{\n"
+                '  "image_description_vlm": "...",\n'
+                '  "image_answering_policy": "caption_only|image_optional|image_recommended|image_required",\n'
+                '  "image_answering_confidence": "high|medium|low",\n'
+                '  "image_answering_reason": "..."\n'
+                "}"
             )
             batch.append(
                 {

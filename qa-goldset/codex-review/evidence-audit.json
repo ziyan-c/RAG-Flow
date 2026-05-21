@@ -1,0 +1,2442 @@
+[
+  {
+    "qa_id": "qa-0001",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0002",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0003",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0004",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0005",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0006",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0007",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0008",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0009",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0010",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0011",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0012",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0013",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0014",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0015",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0016",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0017",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0018",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0019",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0020",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0021",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0022",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0023",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0024",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0025",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0026",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0027",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0028",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0029",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0030",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 2,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0031",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 0.975,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 97.50%."
+  },
+  {
+    "qa_id": "qa-0032",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0033",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0034",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0035",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 1,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0036",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0037",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0038",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0039",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0040",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 3,
+    "modality": "table",
+    "support_token_coverage": 0.9047619047619048,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 90.48%."
+  },
+  {
+    "qa_id": "qa-0041",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 1,
+    "modality": "table",
+    "support_token_coverage": 0.9615384615384616,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 96.15%."
+  },
+  {
+    "qa_id": "qa-0042",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0043",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0044",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 2,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0045",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 3,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0046",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 3,
+    "modality": "table",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0047",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0047",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0048",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0048",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0049",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0049",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0050",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0050",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0051",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0051",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0052",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0052",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 0.9615384615384616,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 96.15%."
+  },
+  {
+    "qa_id": "qa-0053",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0053",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0054",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0054",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0055",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0055",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0056",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+    "page_number": 1,
+    "modality": "diagram",
+    "support_token_coverage": null,
+    "status": "manual_visual_required",
+    "note": "Rendered page for Codex visual review."
+  },
+  {
+    "qa_id": "qa-0056",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0057",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0057",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0058",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0058",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0059",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0059",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0060",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0060",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0061",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0061",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 1,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0062",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 22,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0063",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 119,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0063",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 120,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0064",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 231,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0065",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 360,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0066",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 455,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0066",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 456,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0067",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0068",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 127,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0069",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 287,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0070",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 364,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0071",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 446,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0072",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0073",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 131,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0074",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 257,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0074",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 258,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0075",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 353,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0076",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 440,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0077",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 13,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0078",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 106,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0079",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 337,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0079",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 338,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0080",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 436,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0081",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 17,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0082",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 158,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0083",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 256,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0084",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 395,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0084",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 396,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0085",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 27,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0086",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 98,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0087",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 341,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0088",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 345,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0089",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0090",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 138,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0091",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 243,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0092",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 368,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0093",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 437,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0094",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 38,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0095",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 137,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0096",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 347,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0097",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 495,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0098",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 107,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0099",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 239,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0100",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 246,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0101",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 273,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0102",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 100,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0103",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 230,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0104",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 351,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0105",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 444,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0106",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 329,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0107",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 406,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0108",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 464,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0108",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 465,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0109",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 122,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0110",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 270,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0111",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 314,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0112",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 326,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0113",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 334,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0114",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 15,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0115",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 19,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0116",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 21,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0117",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 126,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0117",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 127,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0118",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 244,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0119",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 354,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0120",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0121",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 122,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0122",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 276,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0122",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 277,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0123",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 357,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0124",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 11,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0124",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0125",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 131,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0126",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 241,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0127",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 103,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0128",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 267,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0128",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 268,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0129",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 355,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0130",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 16,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0130",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 17,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0131",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 123,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0132",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 157,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0133",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 308,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0133",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 309,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0134",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 42,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0135",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 409,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0135",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 410,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0136",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 420,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0137",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 435,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0138",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0139",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 192,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0140",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 249,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0140",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 250,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0141",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 342,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0142",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 37,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0143",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 185,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0144",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 408,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0145",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 102,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0146",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 252,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0146",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 253,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0147",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 430,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0148",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 109,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0149",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 237,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0150",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 349,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0151",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 129,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0152",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 297,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0152",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 298,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0153",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 365,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0154",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 117,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0154",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 118,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0155",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 272,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0156",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 18,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0157",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 52,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0158",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 352,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0159",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 16,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0160",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 9,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0161",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 4,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0161",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 5,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0162",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 6,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0163",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 13,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0164",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 24,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0165",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0166",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 7,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0167",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 10,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0167",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 11,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0168",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0169",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 14,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0169",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 15,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0170",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+    "page_number": 17,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0171",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 14,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0172",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 8,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0173",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 4,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0173",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 5,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0174",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 35,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0175",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 45,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0176",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 25,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0177",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0178",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0179",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 16,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0179",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 17,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0180",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 9,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0180",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 10,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0181",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 11,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0182",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0183",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 15,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0184",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 18,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0184",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 19,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0185",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 20,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0186",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 22,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0187",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+    "page_number": 23,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0188",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 14,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0189",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 7,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0190",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 4,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0190",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 5,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0191",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 3,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0192",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0193",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 8,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0194",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 9,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0195",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 10,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0195",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 11,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0196",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0197",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+    "page_number": 13,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0198",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 22,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0198",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 2,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0199",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 12,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0199",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 296,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0200",
+    "evidence_index": 0,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 21,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  },
+  {
+    "qa_id": "qa-0200",
+    "evidence_index": 1,
+    "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+    "page_number": 11,
+    "modality": "text",
+    "support_token_coverage": 1.0,
+    "status": "verified_text",
+    "note": "Support token coverage against extracted page text: 100.00%."
+  }
+]

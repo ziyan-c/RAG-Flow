@@ -1,0 +1,47 @@
+{
+  "goldset": "qa-goldset/source-pdfs-qa-200.codex-reviewed.json",
+  "reviewed_by": "Codex",
+  "review_status": "pass",
+  "source_pdf_read_scope": {
+    "pdf_count": 14,
+    "total_pages_read_into_review": 1114,
+    "low_text_or_visual_pages_identified": 26,
+    "report": "qa-goldset/codex-review/full-source-pdf-read-report.json"
+  },
+  "qa_scope": {
+    "total_questions": 200,
+    "total_evidence_items": 244,
+    "multi_pdf_questions": 15,
+    "multi_evidence_questions": 44,
+    "visual_questions": 34
+  },
+  "text_and_table_evidence": {
+    "verified_against_original_pdf_page_text": 208,
+    "needs_review": 0
+  },
+  "visual_evidence": {
+    "entries_reviewed_against_rendered_original_pdf_pages": 36,
+    "unique_pages_reviewed": 7,
+    "review_status": "pass"
+  },
+  "corrections_made": [
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+      "page_number": 1,
+      "issue": "Wall Mount and Ceiling Mount accessory IDs were reversed in the generated visual notes.",
+      "corrected_to": {
+        "Wall Mount": "PFB121W",
+        "Ceiling Mount": "PFB110W"
+      }
+    },
+    {
+      "qa_ids": ["qa-0031", "qa-0033", "qa-0040", "qa-0041", "qa-0049", "qa-0058"],
+      "issue": "Evidence support was too loose or pointed at a less relevant sentence even though the answer was recoverable from the cited page.",
+      "correction": "Tightened support text to the exact original-page passages needed to substantiate the answer."
+    }
+  ],
+  "remaining_notes": [
+    "Some answers are concise paraphrases rather than verbatim copies; they were kept where the cited evidence directly supports the answer.",
+    "The review reads every source PDF into the review pass and fully validates QA evidence pages; it does not claim every non-evidence page was manually image-inspected."
+  ]
+}

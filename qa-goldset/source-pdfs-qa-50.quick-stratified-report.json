@@ -1,0 +1,718 @@
+{
+  "score": 5,
+  "trial": 37875,
+  "type_counts": {
+    "fact": 10,
+    "procedure": 10,
+    "table_or_spec": 9,
+    "visual": 8,
+    "cross_page": 7,
+    "multi_pdf_comparison": 4,
+    "safety_or_notice": 2
+  },
+  "difficulty_counts": {
+    "easy": 14,
+    "medium": 28,
+    "hard": 8
+  },
+  "requires_visual": 9,
+  "requires_multiple_pages": 11,
+  "requires_multiple_pdfs": 4,
+  "non_contiguous_page_evidence": 3,
+  "visual_multi_pdf": 1,
+  "missing_sources": [],
+  "source_counts": {
+    "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf": 15,
+    "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf": 5,
+    "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf": 3,
+    "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf": 12,
+    "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf": 3,
+    "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf": 2,
+    "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf": 3,
+    "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf": 1,
+    "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf": 2,
+    "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf": 2,
+    "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf": 2,
+    "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf": 1,
+    "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf": 1,
+    "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf": 2
+  },
+  "selected_ids": [
+    "qa-0003",
+    "qa-0009",
+    "qa-0012",
+    "qa-0017",
+    "qa-0022",
+    "qa-0023",
+    "qa-0027",
+    "qa-0029",
+    "qa-0033",
+    "qa-0034",
+    "qa-0035",
+    "qa-0038",
+    "qa-0043",
+    "qa-0045",
+    "qa-0049",
+    "qa-0050",
+    "qa-0052",
+    "qa-0055",
+    "qa-0068",
+    "qa-0076",
+    "qa-0080",
+    "qa-0081",
+    "qa-0086",
+    "qa-0090",
+    "qa-0094",
+    "qa-0095",
+    "qa-0105",
+    "qa-0107",
+    "qa-0109",
+    "qa-0111",
+    "qa-0117",
+    "qa-0118",
+    "qa-0121",
+    "qa-0123",
+    "qa-0126",
+    "qa-0131",
+    "qa-0133",
+    "qa-0134",
+    "qa-0147",
+    "qa-0160",
+    "qa-0162",
+    "qa-0174",
+    "qa-0178",
+    "qa-0184",
+    "qa-0185",
+    "qa-0190",
+    "qa-0191",
+    "qa-0198",
+    "qa-0199",
+    "qa-0200"
+  ],
+  "targets": {
+    "type_counts": {
+      "fact": 10,
+      "procedure": 10,
+      "table_or_spec": 9,
+      "visual": 8,
+      "cross_page": 7,
+      "multi_pdf_comparison": 4,
+      "safety_or_notice": 2
+    },
+    "difficulty_counts": {
+      "easy": 14,
+      "medium": 28,
+      "hard": 8
+    },
+    "requires_visual": 9,
+    "requires_multiple_pages": 11,
+    "requires_multiple_pdfs": 4,
+    "source_coverage": "all source_pdfs represented at least once"
+  },
+  "items": [
+    {
+      "id": "qa-0003",
+      "question_type": "visual",
+      "difficulty": "medium",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf"
+      ],
+      "question": "Why should a RAG answerer inspect the rendered S3006 dimensions PDF instead of relying only on extracted text?"
+    },
+    {
+      "id": "qa-0009",
+      "question_type": "visual",
+      "difficulty": "medium",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf"
+      ],
+      "question": "What is the purpose of the S3006-4ET-36 PORT PDF in the source set?"
+    },
+    {
+      "id": "qa-0012",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf"
+      ],
+      "question": "Which S3006 source PDF is the best evidence for physical port-layout questions?"
+    },
+    {
+      "id": "qa-0017",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf"
+      ],
+      "question": "What two mounting categories does the HAC-HF3231E installation sheet compare?"
+    },
+    {
+      "id": "qa-0022",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf"
+      ],
+      "question": "Is HAC-HF3805G_Dimention_20171128.pdf primarily a prose manual or a visual drawing?"
+    },
+    {
+      "id": "qa-0023",
+      "question_type": "visual",
+      "difficulty": "medium",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf"
+      ],
+      "question": "What main length values are shown in the HAC-HF3805G dimension drawing?"
+    },
+    {
+      "id": "qa-0027",
+      "question_type": "visual",
+      "difficulty": "easy",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf"
+      ],
+      "question": "What document code is visible on the second page of the HDCVI Box Camera Installation Guide?"
+    },
+    {
+      "id": "qa-0029",
+      "question_type": "visual",
+      "difficulty": "medium",
+      "requires_visual": true,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf"
+      ],
+      "question": "Why does the HDCVI Box Camera Installation Guide need visual QA coverage?"
+    },
+    {
+      "id": "qa-0033",
+      "question_type": "safety_or_notice",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf"
+      ],
+      "question": "What point does the open-source notice make about linking this file with other works?"
+    },
+    {
+      "id": "qa-0034",
+      "question_type": "safety_or_notice",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf"
+      ],
+      "question": "How does the notice characterize BSD-style licenses?"
+    },
+    {
+      "id": "qa-0035",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf"
+      ],
+      "question": "What is the high-level product positioning of the S3006-4ET-60 datasheet?"
+    },
+    {
+      "id": "qa-0038",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf"
+      ],
+      "question": "What PoE pin assignment is stated for the S3006-4ET-60?"
+    },
+    {
+      "id": "qa-0043",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf"
+      ],
+      "question": "What scanning system is specified for the DH-HAC-HF3805G?"
+    },
+    {
+      "id": "qa-0045",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf"
+      ],
+      "question": "Which ordering information entry identifies the PAL version of the 8MP boxed camera?"
+    },
+    {
+      "id": "qa-0049",
+      "question_type": "multi_pdf_comparison",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": true,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "What privacy categories are mentioned in both DSS PC and Web client manuals?"
+    },
+    {
+      "id": "qa-0050",
+      "question_type": "multi_pdf_comparison",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": true,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "Which DSS documents in the source set are explicitly tied to V8.8.0?"
+    },
+    {
+      "id": "qa-0052",
+      "question_type": "multi_pdf_comparison",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": true,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+        "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+      ],
+      "question": "How do the HDCVI camera user manual and DH-HAC-HF3805G datasheet differ in focus?"
+    },
+    {
+      "id": "qa-0055",
+      "question_type": "multi_pdf_comparison",
+      "difficulty": "medium",
+      "requires_visual": true,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": true,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+        "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf"
+      ],
+      "question": "Which S3006 source is better for installation sequence diagrams and which is better for prose installation and operation context?"
+    },
+    {
+      "id": "qa-0068",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 127?"
+    },
+    {
+      "id": "qa-0076",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 440 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0080",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 436?"
+    },
+    {
+      "id": "qa-0081",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 17?"
+    },
+    {
+      "id": "qa-0086",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 98?"
+    },
+    {
+      "id": "qa-0090",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "What structured detail or configuration point is documented on page 138 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0094",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 38 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0095",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "What structured detail or configuration point is documented on page 137 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0105",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "What structured detail or configuration point is documented on page 444 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0107",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 406 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0109",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "What structured detail or configuration point is documented on page 122 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0111",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 314 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0117",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "Which two evidence snippets should be combined from pages 126 and 127 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf for a cross-page retrieval check?"
+    },
+    {
+      "id": "qa-0118",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 244?"
+    },
+    {
+      "id": "qa-0121",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 122 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0123",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 357?"
+    },
+    {
+      "id": "qa-0126",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 241 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0131",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 123?"
+    },
+    {
+      "id": "qa-0133",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "Which two evidence snippets should be combined from pages 308 and 309 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf for a cross-page retrieval check?"
+    },
+    {
+      "id": "qa-0134",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 42 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0147",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 430?"
+    },
+    {
+      "id": "qa-0160",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf"
+      ],
+      "question": "In Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf, what operational instruction or note is documented on page 9?"
+    },
+    {
+      "id": "qa-0162",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf"
+      ],
+      "question": "According to page 6 of Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0174",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+      ],
+      "question": "According to page 35 of HDCVI_Camera_User_Manual_V1.0.7.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0178",
+      "question_type": "procedure",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+      ],
+      "question": "In HDCVI_Camera_User_Manual_V1.0.7.pdf, what operational instruction or note is documented on page 2?"
+    },
+    {
+      "id": "qa-0184",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+      ],
+      "question": "Which two evidence snippets should be combined from pages 18 and 19 of HDCVI_Camera_User_Manual_V1.0.7.pdf for a cross-page retrieval check?"
+    },
+    {
+      "id": "qa-0185",
+      "question_type": "table_or_spec",
+      "difficulty": "medium",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"
+      ],
+      "question": "What structured detail or configuration point is documented on page 20 of HDCVI_Camera_User_Manual_V1.0.7.pdf?"
+    },
+    {
+      "id": "qa-0190",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf"
+      ],
+      "question": "Which two evidence snippets should be combined from pages 4 and 5 of Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf for a cross-page retrieval check?"
+    },
+    {
+      "id": "qa-0191",
+      "question_type": "fact",
+      "difficulty": "easy",
+      "requires_visual": false,
+      "requires_multiple_pages": false,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf"
+      ],
+      "question": "According to page 3 of Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf, what key point is stated?"
+    },
+    {
+      "id": "qa-0198",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "For PC client account access and live-view use, what evidence should be combined from pages 22 and 2 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0199",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "For PC client alarm handling and recording context, what evidence should be combined from pages 12 and 296 of Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf?"
+    },
+    {
+      "id": "qa-0200",
+      "question_type": "cross_page",
+      "difficulty": "hard",
+      "requires_visual": false,
+      "requires_multiple_pages": true,
+      "requires_multiple_pdfs": false,
+      "source_pdfs": [
+        "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"
+      ],
+      "question": "For Web client login and alarm workflow context, what evidence should be combined from pages 21 and 11 of Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf?"
+    }
+  ]
+}

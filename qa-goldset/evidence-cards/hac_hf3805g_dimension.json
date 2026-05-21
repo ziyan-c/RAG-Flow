@@ -1,0 +1,30 @@
+[
+  {
+    "pdf_id": "hac_hf3805g_dimension",
+    "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+    "file_name": "HAC-HF3805G_Dimention_20171128.pdf",
+    "product_group": "HAC-HF3805G",
+    "document_type": "visual_dimension_drawing",
+    "page_idx": 0,
+    "page_number": 1,
+    "title_hint": "HAC-HF3805G_Dimention_20171128",
+    "section_path": [],
+    "text_chars": 0,
+    "text_excerpt": "",
+    "visual_summary": "Dimension drawing for HAC-HF3805G. The top/side views show a main length of 144.5 mm [5.69 in], body length of 134 mm [5.28 in], front width of 82 mm [3.23 in], front height of 73.7 mm [2.9 in], and mounting-hole spacing marks of 54 mm [2.13 in] and 31 mm [1.22 in]. The screw note reads 4-1/4-20X6UCN.",
+    "key_facts": [
+      "Main length is marked 144.5 mm [5.69 in].",
+      "Body length is marked 134 mm [5.28 in].",
+      "The front view marks 82 mm [3.23 in] by 73.7 mm [2.9 in].",
+      "Mounting-hole spacing marks include 54 mm [2.13 in] and 31 mm [1.22 in].",
+      "The screw note reads 4-1/4-20X6UCN."
+    ],
+    "keywords": [],
+    "image_count": 0,
+    "drawing_count": 2643,
+    "modality": [
+      "diagram"
+    ],
+    "needs_visual_review": true
+  }
+]

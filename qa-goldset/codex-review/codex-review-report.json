@@ -1,0 +1,12 @@
+{
+  "goldset": "qa-goldset/source-pdfs-qa-200.codex-reviewed.json",
+  "total_questions": 200,
+  "total_evidence_items": 244,
+  "status_counts": {
+    "manual_visual_required": 36,
+    "verified_text": 208
+  },
+  "unique_visual_pages": 7,
+  "visual_render_count": 36,
+  "text_items_needing_review": []
+}

@@ -1,0 +1,288 @@
+{
+  "pdf_count": 14,
+  "total_pages": 1114,
+  "pdfs": [
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "pages": 540,
+      "text_chars": 856419,
+      "image_pages": 540,
+      "drawing_pages": 538
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "pages": 50,
+      "text_chars": 70204,
+      "image_pages": 50,
+      "drawing_pages": 48
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+      "pages": 447,
+      "text_chars": 715277,
+      "image_pages": 447,
+      "drawing_pages": 445
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
+      "pages": 3,
+      "text_chars": 5670,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
+      "pages": 3,
+      "text_chars": 6838,
+      "image_pages": 2,
+      "drawing_pages": 3
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+      "pages": 1,
+      "text_chars": 41,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+      "pages": 1,
+      "text_chars": 0,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+      "pages": 2,
+      "text_chars": 152,
+      "image_pages": 0,
+      "drawing_pages": 2
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "pages": 45,
+      "text_chars": 46198,
+      "image_pages": 36,
+      "drawing_pages": 44
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+      "pages": 16,
+      "text_chars": 20516,
+      "image_pages": 11,
+      "drawing_pages": 15
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+      "pages": 1,
+      "text_chars": 59,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+      "pages": 1,
+      "text_chars": 10,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+      "pages": 1,
+      "text_chars": 0,
+      "image_pages": 0,
+      "drawing_pages": 1
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
+      "pages": 3,
+      "text_chars": 4297,
+      "image_pages": 3,
+      "drawing_pages": 3
+    }
+  ],
+  "low_text_or_visual_pages": [
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 1,
+      "text_chars": 84,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 69,
+      "text_chars": 58,
+      "images": 2,
+      "drawings": 3
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 89,
+      "text_chars": 93,
+      "images": 1,
+      "drawings": 3
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 228,
+      "text_chars": 98,
+      "images": 3,
+      "drawings": 4
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 540,
+      "text_chars": 0,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "page_number": 1,
+      "text_chars": 86,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "page_number": 3,
+      "text_chars": 114,
+      "images": 1,
+      "drawings": 3
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "page_number": 41,
+      "text_chars": 70,
+      "images": 2,
+      "drawings": 3
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
+      "page_number": 50,
+      "text_chars": 0,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 1,
+      "text_chars": 85,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 67,
+      "text_chars": 58,
+      "images": 2,
+      "drawings": 3
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 216,
+      "text_chars": 98,
+      "images": 3,
+      "drawings": 4
+    },
+    {
+      "pdf": "source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
+      "page_number": 447,
+      "text_chars": 0,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
+      "page_number": 1,
+      "text_chars": 40,
+      "images": 0,
+      "drawings": 2898
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
+      "page_number": 1,
+      "text_chars": 0,
+      "images": 0,
+      "drawings": 2643
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+      "page_number": 1,
+      "text_chars": 91,
+      "images": 0,
+      "drawings": 27880
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
+      "page_number": 2,
+      "text_chars": 59,
+      "images": 0,
+      "drawings": 45192
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "page_number": 1,
+      "text_chars": 31,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "page_number": 13,
+      "text_chars": 58,
+      "images": 0,
+      "drawings": 27
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "page_number": 31,
+      "text_chars": 27,
+      "images": 1,
+      "drawings": 1
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "page_number": 36,
+      "text_chars": 116,
+      "images": 0,
+      "drawings": 1
+    },
+    {
+      "pdf": "source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
+      "page_number": 42,
+      "text_chars": 34,
+      "images": 1,
+      "drawings": 1
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
+      "page_number": 1,
+      "text_chars": 72,
+      "images": 1,
+      "drawings": 0
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
+      "page_number": 1,
+      "text_chars": 58,
+      "images": 0,
+      "drawings": 1201
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
+      "page_number": 1,
+      "text_chars": 9,
+      "images": 0,
+      "drawings": 2264
+    },
+    {
+      "pdf": "source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf",
+      "page_number": 1,
+      "text_chars": 0,
+      "images": 0,
+      "drawings": 2245
+    }
+  ]
+}
