@@ -184,6 +184,10 @@ def _patched_json_path_for(content_json: Path, artifact_dir: Path) -> Path:
     return artifact_dir / f"{stem}_content_list_PATCHED.json"
 
 
+def _is_sectioned_content_json(path: Path) -> bool:
+    return path.name == "content_list_SECTIONED.json" or path.name.endswith("_content_list_SECTIONED.json")
+
+
 def resolve_icon_patch_artifacts(
     artifact_dir: str | Path,
     *,
@@ -197,6 +201,11 @@ def resolve_icon_patch_artifacts(
 
     if content_json:
         resolved_content = Path(content_json).expanduser()
+        if not _is_sectioned_content_json(resolved_content):
+            raise ValueError(
+                "Patching requires sectioned MinerU content JSON "
+                "(*_content_list_SECTIONED.json); run sectioning before patching."
+            )
     else:
         content_candidates = sorted(
             path
@@ -205,17 +214,9 @@ def resolve_icon_patch_artifacts(
         )
         if not content_candidates:
             content_candidates = sorted(path for path in resolved_dir.glob("content_list_SECTIONED.json"))
-        if not content_candidates:
-            content_candidates = sorted(
-                path
-                for path in resolved_dir.glob("*_content_list.json")
-                if "small-icon" not in path.name and "caption" not in path.name
-            )
-        if not content_candidates:
-            content_candidates = sorted(path for path in resolved_dir.glob("content_list.json"))
         resolved_content = _single_candidate(
             content_candidates,
-            label="MinerU content_list JSON",
+            label="sectioned MinerU content_list JSON",
             artifact_dir=resolved_dir,
         )
 
@@ -256,13 +257,13 @@ def resolve_icon_patch_batch(
     except (FileNotFoundError, ValueError):
         pass
 
-    sectioned_candidates = (
-        root.rglob("*_content_list_SECTIONED.json") if recursive else root.glob("*_content_list_SECTIONED.json")
-    )
-    raw_candidates = root.rglob("*_content_list.json") if recursive else root.glob("*_content_list.json")
+    sectioned_candidates = [
+        *(root.rglob("*_content_list_SECTIONED.json") if recursive else root.glob("*_content_list_SECTIONED.json")),
+        *(root.rglob("content_list_SECTIONED.json") if recursive else root.glob("content_list_SECTIONED.json")),
+    ]
     artifacts = []
     seen_dirs: set[Path] = set()
-    for content_json in sorted([*sectioned_candidates, *raw_candidates]):
+    for content_json in sorted(sectioned_candidates):
         if "small-icon" in content_json.name or "caption" in content_json.name:
             continue
         if "PATCHED" in content_json.name or "CAPTIONED" in content_json.name:
@@ -925,7 +926,7 @@ def is_only_icon_output(*, original_text: str, patched_text: str) -> bool:
 def invalid_icon_patch_reason(*, original_text: str, patched_text: str, field_key: str) -> str | None:
     if is_no_missing_response(patched_text):
         return None
-    if field_key != "table_body" and is_only_icon_output(original_text=original_text, patched_text=patched_text):
+    if is_only_icon_output(original_text=original_text, patched_text=patched_text):
         return "only icon output"
     return None
 
@@ -1123,9 +1124,10 @@ def iter_icon_patch_results(
 
 
 def is_no_missing_response(text: str) -> bool:
-    if NO_MISSING_SENTINEL.lower() in text.lower():
+    stripped = text.strip()
+    if NO_MISSING_SENTINEL.lower() in stripped.lower():
         return True
-    normalized = re.sub(r"[\s`\"'.:;!,，。；：！]+", " ", text.strip().lower()).strip()
+    normalized = re.sub(r"[\s`\"'.:;!,，。；：！]+", " ", stripped.lower()).strip()
     return normalized in {"no missing", "no missing icon", "no missing icons"} or normalized.startswith(
         "no missing "
     )
@@ -1453,21 +1455,27 @@ def add_small_icon_text(
             stats.checked_count += 1
             decision = "unchanged"
             written = False
+            fallback_applied = False
             if invalid_reason is not None:
-                fallback_output = None
                 if invalid_reason == "only icon output":
                     fallback_output = fallback_only_icon_output(
                         original_text=req["original_text"],
                         icon_only_output=output,
                     )
-                if fallback_output and should_apply_icon_patch(
-                    original_text=req["original_text"],
-                    patched_text=fallback_output,
-                    field_key=req["key"],
-                ):
-                    output = fallback_output
-                    stats.invalid_fallbacks += 1
-                    decision = "fallback"
+                else:
+                    fallback_output = None
+
+                if invalid_reason == "only icon output":
+                    if fallback_output:
+                        output = fallback_output
+                        stats.invalid_fallbacks += 1
+                        decision = "fallback"
+                        fallback_applied = True
+                    else:
+                        stats.invalid_rejected += 1
+                        request_event.update({"decision": "invalid_rejected", "written": False})
+                        _emit_metric(metrics_sink, "request", request_event)
+                        continue
                 else:
                     stats.invalid_rejected += 1
                     request_event.update({"decision": "invalid_rejected", "written": False})
@@ -1479,7 +1487,7 @@ def add_small_icon_text(
                 _emit_metric(metrics_sink, "request", request_event)
                 continue
 
-            if should_apply_icon_patch(
+            if fallback_applied or should_apply_icon_patch(
                 original_text=req["original_text"],
                 patched_text=output,
                 field_key=req["key"],
@@ -1659,8 +1667,11 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Use a local OpenAI-compatible vision LLM to patch small icon text missing from MinerU JSON."
     )
-    parser.add_argument("--artifact-dir", help="MinerU output folder containing *_content_list.json and *_origin.pdf.")
-    parser.add_argument("--input", default=None, help="Input MinerU content_list JSON.")
+    parser.add_argument(
+        "--artifact-dir",
+        help="MinerU output folder containing *_content_list_SECTIONED.json and *_origin.pdf.",
+    )
+    parser.add_argument("--input", default=None, help="Input sectioned MinerU content_list JSON.")
     parser.add_argument("--output", default=None, help="Output patched content_list JSON.")
     parser.add_argument("--pdf", default=None, help="PDF used for bbox crops. Defaults to *_origin.pdf in --artifact-dir.")
     parser.add_argument("--model", "--llm-model", dest="llm_model", default=config.models.llm_model)
@@ -1695,10 +1706,13 @@ def main(argv: list[str] | None = None) -> None:
         else:
             artifacts_list = resolve_icon_patch_batch(args.artifact_dir, recursive=not args.no_recursive)
     else:
+        input_json = Path(args.input).expanduser() if args.input else config.paths.sectioned_json
+        if not _is_sectioned_content_json(input_json):
+            parser.error("--input must be a sectioned MinerU content JSON (*_content_list_SECTIONED.json).")
         artifacts_list = [
             IconPatchArtifacts(
                 artifact_dir=config.paths.base_dir,
-                content_json=Path(args.input).expanduser() if args.input else config.paths.content_json,
+                content_json=input_json,
                 output_json=Path(args.output).expanduser() if args.output else config.paths.patched_json,
                 origin_pdf=Path(args.pdf).expanduser() if args.pdf else config.paths.source_pdf,
             )

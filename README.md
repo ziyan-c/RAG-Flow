@@ -193,11 +193,11 @@ rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-
 
 The artifact-dir form is the preferred patching entrypoint after MinerU has
 parsed a PDF. It expects a MinerU output folder containing
-`*_content_list.json` and `*_origin.pdf`. If a
-`*_content_list_SECTIONED.json` file is present, patching uses that sectioned
-file and writes `*_content_list_SECTIONED_PATCHED.json`; otherwise it patches
-the raw MinerU file and writes `*_content_list_PATCHED.json`. Patching sends
-its crop images to the local OpenAI-compatible vision LLM configured by
+`*_content_list_SECTIONED.json` and `*_origin.pdf`; run sectioning first.
+Patching does not fall back to raw `*_content_list.json`, and fails fast when
+the sectioned JSON is missing. It writes
+`*_content_list_SECTIONED_PATCHED.json`. Patching sends its crop images to the
+local OpenAI-compatible vision LLM configured by
 `RAG_FLOW_LLM_BASE_URL` and `RAG_FLOW_LLM_MODEL`; start it first with
 `rag-flow serve llm-sglang`. If that service is not reachable, patching fails
 before rendering PDF pages.
@@ -234,15 +234,15 @@ from that checkpoint on retry, deletes the checkpoint after success, writes a
 `*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
 and prints patching statistics at the end. Useful controls:
 
-- `--batch-size`: LLM request group size for checkpoints, default `9`
-- `--concurrency`: maximum simultaneous patching LLM requests, default `3`
+- `--batch-size`: LLM request group size for checkpoints, default `512`
+- `--concurrency`: maximum simultaneous patching LLM requests, default `8`
 - `--max-new-tokens`: generation budget, default `8000`
 - `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
 - `--model` / `--llm-model`: model name sent to the LLM endpoint
 - `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
 - `--dpi`: PDF render DPI for patching crops, default `250`
 - `--page-window-size`: PDF render window size, default `200`
-- `--checkpoint-interval`: write checkpoint every N LLM batches, default `30`
+- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
 - `--invalid-retry-limit`: retry only-icon LLM outputs before fallback insertion, default `0`
 - `--patching-view-pdf`: custom path for the overlay PDF
 - `--no-patching-view`: skip writing the overlay PDF

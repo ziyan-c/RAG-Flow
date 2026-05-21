@@ -29,10 +29,10 @@ from rag_flow.preprocessing.small_icons import (
 from rag_flow.preprocessing.image_descriptions import should_caption_image_block
 
 
-def test_resolve_icon_patch_artifacts_from_mineru_output_dir(tmp_path):
+def test_resolve_icon_patch_artifacts_from_sectioned_output_dir(tmp_path):
     artifact_dir = tmp_path / "hybrid_auto"
     artifact_dir.mkdir()
-    content_json = artifact_dir / "manual_content_list.json"
+    content_json = artifact_dir / "manual_content_list_SECTIONED.json"
     origin_pdf = artifact_dir / "manual_origin.pdf"
     content_json.write_text("[]", encoding="utf-8")
     origin_pdf.write_text("pdf", encoding="utf-8")
@@ -42,10 +42,10 @@ def test_resolve_icon_patch_artifacts_from_mineru_output_dir(tmp_path):
     assert artifacts.artifact_dir == artifact_dir
     assert artifacts.content_json == content_json
     assert artifacts.origin_pdf == origin_pdf
-    assert artifacts.output_json == artifact_dir / "manual_content_list_PATCHED.json"
+    assert artifacts.output_json == artifact_dir / "manual_content_list_SECTIONED_PATCHED.json"
 
 
-def test_resolve_icon_patch_artifacts_prefers_sectioned_json(tmp_path):
+def test_resolve_icon_patch_artifacts_uses_sectioned_json_even_when_raw_exists(tmp_path):
     artifact_dir = tmp_path / "hybrid_auto"
     artifact_dir.mkdir()
     raw_json = artifact_dir / "manual_content_list.json"
@@ -71,11 +71,24 @@ def test_resolve_icon_patch_artifacts_ignores_v2_content_list(tmp_path):
         resolve_icon_patch_artifacts(artifact_dir)
 
 
-def test_resolve_icon_patch_artifacts_rejects_ambiguous_content_lists(tmp_path):
+def test_resolve_icon_patch_artifacts_rejects_raw_content_list(tmp_path):
     artifact_dir = tmp_path / "hybrid_auto"
     artifact_dir.mkdir()
-    (artifact_dir / "a_content_list.json").write_text("[]", encoding="utf-8")
-    (artifact_dir / "b_content_list.json").write_text("[]", encoding="utf-8")
+    raw_json = artifact_dir / "manual_content_list.json"
+    raw_json.write_text("[]", encoding="utf-8")
+    (artifact_dir / "manual_origin.pdf").write_text("pdf", encoding="utf-8")
+
+    with pytest.raises(FileNotFoundError, match="sectioned"):
+        resolve_icon_patch_artifacts(artifact_dir)
+    with pytest.raises(ValueError, match="sectioned"):
+        resolve_icon_patch_artifacts(artifact_dir, content_json=raw_json)
+
+
+def test_resolve_icon_patch_artifacts_rejects_ambiguous_sectioned_content_lists(tmp_path):
+    artifact_dir = tmp_path / "hybrid_auto"
+    artifact_dir.mkdir()
+    (artifact_dir / "a_content_list_SECTIONED.json").write_text("[]", encoding="utf-8")
+    (artifact_dir / "b_content_list_SECTIONED.json").write_text("[]", encoding="utf-8")
     (artifact_dir / "a_origin.pdf").write_text("pdf", encoding="utf-8")
 
     with pytest.raises(ValueError):
@@ -87,14 +100,17 @@ def test_resolve_icon_patch_batch_finds_artifacts_recursively(tmp_path):
     second = tmp_path / "manuals" / "nested" / "b" / "auto"
     first.mkdir(parents=True)
     second.mkdir(parents=True)
-    (first / "a_content_list.json").write_text("[]", encoding="utf-8")
+    (first / "a_content_list_SECTIONED.json").write_text("[]", encoding="utf-8")
     (first / "a_origin.pdf").write_text("pdf", encoding="utf-8")
-    (second / "b_content_list.json").write_text("[]", encoding="utf-8")
+    (second / "b_content_list_SECTIONED.json").write_text("[]", encoding="utf-8")
     (second / "b_origin.pdf").write_text("pdf", encoding="utf-8")
 
     artifacts = resolve_icon_patch_batch(tmp_path / "manuals")
 
-    assert [item.content_json.name for item in artifacts] == ["a_content_list.json", "b_content_list.json"]
+    assert [item.content_json.name for item in artifacts] == [
+        "a_content_list_SECTIONED.json",
+        "b_content_list_SECTIONED.json",
+    ]
 
 
 def test_checkpoint_path_uses_output_stem():
@@ -418,10 +434,18 @@ def test_patch_field_keys_patches_image_footnote_but_not_caption():
     assert _patch_field_keys(block) == ["image_footnote"]
 
 
-def test_table_icon_patch_accepts_icon_output_without_extra_validation():
+def test_table_icon_patch_accepts_icon_output_that_preserves_text():
     assert should_apply_icon_patch(
         original_text="<table><tr><td></td><td>View details.</td></tr></table>",
         patched_text="[Icon: eye] View details.",
+        field_key="table_body",
+    )
+
+
+def test_table_icon_patch_rejects_only_icon_output_when_original_has_text():
+    assert not should_apply_icon_patch(
+        original_text="<table><tr><td></td><td>View details.</td></tr></table>",
+        patched_text="[Icon: eye]",
         field_key="table_body",
     )
 
@@ -436,9 +460,12 @@ def test_table_icon_patch_accepts_html_output():
 
 def test_no_missing_response_allows_simple_variants():
     assert is_no_missing_response("NO_MISSING_SAFE")
+    assert is_no_missing_response("no_missing_safe")
     assert is_no_missing_response("Explanation... NO_MISSING_SAFE [Icon: name]")
     assert is_no_missing_response("No missing.")
     assert is_no_missing_response("`No missing icons`")
+    assert is_no_missing_response("No missing icons were found in this crop.")
+    assert is_no_missing_response("No missing, but add [Icon: search].")
     assert not should_apply_icon_patch(
         original_text="Open settings",
         patched_text="NO_MISSING_SAFE [Icon: name]",
@@ -459,7 +486,15 @@ def test_icon_patch_rejects_only_icon_output_for_text():
     )
 
 
-def test_icon_patch_accepts_non_icon_marker_output():
+def test_icon_patch_rejects_empty_icon_marker_shell():
+    assert not should_apply_icon_patch(
+        original_text="Step 7 Click and select a target.",
+        patched_text="[Icon: ]",
+        field_key="text",
+    )
+
+
+def test_icon_patch_accepts_non_icon_marker_output_as_complete_text():
     assert should_apply_icon_patch(
         original_text="Step 7 Click and select a target.",
         patched_text="Step 7 Click the search icon and select a target.",
@@ -554,7 +589,7 @@ def test_iter_icon_patch_results_sends_multiple_requests():
     class FakeCompletions:
         def create(self, **kwargs):
             prompt = kwargs["messages"][0]["content"][1]["text"]
-            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=f"{prompt} done"))])
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=f"{prompt} [Icon: check] done"))])
 
     client = SimpleNamespace(chat=SimpleNamespace(completions=FakeCompletions()))
     requests = [
@@ -573,5 +608,8 @@ def test_iter_icon_patch_results_sends_multiple_requests():
         )
     )
 
-    assert {output for _, output, _, _, _ in results} == {"first done", "second done"}
+    assert {output for _, output, _, _, _ in results} == {
+        "first [Icon: check] done",
+        "second [Icon: check] done",
+    }
     assert {event["status"] for *_, event in results} == {"ok"}

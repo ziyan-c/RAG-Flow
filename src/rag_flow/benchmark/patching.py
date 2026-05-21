@@ -1844,7 +1844,7 @@ def build_parser(config: AppConfig) -> argparse.ArgumentParser:
             "report",
         ),
     )
-    parser.add_argument("--input-json", type=Path, default=config.paths.content_json)
+    parser.add_argument("--input-json", type=Path, default=config.paths.sectioned_json)
     parser.add_argument("--pdf", type=Path, default=config.paths.source_pdf)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--main-pages", default=DEFAULT_MAIN_PAGES)
