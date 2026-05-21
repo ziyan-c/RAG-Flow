@@ -11,6 +11,8 @@ from rag_flow.config import AppConfig
 from rag_flow.preprocessing import small_icons
 from rag_flow.preprocessing.image_descriptions import (
     DEFAULT_CAPTION_MAX_CONTEXT_TOKENS,
+    SECTIONED_PATCHED_CAPTIONED_SUFFIX,
+    SECTIONED_PATCHED_INPUT_SUFFIX,
     ApproxTokenBudgeter,
     ImageDescriptionArtifacts,
     TextBudgeter,
@@ -57,17 +59,20 @@ class CaptioningViewStats:
 def captioning_view_path_for(content_json: str | Path) -> Path:
     path = Path(content_json)
     name = path.name
-    for suffix in (
-        "_content_list_SECTIONED_PATCHED_CAPTIONED.json",
-        "_content_list_SECTIONED_PATCHED.json",
-        "_content_list_SECTIONED.json",
-        "_content_list_PATCHED_CAPTIONED.json",
-        "_content_list_PATCHED.json",
-        "_content_list.json",
-    ):
+    for suffix in (SECTIONED_PATCHED_CAPTIONED_SUFFIX, SECTIONED_PATCHED_INPUT_SUFFIX):
         if name.endswith(suffix):
             return path.with_name(f"{name[: -len(suffix)]}_CAPTIONING_VIEW.pdf")
-    return path.with_name(f"{path.stem}_CAPTIONING_VIEW.pdf")
+    raise ValueError(
+        "Captioning view requires sectioned patched JSON "
+        f"(*{SECTIONED_PATCHED_INPUT_SUFFIX}) or captioned output "
+        f"(*{SECTIONED_PATCHED_CAPTIONED_SUFFIX})."
+    )
+
+
+def _is_captioning_view_content_path(path: Path) -> bool:
+    return path.name.endswith(SECTIONED_PATCHED_INPUT_SUFFIX) or path.name.endswith(
+        SECTIONED_PATCHED_CAPTIONED_SUFFIX
+    )
 
 
 def _add_region(
@@ -224,6 +229,12 @@ def write_captioning_view_pdf(
     import fitz
 
     content_path = Path(content_json)
+    if not _is_captioning_view_content_path(content_path):
+        raise ValueError(
+            "Captioning view requires sectioned patched JSON "
+            f"(*{SECTIONED_PATCHED_INPUT_SUFFIX}) or captioned output "
+            f"(*{SECTIONED_PATCHED_CAPTIONED_SUFFIX})."
+        )
     output_path = Path(output_pdf).expanduser() if output_pdf else captioning_view_path_for(content_path)
     content_data: list[dict[str, Any]] = json.loads(content_path.read_text(encoding="utf-8"))
     plan = collect_captioning_view_regions(
@@ -306,6 +317,12 @@ def main(argv: list[str] | None = None) -> None:
         artifacts_list = resolve_image_description_batch(args.artifact_dir, recursive=not args.no_recursive)
     else:
         input_json = Path(args.input_json).expanduser() if args.input_json else config.paths.patched_json
+        if not _is_captioning_view_content_path(input_json):
+            parser.error(
+                "caption-view requires sectioned patched JSON "
+                f"(*{SECTIONED_PATCHED_INPUT_SUFFIX}) or captioned output "
+                f"(*{SECTIONED_PATCHED_CAPTIONED_SUFFIX})."
+            )
         input_pdf = Path(args.input_pdf).expanduser() if args.input_pdf else config.paths.source_pdf
         artifacts_list = [
             ImageDescriptionArtifacts(

@@ -105,9 +105,21 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
             "section_path": ["1 Overview"],
             "section_level": 1,
             "section_source": "pdf_outline_exact",
+            "source_relpath": "DSS/manual.pdf",
+            "source_filename": "manual.pdf",
+            "breadcrumb": "DSS > manual.pdf > 1 Overview",
             "bbox": [10, 10, 200, 30],
         },
-        {"type": "text", "page_idx": 0, "text": "overview body", "section_path": ["1 Overview"], "bbox": [10, 40, 200, 80]},
+        {
+            "type": "text",
+            "page_idx": 0,
+            "text": "overview body",
+            "section_path": ["1 Overview"],
+            "source_relpath": "DSS/manual.pdf",
+            "source_filename": "manual.pdf",
+            "breadcrumb": "DSS > manual.pdf > 1 Overview",
+            "bbox": [10, 40, 200, 80],
+        },
         {
             "type": "text",
             "page_idx": 1,
@@ -115,20 +127,34 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
             "section_path": ["2 Setup"],
             "section_level": 1,
             "section_source": "pdf_outline_exact",
+            "source_relpath": "DSS/manual.pdf",
+            "source_filename": "manual.pdf",
+            "breadcrumb": "DSS > manual.pdf > 2 Setup",
             "bbox": [10, 10, 220, 30],
         },
-        {"type": "text", "page_idx": 1, "text": "setup body", "section_path": ["2 Setup"], "bbox": [10, 40, 220, 80]},
+        {
+            "type": "text",
+            "page_idx": 1,
+            "text": "setup body",
+            "section_path": ["2 Setup"],
+            "source_relpath": "DSS/manual.pdf",
+            "source_filename": "manual.pdf",
+            "breadcrumb": "DSS > manual.pdf > 2 Setup",
+            "bbox": [10, 40, 220, 80],
+        },
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
 
-    chunks = create_chunks(input_path, "manual.pdf", mode="auto", max_tokens=100, overlap_tokens=0, min_tokens=1)
+    chunks = create_chunks(input_path, "wrong.pdf", mode="auto", max_tokens=100, overlap_tokens=0, min_tokens=1)
 
     assert len(chunks) == 2
     assert chunks[0]["metadata"]["chunk_mode"] == "section"
+    assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
+    assert chunks[0]["metadata"]["source_filename"] == "manual.pdf"
     assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
-    assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf > 1 Overview"
-    assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf > 1 Overview]")
+    assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf > 1 Overview"
+    assert chunks[0]["chunk_content"].startswith("[Breadcrumb: DSS > manual.pdf > 1 Overview]")
     assert "[Section: 1 Overview]" in chunks[0]["chunk_content"]
     assert chunks[0]["metadata"]["bboxes_by_page"]["0"] == [[10.0, 10.0, 200.0, 30.0], [10.0, 40.0, 200.0, 80.0]]
     assert chunks[1]["metadata"]["section_path"] == ["2 Setup"]

@@ -130,6 +130,7 @@ class PathsConfig:
     chunks_json: Path
     db_path: Path
     collection_name: str
+    source_root: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -264,9 +265,16 @@ class AppConfig:
         source_name = env.get("RAG_FLOW_SOURCE_NAME", DEFAULT_SOURCE_NAME)
         source_stem = Path(source_name).stem
 
+        source_root = (
+            env.path("RAG_FLOW_SOURCE_ROOT", "")
+            if env.get("RAG_FLOW_SOURCE_ROOT", "").strip()
+            else None
+        )
+
         paths = PathsConfig(
             base_dir=base_dir,
             source_name=source_name,
+            source_root=source_root,
             source_pdf=env.path(
                 "RAG_FLOW_SOURCE_PDF",
                 base_dir / "example-technical-manual_origin.pdf",

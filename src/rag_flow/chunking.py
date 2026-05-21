@@ -42,6 +42,9 @@ class ChunkItem:
     section_level: int | None = None
     section_source: str = ""
     table_continuation_block_indices: tuple[int, ...] = ()
+    source_relpath: str = ""
+    source_filename: str = ""
+    breadcrumb: str = ""
 
 
 def _join_field(value: Any) -> str:
@@ -101,6 +104,41 @@ def _block_bbox(block: dict[str, Any]) -> tuple[float, float, float, float] | No
     if x1 <= x0 or y1 <= y0:
         return None
     return (x0, y0, x1, y1)
+
+
+def _source_fields_for_block(block: dict[str, Any], fallback_source_name: str) -> dict[str, str]:
+    source_relpath = str(block.get("source_relpath", "") or "").strip()
+    source_filename = str(block.get("source_filename", "") or "").strip()
+    fields = source_payload_fields(source_relpath or fallback_source_name)
+    if source_filename:
+        fields["source_filename"] = source_filename
+    return fields
+
+
+def _source_fields_for_items(source_name: str, items: list[ChunkItem]) -> dict[str, str]:
+    for item in items:
+        if item.source_relpath:
+            fields = source_payload_fields(item.source_relpath)
+            if item.source_filename:
+                fields["source_filename"] = item.source_filename
+            return fields
+    return source_payload_fields(source_name)
+
+
+def _breadcrumb_for_items(
+    source_name: str,
+    items: list[ChunkItem],
+    section_path: tuple[str, ...],
+) -> str:
+    if section_path:
+        for item in items:
+            if item.breadcrumb and item.section_path == section_path:
+                return item.breadcrumb
+    for item in items:
+        if item.breadcrumb:
+            return item.breadcrumb
+    source_fields = _source_fields_for_items(source_name, items)
+    return source_breadcrumb(source_fields["source_relpath"], section_path)
 
 
 def _visual_region_for_block(block: dict[str, Any], block_idx: int) -> tuple[VisualRegion, ...]:
@@ -164,6 +202,9 @@ def _block_text_item(
     except (TypeError, ValueError):
         section_level = None
     section_source = str(block.get("section_source", "") or "")
+    source_relpath = str(block.get("source_relpath", "") or "").strip()
+    source_filename = str(block.get("source_filename", "") or "").strip()
+    breadcrumb = str(block.get("breadcrumb", "") or "").strip()
 
     if block_type in IGNORED_BLOCK_TYPES:
         return None
@@ -201,6 +242,9 @@ def _block_text_item(
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
+            source_relpath=source_relpath,
+            source_filename=source_filename,
+            breadcrumb=breadcrumb,
         )
 
     if block_type == "table":
@@ -238,6 +282,9 @@ def _block_text_item(
             section_level=section_level,
             section_source=section_source,
             table_continuation_block_indices=continuation_indices,
+            source_relpath=source_relpath,
+            source_filename=source_filename,
+            breadcrumb=breadcrumb,
         )
 
     if block_type in {"text", "list"}:
@@ -254,6 +301,9 @@ def _block_text_item(
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
+            source_relpath=source_relpath,
+            source_filename=source_filename,
+            breadcrumb=breadcrumb,
         )
 
     return None
@@ -342,7 +392,7 @@ def _chunk_metadata(
             )
         for region in item.visual_regions:
             bboxes_by_page[str(region.page_idx)].append([round(value, 3) for value in region.bbox])
-    source_fields = source_payload_fields(source_name)
+    source_fields = _source_fields_for_items(source_name, items)
     metadata: dict[str, Any] = {
         **source_fields,
         "chunk_idx": chunk_idx,
@@ -358,7 +408,7 @@ def _chunk_metadata(
         "images_on_page": images,
         "tables_on_page": tables,
     }
-    metadata["breadcrumb"] = source_breadcrumb(source_fields["source_relpath"], section_path)
+    metadata["breadcrumb"] = _breadcrumb_for_items(source_name, items, section_path)
     if image_answering_evidence:
         metadata["image_answering_evidence"] = image_answering_evidence
     if table_continuations:
@@ -383,7 +433,7 @@ def _make_chunk(
     section_level: int | None = None,
     section_source: str = "",
 ) -> dict[str, Any]:
-    breadcrumb = source_breadcrumb(source_name, section_path)
+    breadcrumb = _breadcrumb_for_items(source_name, items, section_path)
     parts = [f"[Breadcrumb: {breadcrumb}]"]
     if section_path:
         heading = " > ".join(section_path)
@@ -530,12 +580,20 @@ def create_page_level_chunks(
     page_block_indices: dict[int, list[int]] = defaultdict(list)
     page_bboxes: dict[int, list[list[float]]] = defaultdict(list)
     page_sections: dict[int, tuple[tuple[str, ...], int | None, str]] = {}
+    page_source_fields: dict[int, dict[str, str]] = {}
+    page_breadcrumbs: dict[int, str] = {}
     table_continuations = build_table_continuation_map(content_data)
     continuation_indices = table_continuation_indices(table_continuations)
 
     def add_page_metadata(page_idx: int, block: dict[str, Any], block_idx: int) -> None:
         if block_idx not in page_block_indices[page_idx]:
             page_block_indices[page_idx].append(block_idx)
+        if page_idx not in page_source_fields:
+            page_source_fields[page_idx] = _source_fields_for_block(block, source_name)
+        if page_idx not in page_breadcrumbs:
+            breadcrumb = str(block.get("breadcrumb", "") or "").strip()
+            if breadcrumb:
+                page_breadcrumbs[page_idx] = breadcrumb
         bbox = _block_bbox(block)
         if bbox is not None:
             page_bboxes[page_idx].append([round(value, 3) for value in bbox])
@@ -621,7 +679,8 @@ def create_page_level_chunks(
     chunks: list[dict[str, Any]] = []
     for page_idx in sorted(chunk_contents_by_page):
         section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
-        breadcrumb = source_breadcrumb(source_name, section_path)
+        source_fields = page_source_fields.get(page_idx, source_payload_fields(source_name))
+        breadcrumb = page_breadcrumbs.get(page_idx) or source_breadcrumb(source_fields["source_relpath"], section_path)
         content_parts = [f"[Breadcrumb: {breadcrumb}]"]
         if section_path:
             content_parts.append(f"[Section: {' > '.join(section_path)}]")
@@ -630,7 +689,6 @@ def create_page_level_chunks(
         if not chunk_content:
             continue
         chunk_idx = len(chunks)
-        source_fields = source_payload_fields(source_name)
         metadata: dict[str, Any] = {
             **source_fields,
             "chunk_idx": chunk_idx,
@@ -646,7 +704,7 @@ def create_page_level_chunks(
             "images_on_page": _unique(page_images[page_idx]),
             "tables_on_page": _unique(page_tables[page_idx]),
         }
-        metadata["breadcrumb"] = source_breadcrumb(source_fields["source_relpath"], section_path)
+        metadata["breadcrumb"] = breadcrumb
         if page_image_answering_evidence[page_idx]:
             metadata["image_answering_evidence"] = page_image_answering_evidence[page_idx]
         if section_path:

@@ -39,6 +39,8 @@ INLINE_ICON_SKIP_KEYS = {
 DEFAULT_CAPTION_MAX_NEW_TOKENS = 8000
 DEFAULT_CAPTION_MAX_CONTEXT_TOKENS = 10000
 CJK_RE = re.compile(r"[\u3400-\u9fff\uf900-\ufaff]")
+SECTIONED_PATCHED_INPUT_SUFFIX = "_content_list_SECTIONED_PATCHED.json"
+SECTIONED_PATCHED_CAPTIONED_SUFFIX = "_content_list_SECTIONED_PATCHED_CAPTIONED.json"
 IMAGE_ANSWERING_POLICY_KEY = "image_answering_policy"
 IMAGE_ANSWERING_CONFIDENCE_KEY = "image_answering_confidence"
 IMAGE_ANSWERING_REASON_KEY = "image_answering_reason"
@@ -189,18 +191,25 @@ def _join(value: Any) -> str:
 def captioned_json_path_for(input_json: str | Path) -> Path:
     path = Path(input_json)
     name = path.name
-    if name.endswith("_content_list_SECTIONED_PATCHED_CAPTIONED.json"):
+    if name.endswith(SECTIONED_PATCHED_CAPTIONED_SUFFIX):
         return path
-    if name.endswith("_content_list_SECTIONED_PATCHED.json"):
-        prefix = name[: -len("_content_list_SECTIONED_PATCHED.json")]
-        return path.with_name(f"{prefix}_content_list_SECTIONED_PATCHED_CAPTIONED.json")
-    for suffix in ("_content_list_PATCHED.json", "_content_list.json"):
-        if name.endswith(suffix):
-            prefix = name[: -len(suffix)]
-            return path.with_name(f"{prefix}_content_list_PATCHED_CAPTIONED.json")
-    if name.endswith("_content_list_PATCHED_CAPTIONED.json"):
-        return path
-    return path.with_name(f"{path.stem}_CAPTIONED.json")
+    if name.endswith(SECTIONED_PATCHED_INPUT_SUFFIX):
+        prefix = name[: -len(SECTIONED_PATCHED_INPUT_SUFFIX)]
+        return path.with_name(f"{prefix}{SECTIONED_PATCHED_CAPTIONED_SUFFIX}")
+    raise ValueError(
+        "Captioning requires sectioned patched JSON "
+        f"(*{SECTIONED_PATCHED_INPUT_SUFFIX}); old *_content_list_PATCHED.json inputs are not supported."
+    )
+
+
+def require_sectioned_patched_captioning_input(input_json: str | Path) -> Path:
+    path = Path(input_json)
+    if not path.name.endswith(SECTIONED_PATCHED_INPUT_SUFFIX):
+        raise ValueError(
+            "Captioning requires sectioned patched JSON "
+            f"(*{SECTIONED_PATCHED_INPUT_SUFFIX}); run sectioning and patching first."
+        )
+    return path
 
 
 def checkpoint_path_for(output_json: str | Path) -> Path:
@@ -257,6 +266,13 @@ def _block_context_text(block: dict[str, Any]) -> str:
     return "\n".join(block_texts)
 
 
+def _format_document_context(block: dict[str, Any]) -> str:
+    breadcrumb = str(block.get("breadcrumb", "")).strip()
+    if not breadcrumb:
+        return ""
+    return f"### Document Context\nbreadcrumb: {breadcrumb}"
+
+
 def _format_context_block(
     content_data: list[dict[str, Any]],
     idx: int,
@@ -281,6 +297,33 @@ def _format_context_block(
     block_type = block.get("type", "unknown")
     source_label = f", source block {source_idx}" if source_idx != idx else ""
     return f"--- [Block {idx}, page {page_idx}, type {block_type}{continuation_suffix}{source_label}] ---\n{text}"
+
+
+def _section_path_key(block: dict[str, Any]) -> tuple[str, ...] | None:
+    value = block.get("section_path")
+    if isinstance(value, list):
+        parts = tuple(str(part).strip() for part in value if str(part).strip())
+        return parts or None
+    if isinstance(value, str):
+        parts = tuple(part.strip() for part in value.split(">") if part.strip())
+        return parts or None
+    return None
+
+
+def _context_section_key(
+    content_data: list[dict[str, Any]],
+    idx: int,
+    *,
+    continuation_to_master: dict[int, int] | None = None,
+) -> tuple[str, ...] | None:
+    block = content_data[idx]
+    key = _section_path_key(block)
+    if key or not continuation_to_master or idx not in continuation_to_master:
+        return key
+    master_idx = continuation_to_master[idx]
+    if 0 <= master_idx < len(content_data) and isinstance(content_data[master_idx], dict):
+        return _section_path_key(content_data[master_idx])
+    return None
 
 
 def _truncate_text(text: str, max_chars: int) -> str:
@@ -374,6 +417,7 @@ def _collect_nearby_context(
     max_tokens: int,
     budgeter: TextBudgeter,
     continuation_to_master: dict[int, int] | None = None,
+    section_key: tuple[str, ...] | None = None,
 ) -> ContextCollection:
     if max_tokens <= 0:
         return ContextCollection(text="", block_indices=())
@@ -391,6 +435,16 @@ def _collect_nearby_context(
         block = content_data[idx]
         if not isinstance(block, dict):
             continue
+        if section_key is not None:
+            candidate_section_key = _context_section_key(
+                content_data,
+                idx,
+                continuation_to_master=continuation_to_master,
+            )
+            if candidate_section_key is None:
+                continue
+            if candidate_section_key != section_key:
+                break
         segment = _format_context_block(
             content_data,
             idx,
@@ -432,7 +486,10 @@ def collect_surrounding_context_selection(
 ) -> tuple[str, ContextBlockSelection]:
     budgeter = budgeter or ApproxTokenBudgeter()
     if max_context_tokens <= 0:
-        return "", ContextBlockSelection(before_indices=(), current_indices=(), after_indices=())
+        document_context = ""
+        if 0 <= target_idx < len(content_data) and isinstance(content_data[target_idx], dict):
+            document_context = _format_document_context(content_data[target_idx])
+        return document_context, ContextBlockSelection(before_indices=(), current_indices=(), after_indices=())
 
     resolved_continuations = (
         build_table_continuation_map(content_data) if table_continuations is None else table_continuations
@@ -441,7 +498,13 @@ def collect_surrounding_context_selection(
 
     target = ""
     current_indices: tuple[int, ...] = ()
+    target_section_key: tuple[str, ...] | None = None
     if 0 <= target_idx < len(content_data) and isinstance(content_data[target_idx], dict):
+        target_section_key = _context_section_key(
+            content_data,
+            target_idx,
+            continuation_to_master=continuation_to_master,
+        )
         target = _format_context_block(
             content_data,
             target_idx,
@@ -463,6 +526,7 @@ def collect_surrounding_context_selection(
         max_tokens=before_budget,
         budgeter=budgeter,
         continuation_to_master=continuation_to_master,
+        section_key=target_section_key,
     )
     after_context = _collect_nearby_context(
         content_data,
@@ -471,22 +535,53 @@ def collect_surrounding_context_selection(
         max_tokens=after_budget,
         budgeter=budgeter,
         continuation_to_master=continuation_to_master,
+        section_key=target_section_key,
     )
 
-    sections = []
+    before_used = budgeter.count(before_context.text)
+    after_used = budgeter.count(after_context.text)
+    if before_used < before_budget:
+        expanded_after_budget = max(0, remaining - before_used)
+        after_context = _collect_nearby_context(
+            content_data,
+            target_idx,
+            direction=1,
+            max_tokens=expanded_after_budget,
+            budgeter=budgeter,
+            continuation_to_master=continuation_to_master,
+            section_key=target_section_key,
+        )
+        after_used = budgeter.count(after_context.text)
+    if after_used < after_budget:
+        expanded_before_budget = max(0, remaining - after_used)
+        before_context = _collect_nearby_context(
+            content_data,
+            target_idx,
+            direction=-1,
+            max_tokens=expanded_before_budget,
+            budgeter=budgeter,
+            continuation_to_master=continuation_to_master,
+            section_key=target_section_key,
+        )
+
+    document_context = ""
+    if 0 <= target_idx < len(content_data) and isinstance(content_data[target_idx], dict):
+        document_context = _format_document_context(content_data[target_idx])
+    budgeted_sections = []
     if before_context.text:
-        sections.append("### Nearby Text Before Image\n" + before_context.text)
+        budgeted_sections.append("### Nearby Text Before Image\n" + before_context.text)
     if target_context:
-        sections.append("### Current Image Caption/Footnote\n" + target_context)
+        budgeted_sections.append("### Current Image Caption/Footnote\n" + target_context)
     if after_context.text:
-        sections.append("### Nearby Text After Image\n" + after_context.text)
-    context = "\n\n".join(sections)
+        budgeted_sections.append("### Nearby Text After Image\n" + after_context.text)
+    budgeted_context = budgeter.take_head("\n\n".join(budgeted_sections), max_context_tokens)
+    context = "\n\n".join(part for part in (document_context, budgeted_context) if part)
     selection = ContextBlockSelection(
         before_indices=before_context.block_indices,
         current_indices=current_indices if target_context else (),
         after_indices=after_context.block_indices,
     )
-    return budgeter.take_head(context, max_context_tokens), selection
+    return context, selection
 
 
 def get_surrounding_text_context(
@@ -877,6 +972,7 @@ def add_image_descriptions(
     from tqdm import tqdm
 
     base_path = Path(base_dir)
+    require_sectioned_patched_captioning_input(input_json)
     output_path = Path(output_json)
     checkpoint_path = Path(checkpoint_json) if checkpoint_json else checkpoint_path_for(output_path)
     if resume and checkpoint_path.exists():
@@ -997,8 +1093,8 @@ def add_image_descriptions(
                 review_context_token_count = context_budgeter.count(review_context)
             prompt = (
                 "You are an expert technical documentation assistant. I will provide an image "
-                "extracted from a manual, plus nearby text before and after this image in the "
-                "patched MinerU content list.\n\n"
+                "extracted from a manual, plus document breadcrumb and nearby text "
+                "before and after this image in the same section when section metadata is available.\n\n"
                 f"### Text Context:\n{context_text}\n\n"
                 "### Task:\n"
                 "Describe only what is visible in the image, using the nearby text only to resolve "
@@ -1128,6 +1224,10 @@ def main(argv: list[str] | None = None) -> None:
             artifacts_list = resolve_image_description_batch(args.artifact_dir, recursive=not args.no_recursive)
     else:
         input_json = Path(args.input).expanduser() if args.input else config.paths.patched_json
+        try:
+            require_sectioned_patched_captioning_input(input_json)
+        except ValueError as exc:
+            parser.error(str(exc))
         output_json = Path(args.output).expanduser() if args.output else config.paths.captioned_json
         base_dir = Path(args.base_dir).expanduser() if args.base_dir else config.paths.base_dir
         artifacts_list = [

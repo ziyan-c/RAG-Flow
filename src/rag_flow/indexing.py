@@ -400,7 +400,7 @@ def upsert_colpali_vectors(
         resolved_pdf_path,
         configured_source_pdf=config.paths.source_pdf,
         configured_source_name=config.paths.source_name,
-        source_root=source_root_from_input_path(config.mineru.input_path),
+        source_root=config.paths.source_root or source_root_from_input_path(config.mineru.input_path),
     )
     colpali_model_location = resolve_model_location(
         config.models.colpali_model,
@@ -528,6 +528,10 @@ def main(argv: list[str] | None = None) -> None:
     visual_parser = subparsers.add_parser("visual", help="Upsert ColPali visual vectors.")
     visual_parser.add_argument("--pdf", default=str(config.paths.source_pdf))
     visual_parser.add_argument("--source-name", help="Source PDF name stored in visual payloads.")
+    visual_parser.add_argument(
+        "--source-root",
+        help="Directory treated as the source-relative root, e.g. /root/pdfs -> DSS/manual.pdf.",
+    )
     visual_parser.add_argument("--batch-size", type=int, default=config.indexing.visual_batch_size)
     visual_parser.add_argument("--dpi", type=int, default=config.indexing.visual_dpi)
 
@@ -542,7 +546,9 @@ def main(argv: list[str] | None = None) -> None:
             pdf_path,
             configured_source_pdf=config.paths.source_pdf,
             configured_source_name=config.paths.source_name,
-            source_root=source_root_from_input_path(config.mineru.input_path),
+            source_root=args.source_root
+            or config.paths.source_root
+            or source_root_from_input_path(config.mineru.input_path),
         )
         upsert_colpali_vectors(
             config,

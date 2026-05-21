@@ -414,6 +414,9 @@ def test_patch_field_keys_skips_sectioning_and_continuation_metadata():
         "section_path": ["1 Overview"],
         "section_title": "1 Overview",
         "section_source": "pdf_outline_exact",
+        "source_relpath": "DSS/manual.pdf",
+        "source_filename": "manual.pdf",
+        "breadcrumb": "DSS > manual.pdf > 1 Overview",
         "rag_flow_table_continuation_indices": [3],
     }
 

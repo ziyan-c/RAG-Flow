@@ -277,6 +277,10 @@ def test_run_ingest_sectioning_stage_recovers_pdf_outline(tmp_path):
     sectioned = json.loads(artifacts.sectioned_json.read_text(encoding="utf-8"))
     audit = json.loads(artifacts.sectioning_audit_json.read_text(encoding="utf-8"))
     assert sectioned[1]["section_path"] == ["1 Overview"]
+    assert sectioned[1]["source_relpath"] == "manual.pdf"
+    assert sectioned[1]["source_filename"] == "manual.pdf"
+    assert sectioned[1]["breadcrumb"] == "manual.pdf > 1 Overview"
+    assert audit["source_name"] == "manual.pdf"
     assert audit["stats"]["section_event_count"] == 1
 
 
@@ -324,3 +328,27 @@ def test_run_ingest_uses_source_root_relative_chunk_source(tmp_path):
     assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
     assert chunks[0]["metadata"]["source_filename"] == "manual.pdf"
     assert "source" not in chunks[0]["metadata"]
+
+
+def test_run_ingest_uses_manual_source_root_override(tmp_path):
+    config = make_config(tmp_path)
+    source_root = tmp_path / "pdfs"
+    source_pdf = source_root / "DSS" / "manual.pdf"
+    content_json = tmp_path / "mineru-output" / "DSS" / "manual" / "auto" / "manual_content_list.json"
+    captioned_json = content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    captioned_json.parent.mkdir(parents=True)
+    content_json.write_text("[]", encoding="utf-8")
+    captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")
+
+    artifacts = run_ingest(
+        config,
+        pdf_path=source_pdf,
+        source_root=source_root,
+        from_stage="chunking",
+        to_stage="chunking",
+        skip_existing=False,
+    )
+
+    chunks = json.loads(artifacts.chunks_json.read_text(encoding="utf-8"))
+    assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
+    assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf"

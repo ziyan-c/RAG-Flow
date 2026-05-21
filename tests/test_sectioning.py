@@ -5,6 +5,7 @@ from pathlib import Path
 
 from rag_flow.sectioning import (
     OutlineEntry,
+    add_source_metadata,
     main,
     normalize_title,
     section_content,
@@ -29,6 +30,20 @@ def test_section_paths_insert_stage_suffixes():
 
 def test_normalize_title_handles_nbsp_and_spacing():
     assert normalize_title(" 2.1\u00a0\u00a0Standalone   Deployment ") == "2.1 standalone deployment"
+
+
+def test_add_source_metadata_builds_block_breadcrumbs():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "Cover"},
+        {"type": "text", "page_idx": 1, "text": "1 Overview", "section_path": ["1 Overview"]},
+    ]
+
+    result = add_source_metadata(content, source_name="DSS/manual.pdf")
+
+    assert result[0]["source_relpath"] == "DSS/manual.pdf"
+    assert result[0]["source_filename"] == "manual.pdf"
+    assert result[0]["breadcrumb"] == "DSS > manual.pdf"
+    assert result[1]["breadcrumb"] == "DSS > manual.pdf > 1 Overview"
 
 
 def test_section_content_matches_exact_fuzzy_and_page_fallback():
@@ -179,7 +194,12 @@ def test_write_sectioned_json_reads_pdf_outline(tmp_path):
     sectioned = json.loads(output_json.read_text(encoding="utf-8"))
     audit = json.loads(audit_json.read_text(encoding="utf-8"))
     assert sectioned[1]["section_path"] == ["1 Overview"]
+    assert sectioned[1]["source_relpath"] == "manual.pdf"
+    assert sectioned[1]["source_filename"] == "manual.pdf"
+    assert sectioned[1]["breadcrumb"] == "manual.pdf > 1 Overview"
     assert sectioned[3]["section_path"] == ["2 Setup"]
+    assert sectioned[3]["breadcrumb"] == "manual.pdf > 2 Setup"
+    assert audit["source_name"] == "manual.pdf"
     assert audit["stats"]["section_event_count"] == 2
 
 
@@ -201,3 +221,24 @@ def test_sectioning_main_places_default_audit_next_to_custom_output(tmp_path, ca
     output = capsys.readouterr().out
     assert f"output_json: {output_json}" in output
     assert f"audit_json: {tmp_path / 'out' / 'manual_SECTIONING_AUDIT.json'}" in output
+    assert "source_name: manual.pdf" in output
+
+
+def test_sectioning_main_uses_manual_source_root(tmp_path, capsys):
+    source_root = tmp_path / "pdfs"
+    source_pdf = source_root / "DSS" / "manual.pdf"
+
+    main(
+        [
+            "--input-json",
+            str(tmp_path / "manual_content_list.json"),
+            "--input-pdf",
+            str(source_pdf),
+            "--source-root",
+            str(source_root),
+            "--dry-run",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert "source_name: DSS/manual.pdf" in output

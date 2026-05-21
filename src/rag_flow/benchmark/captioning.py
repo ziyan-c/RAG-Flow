@@ -509,7 +509,7 @@ def write_prepare_artifacts(
     )
     write_quality_templates(samples=samples, base_dir=base_dir, output_dir=output_dir)
     if not no_captioning_view and pdf_path.exists():
-        input_json = output_dir / "prepare_input_content_list_PATCHED.json"
+        input_json = output_dir / "prepare_input_content_list_SECTIONED_PATCHED.json"
         _write_json(input_json, content_data)
         stats = write_captioning_view_pdf(
             content_json=input_json,
@@ -768,9 +768,9 @@ def run_one(
 ) -> dict[str, Any]:
     run_dir = output_dir / spec.stage / spec.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    input_json = run_dir / "input_content_list_PATCHED.json"
-    output_json = run_dir / "output_content_list_PATCHED_CAPTIONED.json"
-    checkpoint_json = run_dir / "output_content_list_PATCHED_CAPTIONED.checkpoint.json"
+    input_json = run_dir / "input_content_list_SECTIONED_PATCHED.json"
+    output_json = run_dir / "output_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    checkpoint_json = run_dir / "output_content_list_SECTIONED_PATCHED_CAPTIONED.checkpoint.json"
     working_data = copy.deepcopy(content_data)
     _strip_existing_descriptions(working_data)
     _write_json(input_json, working_data)

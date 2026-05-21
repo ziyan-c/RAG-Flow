@@ -49,6 +49,7 @@ def run_ingest(
     config: AppConfig,
     *,
     pdf_path: str | Path | None = None,
+    source_root: str | Path | None = None,
     from_stage: str = "parsing",
     to_stage: str = "chunking",
     skip_existing: bool = True,
@@ -69,7 +70,7 @@ def run_ingest(
         source_pdf,
         configured_source_pdf=config.paths.source_pdf,
         configured_source_name=config.paths.source_name,
-        source_root=source_root_from_input_path(config.mineru.input_path),
+        source_root=source_root or config.paths.source_root or source_root_from_input_path(config.mineru.input_path),
     )
     mineru_ran = False
 
@@ -96,6 +97,7 @@ def run_ingest(
             input_pdf=source_pdf,
             output_json=artifacts.sectioned_json,
             audit_json=artifacts.sectioning_audit_json,
+            source_name=source_name,
         )
         print(
             f"Recovered {result.stats['section_event_count']} PDF outline sections at "
@@ -211,6 +213,11 @@ def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Run the RAG Flow ingestion pipeline.")
     parser.add_argument("--pdf", default=str(config.mineru.input_path), help="Source PDF to parse and index.")
+    parser.add_argument(
+        "--source-root",
+        default=None,
+        help="Directory treated as the source-relative root, e.g. /root/pdfs -> DSS/manual.pdf.",
+    )
     parser.add_argument("--from-stage", choices=STAGES, default="parsing")
     parser.add_argument("--to-stage", choices=STAGES, default="chunking")
     parser.add_argument("--force", action="store_true", help="Re-run stages even when outputs already exist.")
@@ -234,6 +241,7 @@ def main(argv: list[str] | None = None) -> None:
     run_ingest(
         config,
         pdf_path=args.pdf,
+        source_root=args.source_root,
         from_stage=args.from_stage,
         to_stage=args.to_stage,
         skip_existing=not args.no_skip_existing,

@@ -180,7 +180,12 @@ rag-flow section \
 
 This writes `*_content_list_SECTIONED.json` plus `*_SECTIONING_AUDIT.json`.
 It uses the original source PDF outline/bookmarks, not MinerU heading labels,
-and only adds `section_*` metadata fields to blocks.
+and adds both `section_*` fields and source identity fields
+(`source_relpath`, `source_filename`, `breadcrumb`) to blocks. Breadcrumbs are
+formed from the source relative path plus the current section path, so downstream
+chunking can reuse the same source hierarchy instead of rebuilding it late.
+Set `RAG_FLOW_SOURCE_ROOT=/root/pdfs` or pass `--source-root /root/pdfs` when
+you want `/root/pdfs/DSS/manual.pdf` to be stored as `DSS/manual.pdf`.
 Inside `rag-flow ingest`, this stage runs automatically after MinerU parsing and
 before patching.
 
@@ -286,8 +291,10 @@ Captioning calls the local OpenAI-compatible SGLang service configured by
 `image_description_vlm`, and also writes `image_answering_policy`,
 `image_answering_confidence`, and `image_answering_reason` so downstream
 answering code can decide whether the original image should be supplied with
-the retrieved text. It resumes from
-`*_PATCHED_CAPTIONED.checkpoint.json` when available, writes a checkpoint after
+the retrieved text. Captioning requires the sectioned patched input
+`*_content_list_SECTIONED_PATCHED.json`; legacy `*_content_list_PATCHED.json`
+inputs are intentionally rejected. It resumes from
+`*_content_list_SECTIONED_PATCHED_CAPTIONED.checkpoint.json` when available, writes a checkpoint after
 each LLM batch by default, and skips image blocks that already have
 `image_description_vlm`. Captioning context is taken from nearby text blocks
 before and after each image in the patched JSON order, rather than from a fixed
@@ -626,6 +633,7 @@ All core values are environment variables. The important ones are:
 
 - `RAG_FLOW_BASE_DIR`
 - `RAG_FLOW_SOURCE_PDF`
+- `RAG_FLOW_SOURCE_ROOT`
 - `RAG_FLOW_MINERU_COMMAND`
 - `RAG_FLOW_MINERU_INPUT_PATH`
 - `RAG_FLOW_MINERU_OUTPUT_DIR`

@@ -11,6 +11,7 @@ from typing import Any
 
 from .config import AppConfig
 from .mineru import find_content_json
+from .source_paths import source_breadcrumb, source_name_for_pdf, source_payload_fields, source_root_from_input_path
 from .table_continuations import (
     TABLE_CONTINUATION_INDICES_KEY,
     TABLE_CONTINUATION_MASTER_IDX_KEY,
@@ -521,6 +522,27 @@ def section_content(
     )
 
 
+def add_source_metadata(
+    content_data: list[dict[str, Any]],
+    *,
+    source_name: str,
+) -> list[dict[str, Any]]:
+    source_fields = source_payload_fields(source_name)
+    annotated: list[dict[str, Any]] = []
+    for block in content_data:
+        if not isinstance(block, dict):
+            annotated.append(block)
+            continue
+        new_block = dict(block)
+        section_path = new_block.get("section_path", [])
+        if not isinstance(section_path, list):
+            section_path = []
+        new_block.update(source_fields)
+        new_block["breadcrumb"] = source_breadcrumb(source_fields["source_relpath"], section_path)
+        annotated.append(new_block)
+    return annotated
+
+
 def write_sectioning_audit(
     *,
     audit_path: str | Path,
@@ -528,9 +550,11 @@ def write_sectioning_audit(
     source_pdf: str | Path,
     input_json: str | Path,
     output_json: str | Path,
+    source_name: str,
 ) -> None:
     payload = {
         "source_pdf": str(source_pdf),
+        "source_name": source_name,
         "input_json": str(input_json),
         "output_json": str(output_json),
         "stats": result.stats,
@@ -550,6 +574,7 @@ def write_sectioned_json(
     fuzzy_threshold: float = 0.92,
     max_fuzzy_candidate_chars: int = 260,
     y_close_threshold: float = 50.0,
+    source_name: str | None = None,
 ) -> SectioningResult:
     input_path = Path(input_json).expanduser()
     output_path = Path(output_json).expanduser()
@@ -557,6 +582,7 @@ def write_sectioned_json(
     if not isinstance(content_data, list):
         raise ValueError(f"Expected a list in content JSON: {input_path}")
     outline_entries = read_pdf_outline(input_pdf)
+    resolved_source_name = source_name or source_name_for_pdf(input_pdf)
     result = section_content(
         content_data,
         outline_entries,
@@ -564,12 +590,23 @@ def write_sectioned_json(
         max_fuzzy_candidate_chars=max_fuzzy_candidate_chars,
         y_close_threshold=y_close_threshold,
     )
+    source_annotated = add_source_metadata(result.content_data, source_name=resolved_source_name)
+    result = SectioningResult(
+        content_data=source_annotated,
+        events=result.events,
+        audit_entries=result.audit_entries,
+        stats={
+            **result.stats,
+            "source_metadata_blocks": sum(1 for block in source_annotated if isinstance(block, dict)),
+        },
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(result.content_data, ensure_ascii=False, indent=2), encoding="utf-8")
     write_sectioning_audit(
         audit_path=audit_json,
         result=result,
         source_pdf=input_pdf,
+        source_name=resolved_source_name,
         input_json=input_path,
         output_json=output_path,
     )
@@ -591,9 +628,23 @@ def main(argv: list[str] | None = None) -> None:
 
     parser = argparse.ArgumentParser(description="Annotate MinerU content_list blocks with PDF outline sections.")
     parser.add_argument("--input-json", default=str(default_input_json), help="Input MinerU content_list JSON.")
-    parser.add_argument("--input-pdf", default=str(config.paths.source_pdf), help="Original source PDF with outline/bookmarks.")
+    parser.add_argument(
+        "--input-pdf",
+        default=str(config.paths.source_pdf),
+        help="Original source PDF with outline/bookmarks.",
+    )
     parser.add_argument("--output-json", default=None, help="Output SECTIONED content_list JSON.")
     parser.add_argument("--audit-json", default=None, help="Output SECTIONING_AUDIT JSON.")
+    parser.add_argument(
+        "--source-name",
+        default=None,
+        help="Source relative path stored in sectioned blocks; defaults to sourcepdfs-relative path when available.",
+    )
+    parser.add_argument(
+        "--source-root",
+        default=None,
+        help="Directory treated as the source-relative root, e.g. /root/pdfs -> DSS/manual.pdf.",
+    )
     parser.add_argument("--fuzzy-threshold", type=float, default=0.92)
     parser.add_argument("--max-fuzzy-candidate-chars", type=int, default=260)
     parser.add_argument("--y-close-threshold", type=float, default=50.0)
@@ -612,11 +663,21 @@ def main(argv: list[str] | None = None) -> None:
         if args.audit_json
         else output_json.parent / sectioning_audit_path_for(input_json).name
     )
+    input_pdf = Path(args.input_pdf).expanduser()
+    resolved_source_name = args.source_name or source_name_for_pdf(
+        input_pdf,
+        configured_source_pdf=config.paths.source_pdf,
+        configured_source_name=config.paths.source_name,
+        source_root=args.source_root
+        or config.paths.source_root
+        or source_root_from_input_path(config.mineru.input_path),
+    )
 
     if args.dry_run:
         print("Sectioning inputs:")
         print(f"  input_json: {input_json}")
-        print(f"  input_pdf: {Path(args.input_pdf).expanduser()}")
+        print(f"  input_pdf: {input_pdf}")
+        print(f"  source_name: {resolved_source_name}")
         print(f"  output_json: {output_json}")
         print(f"  audit_json: {audit_json}")
         print(f"  fuzzy_threshold: {args.fuzzy_threshold}")
@@ -625,12 +686,13 @@ def main(argv: list[str] | None = None) -> None:
 
     result = write_sectioned_json(
         input_json=input_json,
-        input_pdf=args.input_pdf,
+        input_pdf=input_pdf,
         output_json=output_json,
         audit_json=audit_json,
         fuzzy_threshold=args.fuzzy_threshold,
         max_fuzzy_candidate_chars=args.max_fuzzy_candidate_chars,
         y_close_threshold=args.y_close_threshold,
+        source_name=resolved_source_name,
     )
     print(f"Wrote sectioned content JSON at {output_json}")
     print(f"Wrote sectioning audit JSON at {audit_json}")

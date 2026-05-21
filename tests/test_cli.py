@@ -167,7 +167,7 @@ def test_caption_view_command_delegates_to_captioning_view_main(monkeypatch):
         [
             "caption-view",
             "--input-json",
-            "manual_content_list_PATCHED_CAPTIONED.json",
+            "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json",
             "--input-pdf",
             "manual.pdf",
             "--dry-run",
@@ -175,7 +175,13 @@ def test_caption_view_command_delegates_to_captioning_view_main(monkeypatch):
     )
 
     assert calls == [
-        ["--input-json", "manual_content_list_PATCHED_CAPTIONED.json", "--input-pdf", "manual.pdf", "--dry-run"]
+        [
+            "--input-json",
+            "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json",
+            "--input-pdf",
+            "manual.pdf",
+            "--dry-run",
+        ]
     ]
 
 

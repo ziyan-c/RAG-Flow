@@ -45,6 +45,7 @@ def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatc
         "\n".join(
             [
                 "RAG_FLOW_SOURCE_PDF=.local/source-documents/manual.pdf",
+                "RAG_FLOW_SOURCE_ROOT=.local/source-documents",
                 "RAG_FLOW_MINERU_INPUT_PATH=.local/source-documents/mineru-input.pdf",
                 "RAG_FLOW_BASE_DIR=runtime/manual",
             ]
@@ -60,6 +61,7 @@ def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatc
     config = AppConfig.from_env()
 
     assert config.paths.source_pdf == tmp_path / ".local" / "source-documents" / "manual.pdf"
+    assert config.paths.source_root == tmp_path / ".local" / "source-documents"
     assert config.mineru.input_path == tmp_path / ".local" / "source-documents" / "mineru-input.pdf"
     assert config.paths.base_dir == tmp_path / "runtime" / "manual"
 
