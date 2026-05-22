@@ -89,7 +89,7 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
         aliases=("offline", "review"),
         notes=(
             "Intended for offline review or difficult queries where context volume is acceptable.",
-            "Keeps min_score_ratio=1.0; the hard token cap controls context length without relative pruning.",
+            "Keeps min_score_ratio=1.0; the soft token cap controls context length without relative pruning.",
         ),
     ),
     "visual-route": ConfigPreset(

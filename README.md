@@ -485,7 +485,7 @@ rag-flow test-retriever "How do I configure alarms?"
 
 The default retrieval preset is the low-latency text-only preset selected by
 the 220-query benchmark. It intentionally retrieves a large candidate pool, then
-uses a hard retrieved-context budget so the downstream answer model is not forced
+uses a soft retrieved-context target so the downstream answer model is not forced
 to consume all candidates:
 
 ```env
@@ -500,12 +500,14 @@ RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN=4.0
 RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=1.0
 ```
 
-`final_top_k` remains a maximum number of chunks. The token cap may return fewer
-chunks, so retrieval does not need to fill the whole 10k budget when the useful
-evidence is already covered. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional
-and relative to the top candidate score; the current default keeps it at `1.0`
-to disable relative filtering because the benchmark did not show a reliable
-quality gain from ratio pruning for the online preset.
+`final_top_k` remains a maximum number of chunks. The token cap is a soft target:
+retrieval appends chunks in rank order, keeps the chunk that first pushes the
+estimated context over budget, and then stops. It does not pre-skip a high-rank
+large chunk just to fit lower-rank smaller chunks, and it does not cut chunks in
+half. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional and relative to the top
+candidate score; the current default keeps it at `1.0` to disable relative
+filtering because the benchmark did not show a reliable quality gain from ratio
+pruning for the online preset.
 
 The `retrieval` stage returns structured image references for images inside
 selected chunks. Each image keeps its `image_answering_policy`, confidence,

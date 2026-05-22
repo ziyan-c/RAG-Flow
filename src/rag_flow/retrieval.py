@@ -556,7 +556,6 @@ class RetrievalEngine:
                 _payload_position_key(item["payload"], item["preferred_page_idx"]),
             )
         )
-        selected_candidates: list[tuple[dict[str, Any], str]] = []
         best_score = float(scored_candidates[0]["score"])
         min_score = _candidate_min_score(
             best_score=best_score,
@@ -564,18 +563,11 @@ class RetrievalEngine:
             min_score_ratio=float(self.config.retrieval.min_score_ratio),
         )
         context_token_budget = max(0, int(self.config.retrieval.max_context_tokens))
-        used_context_tokens = 0
-        for candidate in scored_candidates:
-            if len(selected_candidates) >= self.config.retrieval.final_top_k:
-                break
-            if float(candidate["score"]) < min_score:
-                continue
-            context_block = self._format_context_block(candidate)
-            block_tokens = self._estimate_context_tokens(context_block)
-            if context_token_budget and used_context_tokens + block_tokens > context_token_budget:
-                continue
-            selected_candidates.append((candidate, context_block))
-            used_context_tokens += block_tokens
+        selected_candidates = self._select_context_candidates(
+            scored_candidates,
+            min_score=min_score,
+            context_token_budget=context_token_budget,
+        )
 
         if not selected_candidates:
             context = "No relevant information found in the manual."
@@ -666,6 +658,27 @@ class RetrievalEngine:
     def _estimate_context_tokens(self, text: str) -> int:
         chars_per_token = max(1.0, float(self.config.retrieval.context_chars_per_token))
         return max(1, math.ceil(len(text) / chars_per_token))
+
+    def _select_context_candidates(
+        self,
+        scored_candidates: list[dict[str, Any]],
+        *,
+        min_score: float,
+        context_token_budget: int,
+    ) -> list[tuple[dict[str, Any], str]]:
+        selected_candidates: list[tuple[dict[str, Any], str]] = []
+        used_context_tokens = 0
+        for candidate in scored_candidates:
+            if len(selected_candidates) >= self.config.retrieval.final_top_k:
+                break
+            if float(candidate["score"]) < min_score:
+                continue
+            context_block = self._format_context_block(candidate)
+            selected_candidates.append((candidate, context_block))
+            used_context_tokens += self._estimate_context_tokens(context_block)
+            if context_token_budget and used_context_tokens > context_token_budget:
+                break
+        return selected_candidates
 
     def _image_base_dir_for_payload(self, payload: dict[str, Any]) -> Path:
         raw_base = str(payload.get("image_base_dir") or "").strip()

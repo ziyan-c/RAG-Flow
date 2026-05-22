@@ -310,6 +310,55 @@ def test_build_final_output_filters_to_existing_recommended_images(tmp_path):
     assert final_output.images == (recommended,)
 
 
+def test_context_candidate_selection_keeps_chunk_that_crosses_budget_then_stops():
+    config = SimpleNamespace(
+        retrieval=RetrievalConfig(
+            retrieval_k=10,
+            final_top_k=10,
+            rrf_k=60,
+            visual_weight=1.5,
+            quantized_colpali=False,
+            max_context_tokens=10,
+            context_chars_per_token=1.0,
+        )
+    )
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    engine._format_context_block = lambda candidate: str(candidate["payload"]["chunk_content"])  # type: ignore[method-assign]
+    candidates = [
+        {"score": 3.0, "payload": {"chunk_id": "a", "chunk_content": "123456"}},
+        {"score": 2.0, "payload": {"chunk_id": "b", "chunk_content": "12345"}},
+        {"score": 1.0, "payload": {"chunk_id": "c", "chunk_content": "1"}},
+    ]
+
+    selected = engine._select_context_candidates(candidates, min_score=0.0, context_token_budget=10)
+
+    assert [candidate["payload"]["chunk_id"] for candidate, _block in selected] == ["a", "b"]
+
+
+def test_context_candidate_selection_keeps_top_chunk_even_when_it_exceeds_budget():
+    config = SimpleNamespace(
+        retrieval=RetrievalConfig(
+            retrieval_k=10,
+            final_top_k=10,
+            rrf_k=60,
+            visual_weight=1.5,
+            quantized_colpali=False,
+            max_context_tokens=10,
+            context_chars_per_token=1.0,
+        )
+    )
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    engine._format_context_block = lambda candidate: str(candidate["payload"]["chunk_content"])  # type: ignore[method-assign]
+    candidates = [
+        {"score": 3.0, "payload": {"chunk_id": "a", "chunk_content": "12345678901"}},
+        {"score": 2.0, "payload": {"chunk_id": "b", "chunk_content": "1"}},
+    ]
+
+    selected = engine._select_context_candidates(candidates, min_score=0.0, context_token_budget=10)
+
+    assert [candidate["payload"]["chunk_id"] for candidate, _block in selected] == ["a"]
+
+
 def test_direct_rank_candidates_skip_visual_pages():
     config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
