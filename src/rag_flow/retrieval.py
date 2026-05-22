@@ -13,13 +13,6 @@ from .runtime import get_torch_device
 from .source_paths import normalize_source_name, source_breadcrumb
 
 
-SECTION_EXACT_BONUS = 0.02
-SECTION_RELATED_BONUS = 0.01
-PAGE_SAME_BONUS = 0.02
-PAGE_NEAR_BONUS = 0.01
-PAGE_FAR_BONUS = 0.005
-
-
 @dataclass(frozen=True)
 class HitDetail:
     rank: int
@@ -32,16 +25,10 @@ class HitDetail:
     chunk_id: str = ""
     visual_page_prior: float = 0.0
     visual_alignment_score: float = 0.0
-    section_bonus: float = 0.0
-    page_bonus: float = 0.0
     dense_rrf_score: float = 0.0
     sparse_rrf_score: float = 0.0
     visual_rrf_score: float = 0.0
     direct_text_rrf_score: float = 0.0
-    is_visual_seed: bool = False
-    seed_page_idx: int = 0
-    seed_source_route: str = ""
-    candidate_page_distance: int = 0
 
 
 @dataclass(frozen=True)
@@ -151,42 +138,11 @@ def _payload_position_key(payload: dict[str, Any], preferred_page_idx: int | Non
     )
 
 
-def _page_distance(payload: dict[str, Any], target_page_idx: int) -> int:
-    pages = _payload_page_indices(payload)
-    if not pages:
-        return 10**9
-    return min(abs(page - target_page_idx) for page in pages)
-
-
-def _page_proximity_bonus(payload: dict[str, Any], target_page_idx: int) -> float:
-    distance = _page_distance(payload, target_page_idx)
-    if distance == 0:
-        return PAGE_SAME_BONUS
-    if distance == 1:
-        return PAGE_NEAR_BONUS
-    if distance == 2:
-        return PAGE_FAR_BONUS
-    return 0.0
-
-
 def _section_path(payload: dict[str, Any]) -> tuple[str, ...]:
     value = payload.get("section_path", [])
     if not isinstance(value, list):
         return ()
     return tuple(str(item) for item in value if str(item).strip())
-
-
-def _section_proximity_bonus(payload: dict[str, Any], reference_payload: dict[str, Any]) -> float:
-    left = _section_path(payload)
-    right = _section_path(reference_payload)
-    if not left or not right:
-        return 0.0
-    if left == right:
-        return SECTION_EXACT_BONUS
-    prefix_len = min(len(left), len(right))
-    if left[:prefix_len] == right[:prefix_len]:
-        return SECTION_RELATED_BONUS
-    return 0.0
 
 
 def _visual_chunk_alignment_score(chunk_payload: dict[str, Any], visual_payload: dict[str, Any]) -> float:
@@ -349,26 +305,27 @@ class RetrievalEngine:
         return aliases.get(mode, mode)
 
     def _candidate_mode(self) -> str:
-        mode = (self.config.retrieval.candidate_mode or "seed").strip().lower()
+        mode = (self.config.retrieval.candidate_mode or "direct").strip().lower()
         aliases = {
-            "auto": "seed",
-            "default": "seed",
-            "seed-expansion": "seed",
-            "seed_expansion": "seed",
+            "auto": "direct",
+            "default": "direct",
             "direct-rank": "direct",
             "direct_rank": "direct",
-            "no-seed": "direct",
-            "no_seed": "direct",
             "page-local-bbox": "visual-page-local-bbox",
             "page_local_bbox": "visual-page-local-bbox",
             "visual_page_local_bbox": "visual-page-local-bbox",
             "page-local-naive": "visual-page-local-naive",
             "page_local_naive": "visual-page-local-naive",
             "visual_page_local_naive": "visual-page-local-naive",
-            "current-visual-seed": "visual-seed",
-            "visual_seed": "visual-seed",
         }
-        return aliases.get(mode, mode)
+        resolved = aliases.get(mode, mode)
+        if resolved not in {"direct", "visual-page-local-bbox", "visual-page-local-naive"}:
+            raise ValueError(
+                "Unsupported retrieval candidate mode "
+                f"'{self.config.retrieval.candidate_mode}'. Seed expansion has been removed; "
+                "use 'direct', 'visual-page-local-bbox', or 'visual-page-local-naive'."
+            )
+        return resolved
 
     def _uses_dense_route(self) -> bool:
         return self._route_mode() in {
@@ -442,12 +399,10 @@ class RetrievalEngine:
         if self.client is None:
             self.load()
 
-        import torch
         from qdrant_client import models
 
         collection = self.config.paths.collection_name
         retrieval_k = self.config.retrieval.retrieval_k
-        route_mode = self._route_mode()
         dense_hits = []
         sparse_hits = []
         if self._uses_dense_route():
@@ -509,18 +464,9 @@ class RetrievalEngine:
                 models=models,
             )
         else:
-            top_hits = self._candidate_seed_hits(final_ranking, visual_hits)
-            if not top_hits:
-                return RetrievalResult(
-                    hit_page=1,
-                    all_hits=[],
-                    context="No relevant information found in the manual.",
-                )
-            scored_candidates = self._seed_expansion_candidates(
-                collection_name=collection,
-                top_hits=top_hits,
-                route_mode=route_mode,
-                models=models,
+            raise ValueError(
+                f"Unsupported retrieval candidate mode '{candidate_mode}'. "
+                "Use 'direct', 'visual-page-local-bbox', or 'visual-page-local-naive'."
             )
 
         if not scored_candidates:
@@ -532,7 +478,7 @@ class RetrievalEngine:
         scored_candidates.sort(
             key=lambda item: (
                 -float(item["score"]),
-                _payload_position_key(item["payload"], item["seed_page_idx"]),
+                _payload_position_key(item["payload"], item["preferred_page_idx"]),
             )
         )
         selected_candidates: list[tuple[dict[str, Any], str]] = []
@@ -584,16 +530,10 @@ class RetrievalEngine:
                     chunk_id=str(payload.get("chunk_id", "")),
                     visual_page_prior=float(candidate["visual_page_prior"]),
                     visual_alignment_score=float(candidate["visual_alignment_score"]),
-                    section_bonus=float(candidate["section_bonus"]),
-                    page_bonus=float(candidate["page_bonus"]),
                     dense_rrf_score=float(candidate["dense_rrf_score"]),
                     sparse_rrf_score=float(candidate["sparse_rrf_score"]),
                     visual_rrf_score=float(candidate["visual_rrf_score"]),
                     direct_text_rrf_score=float(candidate["direct_text_rrf_score"]),
-                    is_visual_seed=bool(candidate["is_visual_seed"]),
-                    seed_page_idx=int(candidate["seed_page_idx"]),
-                    seed_source_route="|".join(sorted(candidate["seed_source_routes"])),
-                    candidate_page_distance=int(candidate["candidate_page_distance"]),
                 )
             )
 
@@ -639,7 +579,7 @@ class RetrievalEngine:
         self,
         *,
         payload: dict[str, Any],
-        seed_page_idx: int,
+        preferred_page_idx: int,
         source_pdf: str,
         record_id: Any = "",
     ) -> dict[str, Any]:
@@ -649,16 +589,11 @@ class RetrievalEngine:
             "visual_score": 0.0,
             "visual_page_prior": 0.0,
             "visual_alignment_score": 0.0,
-            "section_bonus": 0.0,
-            "page_bonus": 0.0,
             "dense_rrf_score": 0.0,
             "sparse_rrf_score": 0.0,
             "visual_rrf_score": 0.0,
             "direct_text_rrf_score": 0.0,
-            "is_visual_seed": False,
-            "seed_page_idx": seed_page_idx,
-            "seed_source_routes": set(),
-            "candidate_page_distance": _page_distance(payload, seed_page_idx),
+            "preferred_page_idx": preferred_page_idx,
             "is_continuation": bool(payload.get("is_table_continuation", False)),
             "key": (source_pdf, str(payload.get("chunk_id") or record_id)),
         }
@@ -669,8 +604,6 @@ class RetrievalEngine:
             candidate["score"] = (
                 candidate["direct_score"]
                 + candidate["visual_score"]
-                + candidate["section_bonus"]
-                + candidate["page_bonus"]
             )
             scored_candidates.append(candidate)
         return scored_candidates
@@ -682,13 +615,13 @@ class RetrievalEngine:
             if payload.get("is_visual_page"):
                 continue
             source_pdf = _payload_source_relpath(payload)
-            seed_page_idx = _payload_page_indices(payload)[0] if _payload_page_indices(payload) else _as_int(payload.get("page_idx", 0))
+            preferred_page_idx = _payload_page_indices(payload)[0] if _payload_page_indices(payload) else _as_int(payload.get("page_idx", 0))
             key = _payload_chunk_key(payload)
             candidate = candidates.setdefault(
                 key,
                 self._new_candidate(
                     payload=payload,
-                    seed_page_idx=seed_page_idx,
+                    preferred_page_idx=preferred_page_idx,
                     source_pdf=source_pdf,
                     record_id=hit.get("id", ""),
                 ),
@@ -700,7 +633,6 @@ class RetrievalEngine:
             candidate["sparse_rrf_score"] = max(candidate["sparse_rrf_score"], sparse_score)
             candidate["direct_text_rrf_score"] = max(candidate["direct_text_rrf_score"], direct_text_score)
             candidate["direct_score"] = max(candidate["direct_score"], direct_text_score)
-            candidate["seed_source_routes"].update(route for route in ("dense", "sparse") if hit["routes"].get(route))
         return self._score_candidates(candidates)
 
     def _visual_page_local_candidates(
@@ -716,9 +648,9 @@ class RetrievalEngine:
             candidate["key"]: candidate for candidate in self._direct_rank_candidates(final_ranking)
         }
         use_naive = candidate_mode == "visual-page-local-naive"
-        seed_limit = self.config.retrieval.seed_k or self.config.retrieval.final_top_k
+        visual_limit = self.config.retrieval.final_top_k
 
-        for rank, hit in enumerate(visual_hits[:seed_limit]):
+        for rank, hit in enumerate(visual_hits[:visual_limit]):
             visual_payload = hit.payload
             if not visual_payload.get("is_visual_page"):
                 continue
@@ -750,7 +682,7 @@ class RetrievalEngine:
                     key,
                     self._new_candidate(
                         payload=record.payload,
-                        seed_page_idx=page_idx,
+                        preferred_page_idx=page_idx,
                         source_pdf=source_pdf,
                         record_id=record.id,
                     ),
@@ -764,130 +696,6 @@ class RetrievalEngine:
                 candidate["visual_alignment_score"] = max(candidate["visual_alignment_score"], alignment_score)
                 candidate["visual_rrf_score"] = max(candidate["visual_rrf_score"], route_score)
                 candidate["visual_score"] = max(candidate["visual_score"], route_score * alignment_score)
-                if alignment_score > 0:
-                    candidate["is_visual_seed"] = True
-                    candidate["seed_source_routes"].add("visual")
-                candidate["candidate_page_distance"] = min(
-                    candidate["candidate_page_distance"],
-                    _page_distance(record.payload, page_idx),
-                )
-        return self._score_candidates(candidates)
-
-    def _seed_expansion_candidates(
-        self,
-        *,
-        collection_name: str,
-        top_hits: list[dict[str, Any]],
-        route_mode: str,
-        models: Any,
-    ) -> list[dict[str, Any]]:
-        candidates: dict[tuple[str, str], dict[str, Any]] = {}
-
-        for rank, hit in enumerate(top_hits):
-            payload = hit["payload"]
-            original_hit_page = int(payload["page_idx"])
-            source_pdf = _payload_source_relpath(payload)
-
-            logical_center_page = int(payload.get("parent_page_idx", original_hit_page))
-            should_conditions = [
-                models.FieldCondition(key="page_idx", match=models.MatchValue(value=logical_center_page)),
-                models.FieldCondition(key="page_indices", match=models.MatchValue(value=logical_center_page)),
-                models.FieldCondition(key="parent_page_idx", match=models.MatchValue(value=logical_center_page)),
-            ]
-            neighbor_window = max(0, self.config.retrieval.neighbor_window)
-            if rank == 0:
-                for offset in [*range(-neighbor_window, 0), *range(1, neighbor_window + 1)]:
-                    page = logical_center_page + offset
-                    should_conditions.append(
-                        models.FieldCondition(key="page_idx", match=models.MatchValue(value=page))
-                    )
-                    should_conditions.append(
-                        models.FieldCondition(key="page_indices", match=models.MatchValue(value=page))
-                    )
-            elif rank <= 2:
-                secondary_window = max(0, neighbor_window - 1)
-                for offset in [*range(-secondary_window, 0), *range(1, secondary_window + 1)]:
-                    page = logical_center_page + offset
-                    should_conditions.append(
-                        models.FieldCondition(key="page_idx", match=models.MatchValue(value=page))
-                    )
-                    should_conditions.append(
-                        models.FieldCondition(key="page_indices", match=models.MatchValue(value=page))
-                    )
-
-            records, _ = self.client.scroll(
-                collection_name=collection_name,
-                scroll_filter=models.Filter(
-                    must=[models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_pdf))],
-                    should=should_conditions,
-                ),
-                limit=max(1, self.config.retrieval.candidate_scroll_limit),
-                with_payload=True,
-                with_vectors=False,
-            )
-
-            for record in records:
-                if record.payload.get("is_visual_page"):
-                    continue
-                page_idx = int(record.payload["page_idx"])
-                key = _payload_chunk_key(record.payload)
-                if page_idx < 0:
-                    continue
-                candidate = candidates.setdefault(
-                    key,
-                    self._new_candidate(
-                        payload=record.payload,
-                        seed_page_idx=logical_center_page,
-                        source_pdf=source_pdf,
-                        record_id=record.id,
-                    ),
-                )
-                if not payload.get("is_visual_page") and _payload_chunk_key(record.payload) == _payload_chunk_key(payload):
-                    dense_score = float(hit["routes"].get("dense", 0.0))
-                    sparse_score = float(hit["routes"].get("sparse", 0.0))
-                    direct_text_score = dense_score + sparse_score
-                    candidate["dense_rrf_score"] = max(candidate["dense_rrf_score"], dense_score)
-                    candidate["sparse_rrf_score"] = max(candidate["sparse_rrf_score"], sparse_score)
-                    candidate["direct_text_rrf_score"] = max(candidate["direct_text_rrf_score"], direct_text_score)
-                    candidate["direct_score"] = max(candidate["direct_score"], direct_text_score)
-                    candidate["seed_source_routes"].update(route for route in ("dense", "sparse") if hit["routes"].get(route))
-                if payload.get("is_visual_page"):
-                    visual_page_prior = float(hit["routes"].get("visual", hit["score"]))
-                    alignment_score = (
-                        _visual_chunk_naive_score(record.payload, payload)
-                        if route_mode
-                        in {"visual-naive", "visual-only-naive", "dense-visual-naive", "sparse-visual-naive"}
-                        else _visual_chunk_alignment_score(record.payload, payload)
-                    )
-                    candidate["visual_page_prior"] = max(candidate["visual_page_prior"], visual_page_prior)
-                    candidate["visual_alignment_score"] = max(candidate["visual_alignment_score"], alignment_score)
-                    candidate["visual_rrf_score"] = max(candidate["visual_rrf_score"], visual_page_prior)
-                    candidate["visual_score"] = max(
-                        candidate["visual_score"],
-                        visual_page_prior * alignment_score,
-                    )
-                    if alignment_score > 0:
-                        candidate["is_visual_seed"] = True
-                        candidate["seed_source_routes"].add("visual")
-                candidate["section_bonus"] = max(
-                    candidate["section_bonus"],
-                    _section_proximity_bonus(record.payload, payload)
-                    * self.config.retrieval.section_bonus_scale,
-                )
-                candidate["page_bonus"] = max(
-                    candidate["page_bonus"],
-                    _page_proximity_bonus(record.payload, logical_center_page)
-                    * self.config.retrieval.page_bonus_scale,
-                )
-                candidate["candidate_page_distance"] = min(
-                    candidate["candidate_page_distance"],
-                    _page_distance(record.payload, logical_center_page),
-                )
-                if _page_distance(record.payload, logical_center_page) < _page_distance(
-                    candidate["payload"], candidate["seed_page_idx"]
-                ):
-                    candidate["seed_page_idx"] = logical_center_page
-
         return self._score_candidates(candidates)
 
     def _query_visual_pages_by_scroll(
@@ -1026,36 +834,6 @@ class RetrievalEngine:
             "patch_page_indices": patch_indices,
         }
         return self._visual_page_cache
-
-    def _candidate_seed_hits(self, final_ranking: list[dict[str, Any]], visual_hits: list[Any]) -> list[dict[str, Any]]:
-        seed_limit = self.config.retrieval.seed_k or self.config.retrieval.final_top_k
-        seeds: list[dict[str, Any]] = []
-        seen: set[str] = set()
-
-        def add_seed(seed: dict[str, Any]) -> None:
-            seed_id = str(seed.get("id") or _payload_chunk_key(seed["payload"]))
-            if seed_id in seen:
-                return
-            seen.add(seed_id)
-            seeds.append(seed)
-
-        for seed in final_ranking[:seed_limit]:
-            add_seed(seed)
-
-        for rank, hit in enumerate(visual_hits[:seed_limit]):
-            route_score = self.config.retrieval.visual_weight * (
-                1.0 / (self.config.retrieval.rrf_k + rank + 1)
-            )
-            add_seed(
-                {
-                    "id": hit.id,
-                    "score": route_score,
-                    "payload": hit.payload,
-                    "routes": {"visual": route_score},
-                }
-            )
-
-        return seeds
 
     def _compute_rrf(self, dense_res: list[Any], sparse_res: list[Any], visual_res: list[Any]) -> list[dict[str, Any]]:
         scores: dict[str, dict[str, Any]] = {}

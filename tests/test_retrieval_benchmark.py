@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import json
-from types import SimpleNamespace
 
-from rag_flow.config import RetrievalConfig
 from rag_flow.benchmark.evidence_remap import build_evidence_anchors, remap_query_set_to_chunks
 from rag_flow.benchmark.retrieval import (
     PILOT_QUERIES,
-    _effective_seed_k,
     generate_full_query_set_from_chunks,
     generate_pdf_grounded_full_query_set,
     run_retrieval_benchmark,
@@ -157,14 +154,6 @@ def test_score_query_result_falls_back_to_page_when_no_gold_chunk():
     assert row["page_recall@1"] == 0
     assert row["page_recall@2"] == 1
     assert row["recall@2"] == 1
-
-
-def test_effective_seed_k_distinguishes_direct_from_auto_seed():
-    direct_config = SimpleNamespace(retrieval=RetrievalConfig(30, 10, 30, 0.5, False, candidate_mode="direct"))
-    seed_config = SimpleNamespace(retrieval=RetrievalConfig(30, 10, 30, 0.5, False, candidate_mode="seed", seed_k=0))
-
-    assert _effective_seed_k(direct_config) == 0  # type: ignore[arg-type]
-    assert _effective_seed_k(seed_config) == 10  # type: ignore[arg-type]
 
 
 def test_evidence_anchors_remap_gold_chunks_after_rechunking(tmp_path):

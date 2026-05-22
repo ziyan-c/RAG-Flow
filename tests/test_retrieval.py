@@ -7,9 +7,7 @@ from rag_flow.retrieval import (
     RetrievalEngine,
     _candidate_min_score,
     _colpali_maxsim_score,
-    _page_proximity_bonus,
     _payload_position_key,
-    _section_proximity_bonus,
     _visual_chunk_alignment_score,
     _visual_page_query_filter,
 )
@@ -89,18 +87,6 @@ def test_payload_position_key_sorts_by_page_then_bbox_top_left():
     assert _payload_position_key(upper, 3) < _payload_position_key(lower, 3)
 
 
-def test_section_and_page_proximity_bonuses_are_small_tie_breakers():
-    reference = {"page_idx": 10, "section_path": ["1 Alarm", "1.2 Event"]}
-    same_section = {"page_indices": [10], "section_path": ["1 Alarm", "1.2 Event"]}
-    child_section = {"page_indices": [11], "section_path": ["1 Alarm", "1.2 Event", "1.2.1 Icon"]}
-    other_section = {"page_indices": [20], "section_path": ["2 Storage"]}
-
-    assert _section_proximity_bonus(same_section, reference) > _section_proximity_bonus(child_section, reference)
-    assert _section_proximity_bonus(child_section, reference) > _section_proximity_bonus(other_section, reference)
-    assert _page_proximity_bonus(same_section, 10) > _page_proximity_bonus(child_section, 10)
-    assert _page_proximity_bonus(child_section, 10) > _page_proximity_bonus(other_section, 10)
-
-
 def test_rrf_keeps_route_contributions_for_visual_prior():
     config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
@@ -114,10 +100,22 @@ def test_rrf_keeps_route_contributions_for_visual_prior():
 
 
 def test_candidate_mode_normalizes_direct_aliases():
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="no-seed"))
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct-rank"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
 
     assert engine._candidate_mode() == "direct"
+
+
+def test_candidate_mode_rejects_removed_seed_expansion():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="seed"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+
+    try:
+        engine._candidate_mode()
+    except ValueError as exc:
+        assert "Seed expansion has been removed" in str(exc)
+    else:
+        raise AssertionError("candidate_mode='seed' should be rejected")
 
 
 def test_context_block_includes_breadcrumb_when_chunk_content_lacks_it():
@@ -318,28 +316,3 @@ def test_visual_page_scroll_query_sorts_by_local_maxsim():
     )
 
     assert [hit.id for hit in hits] == ["high"]
-
-
-def test_candidate_seed_hits_keep_top_visual_pages_outside_fused_top_k():
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 1, 60, 1.5, False))
-    engine = RetrievalEngine(config)  # type: ignore[arg-type]
-    final_ranking = [
-        {
-            "id": "chunk-1",
-            "score": 1.0,
-            "payload": {"chunk_id": "chunk-1"},
-            "routes": {"dense": 1.0},
-        }
-    ]
-    visual_hits = [
-        SimpleNamespace(
-            id="visual-page-1",
-            payload={"is_visual_page": True, "page_idx": 0},
-            score=42.0,
-        )
-    ]
-
-    seeds = engine._candidate_seed_hits(final_ranking, visual_hits)
-
-    assert [seed["id"] for seed in seeds] == ["chunk-1", "visual-page-1"]
-    assert seeds[1]["routes"]["visual"] == 1.5 / 61

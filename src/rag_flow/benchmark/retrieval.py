@@ -912,16 +912,10 @@ def _retrieval_result_response(result: Any) -> dict[str, Any]:
                 "chunk_id": hit.chunk_id,
                 "visual_page_prior": hit.visual_page_prior,
                 "visual_alignment_score": hit.visual_alignment_score,
-                "section_bonus": hit.section_bonus,
-                "page_bonus": hit.page_bonus,
                 "dense_rrf_score": hit.dense_rrf_score,
                 "sparse_rrf_score": hit.sparse_rrf_score,
                 "visual_rrf_score": hit.visual_rrf_score,
                 "direct_text_rrf_score": hit.direct_text_rrf_score,
-                "is_visual_seed": hit.is_visual_seed,
-                "seed_page_idx": hit.seed_page_idx,
-                "seed_source_route": hit.seed_source_route,
-                "candidate_page_distance": hit.candidate_page_distance,
             }
             for hit in result.all_hits
         ],
@@ -957,7 +951,7 @@ def _response_feature_summary(query: dict[str, Any], response: dict[str, Any]) -
         for hit in top_final
         if str(hit.get("page_idx", "")).lstrip("-").isdigit()
     }
-    visual_hits = [hit for hit in top_final if _hit_float(hit, "visual_page_prior") > 0 or hit.get("is_visual_seed")]
+    visual_hits = [hit for hit in top_final if _hit_float(hit, "visual_page_prior") > 0]
     visual_pages = {
         _hit_int(hit, "page_idx", -1)
         for hit in visual_hits
@@ -965,7 +959,7 @@ def _response_feature_summary(query: dict[str, Any], response: dict[str, Any]) -
     }
     primary_hit_final = bool(primary_chunk) and any(_hit_chunk_id(hit) == primary_chunk for hit in top_final)
     same_page_misallocation = bool(gold_pages & returned_pages) and not primary_hit_final
-    visual_top = bool(top_hit.get("is_visual_seed") or _hit_float(top_hit, "visual_page_prior") > 0)
+    visual_top = bool(_hit_float(top_hit, "visual_page_prior") > 0)
     visual_overweight_failure = (
         visual_top
         and not primary_hit_final
@@ -977,22 +971,11 @@ def _response_feature_summary(query: dict[str, Any], response: dict[str, Any]) -
         "top_visual_rrf_score": round(_hit_float(top_hit, "visual_rrf_score"), 8),
         "top_direct_text_rrf_score": round(_hit_float(top_hit, "direct_text_rrf_score"), 8),
         "top_visual_alignment_score": round(_hit_float(top_hit, "visual_alignment_score"), 6),
-        "top_section_bonus": round(_hit_float(top_hit, "section_bonus"), 8),
-        "top_page_bonus": round(_hit_float(top_hit, "page_bonus"), 8),
-        "top_seed_source_route": str(top_hit.get("seed_source_route", "")),
-        "top_candidate_page_distance": _hit_int(top_hit, "candidate_page_distance", 0),
         "visual_hit_count": len(visual_hits),
         "visual_gold_page_hit": int(bool(gold_pages & visual_pages)),
         "same_page_misallocation": int(same_page_misallocation),
         "visual_overweight_failure": int(visual_overweight_failure),
     }
-
-
-def _effective_seed_k(config: AppConfig) -> int:
-    candidate_mode = (config.retrieval.candidate_mode or "seed").strip().lower()
-    if candidate_mode in {"direct", "direct-rank", "direct_rank", "no-seed", "no_seed"}:
-        return 0
-    return config.retrieval.seed_k or config.retrieval.final_top_k
 
 
 def _write_csv(path: Path, rows: Sequence[dict[str, Any]], fieldnames: Sequence[str]) -> None:
@@ -1069,7 +1052,6 @@ def run_retrieval_benchmark(
 
         engine = RetrievalEngine(run_config)
         engine.load()
-    effective_seed_k = _effective_seed_k(run_config)
 
     for index, query in enumerate(queries, start=1):
         query_id = str(query.get("query_id") or f"query-{index:04d}")
@@ -1112,12 +1094,7 @@ def run_retrieval_benchmark(
                 "rrf_k": run_config.retrieval.rrf_k,
                 "visual_weight": run_config.retrieval.visual_weight,
                 "enable_visual": int(run_config.retrieval.enable_visual),
-                "seed_k": run_config.retrieval.seed_k,
-                "effective_seed_k": effective_seed_k,
                 "candidate_scroll_limit": run_config.retrieval.candidate_scroll_limit,
-                "neighbor_window": run_config.retrieval.neighbor_window,
-                "section_bonus_scale": run_config.retrieval.section_bonus_scale,
-                "page_bonus_scale": run_config.retrieval.page_bonus_scale,
                 **feature_row,
             }
         )
@@ -1152,11 +1129,7 @@ def run_retrieval_benchmark(
                 "rrf_k": run_config.retrieval.rrf_k,
                 "visual_weight": run_config.retrieval.visual_weight,
                 "enable_visual": int(run_config.retrieval.enable_visual),
-                "seed_k": run_config.retrieval.seed_k,
-                "effective_seed_k": effective_seed_k,
                 "candidate_scroll_limit": run_config.retrieval.candidate_scroll_limit,
-                "neighbor_window": run_config.retrieval.neighbor_window,
-                "top_seed_source_route": feature_row["top_seed_source_route"],
                 "top_dense_rrf_score": feature_row["top_dense_rrf_score"],
                 "top_sparse_rrf_score": feature_row["top_sparse_rrf_score"],
                 "top_visual_rrf_score": feature_row["top_visual_rrf_score"],
@@ -1209,21 +1182,12 @@ def run_retrieval_benchmark(
         "rrf_k",
         "visual_weight",
         "enable_visual",
-        "seed_k",
-        "effective_seed_k",
         "candidate_scroll_limit",
-        "neighbor_window",
-        "section_bonus_scale",
-        "page_bonus_scale",
         "top_dense_rrf_score",
         "top_sparse_rrf_score",
         "top_visual_rrf_score",
         "top_direct_text_rrf_score",
         "top_visual_alignment_score",
-        "top_section_bonus",
-        "top_page_bonus",
-        "top_seed_source_route",
-        "top_candidate_page_distance",
         "visual_hit_count",
         "visual_gold_page_hit",
         "same_page_misallocation",

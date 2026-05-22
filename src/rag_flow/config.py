@@ -168,11 +168,7 @@ class RetrievalConfig:
     device: str = "auto"
     route_mode: str = "auto"
     candidate_mode: str = "direct"
-    seed_k: int = 0
     candidate_scroll_limit: int = 30
-    neighbor_window: int = 2
-    section_bonus_scale: float = 1.0
-    page_bonus_scale: float = 1.0
     max_context_tokens: int = 0
     context_chars_per_token: float = 4.0
     min_candidate_score: float = 0.0
@@ -340,11 +336,7 @@ class AppConfig:
             device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
             route_mode=env.get("RAG_FLOW_RETRIEVAL_ROUTE_MODE", "text"),
             candidate_mode=env.get("RAG_FLOW_RETRIEVAL_CANDIDATE_MODE", "direct"),
-            seed_k=env.int("RAG_FLOW_RETRIEVAL_SEED_K", 0),
             candidate_scroll_limit=env.int("RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_LIMIT", 30),
-            neighbor_window=env.int("RAG_FLOW_RETRIEVAL_NEIGHBOR_WINDOW", 2),
-            section_bonus_scale=env.float("RAG_FLOW_RETRIEVAL_SECTION_BONUS_SCALE", 1.0),
-            page_bonus_scale=env.float("RAG_FLOW_RETRIEVAL_PAGE_BONUS_SCALE", 1.0),
             max_context_tokens=env.int("RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS", 10000),
             context_chars_per_token=env.float("RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN", 4.0),
             min_candidate_score=env.float("RAG_FLOW_RETRIEVAL_MIN_CANDIDATE_SCORE", 0.0),

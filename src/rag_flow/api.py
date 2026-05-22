@@ -27,16 +27,10 @@ class HitDetailResponse(BaseModel):
     chunk_id: str = ""
     visual_page_prior: float = 0.0
     visual_alignment_score: float = 0.0
-    section_bonus: float = 0.0
-    page_bonus: float = 0.0
     dense_rrf_score: float = 0.0
     sparse_rrf_score: float = 0.0
     visual_rrf_score: float = 0.0
     direct_text_rrf_score: float = 0.0
-    is_visual_seed: bool = False
-    seed_page_idx: int = 0
-    seed_source_route: str = ""
-    candidate_page_distance: int = 0
 
 
 class QueryResponse(BaseModel):
@@ -89,16 +83,10 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
                     chunk_id=hit.chunk_id,
                     visual_page_prior=hit.visual_page_prior,
                     visual_alignment_score=hit.visual_alignment_score,
-                    section_bonus=hit.section_bonus,
-                    page_bonus=hit.page_bonus,
                     dense_rrf_score=hit.dense_rrf_score,
                     sparse_rrf_score=hit.sparse_rrf_score,
                     visual_rrf_score=hit.visual_rrf_score,
                     direct_text_rrf_score=hit.direct_text_rrf_score,
-                    is_visual_seed=hit.is_visual_seed,
-                    seed_page_idx=hit.seed_page_idx,
-                    seed_source_route=hit.seed_source_route,
-                    candidate_page_distance=hit.candidate_page_distance,
                 )
                 for hit in result.all_hits
             ],
