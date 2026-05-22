@@ -18,7 +18,7 @@ from .table_continuations import (
 
 INLINE_ICON_KEYS = ("vlm-small-icon-inline-icon", "vlm-small-icon-inline-candidate")
 IGNORED_BLOCK_TYPES = {"header", "footer", "page_number"}
-SUPPORTED_CHUNK_MODES = ("auto", "section", "token", "page")
+SUPPORTED_CHUNK_MODES = ("auto", "section", "token")
 
 
 @dataclass(frozen=True)
@@ -116,15 +116,6 @@ def _block_bbox(block: dict[str, Any]) -> tuple[float, float, float, float] | No
     if x1 <= x0 or y1 <= y0:
         return None
     return (x0, y0, x1, y1)
-
-
-def _source_fields_for_block(block: dict[str, Any], fallback_source_name: str) -> dict[str, str]:
-    source_relpath = str(block.get("source_relpath", "") or "").strip()
-    source_filename = str(block.get("source_filename", "") or "").strip()
-    fields = source_payload_fields(source_relpath or fallback_source_name)
-    if source_filename:
-        fields["source_filename"] = source_filename
-    return fields
 
 
 def _source_fields_for_items(source_name: str, items: list[ChunkItem]) -> dict[str, str]:
@@ -588,160 +579,6 @@ def _section_window_chunks(
     return chunks
 
 
-def create_page_level_chunks(
-    json_path: str | Path,
-    source_name: str,
-) -> list[dict[str, Any]]:
-    with Path(json_path).open("r", encoding="utf-8") as f:
-        content_data = json.load(f)
-
-    chunk_contents_by_page: dict[int, list[str]] = defaultdict(list)
-    page_images: dict[int, list[str]] = defaultdict(list)
-    page_image_answering_evidence: dict[int, list[dict[str, Any]]] = defaultdict(list)
-    page_tables: dict[int, list[str]] = defaultdict(list)
-    page_block_indices: dict[int, list[int]] = defaultdict(list)
-    page_bboxes: dict[int, list[list[float]]] = defaultdict(list)
-    page_sections: dict[int, tuple[tuple[str, ...], int | None, str]] = {}
-    page_source_fields: dict[int, dict[str, str]] = {}
-    page_breadcrumbs: dict[int, str] = {}
-    table_continuations = build_table_continuation_map(content_data)
-    continuation_indices = table_continuation_indices(table_continuations)
-
-    def add_page_metadata(page_idx: int, block: dict[str, Any], block_idx: int) -> None:
-        if block_idx not in page_block_indices[page_idx]:
-            page_block_indices[page_idx].append(block_idx)
-        if page_idx not in page_source_fields:
-            page_source_fields[page_idx] = _source_fields_for_block(block, source_name)
-        if page_idx not in page_breadcrumbs:
-            breadcrumb = str(block.get("breadcrumb", "") or "").strip()
-            if breadcrumb:
-                page_breadcrumbs[page_idx] = breadcrumb
-        bbox = _block_bbox(block)
-        if bbox is not None:
-            page_bboxes[page_idx].append([round(value, 3) for value in bbox])
-        if page_idx not in page_sections:
-            section_path = _section_path(block)
-            section_level = block.get("section_level")
-            try:
-                section_level = int(section_level) if section_level is not None else None
-            except (TypeError, ValueError):
-                section_level = None
-            section_source = str(block.get("section_source", "") or "")
-            if section_path:
-                page_sections[page_idx] = (section_path, section_level, section_source)
-
-    for block_idx, block in enumerate(content_data):
-        if not isinstance(block, dict):
-            continue
-        if block_idx in continuation_indices:
-            continue
-        page_idx = int(block.get("page_idx", 0))
-        block_type = block.get("type")
-
-        if block_type in IGNORED_BLOCK_TYPES:
-            continue
-
-        if block_type == "image":
-            description = str(block.get("image_description_vlm", "")).strip()
-            caption = _join_field(block.get("image_caption", [])).strip()
-            footnote = _join_field(block.get("image_footnote", [])).strip()
-            answering_policy = str(block.get("image_answering_policy", "") or "").strip()
-            if description or caption or footnote or answering_policy:
-                parts = []
-                if caption:
-                    parts.append(f"[Image caption: {caption}]")
-                if description:
-                    parts.append(f"[Image VLM description: {description}]")
-                if footnote:
-                    parts.append(f"[Image footnote: {footnote}]")
-                if answering_policy:
-                    parts.append(f"[Image answering policy: {answering_policy}]")
-                chunk_contents_by_page[page_idx].append("\n".join(parts))
-                add_page_metadata(page_idx, block, block_idx)
-            if block.get("img_path") and not _has_inline_icon_marker(block):
-                page_images[page_idx].append(block["img_path"])
-                evidence = _image_answering_evidence_for_block(
-                    block,
-                    block_idx,
-                    page_idx=page_idx,
-                    bbox=_block_bbox(block),
-                    caption=caption,
-                )
-                if evidence:
-                    page_image_answering_evidence[page_idx].append(evidence)
-
-        elif block_type == "table":
-            caption = _join_field(block.get("table_caption", [])).strip()
-            body = _join_field(block.get("table_body", [])).strip()
-            footnote = _join_field(block.get("table_footnote", [])).strip()
-            parts = []
-            if caption:
-                parts.append(f"[Table caption: {caption}]")
-            if body:
-                parts.append(body)
-            if footnote:
-                parts.append(f"[Table footnote: {footnote}]")
-            if parts:
-                table_text = "\n".join(parts)
-                chunk_contents_by_page[page_idx].append(table_text)
-                add_page_metadata(page_idx, block, block_idx)
-            if block.get("img_path"):
-                page_tables[page_idx].append(block["img_path"])
-
-        elif block_type in {"text", "list"}:
-            key = "list_items" if block_type == "list" else "text"
-            text = _join_field(block.get(key, [])).strip()
-            if text:
-                chunk_contents_by_page[page_idx].append(text)
-                add_page_metadata(page_idx, block, block_idx)
-
-    chunks: list[dict[str, Any]] = []
-    for page_idx in sorted(chunk_contents_by_page):
-        section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
-        source_fields = page_source_fields.get(page_idx, source_payload_fields(source_name))
-        breadcrumb = page_breadcrumbs.get(page_idx)
-        if not breadcrumb:
-            raise ValueError("Chunking requires non-empty breadcrumb metadata; run sectioning before chunking.")
-        content_parts = [f"[Breadcrumb: {breadcrumb}]"]
-        content_parts.extend(chunk_contents_by_page[page_idx])
-        chunk_content = "\n\n".join(content_parts).strip()
-        if not chunk_content:
-            continue
-        chunk_idx = len(chunks)
-        metadata: dict[str, Any] = {
-            **source_fields,
-            "chunk_idx": chunk_idx,
-            "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
-            "chunk_mode": "page",
-            "token_count": estimate_token_count(chunk_content),
-            "block_indices": page_block_indices[page_idx],
-            "bboxes_by_page": {str(page_idx): page_bboxes[page_idx]} if page_bboxes[page_idx] else {},
-            "page_idx": page_idx,
-            "page_start": page_idx,
-            "page_end": page_idx,
-            "page_indices": [page_idx],
-            "images_on_page": _unique(page_images[page_idx]),
-            "tables_on_page": _unique(page_tables[page_idx]),
-        }
-        metadata["breadcrumb"] = breadcrumb
-        if page_image_answering_evidence[page_idx]:
-            metadata["image_answering_evidence"] = page_image_answering_evidence[page_idx]
-        if section_path:
-            metadata["section_path"] = list(section_path)
-            metadata["section_title"] = section_path[-1]
-            if section_level is not None:
-                metadata["section_level"] = section_level
-            if section_source:
-                metadata["section_source"] = section_source
-        chunks.append(
-            {
-                "chunk_content": chunk_content,
-                "metadata": metadata,
-            }
-        )
-    return chunks
-
-
 def create_chunks(
     json_path: str | Path,
     source_name: str,
@@ -753,8 +590,6 @@ def create_chunks(
 ) -> list[dict[str, Any]]:
     if mode not in SUPPORTED_CHUNK_MODES:
         raise ValueError(f"Unsupported chunk mode {mode!r}. Choose one of: {', '.join(SUPPORTED_CHUNK_MODES)}")
-    if mode == "page":
-        return create_page_level_chunks(json_path, source_name)
 
     with Path(json_path).open("r", encoding="utf-8") as f:
         content_data = json.load(f)

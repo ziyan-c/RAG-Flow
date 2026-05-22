@@ -344,7 +344,7 @@ and then split by token budget. If no PDF outline was available and sectioning
 was a no-op, chunking falls back to sequential fixed token windows. Useful
 controls:
 
-- `--mode`: `auto`, `section`, `token`, or `page`
+- `--mode`: `auto`, `section`, or `token`
 - `--max-tokens`: target chunk budget, default `5000`
 - `--overlap-tokens`: repeated tail context between adjacent token chunks, default `500`
 - `--min-tokens`: minimum size before flushing a chunk, default `200`

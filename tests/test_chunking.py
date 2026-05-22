@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from rag_flow.chunking import create_chunks, create_page_level_chunks, main
+from rag_flow.chunking import create_chunks, main
 
 
 def sourced(block: dict, breadcrumb: str = "manual.pdf") -> dict:
@@ -16,7 +16,7 @@ def sourced(block: dict, breadcrumb: str = "manual.pdf") -> dict:
     }
 
 
-def test_create_page_level_chunks(tmp_path):
+def test_token_chunks_render_table_and_image_fields(tmp_path):
     content = [
         sourced({"type": "text", "page_idx": 0, "text": "Overview"}),
         sourced({"type": "list", "page_idx": 0, "list_items": ["One", "Two"]}),
@@ -53,29 +53,29 @@ def test_create_page_level_chunks(tmp_path):
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
 
-    chunks = create_page_level_chunks(input_path, "manual.pdf")
+    chunks = create_chunks(input_path, "manual.pdf", mode="token", max_tokens=1000, overlap_tokens=0, min_tokens=1)
 
-    assert len(chunks) == 2
+    assert len(chunks) == 1
     assert chunks[0]["metadata"]["page_idx"] == 0
     assert chunks[0]["metadata"]["chunk_id"] == "manual-chunk-00000"
-    assert chunks[0]["metadata"]["chunk_mode"] == "page"
+    assert chunks[0]["metadata"]["chunk_mode"] == "token"
     assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf"
-    assert chunks[0]["metadata"]["page_indices"] == [0]
-    assert chunks[0]["metadata"]["block_indices"] == [0, 1]
+    assert chunks[0]["metadata"]["page_indices"] == [0, 1]
+    assert chunks[0]["metadata"]["block_indices"] == [0, 1, 2, 3]
     assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf]")
     assert "Overview" in chunks[0]["chunk_content"]
-    assert "[Table caption: Ports]" in chunks[1]["chunk_content"]
-    assert "[Table footnote: Local only]" in chunks[1]["chunk_content"]
-    assert "Port 8000" in chunks[1]["chunk_content"]
-    assert "[Image caption: Login]" in chunks[1]["chunk_content"]
-    assert "[Image VLM description: A login screen.]" in chunks[1]["chunk_content"]
-    assert "Step 3 Click OK." in chunks[1]["chunk_content"]
-    assert "[Image answering policy: image_recommended]" in chunks[1]["chunk_content"]
-    assert "Image with illustration" not in chunks[1]["chunk_content"]
-    assert "User Manual" not in chunks[1]["chunk_content"]
-    assert "Contact us" not in chunks[1]["chunk_content"]
-    assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
-    assert chunks[1]["metadata"]["image_answering_evidence"] == [
+    assert "[Table caption: Ports]" in chunks[0]["chunk_content"]
+    assert "[Table footnote: Local only]" in chunks[0]["chunk_content"]
+    assert "Port 8000" in chunks[0]["chunk_content"]
+    assert "[Image caption: Login]" in chunks[0]["chunk_content"]
+    assert "[Image VLM description: A login screen.]" in chunks[0]["chunk_content"]
+    assert "Step 3 Click OK." in chunks[0]["chunk_content"]
+    assert "[Image answering policy: image_recommended]" in chunks[0]["chunk_content"]
+    assert "Image with illustration" not in chunks[0]["chunk_content"]
+    assert "User Manual" not in chunks[0]["chunk_content"]
+    assert "Contact us" not in chunks[0]["chunk_content"]
+    assert chunks[0]["metadata"]["images_on_page"] == ["images/login.png"]
+    assert chunks[0]["metadata"]["image_answering_evidence"] == [
         {
             "img_path": "images/login.png",
             "block_idx": 3,
@@ -88,8 +88,7 @@ def test_create_page_level_chunks(tmp_path):
             "image_answering_reason": "Visible labels may matter.",
         }
     ]
-    assert chunks[1]["metadata"]["tables_on_page"] == ["tables/ports.png"]
-    assert chunks[1]["metadata"]["block_indices"] == [2, 3]
+    assert chunks[0]["metadata"]["tables_on_page"] == ["tables/ports.png"]
 
 
 def test_auto_chunks_without_sections_use_token_windows(tmp_path):
@@ -226,38 +225,6 @@ def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
     ]
 
 
-def test_page_level_chunks_do_not_copy_master_table_text_to_continuation_page(tmp_path):
-    content = [
-        sourced({
-            "type": "table",
-            "page_idx": 0,
-            "bbox": [100, 500, 900, 900],
-            "table_caption": ["Table 1"],
-            "table_body": "<table><tr><td>Record Mode</td></tr></table>",
-            "table_footnote": [],
-        }),
-        sourced({
-            "type": "table",
-            "page_idx": 1,
-            "bbox": [100, 80, 900, 300],
-            "table_caption": [],
-            "table_body": "",
-            "table_footnote": [],
-            "img_path": "",
-        }),
-    ]
-    input_path = tmp_path / "content.json"
-    input_path.write_text(json.dumps(content), encoding="utf-8")
-
-    chunks = create_page_level_chunks(input_path, "manual.pdf")
-
-    assert len(chunks) == 1
-    assert chunks[0]["metadata"]["page_idx"] == 0
-    assert chunks[0]["metadata"]["block_indices"] == [0]
-    assert "[Table continuation" not in chunks[0]["chunk_content"]
-    assert "Record Mode" in chunks[0]["chunk_content"]
-
-
 def test_overlap_uses_strict_token_tail_not_whole_items(tmp_path):
     content = [
         sourced({"type": "text", "page_idx": 0, "text": "one two three four five six seven eight"}),
@@ -280,6 +247,14 @@ def test_chunking_requires_breadcrumb_metadata(tmp_path):
 
     with pytest.raises(ValueError, match="breadcrumb"):
         create_chunks(input_path, "manual.pdf", mode="token", max_tokens=100, overlap_tokens=0, min_tokens=1)
+
+
+def test_page_mode_is_not_supported(tmp_path):
+    input_path = tmp_path / "content.json"
+    input_path.write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Unsupported chunk mode 'page'"):
+        create_chunks(input_path, "manual.pdf", mode="page")
 
 
 def test_chunking_main_dry_run_prints_settings(capsys):
