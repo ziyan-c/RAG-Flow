@@ -685,13 +685,6 @@ def create_page_level_chunks(
                 table_text = "\n".join(parts)
                 chunk_contents_by_page[page_idx].append(table_text)
                 add_page_metadata(page_idx, block, block_idx)
-                for continuation_idx in table_continuations.get(block_idx, []):
-                    continuation = content_data[continuation_idx]
-                    continuation_page_idx = _block_page_idx(continuation)
-                    chunk_contents_by_page[continuation_page_idx].append(
-                        f"[Table continuation from page {page_idx + 1}]\n{table_text}"
-                    )
-                    add_page_metadata(continuation_page_idx, continuation, continuation_idx)
             if block.get("img_path"):
                 page_tables[page_idx].append(block["img_path"])
 

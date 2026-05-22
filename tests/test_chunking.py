@@ -226,7 +226,7 @@ def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
     ]
 
 
-def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path):
+def test_page_level_chunks_do_not_copy_master_table_text_to_continuation_page(tmp_path):
     content = [
         sourced({
             "type": "table",
@@ -251,14 +251,11 @@ def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path)
 
     chunks = create_page_level_chunks(input_path, "manual.pdf")
 
-    assert len(chunks) == 2
+    assert len(chunks) == 1
     assert chunks[0]["metadata"]["page_idx"] == 0
-    assert chunks[1]["metadata"]["page_idx"] == 1
     assert chunks[0]["metadata"]["block_indices"] == [0]
-    assert chunks[1]["metadata"]["block_indices"] == [1]
-    assert chunks[1]["metadata"]["bboxes_by_page"] == {"1": [[100.0, 80.0, 900.0, 300.0]]}
-    assert "[Table continuation from page 1]" in chunks[1]["chunk_content"]
-    assert "Record Mode" in chunks[1]["chunk_content"]
+    assert "[Table continuation" not in chunks[0]["chunk_content"]
+    assert "Record Mode" in chunks[0]["chunk_content"]
 
 
 def test_overlap_uses_strict_token_tail_not_whole_items(tmp_path):
