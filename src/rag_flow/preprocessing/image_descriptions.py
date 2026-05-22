@@ -44,6 +44,12 @@ SECTIONED_PATCHED_CAPTIONED_SUFFIX = "_content_list_SECTIONED_PATCHED_CAPTIONED.
 IMAGE_ANSWERING_POLICY_KEY = "image_answering_policy"
 IMAGE_ANSWERING_CONFIDENCE_KEY = "image_answering_confidence"
 IMAGE_ANSWERING_REASON_KEY = "image_answering_reason"
+IMAGE_DESCRIPTION_REQUIRED_KEYS = (
+    "image_description_vlm",
+    IMAGE_ANSWERING_POLICY_KEY,
+    IMAGE_ANSWERING_CONFIDENCE_KEY,
+    IMAGE_ANSWERING_REASON_KEY,
+)
 
 
 @dataclass(frozen=True)
@@ -608,10 +614,45 @@ def should_caption_image_block(block: dict[str, Any]) -> bool:
     return not any(block.get(key) for key in INLINE_ICON_SKIP_KEYS)
 
 
+def validate_captioning_image_inputs(content_data: list[dict[str, Any]], *, base_dir: str | Path) -> None:
+    from PIL import Image
+
+    base_path = Path(base_dir)
+    errors: list[str] = []
+    for idx, block in enumerate(content_data):
+        if not isinstance(block, dict) or block.get("type") != "image":
+            continue
+        if any(block.get(key) for key in INLINE_ICON_SKIP_KEYS):
+            continue
+        img_path = str(block.get("img_path", "") or "").strip()
+        if not img_path:
+            errors.append(f"block {idx}: image block is missing img_path")
+            continue
+        image_path = base_path / img_path
+        if not image_path.exists():
+            errors.append(f"block {idx}: image file not found: {image_path}")
+            continue
+        try:
+            with Image.open(image_path) as image:
+                image.verify()
+        except Exception as exc:
+            errors.append(f"block {idx}: failed to read image file {image_path}: {exc}")
+    if errors:
+        error_text = "\n".join(f"- {error}" for error in errors[:20])
+        remaining = len(errors) - 20
+        if remaining > 0:
+            error_text += f"\n- ... and {remaining} more image input errors"
+        raise ValueError(f"Captioning input validation failed:\n{error_text}")
+
+
+def has_complete_image_description(block: dict[str, Any]) -> bool:
+    return all(str(block.get(key, "") or "").strip() for key in IMAGE_DESCRIPTION_REQUIRED_KEYS)
+
+
 def _is_caption_candidate(block: dict[str, Any], *, skip_existing: bool = True) -> bool:
     if not should_caption_image_block(block):
         return False
-    if skip_existing and str(block.get("image_description_vlm", "")).strip():
+    if skip_existing and has_complete_image_description(block):
         return False
     return True
 
@@ -634,7 +675,7 @@ def collect_image_description_stats(
         if not block.get("img_path"):
             stats.skipped_without_img_path += 1
             continue
-        if skip_existing and str(block.get("image_description_vlm", "")).strip():
+        if skip_existing and has_complete_image_description(block):
             stats.skipped_existing += 1
             continue
         stats.caption_candidates += 1
@@ -984,6 +1025,7 @@ def add_image_descriptions(
     with source_json.open("r", encoding="utf-8") as f:
         content_data: list[dict[str, Any]] = json.load(f)
 
+    validate_captioning_image_inputs(content_data, base_dir=base_path)
     stats = collect_image_description_stats(content_data, base_dir=base_path, skip_existing=skip_existing)
     llm_client = make_captioning_llm_client(
         base_url=llm_base_url,
@@ -1061,8 +1103,7 @@ def add_image_descriptions(
             block = content_data[idx]
             image_path = base_path / block["img_path"]
             if not image_path.exists():
-                print(f"Warning: image not found: {image_path}")
-                continue
+                raise FileNotFoundError(f"Captioning image file not found for block {idx}: {image_path}")
 
             try:
                 image = Image.open(image_path).convert("RGB")
@@ -1070,8 +1111,7 @@ def add_image_descriptions(
                 image = resize_image_for_captioning(image, max_image_side)
             except Exception as exc:
                 stats.failed_image_reads += 1
-                print(f"Warning: failed to read {image_path}: {exc}")
-                continue
+                raise RuntimeError(f"Captioning failed to read image for block {idx}: {image_path}") from exc
 
             page_idx = int(block.get("page_idx", 0))
             context_text, context_selection = collect_surrounding_context_selection(
@@ -1275,6 +1315,7 @@ def main(argv: list[str] | None = None) -> None:
             if artifacts.input_json.exists():
                 with artifacts.input_json.open("r", encoding="utf-8") as f:
                     content_data: list[dict[str, Any]] = json.load(f)
+                validate_captioning_image_inputs(content_data, base_dir=artifacts.base_dir)
                 stats = collect_image_description_stats(
                     content_data,
                     base_dir=artifacts.base_dir,

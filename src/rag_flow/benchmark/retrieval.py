@@ -264,7 +264,11 @@ def _strip_section_number(title: str) -> str:
 def _clean_note(text: str, *, limit: int = 220) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\[Icon:[^\]]+\]", " ", text)
-    text = re.sub(r"\[(?:Section|Table|Image with illustration|Image footnote|Footnote):[^\]]*\]", " ", text)
+    text = re.sub(
+        r"\[(?:Section|Table|Image with illustration|Image caption|Image description|Image VLM description|Image footnote|Image answering policy|Footnote):[^\]]*\]",
+        " ",
+        text,
+    )
     text = re.sub(r"\s+", " ", text).strip()
     if len(text) <= limit:
         return text
@@ -349,7 +353,12 @@ def _question_for_action(title: str) -> str:
 
 def _query_type_for_chunk(text: str) -> str:
     has_table = "[Table:" in text or "<table" in text
-    has_image = "[Image with illustration" in text
+    has_image = (
+        "[Image caption:" in text
+        or "[Image VLM description:" in text
+        or "[Image description:" in text
+        or "[Image with illustration" in text
+    )
     has_steps = bool(re.search(r"\bStep\s+\d+", text))
     if has_table:
         return "table"
@@ -372,7 +381,10 @@ def _question_for_chunk(chunk: dict[str, Any]) -> str:
         subject = caption or _strip_section_number(title) or "this table"
         return f"What parameters or information are described in {subject}?"
     if query_type == "image_ui":
-        caption = _extract_label(text, r"\[Image with illustration:\s*([^\]]+)\]")
+        caption = _extract_label(text, r"\[Image caption:\s*([^\]]+)\]") or _extract_label(
+            text,
+            r"\[Image with illustration:\s*([^\]]+)\]",
+        )
         subject = caption or _strip_section_number(title) or "this interface"
         return f"What does {subject} show in the manual?"
     if query_type == "mixed":

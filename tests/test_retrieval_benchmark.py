@@ -35,13 +35,13 @@ def _sample_chunk(chunk_id: str, chunk_type: str, page_idx: int) -> dict:
         content = "[Table: Alarm parameter description]\n<table><tr><td>Parameter</td></tr></table>"
         section = "4.1 Alarm Parameters"
     elif chunk_type == "image_ui":
-        content = "[Image with illustration: Figure 4-1 Add device]\nThe interface shows the Add Device dialog."
+        content = "[Image caption: Figure 4-1 Add device]\n[Image VLM description: The interface shows the Add Device dialog.]"
         section = "4.2 Add Device"
     elif chunk_type == "operation":
         content = "Step 1 Open the client.\nStep 2 Click Save."
         section = "4.3 Configuring Rules"
     elif chunk_type == "mixed":
-        content = "[Image with illustration: Figure 4-2 Link camera]\nStep 1 Select a camera.\nStep 2 Click OK."
+        content = "[Image caption: Figure 4-2 Link camera]\nStep 1 Select a camera.\nStep 2 Click OK."
         section = "4.4 Adding Linkage"
     else:
         content = "This section describes how the platform organizes monitoring resources and permissions."

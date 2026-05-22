@@ -10,12 +10,14 @@ from rag_flow.preprocessing.image_descriptions import (
     collect_context_token_stats,
     collect_image_description_stats,
     get_surrounding_text_context,
+    has_complete_image_description,
     image_description_response_format,
     main as image_description_main,
     request_image_description_from_llm,
     resize_image_for_captioning,
     resolve_image_description_artifacts,
     should_caption_image_block,
+    validate_captioning_image_inputs,
 )
 from rag_flow.preprocessing.small_icons import image_to_data_url
 
@@ -71,6 +73,7 @@ def test_resolve_image_description_artifacts_from_mineru_output_dir(tmp_path):
 def test_captioning_stats_count_inline_missing_and_existing_images(tmp_path):
     (tmp_path / "images").mkdir()
     (tmp_path / "images" / "figure.jpg").write_text("jpg", encoding="utf-8")
+    (tmp_path / "images" / "partial.jpg").write_text("jpg", encoding="utf-8")
     content = [
         {"type": "image", "page_idx": 0, "img_path": "images/figure.jpg"},
         {"type": "image", "page_idx": 0, "img_path": "images/missing.jpg"},
@@ -79,15 +82,24 @@ def test_captioning_stats_count_inline_missing_and_existing_images(tmp_path):
         {
             "type": "image",
             "page_idx": 0,
+            "img_path": "images/partial.jpg",
+            "image_description_vlm": "Only the old description field exists.",
+        },
+        {
+            "type": "image",
+            "page_idx": 0,
             "img_path": "images/already.jpg",
             "image_description_vlm": "Already captioned.",
+            "image_answering_policy": "caption_only",
+            "image_answering_confidence": "high",
+            "image_answering_reason": "The description is sufficient.",
         },
     ]
 
     stats = collect_image_description_stats(content, base_dir=tmp_path)
 
-    assert stats.images_seen == 5
-    assert stats.caption_candidates == 2
+    assert stats.images_seen == 6
+    assert stats.caption_candidates == 3
     assert stats.missing_image_files == 1
     assert stats.skipped_inline_icons == 1
     assert stats.skipped_without_img_path == 1
@@ -99,6 +111,58 @@ def test_should_caption_image_block_skips_inline_candidate():
         {"type": "image", "img_path": "images/icon.jpg", "vlm-small-icon-inline-candidate": True}
     )
     assert should_caption_image_block({"type": "image", "img_path": "images/figure.jpg"})
+
+
+def test_existing_caption_requires_all_structured_fields():
+    complete = {
+        "image_description_vlm": "A screenshot.",
+        "image_answering_policy": "image_recommended",
+        "image_answering_confidence": "medium",
+        "image_answering_reason": "Visible labels matter.",
+    }
+    incomplete = {
+        "image_description_vlm": "A screenshot.",
+        "image_answering_policy": "image_recommended",
+        "image_answering_confidence": "medium",
+    }
+
+    assert has_complete_image_description(complete)
+    assert not has_complete_image_description(incomplete)
+
+
+def test_captioning_input_validation_rejects_image_without_img_path(tmp_path):
+    content = [{"type": "image", "page_idx": 0}]
+
+    with pytest.raises(ValueError, match="missing img_path"):
+        validate_captioning_image_inputs(content, base_dir=tmp_path)
+
+
+def test_captioning_input_validation_rejects_missing_image_file(tmp_path):
+    content = [{"type": "image", "page_idx": 0, "img_path": "images/missing.png"}]
+
+    with pytest.raises(ValueError, match="image file not found"):
+        validate_captioning_image_inputs(content, base_dir=tmp_path)
+
+
+def test_captioning_input_validation_rejects_unreadable_image_file(tmp_path):
+    (tmp_path / "images").mkdir()
+    (tmp_path / "images" / "broken.png").write_text("not an image", encoding="utf-8")
+    content = [{"type": "image", "page_idx": 0, "img_path": "images/broken.png"}]
+
+    with pytest.raises(ValueError, match="failed to read image file"):
+        validate_captioning_image_inputs(content, base_dir=tmp_path)
+
+
+def test_captioning_input_validation_ignores_inline_icons_without_captioning_image(tmp_path):
+    content = [
+        {
+            "type": "image",
+            "page_idx": 0,
+            "vlm-small-icon-inline-icon": True,
+        }
+    ]
+
+    validate_captioning_image_inputs(content, base_dir=tmp_path)
 
 
 def test_surrounding_text_context_limits_length_and_keeps_nearby_blocks():

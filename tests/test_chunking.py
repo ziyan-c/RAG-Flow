@@ -2,22 +2,33 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from rag_flow.chunking import create_chunks, create_page_level_chunks, main
+
+
+def sourced(block: dict, breadcrumb: str = "manual.pdf") -> dict:
+    return {
+        "source_relpath": "manual.pdf",
+        "source_filename": "manual.pdf",
+        "breadcrumb": breadcrumb,
+        **block,
+    }
 
 
 def test_create_page_level_chunks(tmp_path):
     content = [
-        {"type": "text", "page_idx": 0, "text": "Overview"},
-        {"type": "list", "page_idx": 0, "list_items": ["One", "Two"]},
-        {
+        sourced({"type": "text", "page_idx": 0, "text": "Overview"}),
+        sourced({"type": "list", "page_idx": 0, "list_items": ["One", "Two"]}),
+        sourced({
             "type": "table",
             "page_idx": 1,
             "table_caption": ["Ports"],
             "table_body": ["Port 8000: retriever"],
             "table_footnote": ["Local only"],
             "img_path": "tables/ports.png",
-        },
-        {
+        }),
+        sourced({
             "type": "image",
             "page_idx": 1,
             "image_caption": ["Login"],
@@ -28,16 +39,16 @@ def test_create_page_level_chunks(tmp_path):
             "image_answering_reason": "Visible labels may matter.",
             "img_path": "images/login.png",
             "bbox": [100, 100, 400, 300],
-        },
-        {
+        }),
+        sourced({
             "type": "image",
             "page_idx": 1,
             "img_path": "images/tiny-icon.png",
             "vlm-small-icon-inline-icon": True,
-        },
-        {"type": "header", "page_idx": 1, "text": "User Manual"},
-        {"type": "footer", "page_idx": 1, "text": "Contact us"},
-        {"type": "page_number", "page_idx": 1, "text": "2"},
+        }),
+        sourced({"type": "header", "page_idx": 1, "text": "User Manual"}),
+        sourced({"type": "footer", "page_idx": 1, "text": "Contact us"}),
+        sourced({"type": "page_number", "page_idx": 1, "text": "2"}),
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
@@ -54,7 +65,11 @@ def test_create_page_level_chunks(tmp_path):
     assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf]")
     assert "Overview" in chunks[0]["chunk_content"]
     assert "Port 8000" in chunks[1]["chunk_content"]
+    assert "[Image caption: Login]" in chunks[1]["chunk_content"]
+    assert "[Image VLM description: A login screen.]" in chunks[1]["chunk_content"]
     assert "Step 3 Click OK." in chunks[1]["chunk_content"]
+    assert "[Image answering policy: image_recommended]" in chunks[1]["chunk_content"]
+    assert "Image with illustration" not in chunks[1]["chunk_content"]
     assert "User Manual" not in chunks[1]["chunk_content"]
     assert "Contact us" not in chunks[1]["chunk_content"]
     assert chunks[1]["metadata"]["images_on_page"] == ["images/login.png"]
@@ -65,6 +80,7 @@ def test_create_page_level_chunks(tmp_path):
             "page_idx": 1,
             "bbox": [100.0, 100.0, 400.0, 300.0],
             "image_caption": "Login",
+            "image_description_vlm": "A login screen.",
             "image_answering_policy": "image_recommended",
             "image_answering_confidence": "medium",
             "image_answering_reason": "Visible labels may matter.",
@@ -76,9 +92,9 @@ def test_create_page_level_chunks(tmp_path):
 
 def test_auto_chunks_without_sections_use_token_windows(tmp_path):
     content = [
-        {"type": "text", "page_idx": 0, "text": "alpha beta gamma delta", "bbox": [10, 10, 100, 30]},
-        {"type": "text", "page_idx": 1, "text": "epsilon zeta eta theta", "bbox": [20, 20, 120, 40]},
-        {"type": "text", "page_idx": 2, "text": "iota kappa lambda mu", "bbox": [30, 30, 130, 50]},
+        sourced({"type": "text", "page_idx": 0, "text": "alpha beta gamma delta", "bbox": [10, 10, 100, 30]}),
+        sourced({"type": "text", "page_idx": 1, "text": "epsilon zeta eta theta", "bbox": [20, 20, 120, 40]}),
+        sourced({"type": "text", "page_idx": 2, "text": "iota kappa lambda mu", "bbox": [30, 30, 130, 50]}),
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
@@ -155,7 +171,7 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
     assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
     assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf > 1 Overview"
     assert chunks[0]["chunk_content"].startswith("[Breadcrumb: DSS > manual.pdf > 1 Overview]")
-    assert "[Section: 1 Overview]" in chunks[0]["chunk_content"]
+    assert "[Section: 1 Overview]" not in chunks[0]["chunk_content"]
     assert chunks[0]["metadata"]["bboxes_by_page"]["0"] == [[10.0, 10.0, 200.0, 30.0], [10.0, 40.0, 200.0, 80.0]]
     assert chunks[1]["metadata"]["section_path"] == ["2 Setup"]
     assert "setup body" not in chunks[0]["chunk_content"]
@@ -163,7 +179,7 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
 
 def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
     content = [
-        {
+        sourced({
             "type": "table",
             "page_idx": 0,
             "bbox": [100, 500, 900, 900],
@@ -171,8 +187,8 @@ def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
             "table_body": "<table><tr><td>Record Mode</td></tr></table>",
             "table_footnote": [],
             "section_path": ["1 Overview"],
-        },
-        {
+        }, "manual.pdf > 1 Overview"),
+        sourced({
             "type": "table",
             "page_idx": 1,
             "bbox": [100, 80, 900, 300],
@@ -181,7 +197,7 @@ def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
             "table_footnote": [],
             "img_path": "",
             "section_path": ["1 Overview"],
-        },
+        }, "manual.pdf > 1 Overview"),
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
@@ -210,15 +226,15 @@ def test_chunking_attaches_table_continuation_regions_to_master_chunk(tmp_path):
 
 def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path):
     content = [
-        {
+        sourced({
             "type": "table",
             "page_idx": 0,
             "bbox": [100, 500, 900, 900],
             "table_caption": ["Table 1"],
             "table_body": "<table><tr><td>Record Mode</td></tr></table>",
             "table_footnote": [],
-        },
-        {
+        }),
+        sourced({
             "type": "table",
             "page_idx": 1,
             "bbox": [100, 80, 900, 300],
@@ -226,7 +242,7 @@ def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path)
             "table_body": "",
             "table_footnote": [],
             "img_path": "",
-        },
+        }),
     ]
     input_path = tmp_path / "content.json"
     input_path.write_text(json.dumps(content), encoding="utf-8")
@@ -241,6 +257,30 @@ def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path)
     assert chunks[1]["metadata"]["bboxes_by_page"] == {"1": [[100.0, 80.0, 900.0, 300.0]]}
     assert "[Continuation of table from page 1]" in chunks[1]["chunk_content"]
     assert "Record Mode" in chunks[1]["chunk_content"]
+
+
+def test_overlap_uses_strict_token_tail_not_whole_items(tmp_path):
+    content = [
+        sourced({"type": "text", "page_idx": 0, "text": "one two three four five six seven eight"}),
+        sourced({"type": "text", "page_idx": 0, "text": "nine ten eleven twelve thirteen fourteen"}),
+    ]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    chunks = create_chunks(input_path, "manual.pdf", mode="token", max_tokens=10, overlap_tokens=3, min_tokens=1)
+
+    assert len(chunks) == 2
+    assert "six seven eight" in chunks[1]["chunk_content"]
+    assert "one two three" not in chunks[1]["chunk_content"]
+
+
+def test_chunking_requires_breadcrumb_metadata(tmp_path):
+    content = [{"type": "text", "page_idx": 0, "text": "orphan content"}]
+    input_path = tmp_path / "content.json"
+    input_path.write_text(json.dumps(content), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="breadcrumb"):
+        create_chunks(input_path, "manual.pdf", mode="token", max_tokens=100, overlap_tokens=0, min_tokens=1)
 
 
 def test_chunking_main_dry_run_prints_settings(capsys):

@@ -4,12 +4,12 @@ import argparse
 import json
 import re
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
-from .source_paths import source_breadcrumb, source_payload_fields
+from .source_paths import source_payload_fields
 from .table_continuations import (
     build_table_continuation_map,
     table_continuation_indices,
@@ -77,6 +77,18 @@ def estimate_token_count(text: str) -> int:
     return len(cjk_chars) + len(words)
 
 
+TOKEN_SPAN_RE = re.compile(r"[\u3400-\u9fff]|[A-Za-z0-9_]+|[^\sA-Za-z0-9_\u3400-\u9fff]")
+
+
+def _take_estimated_token_tail(text: str, max_tokens: int) -> str:
+    if max_tokens <= 0 or not text:
+        return ""
+    spans = list(TOKEN_SPAN_RE.finditer(text))
+    if len(spans) <= max_tokens:
+        return text
+    return text[spans[-max_tokens].start() :].lstrip()
+
+
 def _section_path(block: dict[str, Any]) -> tuple[str, ...]:
     value = block.get("section_path", [])
     if isinstance(value, list):
@@ -137,8 +149,7 @@ def _breadcrumb_for_items(
     for item in items:
         if item.breadcrumb:
             return item.breadcrumb
-    source_fields = _source_fields_for_items(source_name, items)
-    return source_breadcrumb(source_fields["source_relpath"], section_path)
+    raise ValueError("Chunking requires non-empty breadcrumb metadata; run sectioning before chunking.")
 
 
 def _visual_region_for_block(block: dict[str, Any], block_idx: int) -> tuple[VisualRegion, ...]:
@@ -173,6 +184,9 @@ def _image_answering_evidence_for_block(
         evidence["bbox"] = [round(value, 3) for value in bbox]
     if caption:
         evidence["image_caption"] = caption
+    description = str(block.get("image_description_vlm", "") or "").strip()
+    if description:
+        evidence["image_description_vlm"] = description
     for key in (
         "image_answering_policy",
         "image_answering_confidence",
@@ -213,12 +227,16 @@ def _block_text_item(
         description = str(block.get("image_description_vlm", "")).strip()
         caption = _join_field(block.get("image_caption", [])).strip()
         footnote = _join_field(block.get("image_footnote", [])).strip()
+        answering_policy = str(block.get("image_answering_policy", "") or "").strip()
         parts = []
-        if description or caption:
-            label = f"[Image with illustration: {caption}]" if caption else "[Image with illustration]"
-            parts.append(f"{label}\n{description}".strip())
+        if caption:
+            parts.append(f"[Image caption: {caption}]")
+        if description:
+            parts.append(f"[Image VLM description: {description}]")
         if footnote:
             parts.append(f"[Image footnote: {footnote}]")
+        if answering_policy:
+            parts.append(f"[Image answering policy: {answering_policy}]")
         text = "\n".join(parts).strip()
         images = (str(block["img_path"]),) if block.get("img_path") and not _has_inline_icon_marker(block) else ()
         evidence = _image_answering_evidence_for_block(
@@ -333,12 +351,19 @@ def _tail_overlap(items: list[ChunkItem], overlap_tokens: int) -> list[ChunkItem
     if overlap_tokens <= 0:
         return []
     selected = []
-    total = 0
+    remaining = overlap_tokens
     for item in reversed(items):
-        selected.append(item)
-        total += estimate_token_count(item.text)
-        if total >= overlap_tokens:
+        if remaining <= 0:
             break
+        item_tokens = max(1, estimate_token_count(item.text))
+        if item_tokens <= remaining:
+            selected.append(item)
+            remaining -= item_tokens
+            continue
+        tail_text = _take_estimated_token_tail(item.text, remaining)
+        if tail_text:
+            selected.append(replace(item, text=tail_text))
+        break
     return list(reversed(selected))
 
 
@@ -435,9 +460,6 @@ def _make_chunk(
 ) -> dict[str, Any]:
     breadcrumb = _breadcrumb_for_items(source_name, items, section_path)
     parts = [f"[Breadcrumb: {breadcrumb}]"]
-    if section_path:
-        heading = " > ".join(section_path)
-        parts.append(f"[Section: {heading}]")
     parts.extend(item.text for item in items if item.text)
     chunk_content = "\n\n".join(parts).strip()
     token_count = estimate_token_count(chunk_content)
@@ -623,13 +645,17 @@ def create_page_level_chunks(
             description = str(block.get("image_description_vlm", "")).strip()
             caption = _join_field(block.get("image_caption", [])).strip()
             footnote = _join_field(block.get("image_footnote", [])).strip()
-            if description or caption or footnote:
+            answering_policy = str(block.get("image_answering_policy", "") or "").strip()
+            if description or caption or footnote or answering_policy:
                 parts = []
-                label = f"[Image with illustration: {caption}]" if caption else "[Image with illustration]"
-                if description or caption:
-                    parts.append(f"\n{label}\n{description}".strip())
+                if caption:
+                    parts.append(f"[Image caption: {caption}]")
+                if description:
+                    parts.append(f"[Image VLM description: {description}]")
                 if footnote:
                     parts.append(f"[Image footnote: {footnote}]")
+                if answering_policy:
+                    parts.append(f"[Image answering policy: {answering_policy}]")
                 chunk_contents_by_page[page_idx].append("\n".join(parts))
                 add_page_metadata(page_idx, block, block_idx)
             if block.get("img_path") and not _has_inline_icon_marker(block):
@@ -680,10 +706,10 @@ def create_page_level_chunks(
     for page_idx in sorted(chunk_contents_by_page):
         section_path, section_level, section_source = page_sections.get(page_idx, ((), None, ""))
         source_fields = page_source_fields.get(page_idx, source_payload_fields(source_name))
-        breadcrumb = page_breadcrumbs.get(page_idx) or source_breadcrumb(source_fields["source_relpath"], section_path)
+        breadcrumb = page_breadcrumbs.get(page_idx)
+        if not breadcrumb:
+            raise ValueError("Chunking requires non-empty breadcrumb metadata; run sectioning before chunking.")
         content_parts = [f"[Breadcrumb: {breadcrumb}]"]
-        if section_path:
-            content_parts.append(f"[Section: {' > '.join(section_path)}]")
         content_parts.extend(chunk_contents_by_page[page_idx])
         chunk_content = "\n\n".join(content_parts).strip()
         if not chunk_content:

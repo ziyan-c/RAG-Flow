@@ -30,6 +30,7 @@ from rag_flow.preprocessing.image_descriptions import (
     ApproxTokenBudgeter,
     add_image_descriptions,
     collect_surrounding_context_selection,
+    has_complete_image_description,
     resize_image_for_captioning,
     should_caption_image_block,
 )
@@ -178,7 +179,7 @@ def collect_caption_candidates(
     for idx, block in enumerate(content_data):
         if not isinstance(block, dict) or not should_caption_image_block(block):
             continue
-        if skip_existing and str(block.get("image_description_vlm", "")).strip():
+        if skip_existing and has_complete_image_description(block):
             continue
         image_path = base_dir / str(block.get("img_path", ""))
         width, height = _image_size(image_path)
@@ -193,7 +194,7 @@ def collect_caption_candidates(
                 "image_height": height,
                 "image_type": classify_image_candidate(block),
                 "caption_preview": _preview(_candidate_caption_text(block)),
-                "has_existing_description": bool(str(block.get("image_description_vlm", "")).strip()),
+                "has_existing_description": has_complete_image_description(block),
             }
         )
     return rows

@@ -78,6 +78,32 @@ def test_prepare_artifacts_write_candidates_and_quality_templates(tmp_path):
     assert scores[0]["context_sufficiency_score"] == ""
 
 
+def test_captioning_candidates_skip_only_complete_existing_outputs(tmp_path):
+    content = [
+        {
+            "type": "image",
+            "page_idx": 0,
+            "img_path": "images/full.png",
+            "image_description_vlm": "Already done.",
+            "image_answering_policy": "caption_only",
+            "image_answering_confidence": "high",
+            "image_answering_reason": "Text is enough.",
+        },
+        {
+            "type": "image",
+            "page_idx": 1,
+            "img_path": "images/partial.png",
+            "image_description_vlm": "Old partial output.",
+        },
+        {"type": "image", "page_idx": 2, "img_path": "images/new.png"},
+    ]
+
+    rows = collect_caption_candidates(content, base_dir=tmp_path, skip_existing=True)
+
+    assert [row["block_idx"] for row in rows] == [1, 2]
+    assert rows[0]["has_existing_description"] is False
+
+
 def test_write_run_worklist_makes_zero_model_context_empty(tmp_path):
     (tmp_path / "images").mkdir()
     (tmp_path / "images" / "figure.png").write_text("not-an-image", encoding="utf-8")

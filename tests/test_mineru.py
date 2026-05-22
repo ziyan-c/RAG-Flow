@@ -291,7 +291,21 @@ def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     captioned_json = content_json.parent / "other_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     captioned_json.parent.mkdir(parents=True)
     content_json.write_text("[]", encoding="utf-8")
-    captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")
+    captioned_json.write_text(
+        json.dumps(
+            [
+                {
+                    "type": "text",
+                    "page_idx": 0,
+                    "text": "hello",
+                    "source_relpath": "other.pdf",
+                    "source_filename": "other.pdf",
+                    "breadcrumb": "other.pdf",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
 
     artifacts = run_ingest(
         config,
@@ -314,7 +328,21 @@ def test_run_ingest_uses_source_root_relative_chunk_source(tmp_path):
     captioned_json = content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     captioned_json.parent.mkdir(parents=True)
     content_json.write_text("[]", encoding="utf-8")
-    captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")
+    captioned_json.write_text(
+        json.dumps(
+            [
+                {
+                    "type": "text",
+                    "page_idx": 0,
+                    "text": "hello",
+                    "source_relpath": "DSS/manual.pdf",
+                    "source_filename": "manual.pdf",
+                    "breadcrumb": "DSS > manual.pdf",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
 
     artifacts = run_ingest(
         config,
@@ -338,7 +366,21 @@ def test_run_ingest_uses_manual_source_root_override(tmp_path):
     captioned_json = content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     captioned_json.parent.mkdir(parents=True)
     content_json.write_text("[]", encoding="utf-8")
-    captioned_json.write_text(json.dumps([{"type": "text", "page_idx": 0, "text": "hello"}]), encoding="utf-8")
+    captioned_json.write_text(
+        json.dumps(
+            [
+                {
+                    "type": "text",
+                    "page_idx": 0,
+                    "text": "hello",
+                    "source_relpath": "DSS/manual.pdf",
+                    "source_filename": "manual.pdf",
+                    "breadcrumb": "DSS > manual.pdf",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
 
     artifacts = run_ingest(
         config,
