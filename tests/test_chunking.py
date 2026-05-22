@@ -64,6 +64,8 @@ def test_create_page_level_chunks(tmp_path):
     assert chunks[0]["metadata"]["block_indices"] == [0, 1]
     assert chunks[0]["chunk_content"].startswith("[Breadcrumb: manual.pdf]")
     assert "Overview" in chunks[0]["chunk_content"]
+    assert "[Table caption: Ports]" in chunks[1]["chunk_content"]
+    assert "[Table footnote: Local only]" in chunks[1]["chunk_content"]
     assert "Port 8000" in chunks[1]["chunk_content"]
     assert "[Image caption: Login]" in chunks[1]["chunk_content"]
     assert "[Image VLM description: A login screen.]" in chunks[1]["chunk_content"]
@@ -255,7 +257,7 @@ def test_page_level_chunks_copy_master_table_text_to_continuation_page(tmp_path)
     assert chunks[0]["metadata"]["block_indices"] == [0]
     assert chunks[1]["metadata"]["block_indices"] == [1]
     assert chunks[1]["metadata"]["bboxes_by_page"] == {"1": [[100.0, 80.0, 900.0, 300.0]]}
-    assert "[Continuation of table from page 1]" in chunks[1]["chunk_content"]
+    assert "[Table continuation from page 1]" in chunks[1]["chunk_content"]
     assert "Record Mode" in chunks[1]["chunk_content"]
 
 

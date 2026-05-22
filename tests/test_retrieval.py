@@ -139,6 +139,26 @@ def test_context_block_includes_breadcrumb_when_chunk_content_lacks_it():
     )
 
     assert "[Breadcrumb: DSS > manual.pdf > 1 Overview > 1.1 Login]" in block
+    assert "[Source: DSS/manual.pdf, Page: 5]\n" in block
+    assert "Section:" not in block
+
+
+def test_context_block_does_not_duplicate_existing_breadcrumb():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    block = engine._format_context_block(
+        {
+            "visual_alignment_score": 0.0,
+            "payload": {
+                "source_relpath": "DSS/manual.pdf",
+                "breadcrumb": "DSS > manual.pdf > 1 Overview",
+                "page_idx": 0,
+                "chunk_content": "[Breadcrumb: DSS > manual.pdf > 1 Overview]\nLogin body",
+            },
+        }
+    )
+
+    assert block.count("[Breadcrumb:") == 1
 
 
 def test_direct_rank_candidates_skip_visual_pages():

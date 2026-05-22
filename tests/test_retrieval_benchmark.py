@@ -32,7 +32,7 @@ def test_write_pilot_query_set_creates_twenty_queries(tmp_path):
 
 def _sample_chunk(chunk_id: str, chunk_type: str, page_idx: int) -> dict:
     if chunk_type == "table":
-        content = "[Table: Alarm parameter description]\n<table><tr><td>Parameter</td></tr></table>"
+        content = "[Table caption: Alarm parameter description]\n<table><tr><td>Parameter</td></tr></table>"
         section = "4.1 Alarm Parameters"
     elif chunk_type == "image_ui":
         content = "[Image caption: Figure 4-1 Add device]\n[Image VLM description: The interface shows the Add Device dialog.]"

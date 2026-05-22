@@ -271,11 +271,11 @@ def _block_text_item(
         footnote = _join_field(block.get("table_footnote", [])).strip()
         parts = []
         if caption:
-            parts.append(f"[Table: {caption}]")
+            parts.append(f"[Table caption: {caption}]")
         if body:
             parts.append(body)
         if footnote:
-            parts.append(f"[Footnote: {footnote}]")
+            parts.append(f"[Table footnote: {footnote}]")
         text = "\n".join(parts).strip()
         tables = (str(block["img_path"]),) if block.get("img_path") else ()
         if not text and not tables:
@@ -676,11 +676,11 @@ def create_page_level_chunks(
             footnote = _join_field(block.get("table_footnote", [])).strip()
             parts = []
             if caption:
-                parts.append(f"[Table: {caption}]")
+                parts.append(f"[Table caption: {caption}]")
             if body:
                 parts.append(body)
             if footnote:
-                parts.append(f"[Footnote: {footnote}]")
+                parts.append(f"[Table footnote: {footnote}]")
             if parts:
                 table_text = "\n".join(parts)
                 chunk_contents_by_page[page_idx].append(table_text)
@@ -689,7 +689,7 @@ def create_page_level_chunks(
                     continuation = content_data[continuation_idx]
                     continuation_page_idx = _block_page_idx(continuation)
                     chunk_contents_by_page[continuation_page_idx].append(
-                        f"[Continuation of table from page {page_idx + 1}]\n{table_text}"
+                        f"[Table continuation from page {page_idx + 1}]\n{table_text}"
                     )
                     add_page_metadata(continuation_page_idx, continuation, continuation_idx)
             if block.get("img_path"):

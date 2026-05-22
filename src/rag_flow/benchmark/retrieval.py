@@ -265,7 +265,7 @@ def _clean_note(text: str, *, limit: int = 220) -> str:
     text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\[Icon:[^\]]+\]", " ", text)
     text = re.sub(
-        r"\[(?:Section|Table|Image with illustration|Image caption|Image description|Image VLM description|Image footnote|Image answering policy|Footnote):[^\]]*\]",
+        r"\[(?:Breadcrumb|Section|Table|Table caption|Table footnote|Image with illustration|Image caption|Image description|Image VLM description|Image footnote|Image answering policy|Footnote):[^\]]*\]",
         " ",
         text,
     )
@@ -352,7 +352,7 @@ def _question_for_action(title: str) -> str:
 
 
 def _query_type_for_chunk(text: str) -> str:
-    has_table = "[Table:" in text or "<table" in text
+    has_table = "[Table caption:" in text or "[Table:" in text or "<table" in text
     has_image = (
         "[Image caption:" in text
         or "[Image VLM description:" in text
@@ -377,7 +377,10 @@ def _question_for_chunk(chunk: dict[str, Any]) -> str:
     title = str(metadata.get("section_title") or "")
     query_type = _query_type_for_chunk(text)
     if query_type == "table":
-        caption = _extract_label(text, r"\[Table:\s*([^\]]+)\]")
+        caption = _extract_label(text, r"\[Table caption:\s*([^\]]+)\]") or _extract_label(
+            text,
+            r"\[Table:\s*([^\]]+)\]",
+        )
         subject = caption or _strip_section_number(title) or "this table"
         return f"What parameters or information are described in {subject}?"
     if query_type == "image_ui":

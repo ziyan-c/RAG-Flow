@@ -619,8 +619,6 @@ class RetrievalEngine:
         page_start = int(payload.get("page_start", page_idx))
         page_end = int(payload.get("page_end", page_idx))
         page_label = f"{page_start + 1}" if page_start == page_end else f"{page_start + 1}-{page_end + 1}"
-        section = payload.get("section_title")
-        section_line = f", Section: {section}" if section else ""
         note_prefix = "[Visual Page Match] " if candidate["visual_alignment_score"] > 0 else ""
         chunk_content = str(payload.get("chunk_content", ""))
         breadcrumb = str(
@@ -629,7 +627,7 @@ class RetrievalEngine:
         )
         breadcrumb_line = "" if chunk_content.lstrip().startswith("[Breadcrumb:") else f"[Breadcrumb: {breadcrumb}]\n"
         return (
-            f"[Source: {_payload_source_relpath(payload)}, Page: {page_label}{section_line}]\n"
+            f"[Source: {_payload_source_relpath(payload)}, Page: {page_label}]\n"
             f"{note_prefix}{breadcrumb_line}{chunk_content}"
         )
 
