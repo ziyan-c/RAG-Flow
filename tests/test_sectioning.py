@@ -105,6 +105,35 @@ def test_section_content_matches_exact_fuzzy_and_page_fallback():
     assert result.content_data[8]["section_confidence"] == 0.75
 
 
+def test_section_page_fallback_uses_outline_y_position():
+    content = [
+        {"type": "text", "page_idx": 0, "text": "Top body", "bbox": [10, 100, 200, 130]},
+        {"type": "text", "page_idx": 0, "text": "Middle body", "bbox": [10, 500, 220, 530]},
+        {"type": "text", "page_idx": 0, "text": "Bottom body", "bbox": [10, 800, 220, 830]},
+    ]
+    entries = [
+        OutlineEntry(
+            outline_index=0,
+            level=1,
+            title="Missing Middle Heading",
+            page_idx=0,
+            section_path=("Missing Middle Heading",),
+            dest_y=500,
+            page_height=1000,
+        )
+    ]
+
+    result = section_content(content, entries)
+
+    assert "section_path" not in result.content_data[0]
+    assert result.content_data[1]["section_source"] == "pdf_outline_page_fallback_y"
+    assert result.content_data[1]["section_confidence"] == 0.78
+    assert result.stats["page_fallbacks"] == 1
+    assert result.stats["page_fallback_y"] == 1
+    assert result.audit_entries[0].matched_block_idx == 1
+    assert result.audit_entries[0].y_distance == 0.0
+
+
 def test_sectioning_keeps_table_continuation_under_master_section():
     content = [
         {"type": "text", "page_idx": 0, "text": "1 Overview", "bbox": [10, 100, 200, 120]},

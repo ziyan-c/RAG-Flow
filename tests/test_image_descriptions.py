@@ -5,6 +5,7 @@ import pytest
 
 from rag_flow.preprocessing.image_descriptions import (
     ImageDescriptionLLMOutput,
+    add_image_descriptions,
     captioned_json_path_for,
     checkpoint_path_for,
     collect_context_token_stats,
@@ -295,7 +296,7 @@ def test_context_token_stats_reports_budget_hits():
     stats = collect_context_token_stats(content, max_context_tokens=20)
 
     assert stats.contexts == 1
-    assert stats.max_tokens <= 20
+    assert stats.max_tokens >= 20
     assert stats.contexts_at_budget == 1
 
 
@@ -396,3 +397,42 @@ def test_image_description_llm_output_validates_structured_json():
     assert output.image_answering_policy == "image_recommended"
     assert output.image_answering_confidence == "medium"
     assert output.image_answering_reason == "Visible labels and layout may matter for answering."
+
+
+def test_add_image_descriptions_writes_captioning_view_from_output_json(tmp_path, monkeypatch):
+    input_json = tmp_path / "manual_content_list_SECTIONED_PATCHED.json"
+    output_json = tmp_path / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
+    pdf_path = tmp_path / "manual_origin.pdf"
+    input_json.write_text("[]", encoding="utf-8")
+    pdf_path.write_text("pdf", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "rag_flow.preprocessing.image_descriptions.make_captioning_llm_client",
+        lambda **_kwargs: object(),
+    )
+    monkeypatch.setattr(
+        "rag_flow.preprocessing.image_descriptions.assert_captioning_llm_available",
+        lambda *_args, **_kwargs: None,
+    )
+
+    calls = []
+
+    def fake_write_captioning_view_pdf(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(output_pdf=tmp_path / "view.pdf", region_count=0, caption_targets=0)
+
+    monkeypatch.setattr(
+        "rag_flow.preprocessing.captioning_view.write_captioning_view_pdf",
+        fake_write_captioning_view_pdf,
+    )
+
+    add_image_descriptions(
+        base_dir=tmp_path,
+        input_json=input_json,
+        output_json=output_json,
+        pdf_path=pdf_path,
+        model_name="local-vlm",
+        write_captioning_view=True,
+    )
+
+    assert calls[0]["content_json"] == output_json

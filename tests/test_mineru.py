@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 from rag_flow.config import (
@@ -10,6 +11,7 @@ from rag_flow.config import (
     ModelConfig,
     PatchingConfig,
     ChunkingConfig,
+    IndexingConfig,
     PathsConfig,
     RetrievalConfig,
     ServerConfig,
@@ -394,3 +396,53 @@ def test_run_ingest_uses_manual_source_root_override(tmp_path):
     chunks = json.loads(artifacts.chunks_json.read_text(encoding="utf-8"))
     assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
     assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf"
+
+
+def test_run_ingest_indexing_both_mode_passes_current_chunks_to_visual(tmp_path, monkeypatch):
+    config = replace(
+        make_config(tmp_path),
+        indexing=IndexingConfig(mode="both", text_batch_size=11, visual_batch_size=12, visual_dpi=220),
+    )
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+
+    calls = []
+
+    def fake_text(config_arg, chunks_path, *, batch_size):
+        calls.append(("text", Path(chunks_path), batch_size))
+
+    def fake_visual(config_arg, **kwargs):
+        calls.append(("visual", Path(kwargs["chunks_path"]), kwargs["batch_size"], kwargs["dpi"]))
+
+    monkeypatch.setattr("rag_flow.pipeline.upsert_text_vectors", fake_text)
+    monkeypatch.setattr("rag_flow.pipeline.upsert_colpali_vectors", fake_visual)
+
+    artifacts = run_ingest(
+        config,
+        from_stage="indexing",
+        to_stage="indexing",
+        skip_existing=False,
+    )
+
+    assert calls == [
+        ("text", artifacts.chunks_json, 11),
+        ("visual", artifacts.chunks_json, 12, 220),
+    ]
+
+
+def test_run_ingest_rejects_visual_only_index_mode(tmp_path):
+    config = replace(make_config(tmp_path), indexing=IndexingConfig(mode="visual"))
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+
+    try:
+        run_ingest(
+            config,
+            from_stage="indexing",
+            to_stage="indexing",
+            skip_existing=False,
+        )
+    except ValueError as exc:
+        assert "RAG_FLOW_INDEX_MODE must be one of: text, both" in str(exc)
+    else:
+        raise AssertionError("visual-only index mode should be rejected")

@@ -48,6 +48,7 @@ class HitDetail:
     sparse_rrf_score: float = 0.0
     visual_rrf_score: float = 0.0
     direct_text_rrf_score: float = 0.0
+    source_relpath: str = ""
     image_references: tuple[RetrievedImage, ...] = ()
 
 
@@ -584,6 +585,7 @@ class RetrievalEngine:
         seen_image_paths: set[str] = set()
         for rank, (candidate, context_block) in enumerate(selected_candidates, start=1):
             payload = candidate["payload"]
+            source_relpath = _payload_source_relpath(payload)
             page_idx = int(payload["page_idx"])
             page_start = int(payload.get("page_start", page_idx))
             page_end = int(payload.get("page_end", page_idx))
@@ -611,6 +613,7 @@ class RetrievalEngine:
                     sparse_rrf_score=float(candidate["sparse_rrf_score"]),
                     visual_rrf_score=float(candidate["visual_rrf_score"]),
                     direct_text_rrf_score=float(candidate["direct_text_rrf_score"]),
+                    source_relpath=source_relpath,
                     image_references=image_references,
                 )
             )
@@ -804,7 +807,7 @@ class RetrievalEngine:
             candidate["key"]: candidate for candidate in self._direct_rank_candidates(final_ranking)
         }
         use_naive = candidate_mode == "visual-page-local-naive"
-        visual_limit = self.config.retrieval.final_top_k
+        visual_limit = self.config.retrieval.retrieval_k
 
         for rank, hit in enumerate(visual_hits[:visual_limit]):
             visual_payload = hit.payload
@@ -815,43 +818,50 @@ class RetrievalEngine:
             route_score = self.config.retrieval.visual_weight * (
                 1.0 / (self.config.retrieval.rrf_k + rank + 1)
             )
-            records, _ = self.client.scroll(
-                collection_name=collection_name,
-                scroll_filter=models.Filter(
-                    must=[models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_pdf))],
-                    should=[
-                        models.FieldCondition(key="page_idx", match=models.MatchValue(value=page_idx)),
-                        models.FieldCondition(key="page_indices", match=models.MatchValue(value=page_idx)),
-                    ],
-                ),
-                limit=max(1, self.config.retrieval.candidate_scroll_limit),
-                with_payload=True,
-                with_vectors=False,
+            scroll_filter = models.Filter(
+                must=[models.FieldCondition(key="source_relpath", match=models.MatchValue(value=source_pdf))],
+                should=[
+                    models.FieldCondition(key="page_idx", match=models.MatchValue(value=page_idx)),
+                    models.FieldCondition(key="page_indices", match=models.MatchValue(value=page_idx)),
+                ],
             )
-            for record in records:
-                if record.payload.get("is_visual_page"):
-                    continue
-                if page_idx not in _payload_page_indices(record.payload):
-                    continue
-                key = _payload_chunk_key(record.payload)
-                candidate = candidates.setdefault(
-                    key,
-                    self._new_candidate(
-                        payload=record.payload,
-                        preferred_page_idx=page_idx,
-                        source_pdf=source_pdf,
-                        record_id=record.id,
-                    ),
+            scroll_page_size = max(1, self.config.retrieval.candidate_scroll_page_size)
+            offset = None
+            while True:
+                records, offset = self.client.scroll(
+                    collection_name=collection_name,
+                    scroll_filter=scroll_filter,
+                    limit=scroll_page_size,
+                    offset=offset,
+                    with_payload=True,
+                    with_vectors=False,
                 )
-                alignment_score = (
-                    _visual_chunk_naive_score(record.payload, visual_payload)
-                    if use_naive
-                    else _visual_chunk_alignment_score(record.payload, visual_payload)
-                )
-                candidate["visual_page_prior"] = max(candidate["visual_page_prior"], route_score)
-                candidate["visual_alignment_score"] = max(candidate["visual_alignment_score"], alignment_score)
-                candidate["visual_rrf_score"] = max(candidate["visual_rrf_score"], route_score)
-                candidate["visual_score"] = max(candidate["visual_score"], route_score * alignment_score)
+                for record in records:
+                    if record.payload.get("is_visual_page"):
+                        continue
+                    if page_idx not in _payload_page_indices(record.payload):
+                        continue
+                    key = _payload_chunk_key(record.payload)
+                    candidate = candidates.setdefault(
+                        key,
+                        self._new_candidate(
+                            payload=record.payload,
+                            preferred_page_idx=page_idx,
+                            source_pdf=source_pdf,
+                            record_id=record.id,
+                        ),
+                    )
+                    alignment_score = (
+                        _visual_chunk_naive_score(record.payload, visual_payload)
+                        if use_naive
+                        else _visual_chunk_alignment_score(record.payload, visual_payload)
+                    )
+                    candidate["visual_page_prior"] = max(candidate["visual_page_prior"], route_score)
+                    candidate["visual_alignment_score"] = max(candidate["visual_alignment_score"], alignment_score)
+                    candidate["visual_rrf_score"] = max(candidate["visual_rrf_score"], route_score)
+                    candidate["visual_score"] = max(candidate["visual_score"], route_score * alignment_score)
+                if offset is None:
+                    break
         return self._score_candidates(candidates)
 
     def _query_visual_pages_by_scroll(

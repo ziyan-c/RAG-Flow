@@ -14,6 +14,7 @@ class ConfigPreset:
 
 
 _TEXT_DIRECT_COMMON: dict[str, str] = {
+    "RAG_FLOW_INDEX_MODE": "text",
     "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL": "0",
     "RAG_FLOW_RETRIEVAL_ROUTE_MODE": "text",
     "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE": "direct",
@@ -108,6 +109,7 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
             "RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO": "1.0",
             "RAG_FLOW_RETRIEVAL_DEVICE": "auto",
             "RAG_FLOW_QUANTIZED_COLPALI": "1",
+            "RAG_FLOW_INDEX_MODE": "both",
             "RAG_FLOW_INDEX_VISUAL_DPI": "200",
             "RAG_FLOW_INDEX_VISUAL_BATCH_SIZE": "8",
         },

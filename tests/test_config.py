@@ -267,6 +267,7 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.rrf_k == 10
     assert config.retrieval.visual_weight == 2.5
+    assert config.retrieval.candidate_scroll_page_size == 30
     assert config.retrieval.max_context_tokens == 10000
     assert config.retrieval.min_score_ratio == 1.0
 
@@ -315,6 +316,7 @@ def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.visual_weight == 2.5
     assert config.retrieval.max_context_tokens == 16000
+    assert config.indexing.mode == "both"
     assert config.indexing.visual_dpi == 200
     assert config.indexing.visual_batch_size == 8
 
@@ -418,6 +420,7 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
                 "RAG_FLOW_QUANTIZED_COLPALI=0",
                 "RAG_FLOW_VISUAL_WEIGHT=0.75",
                 "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct",
+                "RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE=12",
             ]
         ),
         encoding="utf-8",
@@ -432,6 +435,7 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
     assert config.retrieval.candidate_mode == "direct"
     assert config.retrieval.quantized_colpali is False
     assert config.retrieval.visual_weight == 0.75
+    assert config.retrieval.candidate_scroll_page_size == 12
 
 
 def test_indexing_defaults(tmp_path, monkeypatch):
@@ -441,6 +445,7 @@ def test_indexing_defaults(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.indexing.text_batch_size == 256
+    assert config.indexing.mode == "text"
     assert config.indexing.visual_batch_size == 8
     assert config.indexing.visual_dpi == 200
 
@@ -452,6 +457,7 @@ def test_indexing_reads_local_env(tmp_path, monkeypatch):
         "\n".join(
             [
                 "RAG_FLOW_INDEX_TEXT_BATCH_SIZE=128",
+                "RAG_FLOW_INDEX_MODE=both",
                 "RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=32",
                 "RAG_FLOW_INDEX_VISUAL_DPI=250",
             ]
@@ -464,5 +470,6 @@ def test_indexing_reads_local_env(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.indexing.text_batch_size == 128
+    assert config.indexing.mode == "both"
     assert config.indexing.visual_batch_size == 32
     assert config.indexing.visual_dpi == 250

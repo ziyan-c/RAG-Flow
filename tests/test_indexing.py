@@ -19,13 +19,14 @@ from rag_flow.indexing import (
 
 def test_point_id_uses_chunk_id_when_present():
     page_id = point_id("manual.pdf", 3)
-    first_chunk = point_id("manual.pdf", 3, chunk_id="manual-chunk-00001")
-    second_chunk = point_id("manual.pdf", 3, chunk_id="manual-chunk-00002")
+    first_chunk = point_id("manual.pdf", 3, chunk_id="manual.pdf::manual-chunk-00001")
+    second_chunk = point_id("manual.pdf", 3, chunk_id="manual.pdf::manual-chunk-00002")
     visual_page = visual_point_id("manual.pdf", 3)
 
     assert page_id != first_chunk
     assert first_chunk != second_chunk
     assert visual_page not in {page_id, first_chunk, second_chunk}
+    assert visual_point_id("DSS/manual.pdf", 3) != visual_point_id("Other/manual.pdf", 3)
 
 
 def test_page_payloads_from_chunks_carry_section_metadata():
@@ -34,7 +35,7 @@ def test_page_payloads_from_chunks_carry_section_metadata():
             "chunk_content": "Section text",
             "metadata": {
                 "source_relpath": "manual.pdf",
-                "chunk_id": "manual-chunk-00001",
+                "chunk_id": "manual.pdf::manual-chunk-00001",
                 "page_idx": 2,
                 "page_indices": [2],
                 "section_path": ["1 Overview", "1.1 Login"],
@@ -51,7 +52,7 @@ def test_page_payloads_from_chunks_carry_section_metadata():
     assert payloads[2]["section_path"] == ["1 Overview", "1.1 Login"]
     assert payloads[2]["section_title"] == "1.1 Login"
     assert payloads[2]["breadcrumb"] == "manual.pdf > 1 Overview > 1.1 Login"
-    assert payloads[2]["chunk_ids_on_page"] == ["manual-chunk-00001"]
+    assert payloads[2]["chunk_ids_on_page"] == ["manual.pdf::manual-chunk-00001"]
     assert "chunk_content" not in payloads[2]
 
 
@@ -63,7 +64,7 @@ def test_page_payloads_from_chunks_carry_source_path_metadata():
                 "source_relpath": "DSS/manual.pdf",
                 "source_filename": "manual.pdf",
                 "breadcrumb": "DSS > manual.pdf",
-                "chunk_id": "manual-chunk-00001",
+                "chunk_id": "DSS/manual.pdf::manual-chunk-00001",
                 "page_idx": 2,
                 "page_indices": [2],
             },
@@ -154,7 +155,7 @@ def test_delete_existing_points_for_sources_separates_text_and_visual(tmp_path):
             models.PointStruct(
                 id=1,
                 vector={"v": [1.0, 0.0]},
-                payload={"source": "manual.pdf", "chunk_id": "manual-chunk-00001"},
+                payload={"source": "manual.pdf", "chunk_id": "manual.pdf::manual-chunk-00001"},
             ),
             models.PointStruct(
                 id=2,

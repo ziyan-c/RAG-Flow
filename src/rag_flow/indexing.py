@@ -41,12 +41,12 @@ PAYLOAD_INDEX_SPECS = (
 
 
 def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None) -> str:
-    key = f"{source_name}_{chunk_id}" if chunk_id is not None else f"{source_name}_{page_idx}"
+    key = str(chunk_id) if chunk_id is not None else f"{source_name}_{page_idx}"
     return str(uuid.uuid5(uuid.NAMESPACE_DNS, key))
 
 
 def visual_point_id(source_name: str, page_idx: int) -> str:
-    return point_id(source_name, page_idx, chunk_id=f"__visual_page__:{page_idx}")
+    return point_id(source_name, page_idx, chunk_id=f"{source_name}::__visual_page__:{page_idx}")
 
 
 def enum_value(value: Any) -> Any:
@@ -235,60 +235,63 @@ def upsert_text_vectors(
     dense_model = TextEmbedding(config.models.dense_model)
     sparse_model = SparseTextEmbedding(config.models.sparse_model)
     client = create_qdrant_client(config)
-    source_names = {
-        cleanup_name
-        for meta in metadatas
-        if _payload_source_relpath(meta)
-        for cleanup_name in _source_cleanup_names(_payload_source_relpath(meta))
-    }
-    _delete_existing_points_for_sources(
-        client,
-        config.paths.collection_name,
-        models,
-        source_names=source_names,
-        visual=False,
-    )
-    upserted_chunks = 0
-    for start in range(0, len(documents), batch_size):
-        batch_documents = documents[start : start + batch_size]
-        batch_metadatas = metadatas[start : start + batch_size]
-        dense_embeddings = list(dense_model.embed(batch_documents))
-        sparse_embeddings = list(sparse_model.embed(batch_documents))
+    try:
+        source_names = {
+            cleanup_name
+            for meta in metadatas
+            if _payload_source_relpath(meta)
+            for cleanup_name in _source_cleanup_names(_payload_source_relpath(meta))
+        }
+        _delete_existing_points_for_sources(
+            client,
+            config.paths.collection_name,
+            models,
+            source_names=source_names,
+            visual=False,
+        )
+        upserted_chunks = 0
+        for start in range(0, len(documents), batch_size):
+            batch_documents = documents[start : start + batch_size]
+            batch_metadatas = metadatas[start : start + batch_size]
+            dense_embeddings = list(dense_model.embed(batch_documents))
+            sparse_embeddings = list(sparse_model.embed(batch_documents))
 
-        points = []
-        for doc, meta, dense_vec, sparse_vec in zip(
-            batch_documents,
-            batch_metadatas,
-            dense_embeddings,
-            sparse_embeddings,
-        ):
-            payload = dict(meta)
-            source_relpath = _payload_source_relpath(payload)
-            payload.update(source_payload_fields(source_relpath))
-            payload.pop("source", None)
-            payload["chunk_content"] = doc
-            if payload.get("image_answering_evidence"):
-                payload.setdefault("image_base_dir", str(config.paths.base_dir))
-            page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
-            chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
-            points.append(
-                models.PointStruct(
-                    id=point_id(source_relpath, page_idx, chunk_id=chunk_id),
-                    payload=payload,
-                    vector={
-                        TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
-                        TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
-                            indices=sparse_vec.indices.tolist(),
-                            values=sparse_vec.values.tolist(),
-                        ),
-                    },
+            points = []
+            for doc, meta, dense_vec, sparse_vec in zip(
+                batch_documents,
+                batch_metadatas,
+                dense_embeddings,
+                sparse_embeddings,
+            ):
+                payload = dict(meta)
+                source_relpath = _payload_source_relpath(payload)
+                payload.update(source_payload_fields(source_relpath))
+                payload.pop("source", None)
+                payload["chunk_content"] = doc
+                if payload.get("image_answering_evidence"):
+                    payload.setdefault("image_base_dir", str(config.paths.base_dir))
+                page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
+                chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
+                points.append(
+                    models.PointStruct(
+                        id=point_id(source_relpath, page_idx, chunk_id=chunk_id),
+                        payload=payload,
+                        vector={
+                            TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
+                            TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
+                                indices=sparse_vec.indices.tolist(),
+                                values=sparse_vec.values.tolist(),
+                            ),
+                        },
+                    )
                 )
-            )
 
-        client.upsert(collection_name=config.paths.collection_name, points=points)
-        upserted_chunks += len(points)
+            client.upsert(collection_name=config.paths.collection_name, points=points)
+            upserted_chunks += len(points)
 
-    print(f"Upserted {upserted_chunks} text points into {config.paths.collection_name}")
+        print(f"Upserted {upserted_chunks} text points into {config.paths.collection_name}")
+    finally:
+        _close_client(client)
 
 
 def _page_payloads_from_chunks(
@@ -384,6 +387,7 @@ def upsert_colpali_vectors(
     *,
     pdf_path: str | Path | None = None,
     source_name: str | None = None,
+    chunks_path: str | Path | None = None,
     batch_size: int = VISUAL_INDEX_BATCH_SIZE,
     dpi: int = VISUAL_INDEX_DPI,
 ) -> None:
@@ -418,69 +422,72 @@ def upsert_colpali_vectors(
         device_map=device,
     ).eval()
 
-    page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
     try:
-        page_payloads = _page_payloads_from_chunks(
-            load_chunks(config.paths.chunks_json),
-            source_name=resolved_source_name,
-        )
-    except (FileNotFoundError, json.JSONDecodeError):
-        page_payloads = {}
-    _delete_existing_points_for_sources(
-        client,
-        config.paths.collection_name,
-        models,
-        source_names=_source_cleanup_names(resolved_source_name),
-        visual=True,
-    )
-
-    upserted_pages = 0
-    printed_embedding_shape = False
-    for start_idx, first_page, last_page in tqdm(
-        _page_batches(page_count, batch_size),
-        desc="Processing pages",
-    ):
-        batch_images = convert_from_path(
-            str(resolved_pdf_path),
-            dpi=dpi,
-            first_page=first_page,
-            last_page=last_page,
-        )
-        batch_page_indices = list(range(start_idx, start_idx + len(batch_images)))
-
-        with torch.no_grad():
-            batch_inputs = processor.process_images(batch_images).to(device)
-            batch_inputs = {
-                key: value.to(dtype) if value.is_floating_point() else value
-                for key, value in batch_inputs.items()
-            }
-            embeddings = model(**batch_inputs)
-
-        if not printed_embedding_shape and len(embeddings):
-            first_embedding = embeddings[0]
-            patch_count = len(first_embedding)
-            vector_size = len(first_embedding[0]) if patch_count else 0
-            print(f"{PAGE_IMAGE_COLPALI_VECTOR_NAME}: {patch_count} patches x {vector_size} dims")
-            printed_embedding_shape = True
-
-        points = []
-        for page_idx, embedding in zip(batch_page_indices, embeddings):
-            points.append(
-                models.PointStruct(
-                    id=visual_point_id(resolved_source_name, page_idx),
-                    payload=_visual_page_payload(
-                        page_payloads,
-                        source_name=resolved_source_name,
-                        page_idx=page_idx,
-                    ),
-                    vector={PAGE_IMAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
-                )
+        page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
+        try:
+            page_payloads = _page_payloads_from_chunks(
+                load_chunks(chunks_path or config.paths.chunks_json),
+                source_name=resolved_source_name,
             )
+        except (FileNotFoundError, json.JSONDecodeError):
+            page_payloads = {}
+        _delete_existing_points_for_sources(
+            client,
+            config.paths.collection_name,
+            models,
+            source_names=_source_cleanup_names(resolved_source_name),
+            visual=True,
+        )
 
-        client.upsert(collection_name=config.paths.collection_name, points=points)
-        upserted_pages += len(points)
+        upserted_pages = 0
+        printed_embedding_shape = False
+        for start_idx, first_page, last_page in tqdm(
+            _page_batches(page_count, batch_size),
+            desc="Processing pages",
+        ):
+            batch_images = convert_from_path(
+                str(resolved_pdf_path),
+                dpi=dpi,
+                first_page=first_page,
+                last_page=last_page,
+            )
+            batch_page_indices = list(range(start_idx, start_idx + len(batch_images)))
 
-    print(f"Upserted {upserted_pages} ColPali visual page points into {config.paths.collection_name}")
+            with torch.no_grad():
+                batch_inputs = processor.process_images(batch_images).to(device)
+                batch_inputs = {
+                    key: value.to(dtype) if value.is_floating_point() else value
+                    for key, value in batch_inputs.items()
+                }
+                embeddings = model(**batch_inputs)
+
+            if not printed_embedding_shape and len(embeddings):
+                first_embedding = embeddings[0]
+                patch_count = len(first_embedding)
+                vector_size = len(first_embedding[0]) if patch_count else 0
+                print(f"{PAGE_IMAGE_COLPALI_VECTOR_NAME}: {patch_count} patches x {vector_size} dims")
+                printed_embedding_shape = True
+
+            points = []
+            for page_idx, embedding in zip(batch_page_indices, embeddings):
+                points.append(
+                    models.PointStruct(
+                        id=visual_point_id(resolved_source_name, page_idx),
+                        payload=_visual_page_payload(
+                            page_payloads,
+                            source_name=resolved_source_name,
+                            page_idx=page_idx,
+                        ),
+                        vector={PAGE_IMAGE_COLPALI_VECTOR_NAME: embedding.cpu().float().tolist()},
+                    )
+                )
+
+            client.upsert(collection_name=config.paths.collection_name, points=points)
+            upserted_pages += len(points)
+
+        print(f"Upserted {upserted_pages} ColPali visual page points into {config.paths.collection_name}")
+    finally:
+        _close_client(client)
 
 
 def inspect_collection(config: AppConfig, limit: int = 10) -> None:
@@ -529,6 +536,7 @@ def main(argv: list[str] | None = None) -> None:
 
     visual_parser = subparsers.add_parser("visual", help="Upsert ColPali visual vectors.")
     visual_parser.add_argument("--pdf", default=str(config.paths.source_pdf))
+    visual_parser.add_argument("--chunks", default=str(config.paths.chunks_json))
     visual_parser.add_argument("--source-name", help="Source PDF name stored in visual payloads.")
     visual_parser.add_argument(
         "--source-root",
@@ -556,6 +564,7 @@ def main(argv: list[str] | None = None) -> None:
             config,
             pdf_path=pdf_path,
             source_name=source_name,
+            chunks_path=args.chunks,
             batch_size=args.batch_size,
             dpi=args.dpi,
         )

@@ -131,7 +131,7 @@ def test_retrieve_returns_selected_image_references(tmp_path, monkeypatch):
 
     image = RetrievedImage(
         hit_rank=1,
-        chunk_id="manual-chunk-00001",
+        chunk_id="DSS/manual.pdf::manual-chunk-00001",
         source_relpath="DSS/manual.pdf",
         img_path="images/login.png",
         image_path=str(tmp_path / "images" / "login.png"),
@@ -159,6 +159,7 @@ def test_retrieve_returns_selected_image_references(tmp_path, monkeypatch):
     assert response.status_code == 200
     body = response.json()
     assert body["images"][0]["image_path"] == str(tmp_path / "images" / "login.png")
+    assert body["images"][0]["chunk_id"] == "DSS/manual.pdf::manual-chunk-00001"
     assert body["images"][0]["image_answering_policy"] == "image_recommended"
     assert body["images"][0]["bbox"] == [1.0, 2.0, 3.0, 4.0]
     assert body["final_output"]["mode"] == "context_only"
@@ -171,7 +172,7 @@ def test_retrieve_final_output_adds_recommended_existing_images_when_enabled(tmp
 
     optional = RetrievedImage(
         hit_rank=1,
-        chunk_id="manual-chunk-00001",
+        chunk_id="DSS/manual.pdf::manual-chunk-00001",
         source_relpath="DSS/manual.pdf",
         img_path="images/optional.png",
         image_path=str(tmp_path / "images" / "optional.png"),
@@ -183,7 +184,7 @@ def test_retrieve_final_output_adds_recommended_existing_images_when_enabled(tmp
     )
     recommended = RetrievedImage(
         hit_rank=1,
-        chunk_id="manual-chunk-00001",
+        chunk_id="DSS/manual.pdf::manual-chunk-00001",
         source_relpath="DSS/manual.pdf",
         img_path="images/recommended.png",
         image_path=str(tmp_path / "images" / "recommended.png"),
@@ -195,7 +196,7 @@ def test_retrieve_final_output_adds_recommended_existing_images_when_enabled(tmp
     )
     missing_required = RetrievedImage(
         hit_rank=2,
-        chunk_id="manual-chunk-00002",
+        chunk_id="DSS/manual.pdf::manual-chunk-00002",
         source_relpath="DSS/manual.pdf",
         img_path="images/missing.png",
         image_path=str(tmp_path / "images" / "missing.png"),

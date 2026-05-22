@@ -1615,7 +1615,10 @@ def add_small_icon_text(
                             page_offset=page_start,
                         )
                     if final_image is None:
-                        continue
+                        raise RuntimeError(
+                            "Icon patching failed to build a crop for "
+                            f"block_idx={idx}, page_idx={page_idx}, field={key}, bbox={block.get('bbox')!r}."
+                        )
 
                     prompt = build_icon_patch_prompt(original_text=original_text, field_key=key)
                     batch.append(

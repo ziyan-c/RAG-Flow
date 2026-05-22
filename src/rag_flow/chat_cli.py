@@ -9,18 +9,36 @@ from openai import OpenAI
 from .config import AppConfig
 
 
-def _image_items_from_final_output(data: dict) -> list[dict]:
+def _final_output_content(data: dict) -> list[dict]:
     final_output = data.get("final_output")
     if not isinstance(final_output, dict):
-        return []
+        raise ValueError("Retriever response is missing final_output.")
     content = final_output.get("content")
     if not isinstance(content, list):
-        return []
-    image_items: list[dict] = []
+        raise ValueError("Retriever final_output.content must be a list.")
+    if not all(isinstance(item, dict) for item in content):
+        raise ValueError("Retriever final_output.content items must be objects.")
+    return [dict(item) for item in content]
+
+
+def _count_image_items(content: list[dict]) -> int:
+    image_count = 0
     for item in content:
         if isinstance(item, dict) and item.get("type") == "image_url" and isinstance(item.get("image_url"), dict):
-            image_items.append(item)
-    return image_items
+            image_count += 1
+    return image_count
+
+
+def _build_answering_user_content(data: dict, user_query: str) -> list[dict]:
+    retrieval_content = _final_output_content(data)
+    answer_request = (
+        "[User Question]\n"
+        f"{user_query}\n\n"
+        "[Answer Rules]\n"
+        "Use only the retrieved material below. If the material is insufficient, say so clearly. "
+        "Cite Source and Page numbers for factual claims. Answer in the same human language as the user."
+    )
+    return [{"type": "text", "text": answer_request}, *retrieval_content]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -53,23 +71,11 @@ def main(argv: list[str] | None = None) -> None:
             response = requests.post(args.retriever_url, json={"query": user_query}, headers=headers, timeout=120)
             response.raise_for_status()
             data = response.json()
-            context = data["context"]
-            image_items = _image_items_from_final_output(data)
+            user_content = _build_answering_user_content(data, user_query)
+            image_count = _count_image_items(user_content)
             print(f"\n(Top reference page: {data['hit_page']})\n")
-            if image_items:
-                print(f"(Attached retrieval images: {len(image_items)})\n")
-
-            current_turn_prompt = (
-                f"[Latest Retrieved Data]\n{context}\n\n"
-                f"[User's Latest Question]\n{user_query}\n\n"
-                "Instruction: Answer based on the retrieved data and chat history. "
-                "If the answer is not present in the provided data, say so clearly. "
-                "Always cite source page numbers for factual claims. "
-                "Answer in the same human language as the user's question."
-            )
-            user_content: str | list[dict] = current_turn_prompt
-            if image_items:
-                user_content = [{"type": "text", "text": current_turn_prompt}, *image_items]
+            if image_count:
+                print(f"(Attached retrieval images: {image_count})\n")
             messages = [
                 {
                     "role": "system",

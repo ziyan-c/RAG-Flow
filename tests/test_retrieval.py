@@ -30,10 +30,10 @@ def test_visual_alignment_keeps_page_prior_on_single_page_chunk():
     visual_payload = {
         "is_visual_page": True,
         "page_idx": 4,
-        "chunk_ids_on_page": ["manual-chunk-00001"],
+        "chunk_ids_on_page": ["manual.pdf::manual-chunk-00001"],
     }
     chunk_payload = {
-        "chunk_id": "manual-chunk-00001",
+        "chunk_id": "manual.pdf::manual-chunk-00001",
         "page_indices": [4],
         "bboxes_by_page": {"4": [[100, 100, 900, 300]]},
     }
@@ -45,10 +45,10 @@ def test_visual_alignment_attenuates_cross_page_chunks():
     visual_payload = {
         "is_visual_page": True,
         "page_idx": 5,
-        "chunk_ids_on_page": ["manual-chunk-00002"],
+        "chunk_ids_on_page": ["manual.pdf::manual-chunk-00002"],
     }
     chunk_payload = {
-        "chunk_id": "manual-chunk-00002",
+        "chunk_id": "manual.pdf::manual-chunk-00002",
         "page_indices": [4, 5],
         "bboxes_by_page": {
             "4": [[100, 100, 900, 900]],
@@ -64,7 +64,7 @@ def test_visual_alignment_attenuates_cross_page_chunks():
 def test_visual_alignment_rejects_chunks_outside_visual_page():
     visual_payload = {"is_visual_page": True, "page_idx": 5, "chunk_ids_on_page": ["other"]}
     chunk_payload = {
-        "chunk_id": "manual-chunk-00003",
+        "chunk_id": "manual.pdf::manual-chunk-00003",
         "page_indices": [6],
         "bboxes_by_page": {"6": [[100, 100, 900, 300]]},
     }
@@ -172,7 +172,7 @@ def test_image_references_include_all_images_with_policies(tmp_path):
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
     payload = {
         "source_relpath": "DSS/manual.pdf",
-        "chunk_id": "manual-chunk-00001",
+        "chunk_id": "DSS/manual.pdf::manual-chunk-00001",
         "page_idx": 2,
         "image_answering_evidence": [
             {
@@ -214,7 +214,7 @@ def test_image_references_include_all_images_with_policies(tmp_path):
     assert references[1].image_exists is True
     assert references[1].bbox == [1.0, 2.0, 3.0, 4.0]
     assert references[1].hit_rank == 4
-    assert references[1].chunk_id == "manual-chunk-00001"
+    assert references[1].chunk_id == "DSS/manual.pdf::manual-chunk-00001"
     assert references[2].image_exists is False
 
 
@@ -449,6 +449,41 @@ def test_visual_page_local_candidates_stay_on_hit_page():
     assert candidates[0]["visual_score"] > 0.0
 
 
+def test_visual_page_local_candidates_scan_retrieval_k_visual_hits():
+    class FakeClient:
+        def __init__(self):
+            self.pages = []
+
+        def scroll(self, **kwargs):
+            page_condition = kwargs["scroll_filter"].should[0]
+            self.pages.append(page_condition.match.value)
+            return [], None
+
+    config = SimpleNamespace(retrieval=RetrievalConfig(2, 1, 60, 0.5, False, candidate_mode="visual-page-local-bbox"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    fake_client = FakeClient()
+    engine.client = fake_client
+    fake_models = SimpleNamespace(
+        FieldCondition=lambda **kwargs: SimpleNamespace(**kwargs),
+        Filter=lambda **kwargs: SimpleNamespace(**kwargs),
+        MatchValue=lambda **kwargs: SimpleNamespace(**kwargs),
+    )
+
+    engine._visual_page_local_candidates(
+        collection_name="manuals",
+        final_ranking=[],
+        visual_hits=[
+            SimpleNamespace(id="visual-page-1", payload={"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 1}),
+            SimpleNamespace(id="visual-page-2", payload={"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 2}),
+            SimpleNamespace(id="visual-page-3", payload={"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 3}),
+        ],
+        candidate_mode="visual-page-local-bbox",
+        models=fake_models,
+    )
+
+    assert fake_client.pages == [1, 2]
+
+
 def test_visual_page_query_filter_limits_colpali_to_visual_pages():
     class FakeMatchValue:
         def __init__(self, value):
@@ -516,3 +551,83 @@ def test_visual_page_scroll_query_sorts_by_local_maxsim():
     )
 
     assert [hit.id for hit in hits] == ["high"]
+
+
+def test_visual_page_local_candidates_scroll_all_chunks_on_hit_page():
+    class FakeClient:
+        def __init__(self):
+            self.offsets = []
+
+        def scroll(self, **kwargs):
+            self.offsets.append(kwargs.get("offset"))
+            if kwargs.get("offset") is None:
+                return [
+                    SimpleNamespace(
+                        id="chunk-1",
+                        payload={
+                            "source_relpath": "manual.pdf",
+                            "chunk_id": "manual.pdf::manual-chunk-00001",
+                            "page_idx": 0,
+                            "page_indices": [0],
+                            "bboxes_by_page": {"0": [[0, 0, 100, 100]]},
+                        },
+                    )
+                ], "next"
+            return [
+                SimpleNamespace(
+                    id="chunk-2",
+                    payload={
+                        "source_relpath": "manual.pdf",
+                        "chunk_id": "manual.pdf::manual-chunk-00002",
+                        "page_idx": 0,
+                        "page_indices": [0],
+                        "bboxes_by_page": {"0": [[100, 0, 200, 100]]},
+                    },
+                )
+            ], None
+
+    config = SimpleNamespace(
+        retrieval=RetrievalConfig(
+            retrieval_k=1,
+            final_top_k=3,
+            rrf_k=60,
+            visual_weight=1.5,
+            quantized_colpali=False,
+            candidate_mode="visual-page-local-bbox",
+            candidate_scroll_page_size=1,
+        )
+    )
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    engine.client = FakeClient()
+    fake_models = SimpleNamespace(
+        FieldCondition=lambda **kwargs: SimpleNamespace(**kwargs),
+        Filter=lambda **kwargs: SimpleNamespace(**kwargs),
+        MatchValue=lambda **kwargs: SimpleNamespace(**kwargs),
+    )
+    visual_hits = [
+        SimpleNamespace(
+            payload={
+                "is_visual_page": True,
+                "source_relpath": "manual.pdf",
+                "page_idx": 0,
+                "chunk_ids_on_page": [
+                    "manual.pdf::manual-chunk-00001",
+                    "manual.pdf::manual-chunk-00002",
+                ],
+            }
+        )
+    ]
+
+    candidates = engine._visual_page_local_candidates(
+        collection_name="manuals",
+        final_ranking=[],
+        visual_hits=visual_hits,
+        candidate_mode="visual-page-local-bbox",
+        models=fake_models,
+    )
+
+    assert engine.client.offsets == [None, "next"]
+    assert {candidate["payload"]["chunk_id"] for candidate in candidates} == {
+        "manual.pdf::manual-chunk-00001",
+        "manual.pdf::manual-chunk-00002",
+    }

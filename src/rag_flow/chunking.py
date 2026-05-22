@@ -409,10 +409,13 @@ def _chunk_metadata(
         for region in item.visual_regions:
             bboxes_by_page[str(region.page_idx)].append([round(value, 3) for value in region.bbox])
     source_fields = _source_fields_for_items(source_name, items)
+    source_relpath = source_fields["source_relpath"]
+    source_filename = source_fields.get("source_filename") or Path(source_relpath).name
+    local_chunk_id = f"{Path(source_filename).stem}-chunk-{chunk_idx:05d}"
     metadata: dict[str, Any] = {
         **source_fields,
         "chunk_idx": chunk_idx,
-        "chunk_id": f"{Path(source_name).stem}-chunk-{chunk_idx:05d}",
+        "chunk_id": f"{source_relpath}::{local_chunk_id}",
         "chunk_mode": mode,
         "token_count": token_count,
         "block_indices": block_indices,

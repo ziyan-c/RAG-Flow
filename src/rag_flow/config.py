@@ -168,7 +168,7 @@ class RetrievalConfig:
     device: str = "auto"
     route_mode: str = "auto"
     candidate_mode: str = "direct"
-    candidate_scroll_limit: int = 30
+    candidate_scroll_page_size: int = 30
     max_context_tokens: int = 0
     context_chars_per_token: float = 4.0
     min_candidate_score: float = 0.0
@@ -234,6 +234,7 @@ class ChunkingConfig:
 
 @dataclass(frozen=True)
 class IndexingConfig:
+    mode: str = "text"
     text_batch_size: int = 256
     visual_batch_size: int = 64
     visual_dpi: int = 200
@@ -337,7 +338,7 @@ class AppConfig:
             device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
             route_mode=env.get("RAG_FLOW_RETRIEVAL_ROUTE_MODE", "text"),
             candidate_mode=env.get("RAG_FLOW_RETRIEVAL_CANDIDATE_MODE", "direct"),
-            candidate_scroll_limit=env.int("RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_LIMIT", 30),
+            candidate_scroll_page_size=env.int("RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE", 30),
             max_context_tokens=env.int("RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS", 10000),
             context_chars_per_token=env.float("RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN", 4.0),
             min_candidate_score=env.float("RAG_FLOW_RETRIEVAL_MIN_CANDIDATE_SCORE", 0.0),
@@ -397,6 +398,7 @@ class AppConfig:
         )
 
         indexing = IndexingConfig(
+            mode=env.get("RAG_FLOW_INDEX_MODE", "text").strip().lower(),
             text_batch_size=env.int("RAG_FLOW_INDEX_TEXT_BATCH_SIZE", 256),
             visual_batch_size=env.int("RAG_FLOW_INDEX_VISUAL_BATCH_SIZE", 8),
             visual_dpi=env.int("RAG_FLOW_INDEX_VISUAL_DPI", 200),

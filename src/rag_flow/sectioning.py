@@ -263,6 +263,45 @@ def _first_valid_block_on_page(content_data: list[dict[str, Any]], block_indices
     return None
 
 
+def _fallback_block_for_outline(
+    entry: OutlineEntry,
+    content_data: list[dict[str, Any]],
+    block_indices: list[int],
+) -> tuple[int | None, float | None]:
+    valid_blocks = [
+        (idx, content_data[idx])
+        for idx in block_indices
+        if _is_valid_block(content_data[idx])
+    ]
+    candidates = _outline_y_candidates(entry)
+    if valid_blocks and candidates:
+        y_blocks = [
+            (idx, block, y0)
+            for idx, block in valid_blocks
+            if (y0 := _bbox_y0(block)) is not None
+        ]
+        if y_blocks:
+            after_choices = []
+            nearest_choices = []
+            for candidate_y in candidates:
+                after = [
+                    (abs(y0 - candidate_y), y0, idx)
+                    for idx, _block, y0 in y_blocks
+                    if y0 >= candidate_y
+                ]
+                if after:
+                    after_choices.append(min(after, key=lambda item: (item[0], item[1], item[2])))
+                nearest_choices.extend((abs(y0 - candidate_y), y0, idx) for idx, _block, y0 in y_blocks)
+            if after_choices:
+                distance, _y0, idx = min(after_choices, key=lambda item: (item[0], item[1], item[2]))
+                return idx, distance
+            if nearest_choices:
+                distance, _y0, idx = min(nearest_choices, key=lambda item: (item[0], item[1], item[2]))
+                return idx, distance
+
+    return _first_valid_block_on_page(content_data, block_indices), None
+
+
 def _best_by_y_or_order(
     entry: OutlineEntry,
     candidates: list[tuple[int, dict[str, Any], float]],
@@ -349,17 +388,18 @@ def _match_outline_entry(
             fallback_reason=None,
         )
 
-    fallback_idx = _first_valid_block_on_page(content_data, block_indices)
+    fallback_idx, fallback_y_distance = _fallback_block_for_outline(entry, content_data, block_indices)
     if fallback_idx is not None:
+        match_type = "page_fallback_y" if fallback_y_distance is not None else "page_fallback"
         return _event_and_audit(
             entry,
             fallback_idx,
             content_data[fallback_idx],
-            match_type="page_fallback",
-            source="pdf_outline_page_fallback",
-            confidence=0.75,
+            match_type=match_type,
+            source=f"pdf_outline_{match_type}",
+            confidence=0.78 if fallback_y_distance is not None else 0.75,
             match_score=0.0,
-            y_distance=None,
+            y_distance=fallback_y_distance,
             fallback_reason="no heading text block matched outline title on target page",
         )
 
@@ -509,7 +549,8 @@ def section_content(
         "normalized_exact_y_matches": counts.get("normalized_exact_y", 0),
         "fuzzy_matches": counts.get("fuzzy", 0),
         "fuzzy_y_matches": counts.get("fuzzy_y", 0),
-        "page_fallbacks": counts.get("page_fallback", 0),
+        "page_fallbacks": counts.get("page_fallback", 0) + counts.get("page_fallback_y", 0),
+        "page_fallback_y": counts.get("page_fallback_y", 0),
         "unmatched": counts.get("unmatched", 0),
         "table_continuation_groups": len(table_continuations),
         "table_continuation_blocks": sum(len(indices) for indices in table_continuations.values()),

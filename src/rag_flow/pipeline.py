@@ -170,29 +170,32 @@ def run_ingest(
         elif write_chunking_view:
             print(f"Skipping chunking view PDF because source PDF does not exist: {source_pdf}")
 
+    def index_vectors() -> None:
+        mode = config.indexing.mode.strip().lower()
+        if mode not in {"text", "both"}:
+            raise ValueError("RAG_FLOW_INDEX_MODE must be one of: text, both")
+        if mode in {"text", "both"}:
+            upsert_text_vectors(
+                config,
+                artifacts.chunks_json,
+                batch_size=config.indexing.text_batch_size,
+            )
+        if mode == "both":
+            upsert_colpali_vectors(
+                config,
+                pdf_path=source_pdf,
+                source_name=source_name,
+                chunks_path=artifacts.chunks_json,
+                batch_size=config.indexing.visual_batch_size,
+                dpi=config.indexing.visual_dpi,
+            )
+
     stages = {
         "sectioning": Stage("sectioning", artifacts.sectioned_json, recover_sections),
         "patching": Stage("patching", artifacts.patched_json, patch_icons),
         "captioning": Stage("captioning", artifacts.captioned_json, caption_images),
         "chunking": Stage("chunking", artifacts.chunks_json, chunk_pages),
-        "indexing": Stage(
-            "indexing",
-            None,
-            lambda: (
-                upsert_text_vectors(
-                    config,
-                    artifacts.chunks_json,
-                    batch_size=config.indexing.text_batch_size,
-                ),
-                upsert_colpali_vectors(
-                    config,
-                    pdf_path=source_pdf,
-                    source_name=source_name,
-                    batch_size=config.indexing.visual_batch_size,
-                    dpi=config.indexing.visual_dpi,
-                ),
-            ),
-        ),
+        "indexing": Stage("indexing", None, index_vectors),
     }
 
     for name in selected_stages:

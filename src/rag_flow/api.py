@@ -43,6 +43,7 @@ class HitDetailResponse(BaseModel):
     score: float
     is_continuation: bool
     chunk_id: str = ""
+    source_relpath: str = ""
     visual_page_prior: float = 0.0
     visual_alignment_score: float = 0.0
     dense_rrf_score: float = 0.0
@@ -142,6 +143,7 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
                     score=hit.score,
                     is_continuation=hit.is_continuation,
                     chunk_id=hit.chunk_id,
+                    source_relpath=hit.source_relpath,
                     visual_page_prior=hit.visual_page_prior,
                     visual_alignment_score=hit.visual_alignment_score,
                     dense_rrf_score=hit.dense_rrf_score,

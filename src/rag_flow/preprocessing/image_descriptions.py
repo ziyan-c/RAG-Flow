@@ -580,7 +580,7 @@ def collect_surrounding_context_selection(
         budgeted_sections.append("### Current Image Caption/Footnote\n" + target_context)
     if after_context.text:
         budgeted_sections.append("### Nearby Text After Image\n" + after_context.text)
-    budgeted_context = budgeter.take_head("\n\n".join(budgeted_sections), max_context_tokens)
+    budgeted_context = "\n\n".join(budgeted_sections)
     context = "\n\n".join(part for part in (document_context, budgeted_context) if part)
     selection = ContextBlockSelection(
         before_indices=before_context.block_indices,
@@ -1209,7 +1209,7 @@ def add_image_descriptions(
         from rag_flow.preprocessing.captioning_view import write_captioning_view_pdf
 
         view_stats = write_captioning_view_pdf(
-            content_json=input_json,
+            content_json=output_path,
             pdf_path=pdf_path,
             output_pdf=captioning_view_pdf,
             max_context_tokens=max_context_tokens,

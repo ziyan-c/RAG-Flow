@@ -16,7 +16,8 @@ searchable corpus:
    - add context-aware descriptions to extracted images
 4. `captioning`: describe extracted images and write image answering policy metadata.
 5. `chunking`: build section-aware or fixed token-window chunks from enriched `content_list.json`.
-6. `indexing`: store three retrieval signals in Qdrant:
+   Chunk IDs are source-scoped, for example `DSS/manual.pdf::manual-chunk-00000`.
+6. `indexing`: store retrieval signals in Qdrant, controlled by `RAG_FLOW_INDEX_MODE=text|both`:
    - dense text vectors
    - sparse BM25 vectors
    - ColPali page-image multivectors
@@ -405,18 +406,24 @@ Text indexing embeds and upserts chunks in batches. The default batch size is
 `RAG_FLOW_INDEX_TEXT_BATCH_SIZE=256`; override it with
 `rag-flow index text --batch-size <chunks>`.
 
+The ingestion pipeline uses `RAG_FLOW_INDEX_MODE=text` by default. Set
+`RAG_FLOW_INDEX_MODE=both` to run text indexing and ColPali visual indexing from
+`rag-flow ingest --to-stage indexing`. Standalone commands are still available
+for manual one-off indexing jobs.
+
 Upsert ColPali visual vectors:
 
 ```bash
-rag-flow index visual
+rag-flow index visual --chunks /path/to/current_CHUNKED.json
 ```
 
 By default this renders and embeds `RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=8` PDF
 pages per batch at `RAG_FLOW_INDEX_VISUAL_DPI=200`. Override them with
 `rag-flow index visual --batch-size <pages> --dpi <dpi>` if the indexing machine
 needs a different speed/memory tradeoff. If you point visual indexing at a PDF
-outside the configured source, pass `--source-name <file.pdf>` so visual payloads
-match the chunk metadata `source_relpath`.
+outside the configured source, pass both `--source-name <rel/path.pdf>` and
+`--chunks <that-pdf_CHUNKED.json>` so visual payloads match the current chunk
+metadata `source_relpath`.
 
 ColPali is still a page-level visual index. When chunk output is available,
 visual page payloads inherit page/section metadata from the chunk JSON, so
@@ -495,6 +502,7 @@ RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct
 RAG_FLOW_RETRIEVAL_K=150
 RAG_FLOW_FINAL_TOP_K=80
 RAG_FLOW_RRF_K=10
+RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE=30
 RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=10000
 RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN=4.0
 RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=1.0
@@ -508,6 +516,12 @@ half. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional and relative to the top
 candidate score; the current default keeps it at `1.0` to disable relative
 filtering because the benchmark did not show a reliable quality gain from ratio
 pruning for the online preset.
+
+When visual page-local retrieval is enabled, visual page expansion follows
+`RAG_FLOW_RETRIEVAL_K`; `RAG_FLOW_FINAL_TOP_K` only caps the final chunks returned
+to the answer context. `RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE` is only
+the Qdrant scroll page size for fetching chunks on a matched visual page, not a
+candidate cap.
 
 The `retrieval` stage returns structured image references for images inside
 selected chunks. Each image keeps its `image_answering_policy`, confidence,
@@ -532,9 +546,9 @@ also include `image_url` items for existing `image_recommended` or
 }
 ```
 
-`rag-flow chat` reads this field. When the switch is off it sends only text
-context; when it is on it appends those image paths to the OpenAI-compatible LLM
-request.
+`rag-flow chat` consumes `final_output.content` as the answering payload. When
+the switch is off that payload contains only text context; when it is on it also
+contains those image paths for the OpenAI-compatible LLM request.
 
 For offline high-recall review, keep the same text-only direct mode and raise
 the retrieved-context budget. The thesis experiments used

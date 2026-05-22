@@ -57,7 +57,7 @@ def test_token_chunks_render_table_and_image_fields(tmp_path):
 
     assert len(chunks) == 1
     assert chunks[0]["metadata"]["page_idx"] == 0
-    assert chunks[0]["metadata"]["chunk_id"] == "manual-chunk-00000"
+    assert chunks[0]["metadata"]["chunk_id"] == "manual.pdf::manual-chunk-00000"
     assert chunks[0]["metadata"]["chunk_mode"] == "token"
     assert chunks[0]["metadata"]["breadcrumb"] == "manual.pdf"
     assert chunks[0]["metadata"]["page_indices"] == [0, 1]
@@ -110,7 +110,7 @@ def test_auto_chunks_without_sections_use_token_windows(tmp_path):
     assert chunks[0]["metadata"]["bboxes_by_page"] == {"0": [[10.0, 10.0, 100.0, 30.0]]}
     assert chunks[0]["metadata"]["block_indices"] == [0]
     assert chunks[1]["metadata"]["page_indices"] == [1]
-    assert chunks[2]["metadata"]["chunk_id"] == "manual-chunk-00002"
+    assert chunks[2]["metadata"]["chunk_id"] == "manual.pdf::manual-chunk-00002"
 
 
 def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
@@ -169,6 +169,7 @@ def test_auto_chunks_with_sections_keep_section_boundaries(tmp_path):
     assert chunks[0]["metadata"]["chunk_mode"] == "section"
     assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
     assert chunks[0]["metadata"]["source_filename"] == "manual.pdf"
+    assert chunks[0]["metadata"]["chunk_id"] == "DSS/manual.pdf::manual-chunk-00000"
     assert chunks[0]["metadata"]["section_path"] == ["1 Overview"]
     assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf > 1 Overview"
     assert chunks[0]["chunk_content"].startswith("[Breadcrumb: DSS > manual.pdf > 1 Overview]")
