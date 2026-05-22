@@ -15,7 +15,9 @@ from .preprocessing.small_icons import add_small_icon_text
 from .sectioning import write_sectioned_json
 from .source_paths import source_name_for_pdf, source_root_from_input_path
 
-STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
+INGEST_STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
+ONLINE_QA_STAGES = ("retrieval", "answering")
+STAGES = INGEST_STAGES
 
 
 @dataclass(frozen=True)

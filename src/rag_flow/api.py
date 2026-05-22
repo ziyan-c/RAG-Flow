@@ -2,18 +2,36 @@ from __future__ import annotations
 
 import argparse
 import logging
+from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .config import AppConfig
-from .retrieval import RetrievalEngine
+from .retrieval import FinalOutput, RetrievalEngine, RetrievedImage, build_final_output
 
 logger = logging.getLogger(__name__)
 
 
 class QueryRequest(BaseModel):
     query: str = Field(min_length=1)
+
+
+class RetrievedImageResponse(BaseModel):
+    hit_rank: int
+    chunk_id: str
+    source_relpath: str
+    img_path: str
+    image_path: str
+    image_exists: bool
+    page_idx: int
+    page_number: int
+    bbox: list[float] = Field(default_factory=list)
+    image_answering_policy: str
+    image_answering_confidence: str = ""
+    image_answering_reason: str = ""
+    image_caption: str = ""
+    image_description_vlm: str = ""
 
 
 class HitDetailResponse(BaseModel):
@@ -31,12 +49,50 @@ class HitDetailResponse(BaseModel):
     sparse_rrf_score: float = 0.0
     visual_rrf_score: float = 0.0
     direct_text_rrf_score: float = 0.0
+    image_references: list[RetrievedImageResponse] = Field(default_factory=list)
+
+
+class FinalOutputResponse(BaseModel):
+    mode: str
+    context: str
+    content: list[dict[str, Any]] = Field(default_factory=list)
+    images: list[RetrievedImageResponse] = Field(default_factory=list)
 
 
 class QueryResponse(BaseModel):
     hit_page: int
     all_hits: list[HitDetailResponse]
     context: str
+    images: list[RetrievedImageResponse] = Field(default_factory=list)
+    final_output: FinalOutputResponse
+
+
+def _image_response(image: RetrievedImage) -> RetrievedImageResponse:
+    return RetrievedImageResponse(
+        hit_rank=image.hit_rank,
+        chunk_id=image.chunk_id,
+        source_relpath=image.source_relpath,
+        img_path=image.img_path,
+        image_path=image.image_path,
+        image_exists=image.image_exists,
+        page_idx=image.page_idx,
+        page_number=image.page_number,
+        bbox=list(image.bbox),
+        image_answering_policy=image.image_answering_policy,
+        image_answering_confidence=image.image_answering_confidence,
+        image_answering_reason=image.image_answering_reason,
+        image_caption=image.image_caption,
+        image_description_vlm=image.image_description_vlm,
+    )
+
+
+def _final_output_response(final_output: FinalOutput) -> FinalOutputResponse:
+    return FinalOutputResponse(
+        mode=final_output.mode,
+        context=final_output.context,
+        content=[dict(item) for item in final_output.content],
+        images=[_image_response(image) for image in final_output.images],
+    )
 
 
 def create_app(config: AppConfig | None = None) -> FastAPI:
@@ -68,6 +124,11 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
         except Exception as exc:
             logger.exception("Retriever request failed")
             raise HTTPException(status_code=500, detail="Retriever request failed.") from exc
+        final_output = result.final_output or build_final_output(
+            context=result.context,
+            images=result.images,
+            include_images=bool(resolved_config.retrieval.final_output_images),
+        )
 
         return QueryResponse(
             hit_page=result.hit_page,
@@ -87,10 +148,13 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
                     sparse_rrf_score=hit.sparse_rrf_score,
                     visual_rrf_score=hit.visual_rrf_score,
                     direct_text_rrf_score=hit.direct_text_rrf_score,
+                    image_references=[_image_response(image) for image in hit.image_references],
                 )
                 for hit in result.all_hits
             ],
             context=result.context,
+            images=[_image_response(image) for image in result.images],
+            final_output=_final_output_response(final_output),
         )
 
     return app

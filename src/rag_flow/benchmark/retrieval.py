@@ -900,6 +900,25 @@ def _call_retriever(
 
 
 def _retrieval_result_response(result: Any) -> dict[str, Any]:
+    def image_response(image: Any) -> dict[str, Any]:
+        return {
+            "hit_rank": image.hit_rank,
+            "chunk_id": image.chunk_id,
+            "source_relpath": image.source_relpath,
+            "img_path": image.img_path,
+            "image_path": image.image_path,
+            "image_exists": image.image_exists,
+            "page_idx": image.page_idx,
+            "page_number": image.page_number,
+            "bbox": list(image.bbox),
+            "image_answering_policy": image.image_answering_policy,
+            "image_answering_confidence": image.image_answering_confidence,
+            "image_answering_reason": image.image_answering_reason,
+            "image_caption": image.image_caption,
+            "image_description_vlm": image.image_description_vlm,
+        }
+
+    final_output = getattr(result, "final_output", None)
     return {
         "hit_page": result.hit_page,
         "all_hits": [
@@ -916,10 +935,20 @@ def _retrieval_result_response(result: Any) -> dict[str, Any]:
                 "sparse_rrf_score": hit.sparse_rrf_score,
                 "visual_rrf_score": hit.visual_rrf_score,
                 "direct_text_rrf_score": hit.direct_text_rrf_score,
+                "image_references": [image_response(image) for image in hit.image_references],
             }
             for hit in result.all_hits
         ],
         "context": result.context,
+        "images": [image_response(image) for image in result.images],
+        "final_output": {
+            "mode": final_output.mode,
+            "context": final_output.context,
+            "content": [dict(item) for item in final_output.content],
+            "images": [image_response(image) for image in final_output.images],
+        }
+        if final_output
+        else None,
     }
 
 

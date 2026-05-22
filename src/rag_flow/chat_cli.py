@@ -9,9 +9,25 @@ from openai import OpenAI
 from .config import AppConfig
 
 
+def _image_items_from_final_output(data: dict) -> list[dict]:
+    final_output = data.get("final_output")
+    if not isinstance(final_output, dict):
+        return []
+    content = final_output.get("content")
+    if not isinstance(content, list):
+        return []
+    image_items: list[dict] = []
+    for item in content:
+        if isinstance(item, dict) and item.get("type") == "image_url" and isinstance(item.get("image_url"), dict):
+            image_items.append(item)
+    return image_items
+
+
 def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
-    parser = argparse.ArgumentParser(description="Chat with the manual through the retrieval API and an OpenAI-compatible LLM.")
+    parser = argparse.ArgumentParser(
+        description="Run the answering stage through the retrieval API and an OpenAI-compatible LLM."
+    )
     parser.add_argument("--retriever-url", default=config.server.retriever_url)
     parser.add_argument("--retriever-api-key", default=config.server.retriever_api_key)
     parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
@@ -38,7 +54,10 @@ def main(argv: list[str] | None = None) -> None:
             response.raise_for_status()
             data = response.json()
             context = data["context"]
+            image_items = _image_items_from_final_output(data)
             print(f"\n(Top reference page: {data['hit_page']})\n")
+            if image_items:
+                print(f"(Attached retrieval images: {len(image_items)})\n")
 
             current_turn_prompt = (
                 f"[Latest Retrieved Data]\n{context}\n\n"
@@ -48,6 +67,9 @@ def main(argv: list[str] | None = None) -> None:
                 "Always cite source page numbers for factual claims. "
                 "Answer in the same human language as the user's question."
             )
+            user_content: str | list[dict] = current_turn_prompt
+            if image_items:
+                user_content = [{"type": "text", "text": current_turn_prompt}, *image_items]
             messages = [
                 {
                     "role": "system",
@@ -57,7 +79,7 @@ def main(argv: list[str] | None = None) -> None:
                     ),
                 },
                 *chat_history,
-                {"role": "user", "content": current_turn_prompt},
+                {"role": "user", "content": user_content},
             ]
 
             stream = llm_client.chat.completions.create(

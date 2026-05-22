@@ -47,7 +47,7 @@ MODULE_HELP: dict[str, str] = {
     "index": "Upsert or inspect Qdrant indexes.",
     "retriever": "Start the retrieval API service.",
     "test-retriever": "Query the retrieval API from the terminal.",
-    "chat": "Start the terminal RAG chat client.",
+    "chat": "Start the terminal answering client.",
     "agent-demo": "Run the tool-calling demo.",
     "benchmark": "Run benchmark workflows.",
 }

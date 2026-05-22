@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
@@ -11,6 +12,24 @@ from .model_paths import resolve_model_location
 from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
 from .source_paths import normalize_source_name, source_breadcrumb
+
+
+@dataclass(frozen=True)
+class RetrievedImage:
+    hit_rank: int
+    chunk_id: str
+    source_relpath: str
+    img_path: str
+    image_path: str
+    image_exists: bool
+    page_idx: int
+    page_number: int
+    bbox: list[float]
+    image_answering_policy: str
+    image_answering_confidence: str = ""
+    image_answering_reason: str = ""
+    image_caption: str = ""
+    image_description_vlm: str = ""
 
 
 @dataclass(frozen=True)
@@ -29,6 +48,15 @@ class HitDetail:
     sparse_rrf_score: float = 0.0
     visual_rrf_score: float = 0.0
     direct_text_rrf_score: float = 0.0
+    image_references: tuple[RetrievedImage, ...] = ()
+
+
+@dataclass(frozen=True)
+class FinalOutput:
+    mode: str
+    context: str
+    content: tuple[dict[str, Any], ...]
+    images: tuple[RetrievedImage, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -36,6 +64,41 @@ class RetrievalResult:
     hit_page: int
     all_hits: list[HitDetail]
     context: str
+    images: tuple[RetrievedImage, ...] = ()
+    final_output: FinalOutput | None = None
+
+
+_FINAL_OUTPUT_IMAGE_POLICIES = {
+    "image_recommended",
+    "image_required",
+    "recommended",
+    "required",
+}
+
+
+def _is_final_output_image(image: RetrievedImage) -> bool:
+    policy = image.image_answering_policy.strip().lower().replace("-", "_")
+    return bool(image.image_exists and policy in _FINAL_OUTPUT_IMAGE_POLICIES)
+
+
+def build_final_output(
+    *,
+    context: str,
+    images: tuple[RetrievedImage, ...] = (),
+    include_images: bool = False,
+) -> FinalOutput:
+    selected_images = tuple(image for image in images if include_images and _is_final_output_image(image))
+    content: list[dict[str, Any]] = [{"type": "text", "text": context}]
+    content.extend(
+        {"type": "image_url", "image_url": {"url": image.image_path}}
+        for image in selected_images
+    )
+    return FinalOutput(
+        mode="openai_compatible_multimodal" if selected_images else "context_only",
+        context=context,
+        content=tuple(content),
+        images=selected_images,
+    )
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -208,6 +271,16 @@ def _candidate_min_score(*, best_score: float, min_candidate_score: float, min_s
     allowed_drop = min(max(0.0, min_score_ratio), 1.0)
     relative_min_score = best_score * (1.0 - allowed_drop)
     return max(min_candidate_score, relative_min_score)
+
+
+def _evidence_bbox(evidence: dict[str, Any]) -> list[float]:
+    raw = evidence.get("bbox")
+    if not isinstance(raw, list) or len(raw) != 4:
+        return []
+    try:
+        return [float(value) for value in raw]
+    except (TypeError, ValueError):
+        return []
 
 
 def _named_vector(record_vector: Any, vector_name: str) -> Any:
@@ -470,10 +543,12 @@ class RetrievalEngine:
             )
 
         if not scored_candidates:
+            context = "No relevant information found in the manual."
             return RetrievalResult(
                 hit_page=1,
                 all_hits=[],
-                context="No relevant information found in the manual.",
+                context=context,
+                final_output=build_final_output(context=context),
             )
         scored_candidates.sort(
             key=lambda item: (
@@ -503,20 +578,30 @@ class RetrievalEngine:
             used_context_tokens += block_tokens
 
         if not selected_candidates:
+            context = "No relevant information found in the manual."
             return RetrievalResult(
                 hit_page=1,
                 all_hits=[],
-                context="No relevant information found in the manual.",
+                context=context,
+                final_output=build_final_output(context=context),
             )
 
         context_blocks: list[str] = []
         hit_details: list[HitDetail] = []
+        retrieved_images: list[RetrievedImage] = []
+        seen_image_paths: set[str] = set()
         for rank, (candidate, context_block) in enumerate(selected_candidates, start=1):
             payload = candidate["payload"]
             page_idx = int(payload["page_idx"])
             page_start = int(payload.get("page_start", page_idx))
             page_end = int(payload.get("page_end", page_idx))
             page_indices = _payload_page_indices(payload)
+            image_references = self._image_references_for_payload(payload, hit_rank=rank)
+            for image_reference in image_references:
+                if image_reference.image_path in seen_image_paths:
+                    continue
+                seen_image_paths.add(image_reference.image_path)
+                retrieved_images.append(image_reference)
             context_blocks.append(context_block)
             hit_details.append(
                 HitDetail(
@@ -534,6 +619,7 @@ class RetrievalEngine:
                     sparse_rrf_score=float(candidate["sparse_rrf_score"]),
                     visual_rrf_score=float(candidate["visual_rrf_score"]),
                     direct_text_rrf_score=float(candidate["direct_text_rrf_score"]),
+                    image_references=image_references,
                 )
             )
 
@@ -551,6 +637,12 @@ class RetrievalEngine:
             hit_page=hit_details[0].page_number if hit_details else 1,
             all_hits=hit_details,
             context=final_context,
+            images=tuple(retrieved_images),
+            final_output=build_final_output(
+                context=final_context,
+                images=tuple(retrieved_images),
+                include_images=bool(self.config.retrieval.final_output_images),
+            ),
         )
 
     def _format_context_block(self, candidate: dict[str, Any]) -> str:
@@ -574,6 +666,57 @@ class RetrievalEngine:
     def _estimate_context_tokens(self, text: str) -> int:
         chars_per_token = max(1.0, float(self.config.retrieval.context_chars_per_token))
         return max(1, math.ceil(len(text) / chars_per_token))
+
+    def _image_base_dir_for_payload(self, payload: dict[str, Any]) -> Path:
+        raw_base = str(payload.get("image_base_dir") or "").strip()
+        if raw_base:
+            return Path(raw_base).expanduser()
+        return Path(self.config.paths.base_dir).expanduser()
+
+    def _image_references_for_payload(self, payload: dict[str, Any], *, hit_rank: int) -> tuple[RetrievedImage, ...]:
+        raw_evidence = payload.get("image_answering_evidence", [])
+        if not isinstance(raw_evidence, list):
+            return ()
+
+        base_dir = self._image_base_dir_for_payload(payload)
+        source_relpath = _payload_source_relpath(payload)
+        chunk_id = str(payload.get("chunk_id", ""))
+        references: list[RetrievedImage] = []
+        seen: set[str] = set()
+        for evidence in raw_evidence:
+            if not isinstance(evidence, dict):
+                continue
+            policy = str(evidence.get("image_answering_policy", "") or "").strip()
+            img_path = str(evidence.get("img_path", "") or "").strip()
+            if not img_path:
+                continue
+            image_path = Path(img_path).expanduser()
+            if not image_path.is_absolute():
+                image_path = base_dir / image_path
+            resolved_image_path = str(image_path)
+            if resolved_image_path in seen:
+                continue
+            seen.add(resolved_image_path)
+            page_idx = _as_int(evidence.get("page_idx", payload.get("page_idx", 0)))
+            references.append(
+                RetrievedImage(
+                    hit_rank=hit_rank,
+                    chunk_id=chunk_id,
+                    source_relpath=source_relpath,
+                    img_path=img_path,
+                    image_path=resolved_image_path,
+                    image_exists=image_path.exists(),
+                    page_idx=page_idx,
+                    page_number=page_idx + 1,
+                    bbox=_evidence_bbox(evidence),
+                    image_answering_policy=policy,
+                    image_answering_confidence=str(evidence.get("image_answering_confidence", "") or ""),
+                    image_answering_reason=str(evidence.get("image_answering_reason", "") or ""),
+                    image_caption=str(evidence.get("image_caption", "") or ""),
+                    image_description_vlm=str(evidence.get("image_description_vlm", "") or ""),
+                )
+            )
+        return tuple(references)
 
     def _new_candidate(
         self,

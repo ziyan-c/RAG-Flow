@@ -6,18 +6,25 @@ and collection names can be changed through environment variables.
 
 ## What It Does
 
-1. Parse the source PDF with MinerU into structured `content_list.json`.
-2. Recover PDF outline sections into MinerU block metadata when outline data exists.
-3. Patch MinerU output with a vision language model:
+RAG-Flow uses two standardized stage groups. Offline ingestion prepares the
+searchable corpus:
+
+1. `parsing`: parse the source PDF with MinerU into structured `content_list.json`.
+2. `sectioning`: recover PDF outline sections into MinerU block metadata when outline data exists.
+3. `patching`: patch MinerU output with a vision language model:
    - recover small icon text that MinerU/OCR missed
    - add context-aware descriptions to extracted images
-4. Build section-aware or fixed token-window chunks from enriched `content_list.json`.
-5. Store three retrieval signals in Qdrant:
+4. `captioning`: describe extracted images and write image answering policy metadata.
+5. `chunking`: build section-aware or fixed token-window chunks from enriched `content_list.json`.
+6. `indexing`: store three retrieval signals in Qdrant:
    - dense text vectors
    - sparse BM25 vectors
    - ColPali page-image multivectors
-6. Serve a FastAPI `/retrieve` endpoint with RRF fusion.
-7. Use an OpenAI-compatible LLM endpoint for cited terminal chat.
+
+Online QA then runs:
+
+7. `retrieval`: serve a FastAPI `/retrieve` endpoint with RRF fusion and context assembly.
+8. `answering`: use an OpenAI-compatible LLM endpoint for cited answers.
 
 ## Project Layout
 
@@ -30,7 +37,7 @@ src/rag_flow/
   indexing.py               Qdrant collection, text vectors, visual vectors
   retrieval.py              Hybrid retrieval engine and context builder
   api.py                    FastAPI retrieval service
-  chat_cli.py               Terminal RAG chat client
+  chat_cli.py               Terminal answering client
   preprocessing/            MinerU post-processing helpers
 scripts/                    Shell wrappers for common operations
 envs/                       Exported conda environments from the old workspace
@@ -96,6 +103,21 @@ rag-flow serve llm-sglang --dry-run
 
 ## Pipeline
 
+The offline ingestion stage names are:
+
+```text
+parsing -> sectioning -> patching -> captioning -> chunking -> indexing
+```
+
+The online QA stage names are:
+
+```text
+retrieval -> answering
+```
+
+`retrieval` and `answering` run after indexing, but they are not `rag-flow
+ingest --to-stage` values because they depend on a user query.
+
 Check whether MinerU is available:
 
 ```bash
@@ -150,6 +172,13 @@ Run through indexing too:
 
 ```bash
 rag-flow ingest --to-stage indexing
+```
+
+After indexing, start the online stages:
+
+```bash
+rag-flow retriever
+rag-flow chat
 ```
 
 The individual steps are also available when you need manual control.
@@ -442,16 +471,16 @@ RAG_FLOW_QDRANT_URL=http://127.0.0.1:6333
 RAG_FLOW_COLLECTION=technical-manuals
 ```
 
+Start the `retrieval` stage API:
+
+```bash
+rag-flow retriever
+```
+
 Test the retrieval API:
 
 ```bash
 rag-flow test-retriever "How do I configure alarms?"
-```
-
-Start the retriever API:
-
-```bash
-rag-flow retriever
 ```
 
 The default retrieval preset is the low-latency text-only preset selected by
@@ -477,6 +506,33 @@ evidence is already covered. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional
 and relative to the top candidate score; the current default keeps it at `1.0`
 to disable relative filtering because the benchmark did not show a reliable
 quality gain from ratio pruning for the online preset.
+
+The `retrieval` stage returns structured image references for images inside
+selected chunks. Each image keeps its `image_answering_policy`, confidence,
+reason, caption, and VLM description so the `answering` stage can decide whether
+to attach the actual image to a multimodal LLM call. Relative `img_path` values
+are resolved against the payload's `image_base_dir`, falling back to
+`RAG_FLOW_BASE_DIR`.
+
+The API also returns a `final_output` object for the next stage. By default it is
+text-only and contains one OpenAI-compatible text item. Set
+`RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES=1` when `final_output.content` should
+also include `image_url` items for existing `image_recommended` or
+`image_required` evidence images:
+
+```json
+{
+  "mode": "openai_compatible_multimodal",
+  "content": [
+    {"type": "text", "text": "...retrieved context..."},
+    {"type": "image_url", "image_url": {"url": "/absolute/path/to/image.png"}}
+  ]
+}
+```
+
+`rag-flow chat` reads this field. When the switch is off it sends only text
+context; when it is on it appends those image paths to the OpenAI-compatible LLM
+request.
 
 For offline high-recall review, keep the same text-only direct mode and raise
 the retrieved-context budget. The thesis experiments used
@@ -604,7 +660,9 @@ Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
 before package installation. Set `RAG_FLOW_LLM_FIX_CUDNN=0` only if you want to
 handle SGLang/PyTorch/CuDNN compatibility yourself.
 
-Chat from the terminal:
+Run the `answering` stage from the terminal. The command is named `chat`
+because it provides an interactive UI, but the standardized stage name is
+`answering`:
 
 ```bash
 rag-flow chat

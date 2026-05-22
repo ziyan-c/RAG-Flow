@@ -5,6 +5,8 @@ from types import SimpleNamespace
 from rag_flow.config import RetrievalConfig
 from rag_flow.retrieval import (
     RetrievalEngine,
+    RetrievedImage,
+    build_final_output,
     _candidate_min_score,
     _colpali_maxsim_score,
     _payload_position_key,
@@ -157,6 +159,155 @@ def test_context_block_does_not_duplicate_existing_breadcrumb():
     )
 
     assert block.count("[Breadcrumb:") == 1
+
+
+def test_image_references_include_all_images_with_policies(tmp_path):
+    image_dir = tmp_path / "images"
+    image_dir.mkdir()
+    (image_dir / "recommended.png").write_bytes(b"png")
+    config = SimpleNamespace(
+        paths=SimpleNamespace(base_dir=tmp_path),
+        retrieval=RetrievalConfig(10, 3, 60, 1.5, False),
+    )
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    payload = {
+        "source_relpath": "DSS/manual.pdf",
+        "chunk_id": "manual-chunk-00001",
+        "page_idx": 2,
+        "image_answering_evidence": [
+            {
+                "img_path": "images/optional.png",
+                "page_idx": 1,
+                "image_answering_policy": "image_optional",
+            },
+            {
+                "img_path": "images/recommended.png",
+                "page_idx": 2,
+                "bbox": [1, 2, 3, 4],
+                "image_caption": "Login",
+                "image_description_vlm": "A login form.",
+                "image_answering_policy": "image_recommended",
+                "image_answering_confidence": "high",
+                "image_answering_reason": "Visible labels are important.",
+            },
+            {
+                "img_path": "images/required.png",
+                "page_idx": 3,
+                "image_answering_policy": "required",
+            },
+        ],
+    }
+
+    references = engine._image_references_for_payload(payload, hit_rank=4)
+
+    assert [reference.img_path for reference in references] == [
+        "images/optional.png",
+        "images/recommended.png",
+        "images/required.png",
+    ]
+    assert [reference.image_answering_policy for reference in references] == [
+        "image_optional",
+        "image_recommended",
+        "required",
+    ]
+    assert references[1].image_path == str(tmp_path / "images" / "recommended.png")
+    assert references[1].image_exists is True
+    assert references[1].bbox == [1.0, 2.0, 3.0, 4.0]
+    assert references[1].hit_rank == 4
+    assert references[1].chunk_id == "manual-chunk-00001"
+    assert references[2].image_exists is False
+
+
+def test_image_references_fall_back_to_config_base_dir(tmp_path):
+    config = SimpleNamespace(
+        paths=SimpleNamespace(base_dir=tmp_path),
+        retrieval=RetrievalConfig(10, 3, 60, 1.5, False),
+    )
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+    payload = {
+        "source_relpath": "manual.pdf",
+        "image_answering_evidence": [
+            {"img_path": "images/required.png", "image_answering_policy": "image_required"}
+        ],
+    }
+
+    references = engine._image_references_for_payload(payload, hit_rank=1)
+
+    assert len(references) == 1
+    assert references[0].image_path == str(tmp_path / "images" / "required.png")
+
+
+def test_build_final_output_is_text_only_by_default(tmp_path):
+    image = RetrievedImage(
+        hit_rank=1,
+        chunk_id="chunk-1",
+        source_relpath="manual.pdf",
+        img_path="images/recommended.png",
+        image_path=str(tmp_path / "images" / "recommended.png"),
+        image_exists=True,
+        page_idx=0,
+        page_number=1,
+        bbox=[],
+        image_answering_policy="image_recommended",
+    )
+
+    final_output = build_final_output(context="ctx", images=(image,), include_images=False)
+
+    assert final_output.mode == "context_only"
+    assert final_output.content == ({"type": "text", "text": "ctx"},)
+    assert final_output.images == ()
+
+
+def test_build_final_output_filters_to_existing_recommended_images(tmp_path):
+    optional = RetrievedImage(
+        hit_rank=1,
+        chunk_id="chunk-1",
+        source_relpath="manual.pdf",
+        img_path="images/optional.png",
+        image_path=str(tmp_path / "images" / "optional.png"),
+        image_exists=True,
+        page_idx=0,
+        page_number=1,
+        bbox=[],
+        image_answering_policy="image_optional",
+    )
+    recommended = RetrievedImage(
+        hit_rank=1,
+        chunk_id="chunk-1",
+        source_relpath="manual.pdf",
+        img_path="images/recommended.png",
+        image_path=str(tmp_path / "images" / "recommended.png"),
+        image_exists=True,
+        page_idx=0,
+        page_number=1,
+        bbox=[],
+        image_answering_policy="image_recommended",
+    )
+    required_missing = RetrievedImage(
+        hit_rank=1,
+        chunk_id="chunk-1",
+        source_relpath="manual.pdf",
+        img_path="images/required.png",
+        image_path=str(tmp_path / "images" / "required.png"),
+        image_exists=False,
+        page_idx=0,
+        page_number=1,
+        bbox=[],
+        image_answering_policy="image_required",
+    )
+
+    final_output = build_final_output(
+        context="ctx",
+        images=(optional, recommended, required_missing),
+        include_images=True,
+    )
+
+    assert final_output.mode == "openai_compatible_multimodal"
+    assert final_output.content == (
+        {"type": "text", "text": "ctx"},
+        {"type": "image_url", "image_url": {"url": str(tmp_path / "images" / "recommended.png")}},
+    )
+    assert final_output.images == (recommended,)
 
 
 def test_direct_rank_candidates_skip_visual_pages():

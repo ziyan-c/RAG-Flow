@@ -173,6 +173,7 @@ class RetrievalConfig:
     context_chars_per_token: float = 4.0
     min_candidate_score: float = 0.0
     min_score_ratio: float = 1.0
+    final_output_images: bool = False
 
 
 @dataclass(frozen=True)
@@ -341,6 +342,7 @@ class AppConfig:
             context_chars_per_token=env.float("RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN", 4.0),
             min_candidate_score=env.float("RAG_FLOW_RETRIEVAL_MIN_CANDIDATE_SCORE", 0.0),
             min_score_ratio=env.float("RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO", 1.0),
+            final_output_images=env.bool("RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES", False),
         )
 
         server = ServerConfig(

@@ -27,6 +27,12 @@ def test_query(
     print(f"\nQuery: {query_text}")
     print(f"Retrieved in {elapsed:.2f}s")
     print(f"Top hit page: {result.get('hit_page')}")
+    final_output = result.get("final_output")
+    if isinstance(final_output, dict):
+        print(
+            f"Final output: {final_output.get('mode', 'unknown')} | "
+            f"images={len(final_output.get('images') or [])}"
+        )
 
     hits = result.get("all_hits", [])
     if hits:
