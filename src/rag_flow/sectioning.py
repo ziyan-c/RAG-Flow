@@ -679,7 +679,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--source-name",
         default=None,
-        help="Source relative path stored in sectioned blocks; defaults to sourcepdfs-relative path when available.",
+        help="Source relative path stored in sectioned blocks; defaults to source-pdfs-relative path when available.",
     )
     parser.add_argument(
         "--source-root",

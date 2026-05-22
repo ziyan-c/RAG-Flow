@@ -8,11 +8,11 @@ from typing import Mapping
 from .presets import get_preset
 
 
-DEFAULT_BASE_DIR = Path(
-    "/root/autodl-tmp/manuals/public/"
-    "example-technical-manual/hybrid_auto"
-)
 DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
+DEFAULT_SOURCE_ROOT = Path("source-pdfs")
+DEFAULT_OUTPUT_ROOT = Path("output-pdfs")
+DEFAULT_BASE_DIR = DEFAULT_OUTPUT_ROOT / Path(DEFAULT_SOURCE_NAME).stem / "auto"
+DEFAULT_DB_PATH = Path("qdrant-db")
 DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
 DEFAULT_RUNTIME_ENV_FILE = Path("autodl-tmp/.local/rag-flow.env")
 
@@ -263,11 +263,8 @@ class AppConfig:
         source_name = env.get("RAG_FLOW_SOURCE_NAME", DEFAULT_SOURCE_NAME)
         source_stem = Path(source_name).stem
 
-        source_root = (
-            env.path("RAG_FLOW_SOURCE_ROOT", "")
-            if env.get("RAG_FLOW_SOURCE_ROOT", "").strip()
-            else None
-        )
+        source_root_value = env.get("RAG_FLOW_SOURCE_ROOT", str(DEFAULT_SOURCE_ROOT)).strip()
+        source_root = env.path("RAG_FLOW_SOURCE_ROOT", DEFAULT_SOURCE_ROOT) if source_root_value else None
 
         paths = PathsConfig(
             base_dir=base_dir,
@@ -275,7 +272,7 @@ class AppConfig:
             source_root=source_root,
             source_pdf=env.path(
                 "RAG_FLOW_SOURCE_PDF",
-                base_dir / "example-technical-manual_origin.pdf",
+                DEFAULT_SOURCE_ROOT / DEFAULT_SOURCE_NAME,
             ),
             content_json=env.path(
                 "RAG_FLOW_CONTENT_JSON",
@@ -300,7 +297,7 @@ class AppConfig:
                 "RAG_FLOW_CHUNKS_JSON",
                 base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
             ),
-            db_path=env.path("RAG_FLOW_DB_PATH", "/root/autodl-tmp/qdrant-dbs/manual-db"),
+            db_path=env.path("RAG_FLOW_DB_PATH", DEFAULT_DB_PATH),
             collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),
         )
 
@@ -357,7 +354,7 @@ class AppConfig:
         mineru = MinerUConfig(
             command=env.get("RAG_FLOW_MINERU_COMMAND", "mineru"),
             input_path=env.path("RAG_FLOW_MINERU_INPUT_PATH", paths.source_pdf),
-            output_dir=env.path("RAG_FLOW_MINERU_OUTPUT_DIR", base_dir.parent),
+            output_dir=env.path("RAG_FLOW_MINERU_OUTPUT_DIR", DEFAULT_OUTPUT_ROOT),
             backend=env.get("RAG_FLOW_MINERU_BACKEND", ""),
             model_source=env.get("RAG_FLOW_MINERU_MODEL_SOURCE", ""),
             lang=env.get("RAG_FLOW_MINERU_LANG", ""),

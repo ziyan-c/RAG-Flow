@@ -84,7 +84,7 @@ rag-flow mineru doctor
 rag-flow mineru run
 rag-flow section
 rag-flow serve llm-sglang
-rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+rag-flow patch --artifact-dir output-pdfs/example-technical-manual/auto
 rag-flow ingest --to-stage chunking
 rag-flow caption
 rag-flow chunk
@@ -136,7 +136,15 @@ rag-flow mineru setup
 Run the default ingestion path from PDF to retrieval chunks:
 
 ```bash
-rag-flow ingest --pdf .local/source-documents/example-technical-manual.pdf
+rag-flow ingest --pdf source-pdfs/example-technical-manual.pdf
+```
+
+The default local workspace layout is:
+
+```text
+source-pdfs/  input PDF root
+output-pdfs/  MinerU and preprocessing artifacts
+qdrant-db/    local Qdrant vector database
 ```
 
 When `--pdf` is omitted, ingestion uses `RAG_FLOW_MINERU_INPUT_PATH`.
@@ -148,12 +156,12 @@ file-stem output folder:
 
 ```bash
 rag-flow mineru run \
-  --input .local/source-documents \
-  --output-dir /root/autodl-tmp/manuals/public
+  --input source-pdfs \
+  --output-dir output-pdfs
 ```
 
-For example, `.local/source-documents/network/admin.pdf` is parsed with
-`-o /root/autodl-tmp/manuals/public/network`, so MinerU can write its usual
+For example, `source-pdfs/network/admin.pdf` is parsed with
+`-o output-pdfs/network`, so MinerU can write its usual
 `admin/auto/...` files under that mirrored location. Add `--no-recursive` when
 you only want PDFs directly inside the input folder.
 
@@ -204,8 +212,8 @@ Recover PDF outline sections into MinerU JSON:
 
 ```bash
 rag-flow section \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list.json \
-  --input-pdf .local/source-documents/example-technical-manual.pdf
+  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list.json \
+  --input-pdf source-pdfs/example-technical-manual.pdf
 ```
 
 This writes `*_content_list_SECTIONED.json` plus `*_SECTIONING_AUDIT.json`.
@@ -223,7 +231,7 @@ Patch small icons:
 
 ```bash
 rag-flow serve llm-sglang
-rag-flow patch --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+rag-flow patch --artifact-dir output-pdfs/example-technical-manual/auto
 ```
 
 The artifact-dir form is the preferred patching entrypoint after MinerU has
@@ -256,7 +264,7 @@ processes one PDF at a time to avoid GPU memory spikes:
 
 ```bash
 rag-flow patch \
-  --artifact-dir /root/autodl-tmp/manuals/public \
+  --artifact-dir output-pdfs \
   --page-window-size 200 \
   --batch-size 9 \
   --concurrency 3
@@ -299,8 +307,8 @@ You can also regenerate the overlay without running the LLM:
 
 ```bash
 rag-flow patch-view \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
-  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
+  --input-pdf source-pdfs/example-technical-manual.pdf
 ```
 
 Generate image descriptions:
@@ -312,7 +320,7 @@ rag-flow caption
 After patching a MinerU artifact folder, you can also use the artifact-dir form:
 
 ```bash
-rag-flow caption --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+rag-flow caption --artifact-dir output-pdfs/example-technical-manual/auto
 ```
 
 Captioning calls the local OpenAI-compatible SGLang service configured by
@@ -348,15 +356,15 @@ controls:
 You can regenerate the captioning overlay without calling the LLM:
 
 ```bash
-rag-flow caption-view --artifact-dir /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto
+rag-flow caption-view --artifact-dir output-pdfs/example-technical-manual/auto
 ```
 
 Or pass the captioning input JSON and origin PDF explicitly:
 
 ```bash
 rag-flow caption-view \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
-  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
+  --input-pdf source-pdfs/example-technical-manual.pdf
 ```
 
 Build retrieval chunks:
@@ -392,8 +400,8 @@ to inspect. To generate it separately:
 
 ```bash
 rag-flow chunk-view \
-  --input-json /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json \
-  --input-pdf /root/autodl-tmp/manuals/public/example-technical-manual/hybrid_auto/example-technical-manual_origin.pdf
+  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json \
+  --input-pdf source-pdfs/example-technical-manual.pdf
 ```
 
 Upsert text vectors:

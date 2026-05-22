@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from rag_flow.config import AppConfig, resolve_env_file
 
 
@@ -114,6 +116,26 @@ def test_default_stage_paths_follow_source_name(tmp_path, monkeypatch):
     assert config.paths.patched_json.name == "manual_content_list_SECTIONED_PATCHED.json"
     assert config.paths.captioned_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     assert config.paths.chunks_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"
+
+
+def test_default_workspace_paths_are_local_project_dirs(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("RAG_FLOW_ENV_FILE", str(tmp_path / "missing.env"))
+    monkeypatch.delenv("RAG_FLOW_SOURCE_ROOT", raising=False)
+    monkeypatch.delenv("RAG_FLOW_SOURCE_PDF", raising=False)
+    monkeypatch.delenv("RAG_FLOW_BASE_DIR", raising=False)
+    monkeypatch.delenv("RAG_FLOW_MINERU_INPUT_PATH", raising=False)
+    monkeypatch.delenv("RAG_FLOW_MINERU_OUTPUT_DIR", raising=False)
+    monkeypatch.delenv("RAG_FLOW_DB_PATH", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.paths.source_root == Path("source-pdfs")
+    assert config.paths.source_pdf == Path("source-pdfs/example-technical-manual.pdf")
+    assert config.paths.base_dir == Path("output-pdfs/example-technical-manual/auto")
+    assert config.mineru.input_path == Path("source-pdfs/example-technical-manual.pdf")
+    assert config.mineru.output_dir == Path("output-pdfs")
+    assert config.paths.db_path == Path("qdrant-db")
 
 
 def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):

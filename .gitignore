@@ -8,6 +8,9 @@ __pycache__/
 
 # Local data and model caches
 data/
+source-pdfs/
+output-pdfs/
+qdrant-db/
 outputs/
 qdrant-dbs/
 models/

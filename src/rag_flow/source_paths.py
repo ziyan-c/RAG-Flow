@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
 
+# Normalized marker for source-pdfs/source_pdfs/sourcepdfs ancestors.
 SOURCE_ROOT_MARKERS = {"sourcepdfs"}
 
 
