@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from rag_flow import cli
-from rag_flow.presets import CONFIG_PRESETS
+from rag_flow.presets import CONFIG_PRESETS, get_preset
 
 
 PRESET_ENV_KEYS = {"RAG_FLOW_PRESET"} | {key for preset in CONFIG_PRESETS.values() for key in preset.env}
@@ -389,18 +389,30 @@ def test_preset_list_prints_available_presets(capsys):
 
     output = capsys.readouterr().out
     assert "default: Text-only online preset" in output
-    assert "precise: Text-only precise preset" in output
-    assert "tiny: Text-only tiny preset" in output
-    assert "enhanced: Text-only long-answer preset" in output
-    assert "visual-route: Optional ColPali visual route preset" in output
+    assert "high-recall: Text-only review preset" in output
+    assert "compact: Low-token text-only preset" in output
+    assert "compact-with-image-input: Compact text retrieval plus image_url evidence" in output
+    assert "visual-recall: Visual recall preset with ColPali route" in output
+    assert "default-with-image-input: Default text retrieval plus image_url evidence" in output
 
 
 def test_preset_env_prints_preset_values(capsys):
-    cli.main(["preset", "env", "visualroute"])
+    cli.main(["preset", "env", "visual-recall"])
 
     output = capsys.readouterr().out
-    assert "RAG_FLOW_PRESET=visual-route" in output
+    assert "RAG_FLOW_PRESET=visual-recall" in output
     assert "RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive" in output
+    assert "RAG_FLOW_VISUAL_WEIGHT=1.0" in output
+
+
+def test_old_preset_aliases_are_not_supported():
+    for old_name in ("default-with-visual-route", "visual-route", "visualroute", "enhanced", "precise", "tiny"):
+        try:
+            get_preset(old_name)
+        except ValueError as exc:
+            assert "Unknown RAG Flow preset" in str(exc)
+        else:
+            raise AssertionError(f"old preset alias should not resolve: {old_name}")
 
 
 def test_leading_preset_argument_applies_preset_before_module_dispatch(monkeypatch):
@@ -423,16 +435,16 @@ def test_leading_preset_argument_applies_preset_before_module_dispatch(monkeypat
     )
 
     try:
-        cli.main(["--preset", "enhanced", "mineru", "doctor"])
+        cli.main(["--preset", "high-recall", "mineru", "doctor"])
     finally:
         _clear_preset_env_now()
 
-    assert calls == [(["doctor"], "enhanced", "16000")]
+    assert calls == [(["doctor"], "high-recall", "16000")]
 
 
 def test_preset_run_command_is_removed():
     try:
-        cli.main(["preset", "run", "visualroute", "--", "mineru", "doctor"])
+        cli.main(["preset", "run", "visual-recall", "--", "mineru", "doctor"])
     except SystemExit as exc:
         assert exc.code == 2
     else:

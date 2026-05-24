@@ -325,8 +325,8 @@ class AppConfig:
         )
 
         retrieval = RetrievalConfig(
-            retrieval_k=env.int("RAG_FLOW_RETRIEVAL_K", 150),
-            final_top_k=env.int("RAG_FLOW_FINAL_TOP_K", 80),
+            retrieval_k=env.int("RAG_FLOW_RETRIEVAL_K", 80),
+            final_top_k=env.int("RAG_FLOW_FINAL_TOP_K", 20),
             rrf_k=env.int("RAG_FLOW_RRF_K", 10),
             visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 2.5),
             quantized_colpali=env.get("RAG_FLOW_QUANTIZED_COLPALI", "1") not in {"0", "false", "False"},

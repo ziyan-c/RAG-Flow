@@ -499,7 +499,7 @@ rag-flow test-retriever "How do I configure alarms?"
 ```
 
 The default retrieval preset is the low-latency text-only preset selected by
-the thesis benchmark plan. It intentionally retrieves a large candidate pool, then
+the thesis benchmark plan. It retrieves a controlled candidate pool, then
 uses a soft retrieved-context target so the downstream answer model is not forced
 to consume all candidates:
 
@@ -508,8 +508,8 @@ to consume all candidates:
 RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
 # Choices: none, page-naive, page-bbox.
 RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none
-RAG_FLOW_RETRIEVAL_K=150
-RAG_FLOW_FINAL_TOP_K=80
+RAG_FLOW_RETRIEVAL_K=80
+RAG_FLOW_FINAL_TOP_K=20
 RAG_FLOW_RRF_K=10
 RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE=30
 RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=10000
@@ -559,12 +559,13 @@ also include `image_url` items for existing `image_recommended` or
 the switch is off that payload contains only text context; when it is on it also
 contains those image paths for the OpenAI-compatible LLM request.
 
-For offline high-recall review, keep the same text-only mode without visual bonus and raise
-the retrieved-context budget. The thesis experiments used
-`RAG_FLOW_RETRIEVAL_K=150` plus `RAG_FLOW_FINAL_TOP_K=80`, with no-cap runs for
-diagnosis and capped 24k runs for a more practical review preset. Visual
-retrieval is kept optional because it can improve visual/UI query ranking, but
-it loads the ColPali query encoder and is much slower than the default text path.
+For offline high-recall review, keep the same text-only mode without visual bonus
+and use `RAG_FLOW_RETRIEVAL_K=150`, `RAG_FLOW_FINAL_TOP_K=80`, and a 16k
+retrieved-context cap. The thesis also tested 24k, but that run triggered many
+empty answers and missing usage records, so 24k is not a recommended preset.
+Visual retrieval is kept optional because it can improve visual/UI query ranking,
+but it loads the ColPali query encoder and is much slower than the default text
+path.
 
 Named presets can apply the thesis-recommended retrieval settings without
 hand-editing the individual environment variables:
@@ -573,22 +574,34 @@ hand-editing the individual environment variables:
 rag-flow preset list
 rag-flow preset show default
 rag-flow --preset default retriever
-rag-flow --preset tiny test-retriever "How do I configure alarms?"
-rag-flow --preset precise chat
-rag-flow --preset enhanced chat
-rag-flow --preset visual-route test-retriever "How do I configure alarms?"
+rag-flow --preset compact test-retriever "How do I configure alarms?"
+rag-flow --preset high-recall chat
+rag-flow --preset visual-recall test-retriever "How do I configure alarms?"
+rag-flow --preset compact-with-image-input chat
+rag-flow --preset default-with-image-input chat
 ```
 
 The shipped presets are:
 
-- `default`: text-only, `retrieval_k=150`, `final_top_k=80`, 10k retrieved-context cap.
-- `precise`: text-only, same retrieval backbone, 5k retrieved-context cap for stricter answer context.
-- `tiny`: text-only, same retrieval backbone, 3k retrieved-context cap for smoke tests and very short answers.
-- `enhanced`: text-only, same retrieval backbone, 16k retrieved-context cap.
-- `high-recall`: offline text-only review preset, 24k retrieved-context cap, `min_score_ratio=1.0`.
-- `visual-route`: optional ColPali route, `text-visual-naive` plus `page-naive`, 16k retrieved-context cap, `visual_weight=2.5`.
+- `default`: text-only, `retrieval_k=80`, `final_top_k=20`, 10k cap. In the 200-QA thesis run it averaged about 10,072 retrieved-context tokens and reached 11,802 max context tokens.
+- `high-recall`: text-only review mode, `retrieval_k=150`, `final_top_k=80`, 16k cap. It averaged about 16,585 context tokens and reached 17,796 max context tokens.
+- `compact`: low-token text-only mode, `retrieval_k=150`, `final_top_k=10`, 10k cap, `min_score_ratio=0.4`. It averaged about 4,156 context tokens and reached 11,279 max context tokens.
+- `compact-with-image-input`: same compact text retrieval policy, but sends selected evidence images as `image_url` items to the answer model. It has not been separately run on 200 QA; expected text context follows `compact` (about 4,156 average context tokens), while total tokens depend on post-hoc image token usage.
+- `visual-recall`: visual/UI evidence recall mode with the optional ColPali route, `text-visual-naive` plus `page-naive`, `retrieval_k=150`, `final_top_k=20`, 10k cap, `visual_weight=1.0`. It averaged about 10,315 context tokens and reached 11,922 max context tokens.
+- `default-with-image-input`: same retrieval settings as `default`, but sends selected evidence images as `image_url` items to the answer model. It averaged about 10,251 context tokens, 14,325 total input tokens, and reached 23,442 max total input tokens.
 
-You can also set `RAG_FLOW_PRESET=enhanced` in the environment file. Explicit
+Preset cautions:
+
+- `RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS` budgets retrieved text context only. It does not include image token cost.
+- `default-with-image-input` appends selected `image_url` items after text context selection. Image tokens are only visible afterward through LLM usage fields such as `prompt_tokens` and `total_tokens`.
+- `compact-with-image-input` is the safer image-input variant when image evidence is needed but text context should stay small. Its image-token cost still is not pre-budgeted.
+- `visual-recall` changes retrieval routing and requires a visual index plus the ColPali query encoder; it does not send images to the answering model unless image input is also enabled separately.
+- `compact` keeps the tested 10k soft cap. Its lower average context comes from `final_top_k=10` plus `min_score_ratio=0.4`, not from a smaller hard cap.
+- `high-recall` is capped at 16k because the 24k experiment produced many empty answers and missing usage records.
+- `tiny` is not shipped as a final preset; the 3k experiment remains a quality-floor diagnostic, not a recommended mode.
+- Only the six canonical names above are accepted. Old compatibility aliases such as `default-with-visual-route`, `visual-route`, `visualroute`, `enhanced`, and `precise` are intentionally not supported.
+
+You can also set `RAG_FLOW_PRESET=high-recall` in the environment file. Explicit
 environment variables still override preset defaults, so remove hand-written
 retrieval values when you want the named preset to control them fully.
 

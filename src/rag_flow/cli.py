@@ -310,8 +310,7 @@ def _dispatch_preset(args: argparse.Namespace) -> None:
     if args.preset_command == "list":
         for name in preset_names():
             preset = get_preset(name)
-            aliases = f" (aliases: {', '.join(preset.aliases)})" if preset.aliases else ""
-            print(f"{preset.name}: {preset.summary}{aliases}")
+            print(f"{preset.name}: {preset.summary}")
         return
 
     preset = get_preset(args.preset_name)

@@ -284,8 +284,8 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.retrieval.route_mode == "text"
     assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.quantized_colpali is True
-    assert config.retrieval.retrieval_k == 150
-    assert config.retrieval.final_top_k == 80
+    assert config.retrieval.retrieval_k == 80
+    assert config.retrieval.final_top_k == 20
     assert config.retrieval.rrf_k == 10
     assert config.retrieval.visual_weight == 2.5
     assert config.retrieval.candidate_scroll_page_size == 30
@@ -322,7 +322,7 @@ def test_qdrant_server_env_is_optional(tmp_path, monkeypatch):
 def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
-    env_file.write_text("RAG_FLOW_PRESET=visualroute\n", encoding="utf-8")
+    env_file.write_text("RAG_FLOW_PRESET=visual-recall\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
@@ -333,18 +333,18 @@ def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
     assert config.retrieval.route_mode == "text-visual-naive"
     assert config.retrieval.visual_bonus == "page-naive"
     assert config.retrieval.retrieval_k == 150
-    assert config.retrieval.final_top_k == 80
-    assert config.retrieval.visual_weight == 2.5
-    assert config.retrieval.max_context_tokens == 16000
+    assert config.retrieval.final_top_k == 20
+    assert config.retrieval.visual_weight == 1.0
+    assert config.retrieval.max_context_tokens == 10000
     assert config.indexing.mode == "both"
     assert config.indexing.visual_dpi == 200
     assert config.indexing.visual_batch_size == 8
 
 
-def test_precise_preset_uses_smaller_context_cap(tmp_path, monkeypatch):
+def test_compact_preset_uses_score_pruned_context(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
-    env_file.write_text("RAG_FLOW_PRESET=precise\n", encoding="utf-8")
+    env_file.write_text("RAG_FLOW_PRESET=compact\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
@@ -355,15 +355,35 @@ def test_precise_preset_uses_smaller_context_cap(tmp_path, monkeypatch):
     assert config.retrieval.route_mode == "text"
     assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.retrieval_k == 150
-    assert config.retrieval.final_top_k == 80
-    assert config.retrieval.max_context_tokens == 5000
-    assert config.retrieval.min_score_ratio == 1.0
+    assert config.retrieval.final_top_k == 10
+    assert config.retrieval.max_context_tokens == 10000
+    assert config.retrieval.min_score_ratio == 0.4
 
 
-def test_tiny_preset_uses_very_small_context_cap(tmp_path, monkeypatch):
+def test_default_with_image_input_preset_enables_answering_images(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
-    env_file.write_text("RAG_FLOW_PRESET=tiny\n", encoding="utf-8")
+    env_file.write_text("RAG_FLOW_PRESET=default-with-image-input\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.route_mode == "text"
+    assert config.retrieval.visual_bonus == "none"
+    assert config.retrieval.retrieval_k == 80
+    assert config.retrieval.final_top_k == 20
+    assert config.retrieval.max_context_tokens == 10000
+    assert config.retrieval.min_score_ratio == 1.0
+    assert config.retrieval.final_output_images is True
+
+
+def test_compact_with_image_input_preset_keeps_compact_text_budget(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_PRESET=compact-with-image-input\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
@@ -374,9 +394,10 @@ def test_tiny_preset_uses_very_small_context_cap(tmp_path, monkeypatch):
     assert config.retrieval.route_mode == "text"
     assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.retrieval_k == 150
-    assert config.retrieval.final_top_k == 80
-    assert config.retrieval.max_context_tokens == 3000
-    assert config.retrieval.min_score_ratio == 1.0
+    assert config.retrieval.final_top_k == 10
+    assert config.retrieval.max_context_tokens == 10000
+    assert config.retrieval.min_score_ratio == 0.4
+    assert config.retrieval.final_output_images is True
 
 
 def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
@@ -385,7 +406,7 @@ def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
     env_file.write_text(
         "\n".join(
             [
-                "RAG_FLOW_PRESET=enhanced",
+                "RAG_FLOW_PRESET=high-recall",
                 "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=12000",
                 "RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-bbox",
             ]
