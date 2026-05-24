@@ -6,17 +6,17 @@ import json
 import math
 import re
 import time
-from dataclasses import replace
+from dataclasses import asdict, is_dataclass, replace
 from pathlib import Path
 from typing import Any, Sequence
 
 from rag_flow.config import AppConfig
-from rag_flow.preprocessing.small_icons import image_to_data_url, strip_reasoning_text
+from rag_flow.preprocessing.small_icons import strip_reasoning_text
 from rag_flow.retrieval import RetrievalEngine, RetrievalResult
 
 
-DEFAULT_QUERY_SET = Path("thesis/08-end-to-end-answering/data/answering_qaset_50.jsonl")
-DEFAULT_OUTPUT_DIR = Path("thesis/08-end-to-end-answering/data/answering-runs")
+DEFAULT_QUERY_SET = Path("thesis/09-answering/data/answering_qaset_50.jsonl")
+DEFAULT_OUTPUT_DIR = Path("thesis/09-answering/data/answering-runs")
 THINKING_LEAK_RE = re.compile(r"(<think>|</think>|\banalysis\s*:|\breasoning\s*:)", re.IGNORECASE)
 
 
@@ -60,6 +60,18 @@ def _usage_int(usage: dict[str, Any], key: str) -> int:
         return int(usage.get(key) or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _jsonable(value: Any) -> Any:
+    if is_dataclass(value):
+        return _jsonable(asdict(value))
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    return value
 
 
 def _list_ints(values: Any) -> list[int]:
@@ -124,97 +136,38 @@ def _estimate_text_tokens(text: str, *, chars_per_token: float) -> int:
     return max(1, math.ceil(len(text) / max(1.0, chars_per_token)))
 
 
-def _estimate_image_tokens(width: int, height: int) -> int:
-    return max(1, math.ceil(width * height / 784.0))
+def _final_output_content(result: RetrievalResult) -> list[dict[str, Any]]:
+    if result.final_output is None:
+        return [{"type": "text", "text": result.context}]
+    return [dict(item) for item in result.final_output.content]
 
 
-def _render_pdf_page(pdf_path: Path, *, page_idx: int, dpi: int) -> Any:
-    from pdf2image import convert_from_path
-
-    images = convert_from_path(
-        str(pdf_path),
-        dpi=dpi,
-        first_page=page_idx + 1,
-        last_page=page_idx + 1,
+def _image_url_count(content: Sequence[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for item in content
+        if isinstance(item, dict) and item.get("type") == "image_url" and isinstance(item.get("image_url"), dict)
     )
-    if not images:
-        raise RuntimeError(f"Failed to render page {page_idx + 1} from {pdf_path}")
-    return images[0]
 
 
-def _attached_page_images(
-    *,
-    pdf_path: Path,
-    page_scores: list[tuple[int, float]],
-    image_count: int,
-    dpi: int,
-    save_dir: Path | None = None,
-    query_id: str = "",
-) -> list[dict[str, Any]]:
-    attached = []
-    for page_idx, score in page_scores[: max(0, image_count)]:
-        image = _render_pdf_page(pdf_path, page_idx=page_idx, dpi=dpi)
-        width, height = int(image.width), int(image.height)
-        image_path = ""
-        if save_dir is not None:
-            save_dir.mkdir(parents=True, exist_ok=True)
-            image_path = str(save_dir / f"{query_id}_page-{page_idx + 1}_dpi-{dpi}.png")
-            image.save(image_path)
-        attached.append(
-            {
-                "page_idx": page_idx,
-                "page_number": page_idx + 1,
-                "page_score": float(score),
-                "dpi": dpi,
-                "width": width,
-                "height": height,
-                "estimated_image_tokens": _estimate_image_tokens(width, height),
-                "data_url": image_to_data_url(image),
-                "image_path": image_path,
-            }
-        )
-    return attached
-
-
-def _answering_messages(*, query: str, context: str, attached_images: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _answering_messages(*, query: str, final_output_content: list[dict[str, Any]]) -> list[dict[str, Any]]:
     system = (
         "You are a senior technical manual assistant. Answer only from the provided retrieved "
-        "context and attached PDF page images. If the answer is not supported, say that the "
+        "content. If the answer is not supported, say that the "
         "provided evidence is insufficient. Do not output reasoning, analysis, chain-of-thought, "
         "or hidden thinking. Return only the final answer."
     )
-    user_intro = (
-        "[Retrieved text context]\n"
-        f"{context}\n\n"
+    answer_request = (
         "[User question]\n"
         f"{query}\n\n"
-        "Answer the question using the retrieved context. Cite source page numbers for factual claims. "
-        "For table questions, preserve parameter names and their meanings. For UI/image questions, use "
-        "attached PDF page images if present to verify visible regions, fields, buttons, and layout. "
+        "[Answer rules]\n"
+        "Use only the retrieved material below. Cite Source and Page numbers for factual claims. "
+        "For table questions, preserve parameter names and their meanings. "
+        "If retrieval provided image_url evidence, use it only as supporting evidence for visible labels, "
+        "fields, buttons, and layout. "
         "Do not mention internal scoring, gold labels, or this evaluation setup."
     )
-    content: list[dict[str, Any]] = [{"type": "text", "text": user_intro}]
-    if attached_images:
-        content.append(
-            {
-                "type": "text",
-                "text": (
-                    "\nAttached retrieved PDF page images follow. They are selected from the retrieval "
-                    "results by page score, not from gold labels."
-                ),
-            }
-        )
-    for image in attached_images:
-        content.append(
-            {
-                "type": "text",
-                "text": (
-                    f"Attached PDF page {image['page_number']} "
-                    f"(retrieved page_score={image['page_score']:.6f}, dpi={image['dpi']})."
-                ),
-            }
-        )
-        content.append({"type": "image_url", "image_url": {"url": image["data_url"]}})
+    content: list[dict[str, Any]] = [{"type": "text", "text": answer_request}, *final_output_content]
     content.append(
         {
             "type": "text",
@@ -260,17 +213,25 @@ def _make_run_config(
     config: AppConfig,
     *,
     context_cap: int,
-    enable_visual_retrieval: bool,
+    retrieval_k: int,
+    final_top_k: int,
+    rrf_k: int,
+    min_score_ratio: float,
+    final_output_images: bool,
     route_mode: str,
-    candidate_mode: str,
+    visual_bonus: str,
     visual_weight: float,
 ) -> AppConfig:
     retrieval = replace(
         config.retrieval,
+        retrieval_k=retrieval_k,
+        final_top_k=final_top_k,
+        rrf_k=rrf_k,
         max_context_tokens=context_cap,
-        enable_visual=enable_visual_retrieval,
+        min_score_ratio=min_score_ratio,
+        final_output_images=final_output_images,
         route_mode=route_mode,
-        candidate_mode=candidate_mode,
+        visual_bonus=visual_bonus,
         visual_weight=visual_weight,
     )
     return replace(config, retrieval=retrieval)
@@ -282,12 +243,14 @@ def run_answering_benchmark(
     output_dir: Path,
     run_id: str,
     context_cap: int,
-    image_count: int,
-    image_dpi: int,
+    retrieval_k: int,
+    final_top_k: int,
+    rrf_k: int,
+    min_score_ratio: float,
+    final_output_images: bool,
     enable_thinking: bool,
-    enable_visual_retrieval: bool,
     route_mode: str,
-    candidate_mode: str,
+    visual_bonus: str,
     visual_weight: float,
     max_tokens: int,
     llm_base_url: str,
@@ -295,16 +258,19 @@ def run_answering_benchmark(
     llm_api_key: str,
     request_timeout: float,
     limit: int | None,
-    save_images: bool,
     dry_run: bool,
 ) -> Path:
     base_config = AppConfig.from_env()
     run_config = _make_run_config(
         base_config,
         context_cap=context_cap,
-        enable_visual_retrieval=enable_visual_retrieval,
+        retrieval_k=retrieval_k,
+        final_top_k=final_top_k,
+        rrf_k=rrf_k,
+        min_score_ratio=min_score_ratio,
+        final_output_images=final_output_images,
         route_mode=route_mode,
-        candidate_mode=candidate_mode,
+        visual_bonus=visual_bonus,
         visual_weight=visual_weight,
     )
     queries = _load_jsonl(query_set, limit=limit)
@@ -313,7 +279,6 @@ def run_answering_benchmark(
     answers_dir = run_dir / "answers"
     contexts_dir = run_dir / "contexts"
     retrieval_dir = run_dir / "retrieval"
-    images_dir = run_dir / "attached-page-images" if save_images else None
     for path in (responses_dir, answers_dir, contexts_dir, retrieval_dir):
         path.mkdir(parents=True, exist_ok=True)
 
@@ -322,12 +287,10 @@ def run_answering_benchmark(
         "query_set": str(query_set),
         "query_count": len(queries),
         "context_cap": context_cap,
-        "image_count": image_count,
-        "image_dpi": image_dpi,
+        "final_output_images": final_output_images,
         "enable_thinking": enable_thinking,
-        "enable_visual_retrieval": enable_visual_retrieval,
         "route_mode": route_mode,
-        "candidate_mode": candidate_mode,
+        "visual_bonus": visual_bonus,
         "visual_weight": visual_weight,
         "max_tokens": max_tokens,
         "llm_base_url": llm_base_url,
@@ -338,6 +301,7 @@ def run_answering_benchmark(
             "final_top_k": run_config.retrieval.final_top_k,
             "rrf_k": run_config.retrieval.rrf_k,
             "min_score_ratio": run_config.retrieval.min_score_ratio,
+            "final_output_images": run_config.retrieval.final_output_images,
             "context_chars_per_token": run_config.retrieval.context_chars_per_token,
         },
     }
@@ -362,25 +326,11 @@ def run_answering_benchmark(
         result = engine.retrieve(str(query.get("query", "")))
         retrieval_latency = time.perf_counter() - retrieval_started
         page_scores = _page_scores(result)
-        attached_images: list[dict[str, Any]] = []
-        image_error = ""
-        try:
-            attached_images = _attached_page_images(
-                pdf_path=run_config.paths.source_pdf,
-                page_scores=page_scores,
-                image_count=image_count,
-                dpi=image_dpi,
-                save_dir=images_dir,
-                query_id=query_id,
-            )
-        except Exception as exc:
-            image_error = str(exc)
-            if image_count > 0:
-                errors += 1
+        final_output_content = _final_output_content(result)
+        final_output_images_used = tuple(result.final_output.images) if result.final_output else ()
         messages = _answering_messages(
             query=str(query.get("query", "")),
-            context=result.context,
-            attached_images=attached_images,
+            final_output_content=final_output_content,
         )
         answer = ""
         reasoning = ""
@@ -406,9 +356,8 @@ def run_answering_benchmark(
         returned_pages = _hit_page_indices(result)
         gold_chunks = _gold_chunk_ids(query)
         gold_pages = _gold_page_indices(query)
-        attached_page_indices = [int(item["page_idx"]) for item in attached_images]
+        final_output_page_indices = [int(item.page_idx) for item in final_output_images_used]
         thinking_leak = bool(THINKING_LEAK_RE.search(answer or ""))
-        estimated_image_tokens = sum(int(item["estimated_image_tokens"]) for item in attached_images)
         estimated_text_tokens = _estimate_text_tokens(
             result.context,
             chars_per_token=run_config.retrieval.context_chars_per_token,
@@ -423,12 +372,14 @@ def run_answering_benchmark(
             "requires_visual": int(bool(query.get("requires_visual", False))),
             "requires_table": int(bool(query.get("requires_table", False))),
             "context_cap": context_cap,
-            "image_count": image_count,
-            "image_dpi": image_dpi,
+            "retrieval_k": run_config.retrieval.retrieval_k,
+            "final_top_k": run_config.retrieval.final_top_k,
+            "rrf_k": run_config.retrieval.rrf_k,
+            "min_score_ratio": run_config.retrieval.min_score_ratio,
+            "final_output_images_enabled": int(final_output_images),
             "enable_thinking": int(enable_thinking),
-            "enable_visual_retrieval": int(enable_visual_retrieval),
             "route_mode": route_mode,
-            "candidate_mode": candidate_mode,
+            "visual_bonus": visual_bonus,
             "visual_weight": visual_weight,
             "retrieval_latency_seconds": round(retrieval_latency, 4),
             "answering_latency_seconds": round(answering_latency, 4),
@@ -440,13 +391,15 @@ def run_answering_benchmark(
             "gold_page_indices": "|".join(str(page) for page in sorted(gold_pages)),
             "retrieval_gold_context_hit": int(bool(gold_chunks.intersection(returned_chunks))),
             "retrieval_gold_page_hit": int(bool(gold_pages.intersection(returned_pages))),
-            "attached_page_indices": "|".join(str(page) for page in attached_page_indices),
-            "attached_page_numbers": "|".join(str(page + 1) for page in attached_page_indices),
-            "attached_gold_page_hit": int(bool(gold_pages.intersection(attached_page_indices))),
-            "attached_image_widths": "|".join(str(item["width"]) for item in attached_images),
-            "attached_image_heights": "|".join(str(item["height"]) for item in attached_images),
+            "final_output_mode": result.final_output.mode if result.final_output else "context_only",
+            "final_output_image_count": len(final_output_images_used),
+            "final_output_image_url_count": _image_url_count(final_output_content),
+            "final_output_page_indices": "|".join(str(page) for page in final_output_page_indices),
+            "final_output_page_numbers": "|".join(str(page + 1) for page in final_output_page_indices),
+            "final_output_gold_page_hit": int(bool(gold_pages.intersection(final_output_page_indices))),
+            "final_output_image_paths": "|".join(image.image_path for image in final_output_images_used),
+            "final_output_image_policies": "|".join(image.image_answering_policy for image in final_output_images_used),
             "estimated_text_tokens": estimated_text_tokens,
-            "estimated_image_tokens": estimated_image_tokens,
             "usage_prompt_tokens": _usage_int(usage, "prompt_tokens"),
             "usage_completion_tokens": _usage_int(usage, "completion_tokens"),
             "usage_total_tokens": _usage_int(usage, "total_tokens"),
@@ -454,7 +407,6 @@ def run_answering_benchmark(
             "reasoning_chars": len(reasoning or ""),
             "thinking_leak": int(thinking_leak),
             "answer_chars": len(answer or ""),
-            "image_error": image_error,
             "llm_error": llm_error,
             "answer_path": str(answers_dir / f"{query_id}.md"),
             "context_path": str(contexts_dir / f"{query_id}.txt"),
@@ -471,15 +423,17 @@ def run_answering_benchmark(
         retrieval_payload = {
             "hit_page": result.hit_page,
             "context": result.context,
-            "all_hits": [hit.__dict__ for hit in result.all_hits],
+            "all_hits": [_jsonable(hit) for hit in result.all_hits],
             "page_scores": [{"page_idx": page, "page_number": page + 1, "score": score} for page, score in page_scores],
-            "attached_pages": [
-                {key: value for key, value in item.items() if key != "data_url"}
-                for item in attached_images
-            ],
+            "final_output": {
+                "mode": result.final_output.mode if result.final_output else "context_only",
+                "context": result.final_output.context if result.final_output else result.context,
+                "content": _jsonable(final_output_content),
+                "images": [_jsonable(image) for image in final_output_images_used],
+            },
         }
         (retrieval_dir / f"{query_id}.json").write_text(
-            json.dumps(retrieval_payload, ensure_ascii=False, indent=2),
+            json.dumps(_jsonable(retrieval_payload), ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
         response_payload = {
@@ -494,7 +448,7 @@ def run_answering_benchmark(
                 }
                 for message in messages
             ],
-            "errors": {"image_error": image_error, "llm_error": llm_error},
+            "errors": {"llm_error": llm_error},
         }
         (responses_dir / f"{query_id}.json").write_text(
             json.dumps(response_payload, ensure_ascii=False, indent=2),
@@ -503,7 +457,7 @@ def run_answering_benchmark(
         print(
             f"[{index}/{len(queries)}] {query_id}: total={total_latency:.2f}s "
             f"retrieve={retrieval_latency:.2f}s answer={answering_latency:.2f}s "
-            f"usage={row['usage_total_tokens'] or 'missing'} pages={row['attached_page_numbers'] or '-'}"
+            f"usage={row['usage_total_tokens'] or 'missing'} images={row['final_output_image_count']}"
         )
 
     metrics_path = run_dir / "answering_metrics.csv"
@@ -513,12 +467,22 @@ def run_answering_benchmark(
             writer.writeheader()
             writer.writerows(rows)
 
+    final_output_image_count = sum(int(row["final_output_image_count"]) for row in rows)
+    final_output_image_url_count = sum(int(row["final_output_image_url_count"]) for row in rows)
+    if final_output_images and rows and final_output_image_url_count == 0:
+        raise RuntimeError(
+            "final_output_images was enabled, but retrieval produced zero image_url entries. "
+            "Rebuild chunks/index with image_base_dir before running image answering experiments."
+        )
+
     summary = {
         "run_id": run_id,
         "queries": len(rows),
         "errors": errors,
         "thinking_leaks": sum(int(row["thinking_leak"]) for row in rows),
         "usage_missing": sum(int(row["usage_missing"]) for row in rows),
+        "final_output_image_count": final_output_image_count,
+        "final_output_image_url_count": final_output_image_url_count,
         "avg_total_latency_seconds": round(
             sum(float(row["total_latency_seconds"]) for row in rows) / len(rows), 4
         )
@@ -546,12 +510,19 @@ def build_parser(config: AppConfig) -> argparse.ArgumentParser:
     run_parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     run_parser.add_argument("--run-id", required=True)
     run_parser.add_argument("--context-cap", type=int, default=config.retrieval.max_context_tokens)
-    run_parser.add_argument("--image-count", type=int, default=0)
-    run_parser.add_argument("--image-dpi", type=int, default=200)
+    run_parser.add_argument("--retrieval-k", type=int, default=config.retrieval.retrieval_k)
+    run_parser.add_argument("--final-top-k", type=int, default=config.retrieval.final_top_k)
+    run_parser.add_argument("--rrf-k", type=int, default=config.retrieval.rrf_k)
+    run_parser.add_argument("--min-score-ratio", type=float, default=config.retrieval.min_score_ratio)
+    run_parser.add_argument(
+        "--final-output-images",
+        action=argparse.BooleanOptionalAction,
+        default=config.retrieval.final_output_images,
+        help="Let retrieval include recommended/required image_url evidence in final_output.content.",
+    )
     run_parser.add_argument("--enable-thinking", action="store_true")
-    run_parser.add_argument("--enable-visual-retrieval", action="store_true")
     run_parser.add_argument("--route-mode", default=config.retrieval.route_mode)
-    run_parser.add_argument("--candidate-mode", default=config.retrieval.candidate_mode)
+    run_parser.add_argument("--visual-bonus", default=config.retrieval.visual_bonus)
     run_parser.add_argument("--visual-weight", type=float, default=config.retrieval.visual_weight)
     run_parser.add_argument("--llm-base-url", default=config.models.llm_base_url)
     run_parser.add_argument("--llm-model", default=config.models.llm_model)
@@ -559,7 +530,6 @@ def build_parser(config: AppConfig) -> argparse.ArgumentParser:
     run_parser.add_argument("--max-tokens", type=int, default=4000)
     run_parser.add_argument("--timeout", type=float, default=180.0)
     run_parser.add_argument("--limit", type=int)
-    run_parser.add_argument("--save-images", action="store_true")
     run_parser.add_argument("--dry-run", action="store_true")
     return parser
 
@@ -575,12 +545,14 @@ def main(argv: Sequence[str] | None = None) -> None:
             output_dir=args.output_dir,
             run_id=args.run_id,
             context_cap=args.context_cap,
-            image_count=args.image_count,
-            image_dpi=args.image_dpi,
+            retrieval_k=args.retrieval_k,
+            final_top_k=args.final_top_k,
+            rrf_k=args.rrf_k,
+            min_score_ratio=args.min_score_ratio,
+            final_output_images=args.final_output_images,
             enable_thinking=args.enable_thinking,
-            enable_visual_retrieval=args.enable_visual_retrieval,
             route_mode=args.route_mode,
-            candidate_mode=args.candidate_mode,
+            visual_bonus=args.visual_bonus,
             visual_weight=args.visual_weight,
             max_tokens=args.max_tokens,
             llm_base_url=args.llm_base_url,
@@ -588,7 +560,6 @@ def main(argv: Sequence[str] | None = None) -> None:
             llm_api_key=args.api_key,
             request_timeout=args.timeout,
             limit=args.limit,
-            save_images=args.save_images,
             dry_run=args.dry_run,
         )
         return

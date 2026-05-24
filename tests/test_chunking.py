@@ -75,6 +75,7 @@ def test_token_chunks_render_table_and_image_fields(tmp_path):
     assert "User Manual" not in chunks[0]["chunk_content"]
     assert "Contact us" not in chunks[0]["chunk_content"]
     assert chunks[0]["metadata"]["images_on_page"] == ["images/login.png"]
+    assert chunks[0]["metadata"]["image_base_dir"] == str(tmp_path)
     assert chunks[0]["metadata"]["image_answering_evidence"] == [
         {
             "img_path": "images/login.png",

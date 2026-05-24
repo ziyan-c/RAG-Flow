@@ -16,9 +16,9 @@ from rag_flow.benchmark.evidence_remap import build_evidence_anchors, remap_quer
 from rag_flow.config import AppConfig
 
 
-DEFAULT_OUTPUT_DIR = Path("thesis/07-retrieval-serving/data/benchmark-runs")
-DEFAULT_PILOT_QUERY_SET = Path("thesis/07-retrieval-serving/data/pilot_query_set.jsonl")
-DEFAULT_FULL_QUERY_SET = Path("thesis/07-retrieval-serving/data/full_query_set.jsonl")
+DEFAULT_OUTPUT_DIR = Path("thesis/08-retrieval/data/benchmark-runs")
+DEFAULT_PILOT_QUERY_SET = Path("thesis/08-retrieval/data/pilot_query_set.jsonl")
+DEFAULT_FULL_QUERY_SET = Path("thesis/08-retrieval/data/full_query_set.jsonl")
 DEFAULT_RECALL_KS = (1, 3, 5, 10)
 FULL_QUERY_VISUAL_PAGE_RATIO = 0.15
 
@@ -1118,12 +1118,11 @@ def run_retrieval_benchmark(
                 "response_path": str(response_path),
                 "context_path": str(context_path),
                 "route_mode": run_config.retrieval.route_mode,
-                "candidate_mode": run_config.retrieval.candidate_mode,
+                "visual_bonus": run_config.retrieval.visual_bonus,
                 "retrieval_k": run_config.retrieval.retrieval_k,
                 "final_top_k": run_config.retrieval.final_top_k,
                 "rrf_k": run_config.retrieval.rrf_k,
                 "visual_weight": run_config.retrieval.visual_weight,
-                "enable_visual": int(run_config.retrieval.enable_visual),
                 "candidate_scroll_page_size": run_config.retrieval.candidate_scroll_page_size,
                 **feature_row,
             }
@@ -1153,12 +1152,11 @@ def run_retrieval_benchmark(
                     f"strict_coverage@{run_config.retrieval.final_top_k}"
                 ],
                 "route_mode": run_config.retrieval.route_mode,
-                "candidate_mode": run_config.retrieval.candidate_mode,
+                "visual_bonus": run_config.retrieval.visual_bonus,
                 "retrieval_k": run_config.retrieval.retrieval_k,
                 "final_top_k": run_config.retrieval.final_top_k,
                 "rrf_k": run_config.retrieval.rrf_k,
                 "visual_weight": run_config.retrieval.visual_weight,
-                "enable_visual": int(run_config.retrieval.enable_visual),
                 "candidate_scroll_page_size": run_config.retrieval.candidate_scroll_page_size,
                 "top_dense_rrf_score": feature_row["top_dense_rrf_score"],
                 "top_sparse_rrf_score": feature_row["top_sparse_rrf_score"],
@@ -1206,12 +1204,11 @@ def run_retrieval_benchmark(
         "hit_count",
         "context_chars",
         "route_mode",
-        "candidate_mode",
+        "visual_bonus",
         "retrieval_k",
         "final_top_k",
         "rrf_k",
         "visual_weight",
-        "enable_visual",
         "candidate_scroll_page_size",
         "top_dense_rrf_score",
         "top_sparse_rrf_score",

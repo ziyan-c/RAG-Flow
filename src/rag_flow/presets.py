@@ -15,9 +15,8 @@ class ConfigPreset:
 
 _TEXT_DIRECT_COMMON: dict[str, str] = {
     "RAG_FLOW_INDEX_MODE": "text",
-    "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL": "0",
     "RAG_FLOW_RETRIEVAL_ROUTE_MODE": "text",
-    "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE": "direct",
+    "RAG_FLOW_RETRIEVAL_VISUAL_BONUS": "none",
     "RAG_FLOW_RETRIEVAL_K": "150",
     "RAG_FLOW_FINAL_TOP_K": "80",
     "RAG_FLOW_RRF_K": "10",
@@ -97,9 +96,8 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
         name="visual-route",
         summary="Optional ColPali visual route preset with a 16k retrieved-context cap.",
         env={
-            "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL": "1",
-            "RAG_FLOW_RETRIEVAL_ROUTE_MODE": "visual-naive",
-            "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE": "visual-page-local-naive",
+            "RAG_FLOW_RETRIEVAL_ROUTE_MODE": "text-visual-naive",
+            "RAG_FLOW_RETRIEVAL_VISUAL_BONUS": "page-naive",
             "RAG_FLOW_RETRIEVAL_K": "150",
             "RAG_FLOW_FINAL_TOP_K": "80",
             "RAG_FLOW_RRF_K": "10",

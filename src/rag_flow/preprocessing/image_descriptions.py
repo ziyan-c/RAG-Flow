@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from rag_flow.config import AppConfig
 from rag_flow.preprocessing.small_icons import (
@@ -104,7 +104,7 @@ class ContextBlockSelection:
 class ImageDescriptionLLMOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    image_description_vlm: str
+    image_description_vlm: str = Field(max_length=6000)
     image_answering_policy: Literal[
         "caption_only",
         "image_optional",
@@ -112,7 +112,7 @@ class ImageDescriptionLLMOutput(BaseModel):
         "image_required",
     ]
     image_answering_confidence: Literal["high", "medium", "low"]
-    image_answering_reason: str
+    image_answering_reason: str = Field(max_length=1000)
 
 
 class TextBudgeter(Protocol):

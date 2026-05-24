@@ -197,7 +197,7 @@ def test_captioning_defaults(tmp_path, monkeypatch):
     assert config.captioning.max_context_tokens == 2000
     assert config.captioning.max_image_side == 2048
     assert config.captioning.batch_size == 32
-    assert config.captioning.concurrency == 6
+    assert config.captioning.concurrency == 3
     assert config.captioning.checkpoint_interval == 1
     assert config.captioning.llm_timeout == 120.0
 
@@ -280,10 +280,9 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.models.colpali_model == "vidore/colpali-v1.3-merged"
     assert config.models.colpali_model_path is None
     assert config.models.colpali_local_model_root.as_posix() == "/root/autodl-tmp/models"
-    assert config.retrieval.enable_visual is False
     assert config.retrieval.device == "auto"
     assert config.retrieval.route_mode == "text"
-    assert config.retrieval.candidate_mode == "direct"
+    assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.quantized_colpali is True
     assert config.retrieval.retrieval_k == 150
     assert config.retrieval.final_top_k == 80
@@ -331,9 +330,8 @@ def test_retrieval_preset_from_env_file(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.retrieval.enable_visual is True
-    assert config.retrieval.route_mode == "visual-naive"
-    assert config.retrieval.candidate_mode == "visual-page-local-naive"
+    assert config.retrieval.route_mode == "text-visual-naive"
+    assert config.retrieval.visual_bonus == "page-naive"
     assert config.retrieval.retrieval_k == 150
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.visual_weight == 2.5
@@ -354,9 +352,8 @@ def test_precise_preset_uses_smaller_context_cap(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.retrieval.enable_visual is False
     assert config.retrieval.route_mode == "text"
-    assert config.retrieval.candidate_mode == "direct"
+    assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.retrieval_k == 150
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.max_context_tokens == 5000
@@ -374,9 +371,8 @@ def test_tiny_preset_uses_very_small_context_cap(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.retrieval.enable_visual is False
     assert config.retrieval.route_mode == "text"
-    assert config.retrieval.candidate_mode == "direct"
+    assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.retrieval_k == 150
     assert config.retrieval.final_top_k == 80
     assert config.retrieval.max_context_tokens == 3000
@@ -391,7 +387,7 @@ def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
             [
                 "RAG_FLOW_PRESET=enhanced",
                 "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=12000",
-                "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1",
+                "RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-bbox",
             ]
         ),
         encoding="utf-8",
@@ -404,8 +400,7 @@ def test_retrieval_preset_values_can_be_overridden(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.retrieval.max_context_tokens == 12000
-    assert config.retrieval.enable_visual is True
-    assert config.retrieval.route_mode == "text"
+    assert config.retrieval.route_mode == "text-visual-bbox"
 
 
 def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):
@@ -437,11 +432,10 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
     env_file.write_text(
         "\n".join(
             [
-                "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0",
                 "RAG_FLOW_RETRIEVAL_DEVICE=cpu",
                 "RAG_FLOW_QUANTIZED_COLPALI=0",
                 "RAG_FLOW_VISUAL_WEIGHT=0.75",
-                "RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct",
+                "RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none",
                 "RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE=12",
             ]
         ),
@@ -452,9 +446,8 @@ def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.retrieval.enable_visual is False
     assert config.retrieval.device == "cpu"
-    assert config.retrieval.candidate_mode == "direct"
+    assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.quantized_colpali is False
     assert config.retrieval.visual_weight == 0.75
     assert config.retrieval.candidate_scroll_page_size == 12

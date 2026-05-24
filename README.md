@@ -271,8 +271,8 @@ rag-flow patch \
 ```
 
 The LLM prompt asks the model to add missing `[Icon: ...]` markers without
-explanations or surrounding commentary. The run writes a checkpoint every 10
-LLM batches by default, also checkpoints at the end of each page window, resumes
+explanations or surrounding commentary. The run writes a checkpoint after each
+LLM batch by default, also checkpoints at the end of each page window, resumes
 from that checkpoint on retry, deletes the checkpoint after success, writes a
 `*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
 and prints patching statistics at the end. Useful controls:
@@ -341,10 +341,10 @@ showing each captioned image and the nearby context blocks used for it. Useful
 controls:
 
 - `--dry-run`: print resolved paths, image counts, and estimated context token stats without calling the LLM
-- `--max-context-tokens`: cap nearby text sent with each image, default `10000`
+- `--max-context-tokens`: cap nearby text sent with each image, default `2000`
 - `--max-new-tokens`: caption generation budget, default `8000`
-- `--batch-size`: images grouped per local batch, default `4`
-- `--concurrency`: maximum simultaneous captioning LLM requests inside each batch, default `1`
+- `--batch-size`: images grouped per local batch, default `32`
+- `--concurrency`: maximum simultaneous captioning LLM requests inside each batch, default `3`
 - `--llm-base-url`: OpenAI-compatible endpoint, default `RAG_FLOW_LLM_BASE_URL`
 - `--request-timeout`: captioning request timeout in seconds, default `120`
 - `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
@@ -499,14 +499,15 @@ rag-flow test-retriever "How do I configure alarms?"
 ```
 
 The default retrieval preset is the low-latency text-only preset selected by
-the 220-query benchmark. It intentionally retrieves a large candidate pool, then
+the thesis benchmark plan. It intentionally retrieves a large candidate pool, then
 uses a soft retrieved-context target so the downstream answer model is not forced
 to consume all candidates:
 
 ```env
-RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0
+# Choices: text, text-visual-naive, text-visual-bbox.
 RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
-RAG_FLOW_RETRIEVAL_CANDIDATE_MODE=direct
+# Choices: none, page-naive, page-bbox.
+RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none
 RAG_FLOW_RETRIEVAL_K=150
 RAG_FLOW_FINAL_TOP_K=80
 RAG_FLOW_RRF_K=10
@@ -558,7 +559,7 @@ also include `image_url` items for existing `image_recommended` or
 the switch is off that payload contains only text context; when it is on it also
 contains those image paths for the OpenAI-compatible LLM request.
 
-For offline high-recall review, keep the same text-only direct mode and raise
+For offline high-recall review, keep the same text-only mode without visual bonus and raise
 the retrieved-context budget. The thesis experiments used
 `RAG_FLOW_RETRIEVAL_K=150` plus `RAG_FLOW_FINAL_TOP_K=80`, with no-cap runs for
 diagnosis and capped 24k runs for a more practical review preset. Visual
@@ -585,7 +586,7 @@ The shipped presets are:
 - `tiny`: text-only, same retrieval backbone, 3k retrieved-context cap for smoke tests and very short answers.
 - `enhanced`: text-only, same retrieval backbone, 16k retrieved-context cap.
 - `high-recall`: offline text-only review preset, 24k retrieved-context cap, `min_score_ratio=1.0`.
-- `visual-route`: optional ColPali route, `visual-naive` plus `visual-page-local-naive`, 16k retrieved-context cap, `visual_weight=2.5`.
+- `visual-route`: optional ColPali route, `text-visual-naive` plus `page-naive`, 16k retrieved-context cap, `visual_weight=2.5`.
 
 You can also set `RAG_FLOW_PRESET=enhanced` in the environment file. Explicit
 environment variables still override preset defaults, so remove hand-written
@@ -597,19 +598,23 @@ encoder is a Torch model and can run on CPU or CUDA:
 
 ```env
 # Full three-way retrieval, auto-select CUDA when available.
-RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive
+RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-naive
 RAG_FLOW_RETRIEVAL_DEVICE=auto
 
 # Force GPU visual query encoding; fail if CUDA is unavailable.
-RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-bbox
+RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-bbox
 RAG_FLOW_RETRIEVAL_DEVICE=cuda
 
 # Force CPU visual query encoding. Useful for low-frequency local use.
-RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1
+RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive
+RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-naive
 RAG_FLOW_RETRIEVAL_DEVICE=cpu
 
 # Text-only CPU retrieval: dense + sparse, no ColPali model loaded.
-RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=0
+RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
+RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none
 ```
 
 `RAG_FLOW_QUANTIZED_COLPALI=1` only applies when the selected retrieval device

@@ -268,8 +268,6 @@ def upsert_text_vectors(
                 payload.update(source_payload_fields(source_relpath))
                 payload.pop("source", None)
                 payload["chunk_content"] = doc
-                if payload.get("image_answering_evidence"):
-                    payload.setdefault("image_base_dir", str(config.paths.base_dir))
                 page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
                 chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
                 points.append(

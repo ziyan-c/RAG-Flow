@@ -400,8 +400,7 @@ def test_preset_env_prints_preset_values(capsys):
 
     output = capsys.readouterr().out
     assert "RAG_FLOW_PRESET=visual-route" in output
-    assert "RAG_FLOW_RETRIEVAL_ENABLE_VISUAL=1" in output
-    assert "RAG_FLOW_RETRIEVAL_ROUTE_MODE=visual-naive" in output
+    assert "RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive" in output
 
 
 def test_leading_preset_argument_applies_preset_before_module_dispatch(monkeypatch):

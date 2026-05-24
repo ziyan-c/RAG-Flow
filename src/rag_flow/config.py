@@ -164,10 +164,9 @@ class RetrievalConfig:
     rrf_k: int
     visual_weight: float
     quantized_colpali: bool
-    enable_visual: bool = True
     device: str = "auto"
     route_mode: str = "auto"
-    candidate_mode: str = "direct"
+    visual_bonus: str = "none"
     candidate_scroll_page_size: int = 30
     max_context_tokens: int = 0
     context_chars_per_token: float = 4.0
@@ -331,10 +330,9 @@ class AppConfig:
             rrf_k=env.int("RAG_FLOW_RRF_K", 10),
             visual_weight=env.float("RAG_FLOW_VISUAL_WEIGHT", 2.5),
             quantized_colpali=env.get("RAG_FLOW_QUANTIZED_COLPALI", "1") not in {"0", "false", "False"},
-            enable_visual=env.bool("RAG_FLOW_RETRIEVAL_ENABLE_VISUAL", False),
             device=env.get("RAG_FLOW_RETRIEVAL_DEVICE", "auto"),
             route_mode=env.get("RAG_FLOW_RETRIEVAL_ROUTE_MODE", "text"),
-            candidate_mode=env.get("RAG_FLOW_RETRIEVAL_CANDIDATE_MODE", "direct"),
+            visual_bonus=env.get("RAG_FLOW_RETRIEVAL_VISUAL_BONUS", "none"),
             candidate_scroll_page_size=env.int("RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE", 30),
             max_context_tokens=env.int("RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS", 10000),
             context_chars_per_token=env.float("RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN", 4.0),
@@ -382,7 +380,7 @@ class AppConfig:
             max_context_tokens=env.int("RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS", 2000),
             batch_size=env.int("RAG_FLOW_CAPTION_BATCH_SIZE", 32),
             max_image_side=env.int("RAG_FLOW_CAPTION_MAX_IMAGE_SIDE", 2048),
-            concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 6),
+            concurrency=env.int("RAG_FLOW_CAPTION_CONCURRENCY", 3),
             checkpoint_interval=env.int("RAG_FLOW_CAPTION_CHECKPOINT_INTERVAL", 1),
             llm_timeout=env.float("RAG_FLOW_CAPTION_LLM_TIMEOUT", 120.0),
         )

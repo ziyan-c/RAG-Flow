@@ -101,23 +101,23 @@ def test_rrf_keeps_route_contributions_for_visual_prior():
     assert visual["routes"]["visual"] == 1.5 / 61
 
 
-def test_candidate_mode_normalizes_direct_aliases():
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct-rank"))
+def test_visual_bonus_accepts_none():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, visual_bonus="none"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
 
-    assert engine._candidate_mode() == "direct"
+    assert engine._visual_bonus() == "none"
 
 
-def test_candidate_mode_rejects_removed_seed_expansion():
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="seed"))
+def test_visual_bonus_rejects_unknown_modes():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, visual_bonus="seed"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
 
     try:
-        engine._candidate_mode()
+        engine._visual_bonus()
     except ValueError as exc:
-        assert "Seed expansion has been removed" in str(exc)
+        assert "Use one of: none, page-bbox, page-naive" in str(exc)
     else:
-        raise AssertionError("candidate_mode='seed' should be rejected")
+        raise AssertionError("visual_bonus='seed' should be rejected")
 
 
 def test_context_block_includes_breadcrumb_when_chunk_content_lacks_it():
@@ -174,6 +174,7 @@ def test_image_references_include_all_images_with_policies(tmp_path):
         "source_relpath": "DSS/manual.pdf",
         "chunk_id": "DSS/manual.pdf::manual-chunk-00001",
         "page_idx": 2,
+        "image_base_dir": str(tmp_path),
         "image_answering_evidence": [
             {
                 "img_path": "images/optional.png",
@@ -218,7 +219,7 @@ def test_image_references_include_all_images_with_policies(tmp_path):
     assert references[2].image_exists is False
 
 
-def test_image_references_fall_back_to_config_base_dir(tmp_path):
+def test_image_references_require_indexed_image_base_dir(tmp_path):
     config = SimpleNamespace(
         paths=SimpleNamespace(base_dir=tmp_path),
         retrieval=RetrievalConfig(10, 3, 60, 1.5, False),
@@ -233,8 +234,7 @@ def test_image_references_fall_back_to_config_base_dir(tmp_path):
 
     references = engine._image_references_for_payload(payload, hit_rank=1)
 
-    assert len(references) == 1
-    assert references[0].image_path == str(tmp_path / "images" / "required.png")
+    assert references == ()
 
 
 def test_build_final_output_is_text_only_by_default(tmp_path):
@@ -360,7 +360,7 @@ def test_context_candidate_selection_keeps_top_chunk_even_when_it_exceeds_budget
 
 
 def test_direct_rank_candidates_skip_visual_pages():
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, candidate_mode="direct"))
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, visual_bonus="none"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
     final_ranking = [
         {
@@ -416,7 +416,7 @@ def test_visual_page_local_candidates_stay_on_hit_page():
                 ),
             ], None
 
-    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 0.5, False, candidate_mode="visual-page-local-bbox"))
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 0.5, False, visual_bonus="page-bbox"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
     engine.client = FakeClient()
     fake_models = SimpleNamespace(
@@ -440,7 +440,7 @@ def test_visual_page_local_candidates_stay_on_hit_page():
                 score=99.0,
             )
         ],
-        candidate_mode="visual-page-local-bbox",
+        visual_bonus="page-bbox",
         models=fake_models,
     )
 
@@ -459,7 +459,7 @@ def test_visual_page_local_candidates_scan_retrieval_k_visual_hits():
             self.pages.append(page_condition.match.value)
             return [], None
 
-    config = SimpleNamespace(retrieval=RetrievalConfig(2, 1, 60, 0.5, False, candidate_mode="visual-page-local-bbox"))
+    config = SimpleNamespace(retrieval=RetrievalConfig(2, 1, 60, 0.5, False, visual_bonus="page-bbox"))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]
     fake_client = FakeClient()
     engine.client = fake_client
@@ -477,7 +477,7 @@ def test_visual_page_local_candidates_scan_retrieval_k_visual_hits():
             SimpleNamespace(id="visual-page-2", payload={"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 2}),
             SimpleNamespace(id="visual-page-3", payload={"is_visual_page": True, "source_relpath": "manual.pdf", "page_idx": 3}),
         ],
-        candidate_mode="visual-page-local-bbox",
+        visual_bonus="page-bbox",
         models=fake_models,
     )
 
@@ -593,7 +593,7 @@ def test_visual_page_local_candidates_scroll_all_chunks_on_hit_page():
             rrf_k=60,
             visual_weight=1.5,
             quantized_colpali=False,
-            candidate_mode="visual-page-local-bbox",
+            visual_bonus="page-bbox",
             candidate_scroll_page_size=1,
         )
     )
@@ -622,7 +622,7 @@ def test_visual_page_local_candidates_scroll_all_chunks_on_hit_page():
         collection_name="manuals",
         final_ranking=[],
         visual_hits=visual_hits,
-        candidate_mode="visual-page-local-bbox",
+        visual_bonus="page-bbox",
         models=fake_models,
     )
 

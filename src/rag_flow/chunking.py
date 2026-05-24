@@ -365,6 +365,7 @@ def _chunk_metadata(
     mode: str,
     items: list[ChunkItem],
     token_count: int,
+    image_base_dir: Path | None = None,
     section_path: tuple[str, ...] = (),
     section_level: int | None = None,
     section_source: str = "",
@@ -430,6 +431,8 @@ def _chunk_metadata(
     metadata["breadcrumb"] = _breadcrumb_for_items(source_name, items, section_path)
     if image_answering_evidence:
         metadata["image_answering_evidence"] = image_answering_evidence
+        if image_base_dir is not None:
+            metadata["image_base_dir"] = str(image_base_dir)
     if table_continuations:
         metadata["table_continuations"] = table_continuations
     if section_path:
@@ -448,6 +451,7 @@ def _make_chunk(
     chunk_idx: int,
     mode: str,
     items: list[ChunkItem],
+    image_base_dir: Path | None = None,
     section_path: tuple[str, ...] = (),
     section_level: int | None = None,
     section_source: str = "",
@@ -465,6 +469,7 @@ def _make_chunk(
             mode=mode,
             items=items,
             token_count=token_count,
+            image_base_dir=image_base_dir,
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
@@ -480,6 +485,7 @@ def _token_window_chunks(
     max_tokens: int,
     overlap_tokens: int,
     min_tokens: int,
+    image_base_dir: Path | None = None,
     start_chunk_idx: int = 0,
     section_path: tuple[str, ...] = (),
     section_level: int | None = None,
@@ -504,6 +510,7 @@ def _token_window_chunks(
                 chunk_idx=chunk_idx,
                 mode=mode,
                 items=current,
+                image_base_dir=image_base_dir,
                 section_path=section_path,
                 section_level=section_level,
                 section_source=section_source,
@@ -523,6 +530,7 @@ def _token_window_chunks(
             chunk_idx=chunk_idx,
             mode=mode,
             items=current,
+            image_base_dir=image_base_dir,
             section_path=section_path,
             section_level=section_level,
             section_source=section_source,
@@ -539,6 +547,7 @@ def _section_window_chunks(
     max_tokens: int,
     overlap_tokens: int,
     min_tokens: int,
+    image_base_dir: Path | None = None,
 ) -> list[dict[str, Any]]:
     chunks = []
     group: list[ChunkItem] = []
@@ -558,6 +567,7 @@ def _section_window_chunks(
                 max_tokens=max_tokens,
                 overlap_tokens=overlap_tokens,
                 min_tokens=min_tokens,
+                image_base_dir=image_base_dir,
                 start_chunk_idx=len(chunks),
                 section_path=current_path,
                 section_level=current_level,
@@ -594,7 +604,10 @@ def create_chunks(
     if mode not in SUPPORTED_CHUNK_MODES:
         raise ValueError(f"Unsupported chunk mode {mode!r}. Choose one of: {', '.join(SUPPORTED_CHUNK_MODES)}")
 
-    with Path(json_path).open("r", encoding="utf-8") as f:
+    resolved_json_path = Path(json_path).expanduser().resolve()
+    image_base_dir = resolved_json_path.parent
+
+    with resolved_json_path.open("r", encoding="utf-8") as f:
         content_data = json.load(f)
     if not isinstance(content_data, list):
         raise ValueError(f"Expected a list in content JSON: {json_path}")
@@ -612,6 +625,7 @@ def create_chunks(
             max_tokens=max_tokens,
             overlap_tokens=overlap_tokens,
             min_tokens=min_tokens,
+            image_base_dir=image_base_dir,
         )
     return _token_window_chunks(
         items,
@@ -620,6 +634,7 @@ def create_chunks(
         max_tokens=max_tokens,
         overlap_tokens=overlap_tokens,
         min_tokens=min_tokens,
+        image_base_dir=image_base_dir,
     )
 
 

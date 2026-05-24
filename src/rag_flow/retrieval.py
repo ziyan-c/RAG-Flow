@@ -13,6 +13,9 @@ from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
 from .source_paths import normalize_source_name, source_breadcrumb
 
+ROUTE_MODES = ("text", "text-visual-naive", "text-visual-bbox")
+VISUAL_BONUS_MODES = ("none", "page-bbox", "page-naive")
+
 
 @dataclass(frozen=True)
 class RetrievedImage:
@@ -346,92 +349,32 @@ class RetrievalEngine:
         self._visual_page_cache = None
 
     def _route_mode(self) -> str:
-        mode = (self.config.retrieval.route_mode or "auto").strip().lower()
-        if mode == "auto":
-            return "visual-bbox" if self.config.retrieval.enable_visual else "text"
-        aliases = {
-            "dense-only": "dense",
-            "sparse-only": "sparse",
-            "text-only": "text",
-            "visual": "visual-bbox",
-            "visual_bbox": "visual-bbox",
-            "visual-naive": "visual-naive",
-            "visual_naive": "visual-naive",
-            "visual-only": "visual-only-bbox",
-            "visual_only": "visual-only-bbox",
-            "visual-only-bbox": "visual-only-bbox",
-            "visual_only_bbox": "visual-only-bbox",
-            "visual-only-naive": "visual-only-naive",
-            "visual_only_naive": "visual-only-naive",
-            "dense-visual": "dense-visual-bbox",
-            "dense_visual": "dense-visual-bbox",
-            "dense-visual-bbox": "dense-visual-bbox",
-            "dense_visual_bbox": "dense-visual-bbox",
-            "dense-visual-naive": "dense-visual-naive",
-            "dense_visual_naive": "dense-visual-naive",
-            "sparse-visual": "sparse-visual-bbox",
-            "sparse_visual": "sparse-visual-bbox",
-            "sparse-visual-bbox": "sparse-visual-bbox",
-            "sparse_visual_bbox": "sparse-visual-bbox",
-            "sparse-visual-naive": "sparse-visual-naive",
-            "sparse_visual_naive": "sparse-visual-naive",
-        }
-        return aliases.get(mode, mode)
-
-    def _candidate_mode(self) -> str:
-        mode = (self.config.retrieval.candidate_mode or "direct").strip().lower()
-        aliases = {
-            "auto": "direct",
-            "default": "direct",
-            "direct-rank": "direct",
-            "direct_rank": "direct",
-            "page-local-bbox": "visual-page-local-bbox",
-            "page_local_bbox": "visual-page-local-bbox",
-            "visual_page_local_bbox": "visual-page-local-bbox",
-            "page-local-naive": "visual-page-local-naive",
-            "page_local_naive": "visual-page-local-naive",
-            "visual_page_local_naive": "visual-page-local-naive",
-        }
-        resolved = aliases.get(mode, mode)
-        if resolved not in {"direct", "visual-page-local-bbox", "visual-page-local-naive"}:
+        mode = (self.config.retrieval.route_mode or "text").strip().lower()
+        if mode not in ROUTE_MODES:
             raise ValueError(
-                "Unsupported retrieval candidate mode "
-                f"'{self.config.retrieval.candidate_mode}'. Seed expansion has been removed; "
-                "use 'direct', 'visual-page-local-bbox', or 'visual-page-local-naive'."
+                f"Unsupported retrieval route mode '{self.config.retrieval.route_mode}'. "
+                f"Use one of: {', '.join(ROUTE_MODES)}."
             )
-        return resolved
+        return mode
+
+    def _visual_bonus(self) -> str:
+        mode = (self.config.retrieval.visual_bonus or "none").strip().lower()
+        if mode not in VISUAL_BONUS_MODES:
+            raise ValueError(
+                "Unsupported retrieval visual bonus "
+                f"'{self.config.retrieval.visual_bonus}'. "
+                f"Use one of: {', '.join(VISUAL_BONUS_MODES)}."
+            )
+        return mode
 
     def _uses_dense_route(self) -> bool:
-        return self._route_mode() in {
-            "dense",
-            "text",
-            "visual-bbox",
-            "visual-naive",
-            "dense-visual-bbox",
-            "dense-visual-naive",
-        }
+        return self._route_mode() in ROUTE_MODES
 
     def _uses_sparse_route(self) -> bool:
-        return self._route_mode() in {
-            "sparse",
-            "text",
-            "visual-bbox",
-            "visual-naive",
-            "sparse-visual-bbox",
-            "sparse-visual-naive",
-        }
+        return self._route_mode() in ROUTE_MODES
 
     def _uses_visual_route(self) -> bool:
-        return self.config.retrieval.enable_visual and self._route_mode() in {
-            "visual-bbox",
-            "visual-naive",
-            "visual-only-bbox",
-            "visual-only-naive",
-            "dense-visual-bbox",
-            "dense-visual-naive",
-            "sparse-visual-bbox",
-            "sparse-visual-naive",
-        }
+        return self._route_mode() in {"text-visual-naive", "text-visual-bbox"}
 
     def load(self) -> None:
         from fastembed import SparseTextEmbedding, TextEmbedding
@@ -526,21 +469,21 @@ class RetrievalEngine:
             )
 
         final_ranking = self._compute_rrf(dense_hits, sparse_hits, visual_hits)
-        candidate_mode = self._candidate_mode()
-        if candidate_mode == "direct":
+        visual_bonus = self._visual_bonus()
+        if visual_bonus == "none":
             scored_candidates = self._direct_rank_candidates(final_ranking)
-        elif candidate_mode in {"visual-page-local-bbox", "visual-page-local-naive"}:
+        elif visual_bonus in {"page-bbox", "page-naive"}:
             scored_candidates = self._visual_page_local_candidates(
                 collection_name=collection,
                 final_ranking=final_ranking,
                 visual_hits=visual_hits,
-                candidate_mode=candidate_mode,
+                visual_bonus=visual_bonus,
                 models=models,
             )
         else:
             raise ValueError(
-                f"Unsupported retrieval candidate mode '{candidate_mode}'. "
-                "Use 'direct', 'visual-page-local-bbox', or 'visual-page-local-naive'."
+                f"Unsupported retrieval visual bonus '{visual_bonus}'. "
+                f"Use one of: {', '.join(VISUAL_BONUS_MODES)}."
             )
 
         if not scored_candidates:
@@ -683,11 +626,11 @@ class RetrievalEngine:
                 break
         return selected_candidates
 
-    def _image_base_dir_for_payload(self, payload: dict[str, Any]) -> Path:
+    def _image_base_dir_for_payload(self, payload: dict[str, Any]) -> Path | None:
         raw_base = str(payload.get("image_base_dir") or "").strip()
         if raw_base:
             return Path(raw_base).expanduser()
-        return Path(self.config.paths.base_dir).expanduser()
+        return None
 
     def _image_references_for_payload(self, payload: dict[str, Any], *, hit_rank: int) -> tuple[RetrievedImage, ...]:
         raw_evidence = payload.get("image_answering_evidence", [])
@@ -695,6 +638,8 @@ class RetrievalEngine:
             return ()
 
         base_dir = self._image_base_dir_for_payload(payload)
+        if base_dir is None:
+            return ()
         source_relpath = _payload_source_relpath(payload)
         chunk_id = str(payload.get("chunk_id", ""))
         references: list[RetrievedImage] = []
@@ -800,13 +745,13 @@ class RetrievalEngine:
         collection_name: str,
         final_ranking: list[dict[str, Any]],
         visual_hits: list[Any],
-        candidate_mode: str,
+        visual_bonus: str,
         models: Any,
     ) -> list[dict[str, Any]]:
         candidates: dict[tuple[str, str], dict[str, Any]] = {
             candidate["key"]: candidate for candidate in self._direct_rank_candidates(final_ranking)
         }
-        use_naive = candidate_mode == "visual-page-local-naive"
+        use_naive = visual_bonus == "page-naive"
         visual_limit = self.config.retrieval.retrieval_k
 
         for rank, hit in enumerate(visual_hits[:visual_limit]):
