@@ -1,99 +1,224 @@
-# RAG Flow
+# RAG-Flow
 
-RAG Flow is a multimodal retrieval augmented generation pipeline for technical
-manuals. The default preset uses generic example names, and paths, model names,
-and collection names can be changed through environment variables.
+RAG-Flow is a multimodal retrieval-augmented generation pipeline for technical
+manuals. It turns PDF manuals into auditable evidence objects, indexes them with
+hybrid text and optional visual retrieval, and serves source-grounded answers
+through an OpenAI-compatible language model.
 
-## What It Does
+The project was built around a practical question: how do we make RAG reliable
+on manuals where the answer may live in prose, tables, screenshots, diagrams,
+inline icons, page layout, or several pages at once?
 
-RAG-Flow uses two standardized stage groups. Offline ingestion prepares the
-searchable corpus:
+## Highlights
 
-1. `parsing`: parse the source PDF with MinerU into structured `content_list.json`.
-2. `sectioning`: recover PDF outline sections into MinerU block metadata when outline data exists.
-3. `patching`: patch MinerU output with a vision language model:
-   - recover small icon text that MinerU/OCR missed
-   - add context-aware descriptions to extracted images
-4. `captioning`: describe extracted images and write image answering policy metadata.
-5. `chunking`: build section-aware or fixed token-window chunks from enriched `content_list.json`.
-   Chunk IDs are source-scoped, for example `DSS/manual.pdf::manual-chunk-00000`.
-6. `indexing`: store retrieval signals in Qdrant, controlled by `RAG_FLOW_INDEX_MODE=text|both`:
-   - dense text vectors
-   - sparse BM25 vectors
-   - ColPali page-image multivectors
+- End-to-end PDF pipeline: MinerU parsing, PDF-outline sectioning, small-icon
+  repair, image captioning, section-aware chunking, Qdrant indexing, retrieval,
+  and answering.
+- Hybrid retrieval: dense vectors, sparse BM25-style vectors, reciprocal rank
+  fusion, and optional ColPali page-level visual retrieval.
+- Source-first design: every block, chunk, retrieved context, and answer payload
+  carries source identity, page information, section breadcrumbs, and audit
+  metadata.
+- Thesis-scale evaluation: 88 answer-bearing runs, 6,001 generated answers, and
+  18,003 independent review judgments over a 14-PDF technical-manual corpus.
+- Deployable presets: named runtime modes for default online QA, high recall,
+  compact low-token use, visual recall, and diagnostic image-input answering.
 
-Online QA then runs:
+## System Overview
 
-7. `retrieval`: serve a FastAPI `/retrieve` endpoint with RRF fusion and context assembly.
-8. `answering`: use an OpenAI-compatible LLM endpoint for cited answers.
+```mermaid
+flowchart LR
+  subgraph Offline["Offline ingestion"]
+    PDF["Source PDFs"] --> MinerU["MinerU parsing"]
+    MinerU --> Sectioning["Outline sectioning<br/>source identity"]
+    Sectioning --> Patching["Small-icon patching<br/>VLM crop repair"]
+    Patching --> Captioning["Image captioning<br/>answering policy"]
+    Captioning --> Chunking["Section-aware chunking"]
+    Chunking --> TextIndex["Dense + sparse<br/>text index"]
+    PDF --> VisualIndex["Optional ColPali<br/>page index"]
+  end
 
-## Project Layout
+  TextIndex --> Qdrant["Qdrant collection"]
+  VisualIndex --> Qdrant
 
-```text
-src/rag_flow/
-  config.py                 Environment-driven configuration
-  mineru.py                 MinerU install/check/run helpers
-  pipeline.py               End-to-end ingestion orchestration
-  chunking.py               MinerU JSON to retrieval chunks
-  indexing.py               Qdrant collection, text vectors, visual vectors
-  retrieval.py              Hybrid retrieval engine and context builder
-  api.py                    FastAPI retrieval service
-  chat_cli.py               Terminal answering client
-  preprocessing/            MinerU post-processing helpers
-scripts/                    Shell wrappers for common operations
-envs/                       Exported conda environments from the old workspace
-docs/                       Notes and migration docs
-configs/                    Per-manual env templates
+  subgraph Online["Online QA"]
+    Query["User query"] --> Retrieval["Hybrid retrieval<br/>RRF + context cap"]
+    Qdrant --> Retrieval
+    Retrieval --> Payload["Final answer payload<br/>text + optional images"]
+    Payload --> Answerer["Qwen/SGLang or<br/>OpenAI-compatible LLM"]
+    Answerer --> Answer["Grounded answer"]
+  end
 ```
 
-## Setup
+## Why This Exists
+
+Technical manuals are a poor fit for naive text-only RAG. Important evidence can
+appear as:
+
+- a table row with repeated headers,
+- a small UI icon dropped by OCR,
+- a screenshot caption that explains a workflow,
+- a visual dimension drawing with almost no extracted text,
+- a procedure split across section boundaries,
+- or a comparison across several PDF files.
+
+RAG-Flow treats these cases as first-class system problems. The pipeline enriches
+manuals before indexing, keeps the online default conservative, and exposes
+heavier multimodal modes only when their cost is justified.
+
+## Pipeline Contract
+
+| Stage | Input | Output | Purpose |
+| --- | --- | --- | --- |
+| `parsing` | Source PDF | MinerU `content_list.json`, images, origin PDF | Extract layout-aware blocks and assets. |
+| `sectioning` | MinerU JSON + source PDF | `*_SECTIONED.json` | Add source identity and PDF-outline breadcrumbs before LLM enrichment. |
+| `patching` | Sectioned JSON + source PDF | `*_SECTIONED_PATCHED.json`, patching view PDF | Repair small inline icons and missing visual symbols. |
+| `captioning` | Sectioned patched JSON | `*_SECTIONED_PATCHED_CAPTIONED.json`, captioning view PDF | Describe real image blocks and record whether images may be needed during answering. |
+| `chunking` | Captioned JSON | `*_CHUNKED.json`, chunking view PDF | Build source-aware, section-aware retrieval units. |
+| `indexing` | Chunked JSON + PDF pages | Qdrant text and optional visual points | Store dense text, sparse text, and optional ColPali page vectors. |
+| `retrieval` | Qdrant collection + query | Ranked chunks, context text, optional image URLs | Build the final answer payload under explicit top-k and token rules. |
+| `answering` | Retrieval final output | LLM answer, usage, latency, review inputs | Generate source-grounded answers without silently choosing extra evidence. |
+
+## Evaluation Snapshot
+
+The final experiments used a mixed technical-manual corpus: long DSS software
+manuals plus visually dense camera and switch sheets.
+
+| Item | Count |
+| --- | ---: |
+| Source PDFs | 14 |
+| Source pages | 1,114 |
+| Final validation questions | 200 |
+| Evidence items in the gold set | 244 |
+| Answer-bearing runs | 88 |
+| Generated answers | 6,001 |
+| Independent review pass judgments | 18,003 |
+
+### Final Presets
+
+Scores are mean 0-5 answer-quality scores from the final 200-question validation
+unless noted otherwise.
+
+| Preset | Route | Main settings | Mean score | Avg retrieved context | Use when |
+| --- | --- | --- | ---: | ---: | --- |
+| `default` | text-only | `k=80`, `top_k=20`, 10k cap | 2.3383 | ~10,072 tokens | Normal online QA with stable latency and simple deployment. |
+| `high-recall` | text-only | `k=150`, `top_k=80`, 16k cap | 2.4133 | ~16,585 tokens | Hard questions, manual review, or maximum evidence coverage. |
+| `compact` | text-only | `k=150`, `top_k=10`, ratio `0.4`, 10k cap | 2.3833 | ~4,156 tokens | Low-token use, batch previews, and fast screening. |
+| `visual-recall` | ColPali-assisted retrieval | naive page visual bonus, `k=150`, `top_k=20`, 10k cap | 2.3483 | ~10,315 tokens | UI-heavy or diagram-heavy queries where slower retrieval is acceptable. |
+| `default-with-image-input` | default retrieval + images to answerer | selected evidence images appended | 2.3183 | ~10,251 text tokens | Diagnostics when the answerer must inspect images. |
+| `compact-with-image-input` | compact retrieval + images to answerer | selected evidence images appended | not separately run on 200Q | ~4,156 text tokens expected | Image diagnostics with smaller text context. |
+
+Important negative findings:
+
+- `24k` context is not shipped. It produced 124 usage-missing cases in the
+  200-question validation under the current serving limit.
+- Thinking mode is not enabled by default. It reduced quality and increased
+  latency in the measured runs.
+- Always sending images is not the default. Repaired image-input runs delivered
+  1,378 image URLs to the answerer, but did not improve mean quality.
+
+## Quick Start
+
+### 1. Install the core package
 
 ```bash
+cd RAG-Flow
+
 mkdir -p .local
 cp .env.example .local/rag-flow.env
+
 pip install -e ".[text-retrieval]"
 ```
 
-The app automatically loads `.local/rag-flow.env` when commands are run from
-this repository. You can still point to another local env file with
-`RAG_FLOW_ENV_FILE=/path/to/file`.
-
-This core repository still owns its own `.local` private configuration for
-pipeline stages, source documents, model paths, and local experiments. The
-separate `rag-flow-orchestrator` repository has its own `.local` for deployment
-composition and service runtime settings.
-
-Use `pip install -e ".[retrieval,preprocess]"` for the full local visual
-retrieval and preprocessing stack. The lighter `text-retrieval` extra installs
-the default online text retrieval path without Torch, ColPali, or BitsAndBytes.
-
-For the original AutoDL-style environment, the exported conda YAML files are in
-`envs/`. They are intentionally preserved because CUDA, ColPali, MinerU, and
-SGLang package compatibility is sensitive.
-
-## Command Line
-
-All operations are available through the unified `rag-flow` command:
+Use the full local stack when you need MinerU, patching, captioning, and visual
+retrieval on the same machine:
 
 ```bash
-rag-flow init china-all
-rag-flow env create-mineru
-rag-flow env create-pipeline
-rag-flow env create-llm
-rag-flow mineru doctor
-rag-flow mineru run
-rag-flow section
-rag-flow serve llm-sglang
-rag-flow patch --artifact-dir output-pdfs/example-technical-manual/auto
-rag-flow ingest --to-stage chunking
-rag-flow caption
-rag-flow chunk
-rag-flow index text
-rag-flow retriever
-rag-flow chat
+pip install -e ".[mineru,preprocess,retrieval]"
 ```
 
-Use `--dry-run` on script-backed commands to see what would run:
+The lighter `text-retrieval` extra is enough for the default online text path.
+The visual stack pulls in heavier Torch, ColPali, and related dependencies.
+
+### 2. Configure local paths
+
+RAG-Flow automatically reads `.local/rag-flow.env` from the repository root.
+Keep private paths, API keys, source PDFs, model paths, and machine-specific
+settings there.
+
+Common local layout:
+
+```text
+source-pdfs/   input PDF root
+output-pdfs/   MinerU and preprocessing artifacts
+qdrant-db/     local Qdrant vector database
+.local/        private env file, secrets, local-only state
+```
+
+### 3. Run the offline pipeline
+
+```bash
+rag-flow mineru doctor
+rag-flow mineru run --input source-pdfs --output-dir output-pdfs
+rag-flow ingest --to-stage chunking
+rag-flow index text
+```
+
+For optional visual retrieval, build the page-level ColPali index too:
+
+```bash
+rag-flow index visual --chunks /path/to/current_CHUNKED.json
+```
+
+Or run through indexing from the staged pipeline:
+
+```bash
+RAG_FLOW_INDEX_MODE=both rag-flow ingest --to-stage indexing
+```
+
+### 4. Start retrieval and answer questions
+
+```bash
+rag-flow --preset default retriever
+rag-flow --preset default chat
+```
+
+Useful alternatives:
+
+```bash
+rag-flow --preset compact chat
+rag-flow --preset high-recall chat
+rag-flow --preset visual-recall test-retriever "Which port is used for power?"
+rag-flow --preset default-with-image-input chat
+```
+
+## Command Map
+
+All user-facing operations are exposed through one command:
+
+```bash
+rag-flow mineru doctor
+rag-flow mineru setup
+rag-flow mineru run
+rag-flow section
+rag-flow patch
+rag-flow patch-view
+rag-flow caption
+rag-flow caption-view
+rag-flow chunk
+rag-flow chunk-view
+rag-flow index text
+rag-flow index visual
+rag-flow index inspect
+rag-flow retriever
+rag-flow test-retriever "How do I configure alarms?"
+rag-flow chat
+rag-flow preset list
+rag-flow preset show default
+rag-flow benchmark --help
+```
+
+Most script-backed setup commands support `--dry-run`:
 
 ```bash
 rag-flow init china-all --dry-run
@@ -102,750 +227,104 @@ rag-flow env create-pipeline --dry-run
 rag-flow serve llm-sglang --dry-run
 ```
 
-## Pipeline
+## Named Presets
 
-The offline ingestion stage names are:
-
-```text
-parsing -> sectioning -> patching -> captioning -> chunking -> indexing
-```
-
-The online QA stage names are:
-
-```text
-retrieval -> answering
-```
-
-`retrieval` and `answering` run after indexing, but they are not `rag-flow
-ingest --to-stage` values because they depend on a user query.
-
-Check whether MinerU is available:
-
-```bash
-rag-flow mineru doctor
-```
-
-Install the pinned MinerU package into the configured Python environment.
-The default install spec is `mineru[all]==3.0.9`, and the configured Python
-should be 3.10 through 3.13:
-
-```bash
-rag-flow mineru setup
-```
-
-Run the default ingestion path from PDF to retrieval chunks:
-
-```bash
-rag-flow ingest --pdf source-pdfs/example-technical-manual.pdf
-```
-
-The default local workspace layout is:
-
-```text
-source-pdfs/  input PDF root
-output-pdfs/  MinerU and preprocessing artifacts
-qdrant-db/    local Qdrant vector database
-```
-
-When `--pdf` is omitted, ingestion uses `RAG_FLOW_MINERU_INPUT_PATH`.
-`rag-flow mineru run` also uses that same input path and writes to
-`RAG_FLOW_MINERU_OUTPUT_DIR`. `rag-flow mineru run` accepts either one PDF or
-a folder of PDFs. Folder input is recursive by default and mirrors the input
-folder layout into the output root before letting MinerU create each
-file-stem output folder:
-
-```bash
-rag-flow mineru run \
-  --input source-pdfs \
-  --output-dir output-pdfs
-```
-
-For example, `source-pdfs/network/admin.pdf` is parsed with
-`-o output-pdfs/network`, so MinerU can write its usual
-`admin/auto/...` files under that mirrored location. Add `--no-recursive` when
-you only want PDFs directly inside the input folder.
-
-Preview the command sequence without running heavy steps:
-
-```bash
-rag-flow ingest --dry-run
-```
-
-Resume from a later stage:
-
-```bash
-rag-flow ingest --from-stage captioning --to-stage chunking
-```
-
-Run through indexing too:
-
-```bash
-rag-flow ingest --to-stage indexing
-```
-
-After indexing, start the online stages:
-
-```bash
-rag-flow retriever
-rag-flow chat
-```
-
-The individual steps are also available when you need manual control.
-If MinerU writes files into a nested output folder, `rag-flow ingest` searches
-`RAG_FLOW_MINERU_OUTPUT_DIR` for a `*content_list.json` matching the current
-source PDF name, then derives the downstream artifact paths from that folder:
-`*_content_list_SECTIONED.json`,
-`*_content_list_SECTIONED_PATCHED.json`,
-`*_content_list_SECTIONED_PATCHED_CAPTIONED.json`, and
-`*_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json`.
-Set `RAG_FLOW_MINERU_BACKEND=pipeline` for CPU-friendly parsing. Set
-`RAG_FLOW_MINERU_MODEL_SOURCE=modelscope` to run MinerU with
-`MINERU_MODEL_SOURCE=modelscope`.
-
-Run MinerU only:
-
-```bash
-rag-flow mineru run
-```
-
-Recover PDF outline sections into MinerU JSON:
-
-```bash
-rag-flow section \
-  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list.json \
-  --input-pdf source-pdfs/example-technical-manual.pdf
-```
-
-This writes `*_content_list_SECTIONED.json` plus `*_SECTIONING_AUDIT.json`.
-It uses the original source PDF outline/bookmarks, not MinerU heading labels,
-and adds both `section_*` fields and source identity fields
-(`source_relpath`, `source_filename`, `breadcrumb`) to blocks. Breadcrumbs are
-formed from the source relative path plus the current section path, so downstream
-chunking can reuse the same source hierarchy instead of rebuilding it late.
-Set `RAG_FLOW_SOURCE_ROOT=/root/pdfs` or pass `--source-root /root/pdfs` when
-you want `/root/pdfs/DSS/manual.pdf` to be stored as `DSS/manual.pdf`.
-Inside `rag-flow ingest`, this stage runs automatically after MinerU parsing and
-before patching.
-
-Patch small icons:
-
-```bash
-rag-flow serve llm-sglang
-rag-flow patch --artifact-dir output-pdfs/example-technical-manual/auto
-```
-
-The artifact-dir form is the preferred patching entrypoint after MinerU has
-parsed a PDF. It expects a MinerU output folder containing
-`*_content_list_SECTIONED.json` and `*_origin.pdf`; run sectioning first.
-Patching does not fall back to raw `*_content_list.json`, and fails fast when
-the sectioned JSON is missing. It writes
-`*_content_list_SECTIONED_PATCHED.json`. Patching sends its crop images to the
-local OpenAI-compatible vision LLM configured by
-`RAG_FLOW_LLM_BASE_URL` and `RAG_FLOW_LLM_MODEL`; start it first with
-`rag-flow serve llm-sglang`. If that service is not reachable, patching fails
-before rendering PDF pages.
-
-Patching focuses on content blocks instead of page furniture: text, lists, and
-table bodies/footnotes are patched, while table captions, headers, footers, page
-numbers, and empty fields are skipped. Small uncaptioned `image` blocks are
-treated as possible inline icons:
-patching links them to nearby text/list blocks or containing table cells, expands
-the visual crop to include them, marks them in the JSON, and keeps captioning
-from describing them as standalone figures. MinerU represents cross-page table
-continuations as empty `table` blocks; those blocks are not copied into the JSON
-as duplicate text. Instead, their PDF crops are stacked onto the previous table
-crop so the LLM can patch the single complete `table_body` with visual evidence
-from every page of the same table.
-
-The source PDF is rendered in page windows instead of loading the whole book at
-once; the default is 200 pages per window. When `--artifact-dir` points at a
-parent folder, patching finds nested MinerU artifact folders recursively and
-processes one PDF at a time to avoid GPU memory spikes:
-
-```bash
-rag-flow patch \
-  --artifact-dir output-pdfs \
-  --page-window-size 200 \
-  --batch-size 9 \
-  --concurrency 3
-```
-
-The LLM prompt asks the model to add missing `[Icon: ...]` markers without
-explanations or surrounding commentary. The run writes a checkpoint after each
-LLM batch by default, also checkpoints at the end of each page window, resumes
-from that checkpoint on retry, deletes the checkpoint after success, writes a
-`*_PATCHING_VIEW.pdf` overlay that shows the exact crop regions sent to the LLM,
-and prints patching statistics at the end. Useful controls:
-
-- `--batch-size`: LLM request group size for checkpoints, default `512`
-- `--concurrency`: maximum simultaneous patching LLM requests, default `8`
-- `--max-new-tokens`: generation budget, default `8000`
-- `--llm-base-url`: OpenAI-compatible LLM endpoint, default `RAG_FLOW_LLM_BASE_URL`
-- `--model` / `--llm-model`: model name sent to the LLM endpoint
-- `--request-timeout`: per-request timeout, default `RAG_FLOW_PATCH_LLM_TIMEOUT`
-- `--dpi`: PDF render DPI for patching crops, default `250`
-- `--page-window-size`: PDF render window size, default `200`
-- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
-- `--invalid-retry-limit`: retry only-icon LLM outputs before fallback insertion, default `0`
-- `--patching-view-pdf`: custom path for the overlay PDF
-- `--no-patching-view`: skip writing the overlay PDF
-- `--no-resume`: ignore an existing checkpoint
-- `--no-recursive`: only patch the exact artifact folder
-
-Patching needs the pipeline Python environment and Poppler PDF rendering
-commands (`pdfinfo` and `pdftoppm`). `rag-flow env create-pipeline` installs the
-Python packages, writes `RAG_FLOW_PIPELINE_PYTHON_BIN`, and later `rag-flow
-patch` automatically re-runs itself with that Python when the variable is
-available.
-`rag-flow init china-all` installs `poppler-utils` by default on apt-based
-Linux machines.
-
-The same `--max-new-tokens` override is available on `rag-flow ingest` when
-running through the patching stage.
-
-You can also regenerate the overlay without running the LLM:
-
-```bash
-rag-flow patch-view \
-  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
-  --input-pdf source-pdfs/example-technical-manual.pdf
-```
-
-Generate image descriptions:
-
-```bash
-rag-flow caption
-```
-
-After patching a MinerU artifact folder, you can also use the artifact-dir form:
-
-```bash
-rag-flow caption --artifact-dir output-pdfs/example-technical-manual/auto
-```
-
-Captioning calls the local OpenAI-compatible SGLang service configured by
-`RAG_FLOW_LLM_BASE_URL` / `RAG_FLOW_LLM_MODEL`, so start it first with
-`rag-flow serve llm-sglang`. It writes the plain image description to
-`image_description_vlm`, and also writes `image_answering_policy`,
-`image_answering_confidence`, and `image_answering_reason` so downstream
-answering code can decide whether the original image should be supplied with
-the retrieved text. Captioning requires the sectioned patched input
-`*_content_list_SECTIONED_PATCHED.json`; legacy `*_content_list_PATCHED.json`
-inputs are intentionally rejected. It resumes from
-`*_content_list_SECTIONED_PATCHED_CAPTIONED.checkpoint.json` when available, writes a checkpoint after
-each LLM batch by default, and skips image blocks that already have
-`image_description_vlm`. Captioning context is taken from nearby text blocks
-before and after each image in the patched JSON order, rather than from a fixed
-page window. A successful run also writes a `*_CAPTIONING_VIEW.pdf` overlay
-showing each captioned image and the nearby context blocks used for it. Useful
-controls:
-
-- `--dry-run`: print resolved paths, image counts, and estimated context token stats without calling the LLM
-- `--max-context-tokens`: cap nearby text sent with each image, default `2000`
-- `--max-new-tokens`: caption generation budget, default `8000`
-- `--batch-size`: images grouped per local batch, default `32`
-- `--concurrency`: maximum simultaneous captioning LLM requests inside each batch, default `3`
-- `--llm-base-url`: OpenAI-compatible endpoint, default `RAG_FLOW_LLM_BASE_URL`
-- `--request-timeout`: captioning request timeout in seconds, default `120`
-- `--checkpoint-interval`: write checkpoint every N LLM batches, default `1`
-- `--captioning-view-pdf`: custom path for the overlay PDF
-- `--no-captioning-view`: skip writing the overlay PDF
-- `--no-resume`: ignore an existing checkpoint
-- `--no-skip-existing`: regenerate descriptions even when `image_description_vlm` exists
-
-You can regenerate the captioning overlay without calling the LLM:
-
-```bash
-rag-flow caption-view --artifact-dir output-pdfs/example-technical-manual/auto
-```
-
-Or pass the captioning input JSON and origin PDF explicitly:
-
-```bash
-rag-flow caption-view \
-  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json \
-  --input-pdf source-pdfs/example-technical-manual.pdf
-```
-
-Build retrieval chunks:
-
-```bash
-rag-flow chunk
-```
-
-The chunk JSON contains `chunk_content` plus `metadata`; `chunk_content` is the
-text used for embeddings and retrieved context.
-
-By default `rag-flow chunk` uses `RAG_FLOW_CHUNK_MODE=auto`. If the input JSON
-contains `section_path` metadata from sectioning, chunks are grouped by section
-and then split by token budget. If no PDF outline was available and sectioning
-was a no-op, chunking falls back to sequential fixed token windows. Useful
-controls:
-
-- `--mode`: `auto`, `section`, or `token`
-- `--max-tokens`: target chunk budget, default `5000`
-- `--overlap-tokens`: repeated tail context between adjacent token chunks, default `500`
-- `--min-tokens`: minimum size before flushing a chunk, default `200`
-
-Cross-page table continuations use the same relation as patching. The empty
-continuation `table` blocks are not emitted as duplicate text chunks; instead,
-their block indices, pages, and bboxes are attached to the master table chunk's
-metadata. That keeps `chunk_content` clean while letting chunking view and
-visual retrieval know that the table spans multiple pages.
-
-Successful pipeline chunking also writes a `*_CHUNKING_VIEW.pdf` overlay. It
-draws each chunk's source bboxes over the original PDF; adjacent chunks use
-different semi-transparent colors so section boundaries and overlap are easier
-to inspect. To generate it separately:
-
-```bash
-rag-flow chunk-view \
-  --input-json output-pdfs/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json \
-  --input-pdf source-pdfs/example-technical-manual.pdf
-```
-
-Upsert text vectors:
-
-```bash
-rag-flow index text
-```
-
-Text indexing embeds and upserts chunks in batches. The default batch size is
-`RAG_FLOW_INDEX_TEXT_BATCH_SIZE=256`; override it with
-`rag-flow index text --batch-size <chunks>`.
-
-The ingestion pipeline uses `RAG_FLOW_INDEX_MODE=text` by default. Set
-`RAG_FLOW_INDEX_MODE=both` to run text indexing and ColPali visual indexing from
-`rag-flow ingest --to-stage indexing`. Standalone commands are still available
-for manual one-off indexing jobs.
-
-Upsert ColPali visual vectors:
-
-```bash
-rag-flow index visual --chunks /path/to/current_CHUNKED.json
-```
-
-By default this renders and embeds `RAG_FLOW_INDEX_VISUAL_BATCH_SIZE=8` PDF
-pages per batch at `RAG_FLOW_INDEX_VISUAL_DPI=200`. Override them with
-`rag-flow index visual --batch-size <pages> --dpi <dpi>` if the indexing machine
-needs a different speed/memory tradeoff. If you point visual indexing at a PDF
-outside the configured source, pass both `--source-name <rel/path.pdf>` and
-`--chunks <that-pdf_CHUNKED.json>` so visual payloads match the current chunk
-metadata `source_relpath`.
-
-ColPali is still a page-level visual index. When chunk output is available,
-visual page payloads inherit page/section metadata from the chunk JSON, so
-visual hits can be shown and filtered with the same section context as text
-hits. The visual embeddings themselves are not section-level; section metadata
-is auxiliary payload for retrieval context and explanation. Visual page payloads
-store `chunk_ids_on_page` as pointers, but they do not store aggregated
-`chunk_content`; answer context is pulled from the chunk-level text points.
-Each `page-image-colpali` point represents exactly one rendered PDF page. It does not
-reuse the table-continuation metadata from text chunks, so cross-page table
-relations stay in chunk metadata instead of polluting the visual page index.
-Visual indexing renders and upserts the PDF in page batches to avoid loading a
-large manual as one giant image list in memory.
-The collection also indexes `page_indices`, because cross-page chunks can belong
-to several pages; this lets a visual hit on one page retrieve the text chunk that
-spans into that page.
-`rag-flow index inspect` prints the actual ColPali shape for a sampled visual
-point, for example `page-image-colpali: 1030 patches x 128 dims`.
-
-ColPali model loading prefers local files before downloading. Set
-`RAG_FLOW_COLPALI_MODEL_PATH` to force a specific local directory, or leave it
-empty and put a model under `RAG_FLOW_COLPALI_LOCAL_MODEL_ROOT` (default
-`/root/autodl-tmp/models`). The resolver checks common layouts such as
-`vidore/colpali-v1.3-merged`, `colpali-v1.3-merged`,
-`vidore--colpali-v1.3-merged`, and Hugging Face cache directories like
-`models--vidore--colpali-v1.3-merged/snapshots/<revision>`. If none exists, it
-falls back to `RAG_FLOW_COLPALI_MODEL` and lets `from_pretrained` use the normal
-cache/download behavior.
-
-Chunking also records source block indices and page bboxes in chunk metadata.
-The retriever uses those bboxes to keep visual evidence page-local: a ColPali
-hit first contributes a `visual_page_prior`, then the candidate chunk receives a
-conservative `visual_alignment_score` based on whether it belongs to that visual
-page and how much of a cross-page chunk actually appears on the hit page. This
-avoids blindly giving the same visual score to every chunk near the page. A
-token-wise image-patch heatmap ranker exists as an experimental helper, but it is
-not enabled in the default retriever until ColPali patch geometry can be mapped
-reliably for every model output shape.
-
-Inspect the Qdrant collection:
-
-```bash
-rag-flow index inspect
-```
-
-By default RAG-Flow opens Qdrant in Python local mode through
-`RAG_FLOW_DB_PATH`. For an orchestrated Docker/server deployment, point the same
-core retriever at a running Qdrant server instead:
-
-```env
-RAG_FLOW_QDRANT_URL=http://127.0.0.1:6333
-RAG_FLOW_COLLECTION=technical-manuals
-```
-
-Start the `retrieval` stage API:
-
-```bash
-rag-flow retriever
-```
-
-Test the retrieval API:
-
-```bash
-rag-flow test-retriever "How do I configure alarms?"
-```
-
-The default retrieval preset is the low-latency text-only preset selected by
-the thesis benchmark plan. It retrieves a controlled candidate pool, then
-uses a soft retrieved-context target so the downstream answer model is not forced
-to consume all candidates:
-
-```env
-# Choices: text, text-visual-naive, text-visual-bbox.
-RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
-# Choices: none, page-naive, page-bbox.
-RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none
-RAG_FLOW_RETRIEVAL_K=80
-RAG_FLOW_FINAL_TOP_K=20
-RAG_FLOW_RRF_K=10
-RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE=30
-RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS=10000
-RAG_FLOW_RETRIEVAL_CONTEXT_CHARS_PER_TOKEN=4.0
-RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO=1.0
-```
-
-`final_top_k` remains a maximum number of chunks. The token cap is a soft target:
-retrieval appends chunks in rank order, keeps the chunk that first pushes the
-estimated context over budget, and then stops. It does not pre-skip a high-rank
-large chunk just to fit lower-rank smaller chunks, and it does not cut chunks in
-half. `RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO` is optional and relative to the top
-candidate score; the current default keeps it at `1.0` to disable relative
-filtering because the benchmark did not show a reliable quality gain from ratio
-pruning for the online preset.
-
-When visual page-local retrieval is enabled, visual page expansion follows
-`RAG_FLOW_RETRIEVAL_K`; `RAG_FLOW_FINAL_TOP_K` only caps the final chunks returned
-to the answer context. `RAG_FLOW_RETRIEVAL_CANDIDATE_SCROLL_PAGE_SIZE` is only
-the Qdrant scroll page size for fetching chunks on a matched visual page, not a
-candidate cap.
-
-The `retrieval` stage returns structured image references for images inside
-selected chunks. Each image keeps its `image_answering_policy`, confidence,
-reason, caption, and VLM description so the `answering` stage can decide whether
-to attach the actual image to a multimodal LLM call. Relative `img_path` values
-are resolved against the payload's `image_base_dir`, falling back to
-`RAG_FLOW_BASE_DIR`.
-
-The API also returns a `final_output` object for the next stage. By default it is
-text-only and contains one OpenAI-compatible text item. Set
-`RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES=1` when `final_output.content` should
-also include `image_url` items for existing `image_recommended` or
-`image_required` evidence images:
-
-```json
-{
-  "mode": "openai_compatible_multimodal",
-  "content": [
-    {"type": "text", "text": "...retrieved context..."},
-    {"type": "image_url", "image_url": {"url": "/absolute/path/to/image.png"}}
-  ]
-}
-```
-
-`rag-flow chat` consumes `final_output.content` as the answering payload. When
-the switch is off that payload contains only text context; when it is on it also
-contains those image paths for the OpenAI-compatible LLM request.
-
-For offline high-recall review, keep the same text-only mode without visual bonus
-and use `RAG_FLOW_RETRIEVAL_K=150`, `RAG_FLOW_FINAL_TOP_K=80`, and a 16k
-retrieved-context cap. The thesis also tested 24k, but that run triggered many
-empty answers and missing usage records, so 24k is not a recommended preset.
-Visual retrieval is kept optional because it can improve visual/UI query ranking,
-but it loads the ColPali query encoder and is much slower than the default text
-path.
-
-Named presets can apply the thesis-recommended retrieval settings without
-hand-editing the individual environment variables:
+Presets set retrieval and answering environment variables without hand-editing
+the env file.
 
 ```bash
 rag-flow preset list
-rag-flow preset show default
-rag-flow --preset default retriever
-rag-flow --preset compact test-retriever "How do I configure alarms?"
-rag-flow --preset high-recall chat
-rag-flow --preset visual-recall test-retriever "How do I configure alarms?"
-rag-flow --preset compact-with-image-input chat
-rag-flow --preset default-with-image-input chat
+rag-flow preset show high-recall
+rag-flow --preset compact retriever
 ```
 
-The shipped presets are:
-
-- `default`: text-only, `retrieval_k=80`, `final_top_k=20`, 10k cap. In the 200-QA thesis run it averaged about 10,072 retrieved-context tokens and reached 11,802 max context tokens.
-- `high-recall`: text-only review mode, `retrieval_k=150`, `final_top_k=80`, 16k cap. It averaged about 16,585 context tokens and reached 17,796 max context tokens.
-- `compact`: low-token text-only mode, `retrieval_k=150`, `final_top_k=10`, 10k cap, `min_score_ratio=0.4`. It averaged about 4,156 context tokens and reached 11,279 max context tokens.
-- `compact-with-image-input`: same compact text retrieval policy, but sends selected evidence images as `image_url` items to the answer model. It has not been separately run on 200 QA; expected text context follows `compact` (about 4,156 average context tokens), while total tokens depend on post-hoc image token usage.
-- `visual-recall`: visual/UI evidence recall mode with the optional ColPali route, `text-visual-naive` plus `page-naive`, `retrieval_k=150`, `final_top_k=20`, 10k cap, `visual_weight=1.0`. It averaged about 10,315 context tokens and reached 11,922 max context tokens.
-- `default-with-image-input`: same retrieval settings as `default`, but sends selected evidence images as `image_url` items to the answer model. It averaged about 10,251 context tokens, 14,325 total input tokens, and reached 23,442 max total input tokens.
-
-Preset cautions:
-
-- `RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS` budgets retrieved text context only. It does not include image token cost.
-- `default-with-image-input` appends selected `image_url` items after text context selection. Image tokens are only visible afterward through LLM usage fields such as `prompt_tokens` and `total_tokens`.
-- `compact-with-image-input` is the safer image-input variant when image evidence is needed but text context should stay small. Its image-token cost still is not pre-budgeted.
-- `visual-recall` changes retrieval routing and requires a visual index plus the ColPali query encoder; it does not send images to the answering model unless image input is also enabled separately.
-- `compact` keeps the tested 10k soft cap. Its lower average context comes from `final_top_k=10` plus `min_score_ratio=0.4`, not from a smaller hard cap.
-- `high-recall` is capped at 16k because the 24k experiment produced many empty answers and missing usage records.
-- `tiny` is not shipped as a final preset; the 3k experiment remains a quality-floor diagnostic, not a recommended mode.
-- Only the six canonical names above are accepted. Old compatibility aliases such as `default-with-visual-route`, `visual-route`, `visualroute`, `enhanced`, and `precise` are intentionally not supported.
-
-You can also set `RAG_FLOW_PRESET=high-recall` in the environment file. Explicit
-environment variables still override preset defaults, so remove hand-written
-retrieval values when you want the named preset to control them fully.
-
-Retriever visual mode is optional. Dense and sparse text search run on CPU;
-`page-image-colpali` visual search also uses Qdrant on CPU, but the ColPali query
-encoder is a Torch model and can run on CPU or CUDA:
+You can also set a preset in `.local/rag-flow.env`:
 
 ```env
-# Full three-way retrieval, auto-select CUDA when available.
-RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive
-RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-naive
-RAG_FLOW_RETRIEVAL_DEVICE=auto
-
-# Force GPU visual query encoding; fail if CUDA is unavailable.
-RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-bbox
-RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-bbox
-RAG_FLOW_RETRIEVAL_DEVICE=cuda
-
-# Force CPU visual query encoding. Useful for low-frequency local use.
-RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive
-RAG_FLOW_RETRIEVAL_VISUAL_BONUS=page-naive
-RAG_FLOW_RETRIEVAL_DEVICE=cpu
-
-# Text-only CPU retrieval: dense + sparse, no ColPali model loaded.
-RAG_FLOW_RETRIEVAL_ROUTE_MODE=text
-RAG_FLOW_RETRIEVAL_VISUAL_BONUS=none
+RAG_FLOW_PRESET=high-recall
 ```
 
-`RAG_FLOW_QUANTIZED_COLPALI=1` only applies when the selected retrieval device
-is CUDA. CPU visual mode loads ColPali in float32 instead of BitsAndBytes
-quantization.
-
-Start the LLM service on the remote GPU box:
-
-```bash
-rag-flow serve llm-sglang
-```
-
-The SGLang launcher is optional and reads its own profile settings from
-`.local/rag-flow.env`. `rag-flow env create-llm` creates an isolated LLM Python
-environment under `RAG_FLOW_ENV_ROOT`, installs `RAG_FLOW_LLM_INSTALL_SPEC`
-with uv pip by default, installs the CuDNN compatibility fix package
-`RAG_FLOW_LLM_CUDNN_PACKAGE` when `RAG_FLOW_LLM_FIX_CUDNN=1`, and writes
-`RAG_FLOW_LLM_PYTHON_BIN` / `RAG_FLOW_SGLANG_PYTHON` back to the env file. The
-default SGLang profile is `qwen3.6-35b-a3b-gptq-int4`.
-
-Download the default profile before the first launch. The command first looks
-for an existing local model under `RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`
-(`/root/autodl-tmp/models` by default), then the ModelScope cache, then the
-Hugging Face cache. If none exist, the default source is `auto`, which tries
-ModelScope first and then Hugging Face:
-
-```bash
-rag-flow download llm
-rag-flow download llm --dry-run
-rag-flow download llm --source modelscope
-rag-flow download llm --source hf
-```
-
-The download command uses `RAG_FLOW_SGLANG_PYTHON` /
-`RAG_FLOW_LLM_PYTHON_BIN`, installs the selected downloader package first when
-needed (`modelscope` or `huggingface_hub`), writes the resolved source/model
-id/path/served model name back to `.local/rag-flow.env`, and keeps startup
-explicit. With `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE=auto`, a ModelScope download
-failure falls back to Hugging Face. It does not run automatically inside `rag-flow serve llm-sglang`
-because model downloads can be very large. For private Hugging Face repos, set
-`HF_TOKEN`, `HUGGINGFACE_HUB_TOKEN`, or `RAG_FLOW_SGLANG_HF_TOKEN` in
-`.local/rag-flow.env`.
-For manually uploaded models, put the directory at either
-`/root/autodl-tmp/models/<owner>/<model-name>` or
-`/root/autodl-tmp/models/<model-name>`.
-
-Switch profiles or override paths like this:
-
-```bash
-rag-flow download llm --profile qwen3.6-35b-a3b-gptq-int4
-rag-flow download llm --profile qwen3.5-35b-a3b-gptq-int4
-rag-flow download llm --source hf --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/huggingface/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
-rag-flow download llm --model-id palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4 --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
-rag-flow serve llm-sglang --profile qwen3.6-35b-a3b-gptq-int4
-rag-flow serve llm-sglang --profile qwen3.5-35b-a3b-gptq-int4
-rag-flow serve llm-sglang --model-path /root/.cache/modelscope/hub/models/palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
-rag-flow serve llm-sglang --served-model-name palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4
-```
-
-Useful launcher/download variables include `RAG_FLOW_SGLANG_MODEL_PROFILE`,
-`RAG_FLOW_SGLANG_MODEL_ID`, `RAG_FLOW_SGLANG_MODEL_PATH`,
-`RAG_FLOW_SGLANG_SERVED_MODEL_NAME`, `RAG_FLOW_SGLANG_MODEL_REVISION`,
-`RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`, `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`,
-`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`,
-`RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`, `RAG_FLOW_SGLANG_HF_TOKEN`,
-`RAG_FLOW_SGLANG_PORT`, `RAG_FLOW_SGLANG_CONTEXT_LENGTH`,
-`RAG_FLOW_SGLANG_MEM_FRACTION_STATIC`, `RAG_FLOW_SGLANG_QUANTIZATION`,
-`RAG_FLOW_SGLANG_ATTENTION_BACKEND`, and `RAG_FLOW_SGLANG_KV_CACHE_DTYPE`. Set
-`RAG_FLOW_LLM_FIX_CUDNN`, `RAG_FLOW_LLM_CUDNN_PACKAGE`,
-`RAG_FLOW_LLM_EXTRA_PACKAGES`, and `RAG_FLOW_CREATE_LLM_INSTALL_UV`. Set
-`RAG_FLOW_CREATE_LLM_INSTALL_UV=0` if the LLM environment should not install uv
-before package installation. Set `RAG_FLOW_LLM_FIX_CUDNN=0` only if you want to
-handle SGLang/PyTorch/CuDNN compatibility yourself.
-
-Run the `answering` stage from the terminal. The command is named `chat`
-because it provides an interactive UI, but the standardized stage name is
-`answering`:
-
-```bash
-rag-flow chat
-```
-
-## Security Notes
-
-Keep credentials and private source documents under `.local/`. The whole
-directory is ignored by Git and is meant for API keys, SSH details, private env
-files, and raw technical documents such as source PDFs or manual folders.
-
-Tracked files should only contain templates, placeholders, or public defaults.
-For local configuration, copy `.env.example` to `.local/rag-flow.env` and put
-real values there. Runtime artifacts such as Qdrant databases, downloaded
-models, and conda environments can stay on the machine paths configured in that
-private env file.
-
-If the retriever is exposed beyond localhost, set `RAG_FLOW_RETRIEVER_API_KEY`
-and send it as `Authorization: Bearer <token>`. Patching and captioning call the
-configured local OpenAI-compatible LLM endpoint instead of loading a VLM inside
-the pipeline process.
+Explicit environment variables override preset values. Remove hand-written
+retrieval variables when you want a named preset to control the full policy.
 
 ## Configuration
 
-All core values are environment variables. The important ones are:
+The full environment surface is documented in `.env.example`. The most important
+families are:
 
-- `RAG_FLOW_BASE_DIR`
-- `RAG_FLOW_SOURCE_PDF`
-- `RAG_FLOW_SOURCE_ROOT`
-- `RAG_FLOW_MINERU_COMMAND`
-- `RAG_FLOW_MINERU_INPUT_PATH`
-- `RAG_FLOW_MINERU_OUTPUT_DIR`
-- `RAG_FLOW_MINERU_BACKEND`
-- `RAG_FLOW_MINERU_MODEL_SOURCE`
-- `RAG_FLOW_MINERU_VERSION`
-- `RAG_FLOW_MINERU_PYTHON`
-- `RAG_FLOW_INIT_INSTALL_APT_PACKAGES`
-- `RAG_FLOW_INIT_APT_PACKAGES`
-- `RAG_FLOW_PATCH_MAX_NEW_TOKENS`
-- `RAG_FLOW_PATCH_LLM_TIMEOUT`
-- `RAG_FLOW_PATCH_BATCH_SIZE`
-- `RAG_FLOW_PATCH_CONCURRENCY`
-- `RAG_FLOW_PATCH_CHECKPOINT_INTERVAL`
-- `RAG_FLOW_PATCH_INVALID_RETRY_LIMIT`
-- `RAG_FLOW_PATCH_DPI`
-- `RAG_FLOW_PATCH_PAGE_WINDOW_SIZE`
-- `RAG_FLOW_CAPTION_MAX_NEW_TOKENS`
-- `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`
-- `RAG_FLOW_CAPTION_BATCH_SIZE`
-- `RAG_FLOW_CAPTION_CONCURRENCY`
-- `RAG_FLOW_CAPTION_LLM_TIMEOUT`
-- `RAG_FLOW_CONTENT_JSON`
-- `RAG_FLOW_SECTIONED_JSON`
-- `RAG_FLOW_PATCHED_JSON`
-- `RAG_FLOW_CAPTIONED_JSON`
-- `RAG_FLOW_CHUNKS_JSON`
-- `RAG_FLOW_CHUNK_MODE`
-- `RAG_FLOW_CHUNK_MAX_TOKENS`
-- `RAG_FLOW_CHUNK_OVERLAP_TOKENS`
-- `RAG_FLOW_CHUNK_MIN_TOKENS`
-- `RAG_FLOW_DB_PATH`
-- `RAG_FLOW_QDRANT_URL`
-- `RAG_FLOW_QDRANT_API_KEY`
-- `RAG_FLOW_QDRANT_PREFER_GRPC`
-- `RAG_FLOW_QDRANT_TIMEOUT`
-- `RAG_FLOW_COLLECTION`
-- `RAG_FLOW_PIPELINE_ENV`
-- `RAG_FLOW_PIPELINE_PYTHON`
-- `RAG_FLOW_PIPELINE_PYTHON_BIN`
-- `RAG_FLOW_PIPELINE_TORCH_INDEX_URL`
-- `RAG_FLOW_LLM_BASE_URL`
-- `RAG_FLOW_LLM_MODEL`
-- `RAG_FLOW_LLM_PYTHON_BIN`
-- `RAG_FLOW_SGLANG_MODEL_PROFILE`
-- `RAG_FLOW_SGLANG_MODEL_ID`
-- `RAG_FLOW_SGLANG_MODEL_PATH`
-- `RAG_FLOW_SGLANG_SERVED_MODEL_NAME`
-- `RAG_FLOW_SGLANG_MODEL_REVISION`
-- `RAG_FLOW_SGLANG_LOCAL_MODEL_ROOT`
-- `RAG_FLOW_SGLANG_DOWNLOAD_SOURCE`
-- `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_MODELSCOPE`
-- `RAG_FLOW_SGLANG_DOWNLOAD_INSTALL_HUGGINGFACE_HUB`
-- `RAG_FLOW_SGLANG_HF_TOKEN`
-- `RAG_FLOW_SGLANG_PYTHON`
-- `RAG_FLOW_RETRIEVER_API_KEY`
-- `RAG_FLOW_RETRIEVER_MAX_QUERY_CHARS`
-- `RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS`
-- `RAG_FLOW_VLM_MODEL_REVISION`
+| Family | Examples | Purpose |
+| --- | --- | --- |
+| Source and artifacts | `RAG_FLOW_SOURCE_ROOT`, `RAG_FLOW_MINERU_OUTPUT_DIR`, `RAG_FLOW_CONTENT_JSON` | Locate PDFs and stage outputs. |
+| Patching | `RAG_FLOW_PATCH_DPI`, `RAG_FLOW_PATCH_CONCURRENCY`, `RAG_FLOW_PATCH_MAX_NEW_TOKENS` | Control small-icon repair. |
+| Captioning | `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`, `RAG_FLOW_CAPTION_CONCURRENCY` | Control image-description generation. |
+| Chunking | `RAG_FLOW_CHUNK_MODE`, `RAG_FLOW_CHUNK_MAX_TOKENS`, `RAG_FLOW_CHUNK_OVERLAP_TOKENS` | Shape retrieval units. |
+| Indexing | `RAG_FLOW_DB_PATH`, `RAG_FLOW_QDRANT_URL`, `RAG_FLOW_COLLECTION`, `RAG_FLOW_INDEX_MODE` | Configure local or server Qdrant. |
+| Retrieval | `RAG_FLOW_RETRIEVAL_K`, `RAG_FLOW_FINAL_TOP_K`, `RAG_FLOW_RRF_K`, `RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS` | Select evidence for answering. |
+| LLM serving | `RAG_FLOW_LLM_BASE_URL`, `RAG_FLOW_LLM_MODEL`, `RAG_FLOW_SGLANG_MODEL_PATH` | Connect to the OpenAI-compatible answerer. |
 
-See `.env.example` for the full list.
+## Repository Layout
 
-The local initialization command `rag-flow init china-all` reads the same
-env file and runs `soft-links`, `cpu-cores`, and `china-sources` in that
-order. Use `RAG_FLOW_INIT_*` variables to choose apt mirrors, pip/uv indexes,
-Hugging Face cache/mirror settings, `MINERU_MODEL_SOURCE`, locale, and conda
-channels without editing the script. The individual helpers remain available
-as `rag-flow init soft-links`, `rag-flow init cpu-cores`, and
-`rag-flow init china-sources`.
+```text
+src/rag_flow/
+  cli.py                    Unified command dispatcher
+  config.py                 Environment loading and settings
+  mineru.py                 MinerU setup and parsing helpers
+  sectioning.py             PDF-outline section annotation
+  preprocessing/            Small-icon patching, image captioning, view PDFs
+  chunking.py               Section-aware and token-window chunking
+  indexing.py               Qdrant text and visual indexing
+  retrieval.py              Hybrid retrieval and context assembly
+  api.py                    FastAPI retrieval service
+  chat_cli.py               Terminal answering client
+  presets.py                Canonical runtime presets
+  benchmark/                Experiment and review utilities
 
-`china-sources` also writes `RAG_FLOW_ENV_FILE=<repo>/.local/rag-flow.env` into
-the managed shell block. That pins future `rag-flow` commands to the project
-env file even when they are launched from `/root` or another directory.
+scripts/
+  env/                      Environment creation helpers
+  experiments/              V2 experiment runners and summarizers
+  init/                     Machine/bootstrap helpers
+  llm/                      SGLang model download helper
+  remote/                   Remote-machine helper scripts
 
-For China mirrors, `RAG_FLOW_INIT_MIRROR_ORDER=aliyun,tencent,tuna` is the
-default. `china-sources` probes apt, pip/uv, and conda mirrors independently,
-uses the first reachable profile for each category, and writes the selected
-managed defaults back to `.local/rag-flow.env` so later `rag-flow env ...`
-commands inherit the working source.
-
-For Python environments, use the split setup under `scripts/env/`:
-
-```bash
-rag-flow env create-mineru
-rag-flow env create-pipeline
-rag-flow env create-llm
+qa-goldset/                 Gold questions, evidence cards, review helpers
+source-pdfs/                Local source PDF tree
+output-pdfs/                Generated parse/enrichment artifacts
+docs/                       Architecture notes and operational docs
+tests/                      Unit and regression tests
 ```
 
-`create-pipeline` installs the CLI plus patching, captioning, chunking,
-indexing, retriever, and chat dependencies. It writes the resolved Python path
-back to `.local/rag-flow.env`, so module commands can re-enter the right
-environment automatically.
-
-On a new AutoDL China machine, run initialization first, then create the MinerU
-and pipeline environments, then check MinerU:
+## Development
 
 ```bash
-rag-flow init china-all
-rag-flow env create-mineru
-rag-flow env create-pipeline
-rag-flow mineru doctor
-rag-flow mineru run --dry-run
+pip install -e ".[dev,text-retrieval]"
+pytest
 ```
 
-The default environment strategy is `RAG_FLOW_ENV_MANAGER=auto`:
-prefer micromamba/conda for isolated path-based environments under
-`RAG_FLOW_ENV_ROOT`. `rag-flow env create-mineru` ensures `uv` is available
-by default and then uses it for fast pip installs. Set `RAG_FLOW_USE_UV=0`
-to skip installing and using uv, or set `RAG_FLOW_CREATE_MINERU_INSTALL_UV=0`
-to only skip the automatic install step. Keep
-`RAG_FLOW_ENV_ROOT`, pip/uv caches, conda package caches, Hugging Face cache,
-ModelScope cache, and Torch cache under `~/autodl-tmp` on rented GPU machines.
-The pipeline setup uses the PyTorch CUDA 12.8 wheel index by default, which
-fits current RTX 50-series Linux machines better than mixing all packages into
-one environment.
+Run only a focused test while developing:
+
+```bash
+pytest tests/test_presets.py
+pytest tests/test_chunking.py
+```
+
+## Security and Data Hygiene
+
+- Do not commit private manuals, API keys, SSH details, model credentials, or
+  raw customer data.
+- Put local configuration in `.local/rag-flow.env`; `.local/` is ignored by Git.
+- If the retriever is exposed beyond localhost, set
+  `RAG_FLOW_RETRIEVER_API_KEY` and send `Authorization: Bearer <token>`.
+- Runtime artifacts such as Qdrant databases, downloaded models, and generated
+  PDF overlays should stay in ignored local paths unless deliberately published.
+
+## Related Documents
+
+- [Architecture notes](docs/architecture.md)
+- [ColPali environment notes](docs/colpali-environment.md)
+- [Migration notes](docs/migration.md)
+- [Known issues](docs/known-issues.md)
+- [QA gold set](qa-goldset/README.md)
+
+The Politecnico thesis artifacts in `thesis-polimi/` document the final
+experimental narrative and the complete v1/v2 analysis used to choose the
+presets above.
