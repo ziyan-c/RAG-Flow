@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 
-WORK_ROOT = Path("thesis/experiments/v2-final")
+WORK_ROOT = Path("thesis-v2/experiments/v2-final")
 
 
 def _read_rows(path: Path) -> list[dict[str, str]]:

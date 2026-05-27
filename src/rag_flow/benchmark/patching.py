@@ -31,7 +31,7 @@ from rag_flow.preprocessing.small_icons import (
 
 DEFAULT_MAIN_PAGES = "50-250"
 DEFAULT_QUALITY_PAGES = "52,76,81,90,107,123,137,150,158,173,178,196,213,228,244,249,250,258,287,313,316,340,419"
-DEFAULT_OUTPUT_DIR = Path("thesis/04-patching/data/benchmark-runs")
+DEFAULT_OUTPUT_DIR = Path("thesis-v2/04-patching/data/benchmark-runs")
 DEFAULT_QUALITY_SAMPLE_SIZE = 120
 ACTION_PATTERN = re.compile(
     r"\b(click|select|choose|tap|press|hover|open|close|delete|edit|add|upload|download|import|export|save|send)\b",

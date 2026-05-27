@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis/experiments/v2-final}"
+WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis-v2/experiments/v2-final}"
 DB_ROOT="${RAG_FLOW_EXPERIMENT_DB_ROOT:-/root/autodl-tmp/rag-flow-v2-experiments/qdrant}"
 PYTHON_BIN="${RAG_FLOW_EXPERIMENT_PYTHON:-/root/autodl-tmp/envs/rag-flow-pipeline/bin/python}"
 RUN_PREFIX="${RAG_FLOW_EXPERIMENT_RUN_PREFIX:-chunk-profile}"

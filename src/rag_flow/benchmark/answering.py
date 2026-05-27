@@ -15,8 +15,8 @@ from rag_flow.preprocessing.small_icons import strip_reasoning_text
 from rag_flow.retrieval import RetrievalEngine, RetrievalResult
 
 
-DEFAULT_QUERY_SET = Path("thesis/09-answering/data/answering_qaset_50.jsonl")
-DEFAULT_OUTPUT_DIR = Path("thesis/09-answering/data/answering-runs")
+DEFAULT_QUERY_SET = Path("thesis-v2/09-answering/data/answering_qaset_50.jsonl")
+DEFAULT_OUTPUT_DIR = Path("thesis-v2/09-answering/data/answering-runs")
 THINKING_LEAK_RE = re.compile(r"(<think>|</think>|\banalysis\s*:|\breasoning\s*:)", re.IGNORECASE)
 
 

@@ -148,7 +148,7 @@ def write_chunking_score_svg(path: Path, rows: Sequence[dict[str, Any]], *, titl
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Summarize v2 experiment outputs.")
-    parser.add_argument("--work-root", type=Path, default=Path("thesis/experiments/v2-final"))
+    parser.add_argument("--work-root", type=Path, default=Path("thesis-v2/experiments/v2-final"))
     args = parser.parse_args()
     rows = summarize_runs(args.work_root)
     _write_csv(args.work_root / "tables" / "run_summary.csv", rows)

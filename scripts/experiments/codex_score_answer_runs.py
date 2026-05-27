@@ -21,10 +21,19 @@ FAILURE_TYPES = {
     "retrieval_failure",
     "answering_failure",
     "visual_failure",
+    "pdf_access_failure",
     "unsupported_answer",
     "partial_answer",
     "wrong_answer",
 }
+
+
+def _normalize_scoring_mode(scoring_mode: str) -> str:
+    aliases = {
+        "rag": "rag-evidence",
+        "direct-pdf": "content-only",
+    }
+    return aliases.get(scoring_mode, scoring_mode)
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -34,6 +43,32 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 def _read_csv(path: Path) -> list[dict[str, Any]]:
     with path.open(encoding="utf-8", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def _normalize_query(row: dict[str, Any], *, index: int) -> dict[str, Any]:
+    query_id = str(row.get("query_id") or row.get("id") or f"query-{index:04d}")
+    evidence = row.get("gold_evidence")
+    if evidence is None:
+        evidence = row.get("evidence", [])
+    return {
+        **row,
+        "query_id": query_id,
+        "query": row.get("query") or row.get("question") or "",
+        "canonical_answer": row.get("canonical_answer") or row.get("answer") or "",
+        "gold_evidence": evidence if isinstance(evidence, list) else [],
+        "source_pdfs": row.get("source_pdfs") if isinstance(row.get("source_pdfs"), list) else [],
+    }
+
+
+def _read_query_set(path: Path) -> list[dict[str, Any]]:
+    if path.suffix == ".jsonl":
+        rows = _read_jsonl(path)
+    else:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload, list):
+            raise ValueError(f"Expected a JSON list or JSONL query set: {path}")
+        rows = payload
+    return [_normalize_query(row, index=index) for index, row in enumerate(rows, start=1)]
 
 
 def _write_csv(path: Path, rows: Sequence[dict[str, Any]]) -> None:
@@ -85,30 +120,70 @@ def _evidence_summary(query: dict[str, Any], *, limit: int = 1600) -> str:
     return _clip(" ; ".join(parts), limit)
 
 
-def _prompt_for_batch(items: Sequence[dict[str, Any]], *, pass_id: int) -> str:
+def _prompt_for_batch(
+    items: Sequence[dict[str, Any]],
+    *,
+    pass_id: int,
+    scoring_mode: str,
+    include_gold_evidence: bool,
+) -> str:
+    scoring_mode = _normalize_scoring_mode(scoring_mode)
     payload = []
     for item in items:
-        payload.append(
-            {
-                "query_id": item["query_id"],
-                "question": item["question"],
-                "canonical_answer": item["canonical_answer"],
-                "gold_evidence_summary": item["gold_evidence_summary"],
-                "retrieved_context_excerpt": item["retrieved_context_excerpt"],
-                "system_answer": item["system_answer"],
-            }
+        payload_item = {
+            "query_id": item["query_id"],
+            "question": item["question"],
+            "canonical_answer": item["canonical_answer"],
+            "system_answer": item["system_answer"],
+        }
+        if scoring_mode == "rag-evidence":
+            payload_item["gold_evidence_summary"] = item["gold_evidence_summary"]
+            payload_item["retrieved_context_excerpt"] = item["retrieved_context_excerpt"]
+        elif include_gold_evidence:
+            payload_item["gold_evidence_summary"] = item["gold_evidence_summary"]
+            payload_item["source_pdfs"] = item.get("source_pdfs", [])
+        payload.append(payload_item)
+    if scoring_mode == "rag-evidence":
+        support_rule = (
+            "Diagnostic evidence-support rule: retrieved_context_excerpt is the evidence that the "
+            "RAG system actually gave to the answerer. If the candidate answer matches the "
+            "canonical answer but is not supported by retrieved_context_excerpt, mark "
+            "unsupported_answer and note the mismatch. "
+        )
+        mode_note = (
+            "These are RAG answers scored in diagnostic rag-evidence mode; retrieved-context "
+            "support is checked in addition to content quality."
+        )
+        truth_source = "Use the canonical answer and gold evidence summary as the truth source. "
+    else:
+        support_rule = (
+            "No retrieved context is provided and no retrieved-context support penalty applies. "
+            "Judge only whether system_answer answers the question correctly compared with "
+            "canonical_answer. "
+        )
+        mode_note = "These answers are scored in content-only mode."
+        truth_source = (
+            "Use the canonical answer as the truth source. "
+            if not include_gold_evidence
+            else "Use the canonical answer as the truth source; gold evidence is only optional audit context. "
         )
     return (
         "You are Codex acting as an independent thesis evaluator. "
-        f"This is scoring pass {pass_id}. Do not infer from previous passes.\n\n"
-        "Score each RAG answer from 0 to 5 as an integer:\n"
-        "5 = complete and supported by retrieved context; 4 = mostly correct with minor omissions; "
-        "3 = partially useful but missing important details; 2 = weak or poorly supported; "
-        "1 = mostly wrong; 0 = empty/irrelevant.\n"
-        "Use the canonical answer and gold evidence summary as the truth source. "
-        "If the answer is correct but the retrieved context excerpt does not support it, mark unsupported_answer. "
+        f"This is scoring pass {pass_id}. Do not infer from previous passes. {mode_note}\n\n"
+        "Use the same 0-5 content-quality scale for every run type. Compare system_answer with "
+        "canonical_answer, ignoring harmless wording differences:\n"
+        "5 = fully correct and covers all required facts, steps, constraints, and conditions; "
+        "4 = mostly correct with only minor omissions that would not mislead the user; "
+        "3 = partially useful but missing important details, constraints, fields, or synthesis; "
+        "2 = weak, incomplete, or unreliable; "
+        "1 = mostly wrong or based on irrelevant material; "
+        "0 = empty, irrelevant, refusal, or severe hallucination.\n"
+        f"{truth_source}"
+        f"{support_rule}"
         "Use failure_type one of: none, retrieval_failure, answering_failure, visual_failure, "
-        "unsupported_answer, partial_answer, wrong_answer.\n\n"
+        "pdf_access_failure, unsupported_answer, partial_answer, wrong_answer. For content-only "
+        "scoring, prefer none, answering_failure, pdf_access_failure, partial_answer, or "
+        "wrong_answer unless another label clearly applies.\n\n"
         "Return only valid JSON with this shape:\n"
         "{\"scores\":[{\"query_id\":\"...\",\"score\":5,\"failure_type\":\"none\","
         "\"canonical_comparison\":\"what the answer covers or misses versus the canonical answer\","
@@ -171,7 +246,11 @@ def score_run(
     context_chars: int,
     timeout: int,
     jobs: int = 1,
+    scoring_mode: str = "content-only",
+    include_gold_evidence: bool = False,
+    score_tag: str = "content_only_scored",
 ) -> tuple[Path, list[dict[str, Any]]]:
+    scoring_mode = _normalize_scoring_mode(scoring_mode)
     metrics = _read_csv(run_dir / "answering_metrics.csv")
     all_pass_rows: list[dict[str, Any]] = []
     raw_dir = run_dir / "codex-review-raw"
@@ -192,10 +271,16 @@ def score_run(
                     "gold_evidence_summary": _evidence_summary(query),
                     "retrieved_context_excerpt": _load_context(run_dir, query_id, context_chars=context_chars),
                     "system_answer": _load_answer(run_dir, query_id),
+                    "source_pdfs": query.get("source_pdfs", []),
                 }
             )
         batch_id = start // batch_size + 1
-        prompt = _prompt_for_batch(items, pass_id=pass_id)
+        prompt = _prompt_for_batch(
+            items,
+            pass_id=pass_id,
+            scoring_mode=scoring_mode,
+            include_gold_evidence=include_gold_evidence,
+        )
         raw_text = _run_codex(prompt, timeout=timeout)
         raw_path = raw_dir / f"pass-{pass_id:02d}-batch-{batch_id:04d}.txt"
         raw_path.write_text(raw_text, encoding="utf-8")
@@ -270,16 +355,25 @@ def score_run(
             }
         )
         final_rows.append(final)
-    _write_csv(run_dir / "codex_score_passes.csv", all_pass_rows)
-    scored_path = run_dir / "answering_metrics_scored.csv"
+    if score_tag == "scored":
+        pass_path = run_dir / "codex_score_passes.csv"
+        scored_path = run_dir / "answering_metrics_scored.csv"
+    else:
+        pass_path = run_dir / f"codex_score_passes_{score_tag}.csv"
+        scored_path = run_dir / f"answering_metrics_{score_tag}.csv"
+    _write_csv(pass_path, all_pass_rows)
     _write_csv(scored_path, final_rows)
     return scored_path, final_rows
 
 
-def summarize_runs(run_dirs: Sequence[Path]) -> list[dict[str, Any]]:
+def summarize_runs(run_dirs: Sequence[Path], *, score_tag: str = "scored") -> list[dict[str, Any]]:
     rows = []
     for run_dir in run_dirs:
-        path = run_dir / "answering_metrics_scored.csv"
+        path = (
+            run_dir / "answering_metrics_scored.csv"
+            if score_tag == "scored"
+            else run_dir / f"answering_metrics_{score_tag}.csv"
+        )
         if not path.exists():
             continue
         metrics = _read_csv(path)
@@ -324,10 +418,35 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument("--context-chars", type=int, default=6000)
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--jobs", type=int, default=1)
+    parser.add_argument(
+        "--scoring-mode",
+        choices=("content-only", "rag-evidence", "rag", "direct-pdf"),
+        default="content-only",
+        help=(
+            "content-only scores question/canonical/system answer only. "
+            "rag-evidence additionally checks retrieved-context support. "
+            "rag and direct-pdf are compatibility aliases."
+        ),
+    )
+    parser.add_argument(
+        "--include-gold-evidence",
+        action="store_true",
+        help="For content-only scoring, include gold evidence as optional audit context. RAG-evidence scoring always includes it.",
+    )
+    parser.add_argument(
+        "--score-tag",
+        default="",
+        help=(
+            "Output tag. Defaults to content_only_scored for content-only and scored for rag-evidence. "
+            "Use a custom tag to avoid overwriting prior scored metrics."
+        ),
+    )
     parser.add_argument("--summary-output", type=Path)
     args = parser.parse_args(argv)
 
-    query_lookup = {str(row["query_id"]): row for row in _read_jsonl(args.query_set)}
+    scoring_mode = _normalize_scoring_mode(args.scoring_mode)
+    score_tag = args.score_tag or ("scored" if scoring_mode == "rag-evidence" else "content_only_scored")
+    query_lookup = {str(row["query_id"]): row for row in _read_query_set(args.query_set)}
     run_dirs = [path.expanduser().resolve() for path in args.run_dir]
     for run_dir in run_dirs:
         path, _rows = score_run(
@@ -338,10 +457,13 @@ def main(argv: Sequence[str] | None = None) -> None:
             context_chars=args.context_chars,
             timeout=args.timeout,
             jobs=args.jobs,
+            scoring_mode=scoring_mode,
+            include_gold_evidence=args.include_gold_evidence,
+            score_tag=score_tag,
         )
         print(f"Scored {run_dir}: {path}")
     if args.summary_output:
-        _write_csv(args.summary_output, summarize_runs(run_dirs))
+        _write_csv(args.summary_output, summarize_runs(run_dirs, score_tag=score_tag))
         print(f"Summary: {args.summary_output}")
 
 

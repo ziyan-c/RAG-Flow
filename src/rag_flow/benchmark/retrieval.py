@@ -16,9 +16,9 @@ from rag_flow.benchmark.evidence_remap import build_evidence_anchors, remap_quer
 from rag_flow.config import AppConfig
 
 
-DEFAULT_OUTPUT_DIR = Path("thesis/08-retrieval/data/benchmark-runs")
-DEFAULT_PILOT_QUERY_SET = Path("thesis/08-retrieval/data/pilot_query_set.jsonl")
-DEFAULT_FULL_QUERY_SET = Path("thesis/08-retrieval/data/full_query_set.jsonl")
+DEFAULT_OUTPUT_DIR = Path("thesis-v2/08-retrieval/data/benchmark-runs")
+DEFAULT_PILOT_QUERY_SET = Path("thesis-v2/08-retrieval/data/pilot_query_set.jsonl")
+DEFAULT_FULL_QUERY_SET = Path("thesis-v2/08-retrieval/data/full_query_set.jsonl")
 DEFAULT_RECALL_KS = (1, 3, 5, 10)
 FULL_QUERY_VISUAL_PAGE_RATIO = 0.15
 

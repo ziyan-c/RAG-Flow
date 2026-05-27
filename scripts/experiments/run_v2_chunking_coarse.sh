@@ -6,7 +6,7 @@ set -a
 source "${RAG_FLOW_ENV_FILE:-.local/rag-flow.env}"
 set +a
 
-WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis/experiments/v2-final}"
+WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis-v2/experiments/v2-final}"
 DB_ROOT="${RAG_FLOW_EXPERIMENT_DB_ROOT:-/root/autodl-tmp/rag-flow-v2-experiments/qdrant}"
 PYTHON_BIN="${RAG_FLOW_PIPELINE_PYTHON_BIN:-/root/autodl-tmp/envs/rag-flow-pipeline/bin/python}"
 mkdir -p "$WORK_ROOT/logs"

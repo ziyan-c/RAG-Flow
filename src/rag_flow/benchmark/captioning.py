@@ -36,7 +36,7 @@ from rag_flow.preprocessing.image_descriptions import (
 )
 
 
-DEFAULT_OUTPUT_DIR = Path("thesis/05-captioning/data/benchmark-runs")
+DEFAULT_OUTPUT_DIR = Path("thesis-v2/05-captioning/data/benchmark-runs")
 DEFAULT_QUALITY_SAMPLE_SIZE = 80
 DEFAULT_REVIEW_CONTEXT_TOKENS = 50000
 

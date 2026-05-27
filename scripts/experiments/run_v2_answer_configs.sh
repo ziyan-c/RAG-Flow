@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis/experiments/v2-final}"
+WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis-v2/experiments/v2-final}"
 PYTHON_BIN="${RAG_FLOW_EXPERIMENT_PYTHON:-/root/autodl-tmp/envs/rag-flow-pipeline/bin/python}"
 QUERY_SET="${RAG_FLOW_EXPERIMENT_QUERY_SET:-${WORK_ROOT}/qa/qa50.jsonl}"
 COLLECTION="${RAG_FLOW_EXPERIMENT_COLLECTION:-rag-flow-v2}"

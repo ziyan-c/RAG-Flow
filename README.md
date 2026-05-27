@@ -21,8 +21,8 @@ inline icons, page layout, or several pages at once?
   metadata.
 - Thesis-scale evaluation: 88 answer-bearing runs, 6,001 generated answers, and
   18,003 independent review judgments over a 14-PDF technical-manual corpus.
-- Deployable presets: named runtime modes for default online QA, high recall,
-  compact low-token use, visual recall, and diagnostic image-input answering.
+- Deployable presets: named runtime modes for low, medium, and high text
+  budgets, plus image-input and visual-recall variants.
 
 ## System Overview
 
@@ -63,7 +63,7 @@ appear as:
 - or a comparison across several PDF files.
 
 RAG-Flow treats these cases as first-class system problems. The pipeline enriches
-manuals before indexing, keeps the online default conservative, and exposes
+manuals before indexing, keeps the medium preset conservative, and exposes
 heavier multimodal modes only when their cost is justified.
 
 ## Pipeline Contract
@@ -101,12 +101,12 @@ unless noted otherwise.
 
 | Preset | Route | Main settings | Mean score | Avg retrieved context | Use when |
 | --- | --- | --- | ---: | ---: | --- |
-| `default` | text-only | `k=80`, `top_k=20`, 10k cap | 2.3383 | ~10,072 tokens | Normal online QA with stable latency and simple deployment. |
-| `high-recall` | text-only | `k=150`, `top_k=80`, 16k cap | 2.4133 | ~16,585 tokens | Hard questions, manual review, or maximum evidence coverage. |
-| `compact` | text-only | `k=150`, `top_k=10`, ratio `0.4`, 10k cap | 2.3833 | ~4,156 tokens | Low-token use, batch previews, and fast screening. |
-| `visual-recall` | ColPali-assisted retrieval | naive page visual bonus, `k=150`, `top_k=20`, 10k cap | 2.3483 | ~10,315 tokens | UI-heavy or diagram-heavy queries where slower retrieval is acceptable. |
-| `default-with-image-input` | default retrieval + images to answerer | selected evidence images appended | 2.3183 | ~10,251 text tokens | Diagnostics when the answerer must inspect images. |
-| `compact-with-image-input` | compact retrieval + images to answerer | selected evidence images appended | not separately run on 200Q | ~4,156 text tokens expected | Image diagnostics with smaller text context. |
+| `low` | text-only | `k=150`, `top_k=10`, ratio `0.4`, 10k cap | 2.3833 | ~4,156 tokens | Low-token use, batch previews, and high-volume support drafting. |
+| `medium` | text-only | `k=80`, `top_k=20`, 10k cap | 2.3383 | ~10,072 tokens | Normal online QA with stable latency and simple deployment. |
+| `high` | text-only | `k=150`, `top_k=80`, 16k cap | 2.4133 | ~16,585 tokens | Hard questions, manual review, or maximum evidence coverage. |
+| `low-with-image-input` | low retrieval + images to answerer | selected evidence images appended | not separately run on 200Q | ~4,156 text tokens expected | Image diagnostics with smaller text context. |
+| `medium-with-image-input` | medium retrieval + images to answerer | selected evidence images appended | 2.3183 | ~10,251 text tokens | Diagnostics when the answerer must inspect images. |
+| `medium-with-visual-recall` | ColPali-assisted retrieval | naive page visual bonus, `k=150`, `top_k=20`, 10k cap | 2.3483 | ~10,315 tokens | UI-heavy or diagram-heavy queries where slower retrieval is acceptable. |
 
 Important negative findings:
 
@@ -179,17 +179,17 @@ RAG_FLOW_INDEX_MODE=both rag-flow ingest --to-stage indexing
 ### 4. Start retrieval and answer questions
 
 ```bash
-rag-flow --preset default retriever
-rag-flow --preset default chat
+rag-flow --preset medium retriever
+rag-flow --preset medium chat
 ```
 
 Useful alternatives:
 
 ```bash
-rag-flow --preset compact chat
-rag-flow --preset high-recall chat
-rag-flow --preset visual-recall test-retriever "Which port is used for power?"
-rag-flow --preset default-with-image-input chat
+rag-flow --preset low chat
+rag-flow --preset high chat
+rag-flow --preset medium-with-visual-recall test-retriever "Which port is used for power?"
+rag-flow --preset medium-with-image-input chat
 ```
 
 ## Command Map
@@ -214,7 +214,7 @@ rag-flow retriever
 rag-flow test-retriever "How do I configure alarms?"
 rag-flow chat
 rag-flow preset list
-rag-flow preset show default
+rag-flow preset show medium
 rag-flow benchmark --help
 ```
 
@@ -234,18 +234,21 @@ the env file.
 
 ```bash
 rag-flow preset list
-rag-flow preset show high-recall
-rag-flow --preset compact retriever
+rag-flow preset show high
+rag-flow --preset low retriever
 ```
 
 You can also set a preset in `.local/rag-flow.env`:
 
 ```env
-RAG_FLOW_PRESET=high-recall
+RAG_FLOW_PRESET=high
 ```
 
 Explicit environment variables override preset values. Remove hand-written
 retrieval variables when you want a named preset to control the full policy.
+The previous names (`default`, `high-recall`, `compact`, `visual-recall`, and
+their image-input variants) are accepted as compatibility aliases, but
+`preset list` and `preset env` print the canonical names above.
 
 ## Configuration
 

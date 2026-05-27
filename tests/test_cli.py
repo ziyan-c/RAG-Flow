@@ -388,21 +388,30 @@ def test_preset_list_prints_available_presets(capsys):
     cli.main(["preset", "list"])
 
     output = capsys.readouterr().out
-    assert "default: Text-only online preset" in output
-    assert "high-recall: Text-only review preset" in output
-    assert "compact: Low-token text-only preset" in output
-    assert "compact-with-image-input: Compact text retrieval plus image_url evidence" in output
-    assert "visual-recall: Visual recall preset with ColPali route" in output
-    assert "default-with-image-input: Default text retrieval plus image_url evidence" in output
+    assert "low: Low-token text-only preset" in output
+    assert "medium: Conservative text baseline" in output
+    assert "high: High-recall text preset" in output
+    assert "low-with-image-input: Low-token text retrieval plus image_url evidence" in output
+    assert "medium-with-image-input: Medium text retrieval plus image_url evidence" in output
+    assert "medium-with-visual-recall: Medium visual recall preset with ColPali route" in output
 
 
 def test_preset_env_prints_preset_values(capsys):
-    cli.main(["preset", "env", "visual-recall"])
+    cli.main(["preset", "env", "medium-with-visual-recall"])
 
     output = capsys.readouterr().out
-    assert "RAG_FLOW_PRESET=visual-recall" in output
+    assert "RAG_FLOW_PRESET=medium-with-visual-recall" in output
     assert "RAG_FLOW_RETRIEVAL_ROUTE_MODE=text-visual-naive" in output
     assert "RAG_FLOW_VISUAL_WEIGHT=1.0" in output
+
+
+def test_current_preset_aliases_resolve_to_canonical_names():
+    assert get_preset("compact").name == "low"
+    assert get_preset("default").name == "medium"
+    assert get_preset("high-recall").name == "high"
+    assert get_preset("compact-with-image-input").name == "low-with-image-input"
+    assert get_preset("default-with-image-input").name == "medium-with-image-input"
+    assert get_preset("visual-recall").name == "medium-with-visual-recall"
 
 
 def test_old_preset_aliases_are_not_supported():
@@ -435,16 +444,16 @@ def test_leading_preset_argument_applies_preset_before_module_dispatch(monkeypat
     )
 
     try:
-        cli.main(["--preset", "high-recall", "mineru", "doctor"])
+        cli.main(["--preset", "high", "mineru", "doctor"])
     finally:
         _clear_preset_env_now()
 
-    assert calls == [(["doctor"], "high-recall", "16000")]
+    assert calls == [(["doctor"], "high", "16000")]
 
 
 def test_preset_run_command_is_removed():
     try:
-        cli.main(["preset", "run", "visual-recall", "--", "mineru", "doctor"])
+        cli.main(["preset", "run", "medium-with-visual-recall", "--", "mineru", "doctor"])
     except SystemExit as exc:
         assert exc.code == 2
     else:

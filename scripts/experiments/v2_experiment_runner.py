@@ -24,7 +24,7 @@ from rag_flow.indexing import upsert_colpali_vectors, upsert_text_vectors
 from rag_flow.source_paths import source_name_for_pdf
 
 
-DEFAULT_WORK_ROOT = Path("thesis/experiments/v2-final")
+DEFAULT_WORK_ROOT = Path("thesis-v2/experiments/v2-final")
 DEFAULT_QA50_JSON = Path("qa-goldset/source-pdfs-qa-50.quick-stratified.json")
 DEFAULT_QA200_JSON = Path("qa-goldset/source-pdfs-qa-200.codex-reviewed.json")
 SUPPORT_ENV_KEYS = (

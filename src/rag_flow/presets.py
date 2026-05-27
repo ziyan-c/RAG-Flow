@@ -27,36 +27,8 @@ _TEXT_COMMON: dict[str, str] = {
 
 
 CONFIG_PRESETS: dict[str, ConfigPreset] = {
-    "default": ConfigPreset(
-        name="default",
-        summary="Text-only online preset: k80/top20 with a 10k retrieved-context cap.",
-        env={
-            **_TEXT_COMMON,
-            "RAG_FLOW_RETRIEVAL_K": "80",
-            "RAG_FLOW_FINAL_TOP_K": "20",
-            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "10000",
-        },
-        notes=(
-            "Matches the safe text-only default recommended for normal interactive use.",
-            "Keeps ColPali disabled for low latency and simpler deployment.",
-        ),
-    ),
-    "high-recall": ConfigPreset(
-        name="high-recall",
-        summary="Text-only review preset: k150/top80 with a 16k retrieved-context cap.",
-        env={
-            **_TEXT_COMMON,
-            "RAG_FLOW_RETRIEVAL_K": "150",
-            "RAG_FLOW_FINAL_TOP_K": "80",
-            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "16000",
-        },
-        notes=(
-            "Best 200-QA score among the recommended presets, but it costs more context and latency than default.",
-            "The 24k experiment is intentionally not shipped because it triggered many empty answers and missing usage records.",
-        ),
-    ),
-    "compact": ConfigPreset(
-        name="compact",
+    "low": ConfigPreset(
+        name="low",
         summary="Low-token text-only preset: k150/top10, ratio 0.4, 10k soft cap.",
         env={
             **_TEXT_COMMON,
@@ -67,12 +39,40 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
         },
         notes=(
             "Keeps the tested 10k soft cap; the lower average context comes from top10 plus score-ratio pruning.",
-            "Useful for previews, batch cost control, or interactive flows where a small quality trade-off is acceptable.",
+            "Useful for previews, batch cost control, or high-volume support flows where a small quality trade-off is acceptable.",
         ),
     ),
-    "compact-with-image-input": ConfigPreset(
-        name="compact-with-image-input",
-        summary="Compact text retrieval plus image_url evidence in the answering payload.",
+    "medium": ConfigPreset(
+        name="medium",
+        summary="Conservative text baseline: k80/top20 with a 10k retrieved-context cap.",
+        env={
+            **_TEXT_COMMON,
+            "RAG_FLOW_RETRIEVAL_K": "80",
+            "RAG_FLOW_FINAL_TOP_K": "20",
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "10000",
+        },
+        notes=(
+            "Matches the safe text-only preset recommended for normal interactive use.",
+            "Keeps ColPali disabled for low latency and simpler deployment.",
+        ),
+    ),
+    "high": ConfigPreset(
+        name="high",
+        summary="High-recall text preset: k150/top80 with a 16k retrieved-context cap.",
+        env={
+            **_TEXT_COMMON,
+            "RAG_FLOW_RETRIEVAL_K": "150",
+            "RAG_FLOW_FINAL_TOP_K": "80",
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "16000",
+        },
+        notes=(
+            "Best 200-QA score among the recommended presets, but it costs more context and latency than medium.",
+            "The 24k experiment is intentionally not shipped because it triggered many empty answers and missing usage records.",
+        ),
+    ),
+    "low-with-image-input": ConfigPreset(
+        name="low-with-image-input",
+        summary="Low-token text retrieval plus image_url evidence in the answering payload.",
         env={
             **_TEXT_COMMON,
             "RAG_FLOW_RETRIEVAL_K": "150",
@@ -82,13 +82,29 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
             "RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES": "1",
         },
         notes=(
-            "Combines the compact text context policy with retrieval-provided image evidence.",
+            "Combines the low-token text context policy with retrieval-provided image evidence.",
             "This preset has not been separately validated by a 200-QA run; image tokens remain post-hoc LLM usage.",
         ),
     ),
-    "visual-recall": ConfigPreset(
-        name="visual-recall",
-        summary="Visual recall preset with ColPali route: naive page bonus, k150/top20, 10k cap.",
+    "medium-with-image-input": ConfigPreset(
+        name="medium-with-image-input",
+        summary="Medium text retrieval plus image_url evidence in the answering payload.",
+        env={
+            **_TEXT_COMMON,
+            "RAG_FLOW_RETRIEVAL_K": "80",
+            "RAG_FLOW_FINAL_TOP_K": "20",
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "10000",
+            "RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES": "1",
+        },
+        notes=(
+            "This is a diagnostic preset for cases where the answer model must see evidence images.",
+            "Image tokens are not included in the retrieval context budget; they only appear in post-hoc LLM usage.",
+            "It is not the online default because the 200-QA run increased total tokens and latency without improving score.",
+        ),
+    ),
+    "medium-with-visual-recall": ConfigPreset(
+        name="medium-with-visual-recall",
+        summary="Medium visual recall preset with ColPali route: naive page bonus, k150/top20, 10k cap.",
         env={
             "RAG_FLOW_RETRIEVAL_ROUTE_MODE": "text-visual-naive",
             "RAG_FLOW_RETRIEVAL_VISUAL_BONUS": "page-naive",
@@ -113,22 +129,16 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
             "Requires a built visual index and loads the ColPali query encoder.",
         ),
     ),
-    "default-with-image-input": ConfigPreset(
-        name="default-with-image-input",
-        summary="Default text retrieval plus image_url evidence in the answering payload.",
-        env={
-            **_TEXT_COMMON,
-            "RAG_FLOW_RETRIEVAL_K": "80",
-            "RAG_FLOW_FINAL_TOP_K": "20",
-            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "10000",
-            "RAG_FLOW_RETRIEVAL_FINAL_OUTPUT_IMAGES": "1",
-        },
-        notes=(
-            "This is a diagnostic preset for cases where the answer model must see evidence images.",
-            "Image tokens are not included in the retrieval context budget; they only appear in post-hoc LLM usage.",
-            "It is not the online default because the 200-QA run increased total tokens and latency without improving score.",
-        ),
-    ),
+}
+
+
+PRESET_ALIASES: dict[str, str] = {
+    "compact": "low",
+    "default": "medium",
+    "high-recall": "high",
+    "compact-with-image-input": "low-with-image-input",
+    "default-with-image-input": "medium-with-image-input",
+    "visual-recall": "medium-with-visual-recall",
 }
 
 
@@ -140,6 +150,8 @@ def resolve_preset_name(name: str) -> str:
     key = name.strip()
     if key in CONFIG_PRESETS:
         return key
+    if key in PRESET_ALIASES:
+        return PRESET_ALIASES[key]
     else:
         available = ", ".join(preset_names())
         raise ValueError(f"Unknown RAG Flow preset '{name}'. Available presets: {available}.")
