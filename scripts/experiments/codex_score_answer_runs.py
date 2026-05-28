@@ -249,6 +249,8 @@ def score_run(
     scoring_mode: str = "content-only",
     include_gold_evidence: bool = False,
     score_tag: str = "content_only_scored",
+    reviewer_model_label: str = "gpt-5.5",
+    reviewer_reasoning_label: str = "xhigh",
 ) -> tuple[Path, list[dict[str, Any]]]:
     scoring_mode = _normalize_scoring_mode(scoring_mode)
     metrics = _read_csv(run_dir / "answering_metrics.csv")
@@ -306,6 +308,9 @@ def score_run(
                     "query_id": query_id,
                     "pass_id": pass_id,
                     "score": value,
+                    "reviewer_model": reviewer_model_label,
+                    "reviewer_reasoning_effort": reviewer_reasoning_label,
+                    "scoring_mode": scoring_mode,
                     "failure_type": failure_type,
                     "canonical_comparison": str(score.get("canonical_comparison") or ""),
                     "review_notes": str(score.get("review_notes") or ""),
@@ -345,6 +350,10 @@ def score_run(
                 "score_pass_2": next((row["score"] for row in scored if row["pass_id"] == 2), ""),
                 "score_pass_3": next((row["score"] for row in scored if row["pass_id"] == 3), ""),
                 "answer_score": round(avg, 4),
+                "reviewer_model": reviewer_model_label,
+                "reviewer_reasoning_effort": reviewer_reasoning_label,
+                "scoring_mode": scoring_mode,
+                "scoring_passes": passes,
                 "score_disagreement": round(max(values) - min(values), 4) if values else "",
                 "failure_type": "|".join(sorted({row["failure_type"] for row in scored if row["failure_type"] != "none"}))
                 or "none",
@@ -388,6 +397,13 @@ def summarize_runs(run_dirs: Sequence[Path], *, score_tag: str = "scored") -> li
             {
                 "run_id": run_dir.name,
                 "query_count": len(metrics),
+                "reviewer_model": next((row.get("reviewer_model", "") for row in metrics if row.get("reviewer_model")), ""),
+                "reviewer_reasoning_effort": next(
+                    (row.get("reviewer_reasoning_effort", "") for row in metrics if row.get("reviewer_reasoning_effort")),
+                    "",
+                ),
+                "scoring_mode": next((row.get("scoring_mode", "") for row in metrics if row.get("scoring_mode")), ""),
+                "scoring_passes": next((row.get("scoring_passes", "") for row in metrics if row.get("scoring_passes")), ""),
                 "mean_score": round(statistics.mean(scores), 4) if scores else 0,
                 "median_score": round(statistics.median(scores), 4) if scores else 0,
                 "high_quality_rate": round(sum(1 for value in scores if value >= 4) / len(scores), 4) if scores else 0,
@@ -441,6 +457,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             "Use a custom tag to avoid overwriting prior scored metrics."
         ),
     )
+    parser.add_argument("--reviewer-model-label", default="gpt-5.5")
+    parser.add_argument("--reviewer-reasoning-label", default="xhigh")
     parser.add_argument("--summary-output", type=Path)
     args = parser.parse_args(argv)
 
@@ -460,6 +478,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             scoring_mode=scoring_mode,
             include_gold_evidence=args.include_gold_evidence,
             score_tag=score_tag,
+            reviewer_model_label=args.reviewer_model_label,
+            reviewer_reasoning_label=args.reviewer_reasoning_label,
         )
         print(f"Scored {run_dir}: {path}")
     if args.summary_output:

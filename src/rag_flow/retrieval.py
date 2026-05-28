@@ -7,13 +7,14 @@ from types import SimpleNamespace
 from typing import Any
 
 from .config import AppConfig
+from .embeddings import create_dense_embedding, create_sparse_embedding, sparse_embedding_parts
 from .indexing import COLPALI_VECTOR_SIZE, PAGE_IMAGE_COLPALI_VECTOR_NAME, TEXT_DENSE_VECTOR_NAME, TEXT_SPARSE_VECTOR_NAME
 from .model_paths import resolve_model_location
 from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
 from .source_paths import normalize_source_name, source_breadcrumb
 
-ROUTE_MODES = ("text", "text-visual-naive", "text-visual-bbox")
+ROUTE_MODES = ("text", "text-dense-only", "text-sparse-only", "text-visual-naive", "text-visual-bbox")
 VISUAL_BONUS_MODES = ("none", "page-bbox", "page-naive")
 
 
@@ -368,22 +369,23 @@ class RetrievalEngine:
         return mode
 
     def _uses_dense_route(self) -> bool:
-        return self._route_mode() in ROUTE_MODES
+        return self._route_mode() in {"text", "text-dense-only", "text-visual-naive", "text-visual-bbox"}
 
     def _uses_sparse_route(self) -> bool:
-        return self._route_mode() in ROUTE_MODES
+        return self._route_mode() in {"text", "text-sparse-only", "text-visual-naive", "text-visual-bbox"}
 
     def _uses_visual_route(self) -> bool:
         return self._route_mode() in {"text-visual-naive", "text-visual-bbox"}
 
     def load(self) -> None:
-        from fastembed import SparseTextEmbedding, TextEmbedding
-
         self.client = create_qdrant_client(self.config)
         if self._uses_dense_route():
-            self.dense_model = TextEmbedding(self.config.models.dense_model)
+            self.dense_model = create_dense_embedding(
+                self.config.models.dense_model,
+                vector_size=self.config.models.dense_vector_size,
+            )
         if self._uses_sparse_route():
-            self.sparse_model = SparseTextEmbedding(self.config.models.sparse_model)
+            self.sparse_model = create_sparse_embedding(self.config.models.sparse_model)
         if not self._uses_visual_route():
             self.device = None
             self.colpali_processor = None
@@ -432,16 +434,7 @@ class RetrievalEngine:
             ).points
         if self._uses_sparse_route():
             sparse_query_obj = list(self.sparse_model.query_embed(query_text))[0]
-            sparse_indices = (
-                sparse_query_obj.indices.tolist()
-                if hasattr(sparse_query_obj.indices, "tolist")
-                else list(sparse_query_obj.indices)
-            )
-            sparse_values = (
-                sparse_query_obj.values.tolist()
-                if hasattr(sparse_query_obj.values, "tolist")
-                else list(sparse_query_obj.values)
-            )
+            sparse_indices, sparse_values = sparse_embedding_parts(sparse_query_obj)
             sparse_hits = self.client.query_points(
                 collection_name=collection,
                 query=models.SparseVector(indices=sparse_indices, values=sparse_values),

@@ -259,6 +259,7 @@ def run_answering_benchmark(
     request_timeout: float,
     limit: int | None,
     dry_run: bool,
+    skip_answering: bool = False,
 ) -> Path:
     base_config = AppConfig.from_env()
     run_config = _make_run_config(
@@ -295,7 +296,13 @@ def run_answering_benchmark(
         "max_tokens": max_tokens,
         "llm_base_url": llm_base_url,
         "llm_model": llm_model,
+        "skip_answering": skip_answering,
         "source_pdf": str(run_config.paths.source_pdf),
+        "models": {
+            "dense_model": run_config.models.dense_model,
+            "dense_vector_size": run_config.models.dense_vector_size,
+            "sparse_model": run_config.models.sparse_model,
+        },
         "retrieval": {
             "retrieval_k": run_config.retrieval.retrieval_k,
             "final_top_k": run_config.retrieval.final_top_k,
@@ -314,9 +321,11 @@ def run_answering_benchmark(
 
     engine = RetrievalEngine(run_config)
     engine.load()
-    from openai import OpenAI
+    llm_client = None
+    if not skip_answering:
+        from openai import OpenAI
 
-    llm_client = OpenAI(api_key=llm_api_key, base_url=llm_base_url, timeout=request_timeout)
+        llm_client = OpenAI(api_key=llm_api_key, base_url=llm_base_url, timeout=request_timeout)
     rows: list[dict[str, Any]] = []
     errors = 0
     for index, query in enumerate(queries, start=1):
@@ -338,17 +347,20 @@ def run_answering_benchmark(
         raw_response: dict[str, Any] = {}
         llm_error = ""
         answering_started = time.perf_counter()
-        try:
-            answer, reasoning, usage, raw_response = _call_answering_llm(
-                client=llm_client,
-                model=llm_model,
-                messages=messages,
-                max_tokens=max_tokens,
-                enable_thinking=enable_thinking,
-            )
-        except Exception as exc:
-            errors += 1
-            llm_error = str(exc)
+        if skip_answering:
+            llm_error = "answering_skipped"
+        else:
+            try:
+                answer, reasoning, usage, raw_response = _call_answering_llm(
+                    client=llm_client,
+                    model=llm_model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    enable_thinking=enable_thinking,
+                )
+            except Exception as exc:
+                errors += 1
+                llm_error = str(exc)
         answering_latency = time.perf_counter() - answering_started
         total_latency = time.perf_counter() - started
 
@@ -479,6 +491,7 @@ def run_answering_benchmark(
         "run_id": run_id,
         "queries": len(rows),
         "errors": errors,
+        "answering_skipped": int(skip_answering),
         "thinking_leaks": sum(int(row["thinking_leak"]) for row in rows),
         "usage_missing": sum(int(row["usage_missing"]) for row in rows),
         "final_output_image_count": final_output_image_count,
@@ -531,6 +544,11 @@ def build_parser(config: AppConfig) -> argparse.ArgumentParser:
     run_parser.add_argument("--timeout", type=float, default=180.0)
     run_parser.add_argument("--limit", type=int)
     run_parser.add_argument("--dry-run", action="store_true")
+    run_parser.add_argument(
+        "--skip-answering",
+        action="store_true",
+        help="Run retrieval and archive contexts without calling the answering LLM.",
+    )
     return parser
 
 
@@ -561,6 +579,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             request_timeout=args.timeout,
             limit=args.limit,
             dry_run=args.dry_run,
+            skip_answering=args.skip_answering,
         )
         return
 

@@ -218,6 +218,12 @@ def _env_override(**values: str) -> dict[str, str]:
     return env
 
 
+def _directory_size_bytes(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(item.stat().st_size for item in path.rglob("*") if item.is_file())
+
+
 def export_support_env_from_rag_flow_env() -> None:
     """Export cache/mirror env vars that third-party libraries read directly."""
     values = load_env_file(resolve_env_file())
@@ -281,9 +287,13 @@ def index_profile(
     return {
         "db_path": str(db_path),
         "collection": collection,
+        "dense_model": config.models.dense_model,
+        "dense_vector_size": config.models.dense_vector_size,
+        "sparse_model": config.models.sparse_model,
         "text_index_seconds": round(text_seconds, 3),
         "visual_index_seconds": round(visual_seconds, 3),
         "index_visual": index_visual,
+        "db_size_bytes": _directory_size_bytes(db_path),
     }
 
 
@@ -306,6 +316,7 @@ def run_answer_config(
     final_output_images: bool,
     enable_thinking: bool,
     limit: int | None,
+    skip_answering: bool = False,
 ) -> Path:
     _env_override(
         RAG_FLOW_DB_PATH=str(db_path),
@@ -333,6 +344,7 @@ def run_answer_config(
         request_timeout=240.0,
         limit=limit,
         dry_run=False,
+        skip_answering=skip_answering,
     )
 
 
@@ -391,6 +403,7 @@ def cmd_run_config(args: argparse.Namespace) -> None:
         final_output_images=args.final_output_images,
         enable_thinking=args.enable_thinking,
         limit=args.limit,
+        skip_answering=args.skip_answering,
     )
     summary = {
         "run_id": args.run_id,
@@ -413,6 +426,7 @@ def cmd_run_config(args: argparse.Namespace) -> None:
         "max_tokens": args.max_tokens,
         "final_output_images": args.final_output_images,
         "enable_thinking": args.enable_thinking,
+        "skip_answering": args.skip_answering,
         **index_summary,
     }
     run_summary_path = args.work_root / "runs" / f"{_safe_slug(args.run_id)}.json"
@@ -489,12 +503,16 @@ def cmd_answer_config(args: argparse.Namespace) -> None:
         final_output_images=args.final_output_images,
         enable_thinking=args.enable_thinking,
         limit=args.limit,
+        skip_answering=args.skip_answering,
     )
     summary = {
         "run_id": args.run_id,
         "answer_run": str(answer_run),
         "db_path": str(args.db_path),
         "collection": args.collection,
+        "dense_model": AppConfig.from_env().models.dense_model,
+        "dense_vector_size": AppConfig.from_env().models.dense_vector_size,
+        "sparse_model": AppConfig.from_env().models.sparse_model,
         "context_cap": args.context_cap,
         "retrieval_k": args.retrieval_k,
         "final_top_k": args.final_top_k,
@@ -506,6 +524,7 @@ def cmd_answer_config(args: argparse.Namespace) -> None:
         "max_tokens": args.max_tokens,
         "final_output_images": args.final_output_images,
         "enable_thinking": args.enable_thinking,
+        "skip_answering": args.skip_answering,
         "index_visual": args.index_visual,
     }
     run_summary_path = args.work_root / "runs" / f"{_safe_slug(args.run_id)}.json"
@@ -545,12 +564,17 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--final-top-k", type=int, default=80)
     run_parser.add_argument("--rrf-k", type=int, default=10)
     run_parser.add_argument("--min-score-ratio", type=float, default=1.0)
-    run_parser.add_argument("--route-mode", choices=("text", "text-visual-naive", "text-visual-bbox"), default="text")
+    run_parser.add_argument(
+        "--route-mode",
+        choices=("text", "text-dense-only", "text-sparse-only", "text-visual-naive", "text-visual-bbox"),
+        default="text",
+    )
     run_parser.add_argument("--visual-bonus", choices=("none", "page-naive", "page-bbox"), default="none")
     run_parser.add_argument("--visual-weight", type=float, default=2.5)
     run_parser.add_argument("--max-tokens", type=int, default=4000)
     run_parser.add_argument("--final-output-images", action="store_true")
     run_parser.add_argument("--enable-thinking", action="store_true")
+    run_parser.add_argument("--skip-answering", action="store_true")
     run_parser.add_argument("--limit", type=int)
 
     index_parser = subparsers.add_parser("index-profile")
@@ -581,12 +605,17 @@ def build_parser() -> argparse.ArgumentParser:
     answer_parser.add_argument("--final-top-k", type=int, default=80)
     answer_parser.add_argument("--rrf-k", type=int, default=10)
     answer_parser.add_argument("--min-score-ratio", type=float, default=1.0)
-    answer_parser.add_argument("--route-mode", choices=("text", "text-visual-naive", "text-visual-bbox"), default="text")
+    answer_parser.add_argument(
+        "--route-mode",
+        choices=("text", "text-dense-only", "text-sparse-only", "text-visual-naive", "text-visual-bbox"),
+        default="text",
+    )
     answer_parser.add_argument("--visual-bonus", choices=("none", "page-naive", "page-bbox"), default="none")
     answer_parser.add_argument("--visual-weight", type=float, default=2.5)
     answer_parser.add_argument("--max-tokens", type=int, default=4000)
     answer_parser.add_argument("--final-output-images", action="store_true")
     answer_parser.add_argument("--enable-thinking", action="store_true")
+    answer_parser.add_argument("--skip-answering", action="store_true")
     answer_parser.add_argument("--index-visual", action="store_true")
     answer_parser.add_argument("--limit", type=int)
     return parser

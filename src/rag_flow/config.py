@@ -144,6 +144,7 @@ class QdrantConfig:
 @dataclass(frozen=True)
 class ModelConfig:
     dense_model: str
+    dense_vector_size: int
     sparse_model: str
     colpali_model: str
     vlm_model: str
@@ -309,6 +310,7 @@ class AppConfig:
 
         models = ModelConfig(
             dense_model=env.get("RAG_FLOW_DENSE_MODEL", "intfloat/multilingual-e5-large"),
+            dense_vector_size=env.int("RAG_FLOW_DENSE_VECTOR_SIZE", 1024),
             sparse_model=env.get("RAG_FLOW_SPARSE_MODEL", "Qdrant/bm25"),
             colpali_model=env.get("RAG_FLOW_COLPALI_MODEL", "vidore/colpali-v1.3-merged"),
             colpali_model_path=env.path("RAG_FLOW_COLPALI_MODEL_PATH", "")

@@ -120,6 +120,24 @@ def test_visual_bonus_rejects_unknown_modes():
         raise AssertionError("visual_bonus='seed' should be rejected")
 
 
+def test_text_dense_only_route_uses_only_dense_query():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, route_mode="text-dense-only"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+
+    assert engine._uses_dense_route() is True
+    assert engine._uses_sparse_route() is False
+    assert engine._uses_visual_route() is False
+
+
+def test_text_sparse_only_route_uses_only_sparse_query():
+    config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False, route_mode="text-sparse-only"))
+    engine = RetrievalEngine(config)  # type: ignore[arg-type]
+
+    assert engine._uses_dense_route() is False
+    assert engine._uses_sparse_route() is True
+    assert engine._uses_visual_route() is False
+
+
 def test_context_block_includes_breadcrumb_when_chunk_content_lacks_it():
     config = SimpleNamespace(retrieval=RetrievalConfig(10, 3, 60, 1.5, False))
     engine = RetrievalEngine(config)  # type: ignore[arg-type]

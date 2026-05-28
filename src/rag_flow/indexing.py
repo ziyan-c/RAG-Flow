@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import AppConfig
+from .embeddings import create_dense_embedding, create_sparse_embedding, sparse_embedding_parts
 from .model_paths import resolve_model_location
 from .qdrant import create_qdrant_client
 from .runtime import get_torch_device
@@ -19,7 +20,7 @@ from .source_paths import (
     source_root_from_input_path,
 )
 
-DENSE_VECTOR_SIZE = 1024
+DEFAULT_DENSE_VECTOR_SIZE = 1024
 COLPALI_VECTOR_SIZE = 128
 TEXT_INDEX_BATCH_SIZE = 256
 VISUAL_INDEX_BATCH_SIZE = 8
@@ -115,6 +116,8 @@ def validate_collection_schema(config: AppConfig, client: Any | None = None) -> 
     sparse_vectors = getattr(info.config.params, "sparse_vectors", {}) or {}
     errors = []
 
+    dense_vector_size = int(config.models.dense_vector_size or DEFAULT_DENSE_VECTOR_SIZE)
+
     if not isinstance(vectors, dict):
         errors.append("collection must use named vectors")
     else:
@@ -122,8 +125,8 @@ def validate_collection_schema(config: AppConfig, client: Any | None = None) -> 
         colpali = vectors.get(PAGE_IMAGE_COLPALI_VECTOR_NAME)
         if dense is None:
             errors.append(f"missing {TEXT_DENSE_VECTOR_NAME} vector")
-        elif dense.size != DENSE_VECTOR_SIZE or enum_value(dense.distance) != enum_value(models.Distance.COSINE):
-            errors.append(f"{TEXT_DENSE_VECTOR_NAME} must be {DENSE_VECTOR_SIZE} cosine dimensions")
+        elif dense.size != dense_vector_size or enum_value(dense.distance) != enum_value(models.Distance.COSINE):
+            errors.append(f"{TEXT_DENSE_VECTOR_NAME} must be {dense_vector_size} cosine dimensions")
 
         if colpali is None:
             errors.append(f"missing {PAGE_IMAGE_COLPALI_VECTOR_NAME} vector")
@@ -156,6 +159,7 @@ def ensure_collection(config: AppConfig) -> None:
     client = create_qdrant_client(config)
     try:
         collection = config.paths.collection_name
+        dense_vector_size = int(config.models.dense_vector_size or DEFAULT_DENSE_VECTOR_SIZE)
         if client.collection_exists(collection):
             validate_collection_schema(config, client=client)
             ensure_payload_indexes(client, collection, models)
@@ -164,7 +168,7 @@ def ensure_collection(config: AppConfig) -> None:
         client.create_collection(
             collection_name=collection,
             vectors_config={
-                TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=DENSE_VECTOR_SIZE, distance=models.Distance.COSINE),
+                TEXT_DENSE_VECTOR_NAME: models.VectorParams(size=dense_vector_size, distance=models.Distance.COSINE),
                 PAGE_IMAGE_COLPALI_VECTOR_NAME: models.VectorParams(
                     size=COLPALI_VECTOR_SIZE,
                     distance=models.Distance.COSINE,
@@ -221,7 +225,6 @@ def upsert_text_vectors(
     *,
     batch_size: int = TEXT_INDEX_BATCH_SIZE,
 ) -> None:
-    from fastembed import SparseTextEmbedding, TextEmbedding
     from qdrant_client import models
 
     if batch_size <= 0:
@@ -232,8 +235,8 @@ def upsert_text_vectors(
     documents = [chunk["chunk_content"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
 
-    dense_model = TextEmbedding(config.models.dense_model)
-    sparse_model = SparseTextEmbedding(config.models.sparse_model)
+    dense_model = create_dense_embedding(config.models.dense_model, vector_size=config.models.dense_vector_size)
+    sparse_model = create_sparse_embedding(config.models.sparse_model)
     client = create_qdrant_client(config)
     try:
         source_names = {
@@ -270,6 +273,7 @@ def upsert_text_vectors(
                 payload["chunk_content"] = doc
                 page_idx = int(payload.get("page_idx", payload.get("page_start", 0)))
                 chunk_id = payload.get("chunk_id", payload.get("chunk_idx"))
+                sparse_indices, sparse_values = sparse_embedding_parts(sparse_vec)
                 points.append(
                     models.PointStruct(
                         id=point_id(source_relpath, page_idx, chunk_id=chunk_id),
@@ -277,8 +281,8 @@ def upsert_text_vectors(
                         vector={
                             TEXT_DENSE_VECTOR_NAME: dense_vec.tolist(),
                             TEXT_SPARSE_VECTOR_NAME: models.SparseVector(
-                                indices=sparse_vec.indices.tolist(),
-                                values=sparse_vec.values.tolist(),
+                                indices=sparse_indices,
+                                values=sparse_values,
                             ),
                         },
                     )

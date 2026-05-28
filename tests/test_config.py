@@ -486,6 +486,18 @@ def test_indexing_defaults(tmp_path, monkeypatch):
     assert config.indexing.visual_dpi == 200
 
 
+def test_dense_vector_size_can_be_configured(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_DENSE_VECTOR_SIZE=2560\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.models.dense_vector_size == 2560
+
+
 def test_indexing_reads_local_env(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
