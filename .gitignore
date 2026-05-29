@@ -31,3 +31,10 @@ models/
 # Thesis is stored outside the repository and linked locally.
 /thesis
 /thesis-v1-archive
+/thesis-polimi
+/thesis-polimi-cn
+/thesis-polimi-cn-typst
+/thesis-template-polimi
+/thesis-v1
+/thesis-v2
+/thesis-v3
