@@ -8,9 +8,10 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from .config import AppConfig
+from .source_paths import source_name_for_pdf, source_root_from_input_path
 
 PINNED_MINERU_VERSION = "3.0.9"
 MINERU_PYTHON_MIN = (3, 10)
@@ -329,9 +330,42 @@ def run_mineru_batch(
     return commands
 
 
-def expected_content_json(config: AppConfig, *, source_pdf: str | Path | None = None) -> Path:
+def mineru_output_dir_for_pdf(
+    config: AppConfig,
+    *,
+    source_pdf: str | Path | None = None,
+    source_root: str | Path | None = None,
+) -> Path:
+    output_root = Path(config.mineru.output_dir)
+    pdf = Path(source_pdf or config.mineru.input_path)
+    if pdf.suffix.lower() != ".pdf":
+        return output_root
+
+    source_name = source_name_for_pdf(
+        pdf,
+        configured_source_pdf=config.paths.source_pdf,
+        configured_source_name=config.paths.source_name,
+        source_root=source_root or config.paths.source_root or source_root_from_input_path(config.mineru.input_path),
+    )
+    relative_parent = PurePosixPath(source_name).parent
+    if str(relative_parent) in {"", "."}:
+        return output_root
+    return output_root / Path(relative_parent.as_posix())
+
+
+def expected_content_json(
+    config: AppConfig,
+    *,
+    source_pdf: str | Path | None = None,
+    source_root: str | Path | None = None,
+) -> Path:
     stem = Path(source_pdf or config.mineru.input_path).stem
-    return Path(config.mineru.output_dir) / stem / "auto" / f"{stem}_content_list.json"
+    return (
+        mineru_output_dir_for_pdf(config, source_pdf=source_pdf, source_root=source_root)
+        / stem
+        / "auto"
+        / f"{stem}_content_list.json"
+    )
 
 
 def _content_json_score(path: Path, source_pdf: str | Path | None) -> int | None:
@@ -394,8 +428,13 @@ def find_content_json(
     *,
     search_root: str | Path | None = None,
     source_pdf: str | Path | None = None,
+    source_root: str | Path | None = None,
 ) -> Path | None:
     target_input = source_pdf or config.mineru.input_path
+    expected = expected_content_json(config, source_pdf=target_input, source_root=source_root)
+    if expected.exists():
+        return expected
+
     if config.paths.content_json.exists() and _content_json_score(config.paths.content_json, target_input) is not None:
         return config.paths.content_json
 
@@ -421,8 +460,11 @@ def infer_artifacts(
     *,
     content_json: str | Path | None = None,
     source_pdf: str | Path | None = None,
+    source_root: str | Path | None = None,
 ) -> MinerUArtifacts:
-    resolved_content = Path(content_json) if content_json else find_content_json(config, source_pdf=source_pdf)
+    resolved_content = (
+        Path(content_json) if content_json else find_content_json(config, source_pdf=source_pdf, source_root=source_root)
+    )
     if resolved_content is None:
         raise FileNotFoundError(
             f"Cannot find MinerU content_list JSON. Expected {config.paths.content_json} "

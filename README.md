@@ -149,8 +149,8 @@ settings there.
 Common local layout:
 
 ```text
-source-pdfs/   input PDF root
-output-pdfs/   MinerU and preprocessing artifacts
+pdfs/source/   input PDF root
+pdfs/output/   MinerU and preprocessing artifacts, preserving source subfolders
 qdrant-db/     local Qdrant vector database
 .local/        private env file, secrets, local-only state
 ```
@@ -159,7 +159,7 @@ qdrant-db/     local Qdrant vector database
 
 ```bash
 rag-flow mineru doctor
-rag-flow mineru run --input source-pdfs --output-dir output-pdfs
+rag-flow mineru run --input pdfs/source --output-dir pdfs/output
 rag-flow ingest --to-stage chunking
 rag-flow index text
 ```
@@ -293,8 +293,8 @@ scripts/
   remote/                   Remote-machine helper scripts
 
 qa-goldset/                 Gold questions, evidence cards, review helpers
-source-pdfs/                Local source PDF tree
-output-pdfs/                Generated parse/enrichment artifacts
+pdfs/source/                Local source PDF tree
+pdfs/output/                Generated parse/enrichment artifacts
 docs/                       Architecture notes and operational docs
 tests/                      Unit and regression tests
 ```

@@ -9,8 +9,8 @@ from .presets import get_preset
 
 
 DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
-DEFAULT_SOURCE_ROOT = Path("source-pdfs")
-DEFAULT_OUTPUT_ROOT = Path("output-pdfs")
+DEFAULT_SOURCE_ROOT = Path("pdfs/source")
+DEFAULT_OUTPUT_ROOT = Path("pdfs/output")
 DEFAULT_BASE_DIR = DEFAULT_OUTPUT_ROOT / Path(DEFAULT_SOURCE_NAME).stem / "auto"
 DEFAULT_DB_PATH = Path("qdrant-db")
 DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
@@ -49,7 +49,9 @@ def resolve_env_file(env_file: str | os.PathLike[str] | None = None) -> str | os
 def env_path_base(env_file: str | os.PathLike[str] | None) -> Path | None:
     if not env_file:
         return None
-    env_path = Path(env_file).expanduser().resolve()
+    env_path = Path(env_file).expanduser()
+    if not env_path.is_absolute():
+        env_path = Path.cwd() / env_path
     if env_path.parent.name == ".local":
         return env_path.parent.parent
     return env_path.parent

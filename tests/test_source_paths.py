@@ -18,6 +18,12 @@ def test_source_name_detects_source_pdfs_ancestor(tmp_path):
     assert source_name_for_pdf(pdf) == "HAC-HF3805G/manual.pdf"
 
 
+def test_source_name_detects_pdfs_source_ancestor(tmp_path):
+    pdf = tmp_path / "pdfs" / "source" / "DSS" / "manual.pdf"
+
+    assert source_name_for_pdf(pdf) == "DSS/manual.pdf"
+
+
 def test_source_name_falls_back_to_configured_source_name(tmp_path):
     pdf = tmp_path / "private" / "manual.pdf"
 

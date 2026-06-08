@@ -18,11 +18,13 @@ from rag_flow.config import (
 )
 from rag_flow.mineru import (
     build_mineru_command,
+    expected_content_json,
     find_content_json,
     infer_artifacts,
     iter_input_pdfs,
     mineru_batch_items,
     mineru_install_spec,
+    mineru_output_dir_for_pdf,
     run_mineru_batch,
 )
 from rag_flow.pipeline import run_ingest
@@ -46,6 +48,7 @@ def make_config(tmp_path: Path, *, command: str = "mineru", input_path: Path | N
         ),
         models=ModelConfig(
             dense_model="dense",
+            dense_vector_size=1024,
             sparse_model="sparse",
             colpali_model="colpali",
             vlm_model="vlm",
@@ -172,6 +175,22 @@ def test_mineru_batch_items_mirror_input_tree(tmp_path):
         (Path("product/network/admin.pdf"), Path("product/network")),
         (Path("quickstart.pdf"), Path(".")),
     ]
+
+
+def test_single_pdf_artifacts_preserve_source_root_subfolders(tmp_path):
+    docs = tmp_path / "pdfs" / "source"
+    output = tmp_path / "pdfs" / "output"
+    pdf = docs / "DSS Professional 8.7" / "manual.pdf"
+    base_config = make_config(tmp_path, input_path=docs)
+    config = replace(
+        base_config,
+        mineru=replace(base_config.mineru, output_dir=output),
+    )
+
+    assert mineru_output_dir_for_pdf(config, source_pdf=pdf) == output / "DSS Professional 8.7"
+    assert expected_content_json(config, source_pdf=pdf) == (
+        output / "DSS Professional 8.7" / "manual" / "auto" / "manual_content_list.json"
+    )
 
 
 def test_run_mineru_batch_dry_run_uses_mirrored_output_dirs(tmp_path, monkeypatch, capsys):

@@ -68,6 +68,35 @@ def test_relative_paths_in_local_env_resolve_from_repo_root(tmp_path, monkeypatc
     assert config.paths.base_dir == tmp_path / "runtime" / "manual"
 
 
+def test_relative_paths_in_symlinked_local_env_resolve_from_visible_repo_root(tmp_path, monkeypatch):
+    repo_root = tmp_path / "repo"
+    private_root = tmp_path / "private"
+    repo_root.mkdir()
+    env_dir = private_root / ".local"
+    env_dir.mkdir(parents=True)
+    env_file = env_dir / "rag-flow.env"
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_SOURCE_PDF=pdfs/source/manual.pdf",
+                "RAG_FLOW_SOURCE_ROOT=pdfs/source",
+                "RAG_FLOW_BASE_DIR=pdfs/output/manual/auto",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (repo_root / ".local").symlink_to(env_dir, target_is_directory=True)
+
+    monkeypatch.chdir(repo_root)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.paths.source_pdf == repo_root / "pdfs" / "source" / "manual.pdf"
+    assert config.paths.source_root == repo_root / "pdfs" / "source"
+    assert config.paths.base_dir == repo_root / "pdfs" / "output" / "manual" / "auto"
+
+
 def test_relative_paths_imported_from_env_file_still_resolve_from_repo_root(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()
@@ -130,11 +159,11 @@ def test_default_workspace_paths_are_local_project_dirs(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.paths.source_root == Path("source-pdfs")
-    assert config.paths.source_pdf == Path("source-pdfs/example-technical-manual.pdf")
-    assert config.paths.base_dir == Path("output-pdfs/example-technical-manual/auto")
-    assert config.mineru.input_path == Path("source-pdfs/example-technical-manual.pdf")
-    assert config.mineru.output_dir == Path("output-pdfs")
+    assert config.paths.source_root == Path("pdfs/source")
+    assert config.paths.source_pdf == Path("pdfs/source/example-technical-manual.pdf")
+    assert config.paths.base_dir == Path("pdfs/output/example-technical-manual/auto")
+    assert config.mineru.input_path == Path("pdfs/source/example-technical-manual.pdf")
+    assert config.mineru.output_dir == Path("pdfs/output")
     assert config.paths.db_path == Path("qdrant-db")
 
 

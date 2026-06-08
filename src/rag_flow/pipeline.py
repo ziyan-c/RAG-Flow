@@ -8,7 +8,14 @@ from typing import Callable
 from .chunking import create_chunks, write_chunks
 from .config import AppConfig
 from .indexing import upsert_colpali_vectors, upsert_text_vectors
-from .mineru import MinerUArtifacts, expected_content_json, find_content_json, infer_artifacts, run_mineru
+from .mineru import (
+    MinerUArtifacts,
+    expected_content_json,
+    find_content_json,
+    infer_artifacts,
+    mineru_output_dir_for_pdf,
+    run_mineru,
+)
 from .preprocessing.chunking_view import write_chunking_view_pdf
 from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
@@ -74,24 +81,25 @@ def run_ingest(
         configured_source_name=config.paths.source_name,
         source_root=source_root or config.paths.source_root or source_root_from_input_path(config.mineru.input_path),
     )
+    mineru_output_dir = mineru_output_dir_for_pdf(config, source_pdf=source_pdf, source_root=source_root)
     mineru_ran = False
 
     content_json = None
     if "parsing" not in selected_stages:
-        content_json = infer_artifacts(config, source_pdf=source_pdf).content_json
+        content_json = infer_artifacts(config, source_pdf=source_pdf, source_root=source_root).content_json
     elif skip_existing and not force:
-        content_json = find_content_json(config, source_pdf=source_pdf)
+        content_json = find_content_json(config, source_pdf=source_pdf, source_root=source_root)
 
     if "parsing" in selected_stages and (force or not content_json):
         if dry_run:
-            run_mineru(config, pdf_path=source_pdf, dry_run=True)
-            content_json = expected_content_json(config, source_pdf=source_pdf)
+            run_mineru(config, pdf_path=source_pdf, output_dir=mineru_output_dir, dry_run=True)
+            content_json = expected_content_json(config, source_pdf=source_pdf, source_root=source_root)
         else:
-            run_mineru(config, pdf_path=source_pdf)
-            content_json = infer_artifacts(config, source_pdf=source_pdf).content_json
+            run_mineru(config, pdf_path=source_pdf, output_dir=mineru_output_dir)
+            content_json = infer_artifacts(config, source_pdf=source_pdf, source_root=source_root).content_json
             mineru_ran = True
 
-    artifacts = infer_artifacts(config, content_json=content_json, source_pdf=source_pdf)
+    artifacts = infer_artifacts(config, content_json=content_json, source_pdf=source_pdf, source_root=source_root)
 
     def recover_sections() -> None:
         result = write_sectioned_json(

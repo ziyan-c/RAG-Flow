@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
 
-# Normalized marker for source-pdfs/source_pdfs/sourcepdfs ancestors.
+# Normalized marker for legacy source-pdfs/source_pdfs/sourcepdfs ancestors.
 SOURCE_ROOT_MARKERS = {"sourcepdfs"}
 
 
@@ -54,7 +54,8 @@ def _source_root_ancestors(pdf_path: Path) -> list[Path]:
     roots = []
     for parent in pdf_path.parents:
         marker = parent.name.lower().replace("-", "").replace("_", "")
-        if marker in SOURCE_ROOT_MARKERS:
+        parent_marker = parent.parent.name.lower().replace("-", "").replace("_", "")
+        if marker in SOURCE_ROOT_MARKERS or (marker == "source" and parent_marker == "pdfs"):
             roots.append(parent)
     return roots
 
