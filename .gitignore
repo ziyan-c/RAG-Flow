@@ -8,6 +8,7 @@ __pycache__/
 
 # Local data and model caches
 data/
+CUSTOM_DATA/
 pdfs/source/
 pdfs/output/
 source-pdfs/
