@@ -134,10 +134,10 @@ CONFIG_PRESETS: dict[str, ConfigPreset] = {
 
 PRESET_ALIASES: dict[str, str] = {
     "compact": "low",
-    "default": "medium",
+    "default": "low",
     "high-recall": "high",
     "compact-with-image-input": "low-with-image-input",
-    "default-with-image-input": "medium-with-image-input",
+    "default-with-image-input": "low-with-image-input",
     "visual-recall": "medium-with-visual-recall",
 }
 

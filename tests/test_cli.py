@@ -407,10 +407,10 @@ def test_preset_env_prints_preset_values(capsys):
 
 def test_current_preset_aliases_resolve_to_canonical_names():
     assert get_preset("compact").name == "low"
-    assert get_preset("default").name == "medium"
+    assert get_preset("default").name == "low"
     assert get_preset("high-recall").name == "high"
     assert get_preset("compact-with-image-input").name == "low-with-image-input"
-    assert get_preset("default-with-image-input").name == "medium-with-image-input"
+    assert get_preset("default-with-image-input").name == "low-with-image-input"
     assert get_preset("visual-recall").name == "medium-with-visual-recall"
 
 

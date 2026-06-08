@@ -97,7 +97,7 @@ manuals plus visually dense camera and switch sheets.
 ### Final Presets
 
 Scores are mean 0-5 answer-quality scores from the final 200-question validation
-unless noted otherwise.
+unless noted otherwise. The built-in runtime default is `low`.
 
 | Preset | Route | Main settings | Mean score | Avg retrieved context | Use when |
 | --- | --- | --- | ---: | ---: | --- |
@@ -179,14 +179,14 @@ RAG_FLOW_INDEX_MODE=both rag-flow ingest --to-stage indexing
 ### 4. Start retrieval and answer questions
 
 ```bash
-rag-flow --preset medium retriever
-rag-flow --preset medium chat
+rag-flow retriever
+rag-flow chat
 ```
 
 Useful alternatives:
 
 ```bash
-rag-flow --preset low chat
+rag-flow --preset medium chat
 rag-flow --preset high chat
 rag-flow --preset medium-with-visual-recall test-retriever "Which port is used for power?"
 rag-flow --preset medium-with-image-input chat
@@ -235,7 +235,7 @@ the env file.
 ```bash
 rag-flow preset list
 rag-flow preset show high
-rag-flow --preset low retriever
+rag-flow retriever
 ```
 
 You can also set a preset in `.local/rag-flow.env`:
@@ -264,6 +264,9 @@ families are:
 | Indexing | `RAG_FLOW_DB_PATH`, `RAG_FLOW_QDRANT_URL`, `RAG_FLOW_COLLECTION`, `RAG_FLOW_INDEX_MODE` | Configure local or server Qdrant. |
 | Retrieval | `RAG_FLOW_RETRIEVAL_K`, `RAG_FLOW_FINAL_TOP_K`, `RAG_FLOW_RRF_K`, `RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS` | Select evidence for answering. |
 | LLM serving | `RAG_FLOW_LLM_BASE_URL`, `RAG_FLOW_LLM_MODEL`, `RAG_FLOW_SGLANG_MODEL_PATH` | Connect to the OpenAI-compatible answerer. |
+
+The built-in chunking default is `auto` mode with `max_tokens=1500`,
+`overlap_tokens=150`, and `min_tokens=150`.
 
 ## Repository Layout
 

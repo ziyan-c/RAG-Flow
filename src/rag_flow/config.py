@@ -15,6 +15,7 @@ DEFAULT_BASE_DIR = DEFAULT_OUTPUT_ROOT / Path(DEFAULT_SOURCE_NAME).stem / "auto"
 DEFAULT_DB_PATH = Path("qdrant-db")
 DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
 DEFAULT_RUNTIME_ENV_FILE = Path("autodl-tmp/.local/rag-flow.env")
+DEFAULT_CONFIG_PRESET = "low"
 
 
 def find_upwards(relative_path: str | Path, start: Path | None = None) -> Path | None:
@@ -73,9 +74,7 @@ def load_env_file(path: str | os.PathLike[str] | None) -> dict[str, str]:
 
 
 def apply_preset_defaults(file_values: Mapping[str, str]) -> dict[str, str]:
-    preset_name = os.environ.get("RAG_FLOW_PRESET") or file_values.get("RAG_FLOW_PRESET", "")
-    if not preset_name.strip():
-        return dict(file_values)
+    preset_name = os.environ.get("RAG_FLOW_PRESET") or file_values.get("RAG_FLOW_PRESET") or DEFAULT_CONFIG_PRESET
     preset = get_preset(preset_name)
     return {**preset.env, **file_values, "RAG_FLOW_PRESET": preset.name}
 
@@ -227,16 +226,16 @@ class CaptioningConfig:
 @dataclass(frozen=True)
 class ChunkingConfig:
     mode: str = "auto"
-    max_tokens: int = 5000
-    overlap_tokens: int = 500
-    min_tokens: int = 200
+    max_tokens: int = 1500
+    overlap_tokens: int = 150
+    min_tokens: int = 150
 
 
 @dataclass(frozen=True)
 class IndexingConfig:
     mode: str = "text"
     text_batch_size: int = 256
-    visual_batch_size: int = 64
+    visual_batch_size: int = 8
     visual_dpi: int = 200
 
 
@@ -389,9 +388,9 @@ class AppConfig:
 
         chunking = ChunkingConfig(
             mode=env.get("RAG_FLOW_CHUNK_MODE", "auto"),
-            max_tokens=env.int("RAG_FLOW_CHUNK_MAX_TOKENS", 5000),
-            overlap_tokens=env.int("RAG_FLOW_CHUNK_OVERLAP_TOKENS", 500),
-            min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 200),
+            max_tokens=env.int("RAG_FLOW_CHUNK_MAX_TOKENS", 1500),
+            overlap_tokens=env.int("RAG_FLOW_CHUNK_OVERLAP_TOKENS", 150),
+            min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 150),
         )
 
         indexing = IndexingConfig(

@@ -597,9 +597,9 @@ def create_chunks(
     source_name: str,
     *,
     mode: str = "auto",
-    max_tokens: int = 5000,
-    overlap_tokens: int = 500,
-    min_tokens: int = 200,
+    max_tokens: int = 1500,
+    overlap_tokens: int = 150,
+    min_tokens: int = 150,
 ) -> list[dict[str, Any]]:
     if mode not in SUPPORTED_CHUNK_MODES:
         raise ValueError(f"Unsupported chunk mode {mode!r}. Choose one of: {', '.join(SUPPORTED_CHUNK_MODES)}")

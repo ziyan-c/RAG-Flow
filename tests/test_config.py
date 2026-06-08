@@ -240,9 +240,9 @@ def test_chunking_defaults(tmp_path, monkeypatch):
     config = AppConfig.from_env()
 
     assert config.chunking.mode == "auto"
-    assert config.chunking.max_tokens == 5000
-    assert config.chunking.overlap_tokens == 500
-    assert config.chunking.min_tokens == 200
+    assert config.chunking.max_tokens == 1500
+    assert config.chunking.overlap_tokens == 150
+    assert config.chunking.min_tokens == 150
 
 
 def test_chunking_reads_local_env(tmp_path, monkeypatch):
@@ -284,13 +284,13 @@ def test_retrieval_defaults(tmp_path, monkeypatch):
     assert config.retrieval.route_mode == "text"
     assert config.retrieval.visual_bonus == "none"
     assert config.retrieval.quantized_colpali is True
-    assert config.retrieval.retrieval_k == 80
-    assert config.retrieval.final_top_k == 20
+    assert config.retrieval.retrieval_k == 150
+    assert config.retrieval.final_top_k == 10
     assert config.retrieval.rrf_k == 10
     assert config.retrieval.visual_weight == 2.5
     assert config.retrieval.candidate_scroll_page_size == 30
     assert config.retrieval.max_context_tokens == 10000
-    assert config.retrieval.min_score_ratio == 1.0
+    assert config.retrieval.min_score_ratio == 0.4
 
 
 def test_qdrant_server_env_is_optional(tmp_path, monkeypatch):
