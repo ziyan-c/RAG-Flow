@@ -225,11 +225,18 @@ command=(
   --context-length "$RAG_FLOW_SGLANG_CONTEXT_LENGTH"
 )
 
-[[ -n "${RAG_FLOW_SGLANG_SERVED_MODEL_NAME:-}" ]] && command+=(--served-model-name "$RAG_FLOW_SGLANG_SERVED_MODEL_NAME")
-[[ -n "$RAG_FLOW_SGLANG_REASONING_PARSER" ]] && command+=(--reasoning-parser "$RAG_FLOW_SGLANG_REASONING_PARSER")
-[[ -n "$RAG_FLOW_SGLANG_QUANTIZATION" ]] && command+=(--quantization "$RAG_FLOW_SGLANG_QUANTIZATION")
-[[ -n "$RAG_FLOW_SGLANG_ATTENTION_BACKEND" ]] && command+=(--attention-backend "$RAG_FLOW_SGLANG_ATTENTION_BACKEND")
-[[ -n "$RAG_FLOW_SGLANG_KV_CACHE_DTYPE" ]] && command+=(--kv-cache-dtype "$RAG_FLOW_SGLANG_KV_CACHE_DTYPE")
+append_optional_sglang_arg() {
+  local name="$1"
+  local value="$2"
+  [[ -z "$value" || "$value" == "none" ]] && return
+  command+=("$name" "$value")
+}
+
+append_optional_sglang_arg --served-model-name "${RAG_FLOW_SGLANG_SERVED_MODEL_NAME:-}"
+append_optional_sglang_arg --reasoning-parser "$RAG_FLOW_SGLANG_REASONING_PARSER"
+append_optional_sglang_arg --quantization "$RAG_FLOW_SGLANG_QUANTIZATION"
+append_optional_sglang_arg --attention-backend "$RAG_FLOW_SGLANG_ATTENTION_BACKEND"
+append_optional_sglang_arg --kv-cache-dtype "$RAG_FLOW_SGLANG_KV_CACHE_DTYPE"
 
 if [[ -n "$RAG_FLOW_SGLANG_EXTRA_ARGS" ]]; then
   # shellcheck disable=SC2206

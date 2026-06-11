@@ -160,20 +160,14 @@ qdrant-db/     local Qdrant vector database
 ```bash
 rag-flow mineru doctor
 rag-flow mineru run --input pdfs/source --output-dir pdfs/output
-rag-flow ingest --to-stage chunking
-rag-flow index text
+rag-flow ingest
 ```
 
-For optional visual retrieval, build the page-level ColPali index too:
+By default this runs through text indexing. To include the optional page-level
+ColPali visual index in the same staged pipeline, use:
 
 ```bash
-rag-flow index visual --chunks /path/to/current_CHUNKED.json
-```
-
-Or run through indexing from the staged pipeline:
-
-```bash
-RAG_FLOW_INDEX_MODE=both rag-flow ingest --to-stage indexing
+RAG_FLOW_INDEX_MODE=both rag-flow ingest
 ```
 
 ### 4. Start retrieval and answer questions
@@ -258,12 +252,20 @@ families are:
 | Family | Examples | Purpose |
 | --- | --- | --- |
 | Source and artifacts | `RAG_FLOW_SOURCE_ROOT`, `RAG_FLOW_MINERU_OUTPUT_DIR`, `RAG_FLOW_CONTENT_JSON` | Locate PDFs and stage outputs. |
-| Patching | `RAG_FLOW_PATCH_DPI`, `RAG_FLOW_PATCH_CONCURRENCY`, `RAG_FLOW_PATCH_MAX_NEW_TOKENS` | Control small-icon repair. |
-| Captioning | `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS`, `RAG_FLOW_CAPTION_CONCURRENCY` | Control image-description generation. |
+| Patching | `RAG_FLOW_VLM_BASE_URL`, `RAG_FLOW_VLM_MODEL`, `RAG_FLOW_PATCH_DPI`, `RAG_FLOW_PATCH_CONCURRENCY` | Control vision-model small-icon repair. |
+| Captioning | `RAG_FLOW_VLM_BASE_URL`, `RAG_FLOW_VLM_MODEL`, `RAG_FLOW_CAPTION_MAX_CONTEXT_TOKENS` | Control vision-model image-description generation. |
 | Chunking | `RAG_FLOW_CHUNK_MODE`, `RAG_FLOW_CHUNK_MAX_TOKENS`, `RAG_FLOW_CHUNK_OVERLAP_TOKENS` | Shape retrieval units. |
 | Indexing | `RAG_FLOW_DB_PATH`, `RAG_FLOW_QDRANT_URL`, `RAG_FLOW_COLLECTION`, `RAG_FLOW_INDEX_MODE` | Configure local or server Qdrant. |
 | Retrieval | `RAG_FLOW_RETRIEVAL_K`, `RAG_FLOW_FINAL_TOP_K`, `RAG_FLOW_RRF_K`, `RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS` | Select evidence for answering. |
-| LLM serving | `RAG_FLOW_LLM_BASE_URL`, `RAG_FLOW_LLM_MODEL`, `RAG_FLOW_SGLANG_MODEL_PATH` | Connect to the OpenAI-compatible answerer. |
+| Model serving | `RAG_FLOW_VLM_SERVER_AUTO_START`, `RAG_FLOW_LLM_SERVER_AUTO_START`, `RAG_FLOW_VLM_SGLANG_MODEL_ID`, `RAG_FLOW_LLM_SGLANG_MODEL_ID` | Optionally start the VLM only for patching/captioning and the LLM only for chat/answering. |
+
+Patching and captioning use the VLM endpoint (`RAG_FLOW_VLM_BASE_URL`,
+`RAG_FLOW_VLM_MODEL`). If `RAG_FLOW_VLM_SERVER_AUTO_START=1`, ingest starts that
+server before the first patching/captioning stage that actually runs, then stops
+it after the last such stage to free VRAM. Chat and answering benchmarks use the
+LLM endpoint (`RAG_FLOW_LLM_BASE_URL`, `RAG_FLOW_LLM_MODEL`); setting
+`RAG_FLOW_LLM_SERVER_AUTO_START=1` starts the answer model only when answers are
+generated, so retrieval-only and `--skip-answering` runs do not load it.
 
 The built-in chunking default is `auto` mode with `max_tokens=1500`,
 `overlap_tokens=150`, and `min_tokens=150`.

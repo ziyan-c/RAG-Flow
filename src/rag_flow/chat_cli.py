@@ -7,6 +7,7 @@ import requests
 from openai import OpenAI
 
 from .config import AppConfig
+from .model_server import managed_model_server
 
 
 def _final_output_content(data: dict) -> list[dict]:
@@ -54,73 +55,74 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--max-tokens", type=int, default=config.models.llm_max_tokens)
     args = parser.parse_args(argv)
 
-    llm_client = OpenAI(api_key=args.api_key, base_url=args.llm_base_url)
-    chat_history: list[dict[str, str]] = []
+    with managed_model_server(config, "llm", base_url=args.llm_base_url, api_key=args.api_key, model=args.llm_model):
+        llm_client = OpenAI(api_key=args.api_key, base_url=args.llm_base_url)
+        chat_history: list[dict[str, str]] = []
 
-    print("RAG Flow chat is ready. Type q, quit, or exit to stop.")
-    while True:
-        user_query = input("\nYou: ").strip()
-        if user_query.lower() in {"q", "quit", "exit"}:
-            print("Goodbye.")
-            break
-        if not user_query:
-            continue
+        print("RAG Flow chat is ready. Type q, quit, or exit to stop.")
+        while True:
+            user_query = input("\nYou: ").strip()
+            if user_query.lower() in {"q", "quit", "exit"}:
+                print("Goodbye.")
+                break
+            if not user_query:
+                continue
 
-        try:
-            headers = {"Authorization": f"Bearer {args.retriever_api_key}"} if args.retriever_api_key else None
-            response = requests.post(args.retriever_url, json={"query": user_query}, headers=headers, timeout=120)
-            response.raise_for_status()
-            data = response.json()
-            user_content = _build_answering_user_content(data, user_query)
-            image_count = _count_image_items(user_content)
-            print(f"\n(Top reference page: {data['hit_page']})\n")
-            if image_count:
-                print(f"(Attached retrieval images: {image_count})\n")
-            messages = [
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a senior technical expert assistant. "
-                        "You answer questions only from the provided reference materials."
-                    ),
-                },
-                *chat_history,
-                {"role": "user", "content": user_content},
-            ]
+            try:
+                headers = {"Authorization": f"Bearer {args.retriever_api_key}"} if args.retriever_api_key else None
+                response = requests.post(args.retriever_url, json={"query": user_query}, headers=headers, timeout=120)
+                response.raise_for_status()
+                data = response.json()
+                user_content = _build_answering_user_content(data, user_query)
+                image_count = _count_image_items(user_content)
+                print(f"\n(Top reference page: {data['hit_page']})\n")
+                if image_count:
+                    print(f"(Attached retrieval images: {image_count})\n")
+                messages = [
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a senior technical expert assistant. "
+                            "You answer questions only from the provided reference materials."
+                        ),
+                    },
+                    *chat_history,
+                    {"role": "user", "content": user_content},
+                ]
 
-            stream = llm_client.chat.completions.create(
-                model=args.llm_model,
-                messages=messages,
-                max_tokens=args.max_tokens,
-                stream=True,
-                top_p=0.85,
-                temperature=1.0,
-            )
+                stream = llm_client.chat.completions.create(
+                    model=args.llm_model,
+                    messages=messages,
+                    max_tokens=args.max_tokens,
+                    stream=True,
+                    top_p=0.85,
+                    temperature=1.0,
+                )
 
-            assistant_reply = ""
-            for chunk in stream:
-                if not chunk.choices:
-                    continue
-                delta = chunk.choices[0].delta
-                reasoning = getattr(delta, "reasoning_content", None)
-                if reasoning:
-                    sys.stdout.write(f"\033[90m{reasoning}\033[0m")
-                    sys.stdout.flush()
-                if delta.content:
-                    sys.stdout.write(delta.content)
-                    sys.stdout.flush()
-                    assistant_reply += delta.content
-            print("\n")
+                assistant_reply = ""
+                for chunk in stream:
+                    if not chunk.choices:
+                        continue
+                    delta = chunk.choices[0].delta
+                    reasoning = getattr(delta, "reasoning_content", None)
+                    if reasoning:
+                        sys.stdout.write(f"\033[90m{reasoning}\033[0m")
+                        sys.stdout.flush()
+                    if delta.content:
+                        sys.stdout.write(delta.content)
+                        sys.stdout.flush()
+                        assistant_reply += delta.content
+                print("\n")
 
-            chat_history.append({"role": "user", "content": user_query})
-            chat_history.append({"role": "assistant", "content": assistant_reply.strip()})
-            if len(chat_history) > 12:
-                chat_history = chat_history[-12:]
+                chat_history.append({"role": "user", "content": user_query})
+                chat_history.append({"role": "assistant", "content": assistant_reply.strip()})
+                if len(chat_history) > 12:
+                    chat_history = chat_history[-12:]
 
-        except requests.exceptions.ConnectionError as exc:
-            print(f"Connection failed. Check the retriever and LLM services. Details: {exc}")
-        except Exception as exc:
-            print(f"Unexpected error: {exc}")
+            except requests.exceptions.ConnectionError as exc:
+                print(f"Connection failed. Check the retriever and LLM services. Details: {exc}")
+            except Exception as exc:
+                print(f"Unexpected error: {exc}")
 
 
 if __name__ == "__main__":

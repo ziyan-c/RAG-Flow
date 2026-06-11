@@ -45,6 +45,7 @@ def make_config(
         ),
         models=ModelConfig(
             dense_model="dense",
+            dense_vector_size=1024,
             sparse_model="sparse",
             colpali_model="colpali",
             vlm_model="vlm",

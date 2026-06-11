@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -8,6 +9,7 @@ from typing import Callable
 from .chunking import create_chunks, write_chunks
 from .config import AppConfig
 from .indexing import upsert_colpali_vectors, upsert_text_vectors
+from .model_server import managed_model_server
 from .mineru import (
     MinerUArtifacts,
     expected_content_json,
@@ -25,6 +27,7 @@ from .source_paths import source_name_for_pdf, source_root_from_input_path
 INGEST_STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
 ONLINE_QA_STAGES = ("retrieval", "answering")
 STAGES = INGEST_STAGES
+VLM_STAGES = {"patching", "captioning"}
 
 
 @dataclass(frozen=True)
@@ -54,13 +57,17 @@ def _print_stage(stage_name: str, output_path: Path | None, *, dry_run: bool, sk
         print(f"[{prefix}] {stage_name}")
 
 
+def _has_later_vlm_stage(selected_stages: tuple[str, ...], index: int) -> bool:
+    return any(stage in VLM_STAGES for stage in selected_stages[index + 1 :])
+
+
 def run_ingest(
     config: AppConfig,
     *,
     pdf_path: str | Path | None = None,
     source_root: str | Path | None = None,
     from_stage: str = "parsing",
-    to_stage: str = "chunking",
+    to_stage: str = "indexing",
     skip_existing: bool = True,
     force: bool = False,
     dry_run: bool = False,
@@ -119,9 +126,9 @@ def run_ingest(
             input_json=artifacts.sectioned_json,
             output_json=artifacts.patched_json,
             pdf_path=source_pdf,
-            llm_base_url=config.models.llm_base_url,
-            llm_api_key=config.models.llm_api_key,
-            llm_model=config.models.llm_model,
+            llm_base_url=config.models.vlm_base_url,
+            llm_api_key=config.models.vlm_api_key,
+            llm_model=config.models.vlm_model,
             dpi=config.patching.dpi,
             batch_size=config.patching.batch_size if patch_batch_size is None else patch_batch_size,
             concurrency=config.patching.concurrency if patch_concurrency is None else patch_concurrency,
@@ -143,14 +150,14 @@ def run_ingest(
             input_json=artifacts.patched_json,
             output_json=artifacts.captioned_json,
             pdf_path=source_pdf,
-            model_name=config.models.llm_model,
+            model_name=config.models.vlm_model,
             max_new_tokens=config.captioning.max_new_tokens,
             batch_size=config.captioning.batch_size,
             concurrency=config.captioning.concurrency,
             max_context_tokens=config.captioning.max_context_tokens,
             max_image_side=config.captioning.max_image_side,
-            llm_base_url=config.models.llm_base_url,
-            llm_api_key=config.models.llm_api_key,
+            llm_base_url=config.models.vlm_base_url,
+            llm_api_key=config.models.vlm_api_key,
             llm_timeout=config.captioning.llm_timeout,
             checkpoint_interval=config.captioning.checkpoint_interval,
         )
@@ -206,18 +213,32 @@ def run_ingest(
         "indexing": Stage("indexing", None, index_vectors),
     }
 
-    for name in selected_stages:
-        if name == "parsing":
-            skipped = bool(content_json) and not force and not mineru_ran and not dry_run
-            _print_stage(name, artifacts.content_json, dry_run=dry_run, skipped=skipped)
-            continue
+    model_stack = ExitStack()
+    vlm_server_open = False
+    try:
+        for index, name in enumerate(selected_stages):
+            if name == "parsing":
+                skipped = bool(content_json) and not force and not mineru_ran and not dry_run
+                _print_stage(name, artifacts.content_json, dry_run=dry_run, skipped=skipped)
+                continue
 
-        stage = stages[name]
-        skipped = bool(stage.output_path and stage.output_path.exists() and skip_existing and not force)
-        _print_stage(stage.name, stage.output_path, dry_run=dry_run, skipped=skipped)
-        if dry_run or skipped:
-            continue
-        stage.action()
+            stage = stages[name]
+            skipped = bool(stage.output_path and stage.output_path.exists() and skip_existing and not force)
+            _print_stage(stage.name, stage.output_path, dry_run=dry_run, skipped=skipped)
+            if dry_run or skipped:
+                if vlm_server_open and name in VLM_STAGES and not _has_later_vlm_stage(selected_stages, index):
+                    model_stack.close()
+                    vlm_server_open = False
+                continue
+            if name in VLM_STAGES and not vlm_server_open:
+                model_stack.enter_context(managed_model_server(config, "vlm"))
+                vlm_server_open = True
+            stage.action()
+            if vlm_server_open and name in VLM_STAGES and not _has_later_vlm_stage(selected_stages, index):
+                model_stack.close()
+                vlm_server_open = False
+    finally:
+        model_stack.close()
 
     return artifacts
 
@@ -232,7 +253,7 @@ def main(argv: list[str] | None = None) -> None:
         help="Directory treated as the source-relative root, e.g. /root/pdfs -> DSS/manual.pdf.",
     )
     parser.add_argument("--from-stage", choices=STAGES, default="parsing")
-    parser.add_argument("--to-stage", choices=STAGES, default="chunking")
+    parser.add_argument("--to-stage", choices=STAGES, default="indexing")
     parser.add_argument("--force", action="store_true", help="Re-run stages even when outputs already exist.")
     parser.add_argument("--no-skip-existing", action="store_true", help="Run stages even when outputs already exist.")
     parser.add_argument(

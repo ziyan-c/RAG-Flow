@@ -155,6 +155,8 @@ class ModelConfig:
     llm_api_key: str
     llm_model: str
     llm_max_tokens: int
+    vlm_base_url: str = "http://localhost:8080/v1"
+    vlm_api_key: str = "EMPTY"
     colpali_model_path: Path | None = None
     colpali_local_model_root: Path = Path("/root/autodl-tmp/models")
 
@@ -242,6 +244,30 @@ class IndexingConfig:
 
 
 @dataclass(frozen=True)
+class ModelServerConfig:
+    auto_start: bool = False
+    stop_after: bool = True
+    command: str = ""
+    log_path: Path | None = None
+    startup_timeout: float = 900.0
+    poll_interval: float = 5.0
+    sglang_model_profile: str = "custom"
+    sglang_model_id: str = ""
+    sglang_model_path: Path | None = None
+    sglang_served_model_name: str = ""
+    sglang_python: str = ""
+    sglang_local_model_root: Path = Path("/root/autodl-tmp/models")
+    sglang_mem_fraction_static: str = ""
+    sglang_context_length: str = ""
+    sglang_tp_size: str = ""
+    sglang_quantization: str = ""
+    sglang_reasoning_parser: str = ""
+    sglang_attention_backend: str = ""
+    sglang_kv_cache_dtype: str = ""
+    sglang_extra_args: str = ""
+
+
+@dataclass(frozen=True)
 class AppConfig:
     paths: PathsConfig
     models: ModelConfig
@@ -253,6 +279,8 @@ class AppConfig:
     chunking: ChunkingConfig
     qdrant: QdrantConfig = field(default_factory=QdrantConfig)
     indexing: IndexingConfig = field(default_factory=IndexingConfig)
+    vlm_server: ModelServerConfig = field(default_factory=ModelServerConfig)
+    llm_server: ModelServerConfig = field(default_factory=ModelServerConfig)
 
     @classmethod
     def from_env(cls, env_file: str | os.PathLike[str] | None = None) -> "AppConfig":
@@ -318,9 +346,14 @@ class AppConfig:
             if env.get("RAG_FLOW_COLPALI_MODEL_PATH", "")
             else None,
             colpali_local_model_root=env.path("RAG_FLOW_COLPALI_LOCAL_MODEL_ROOT", "/root/autodl-tmp/models"),
-            vlm_model=env.get("RAG_FLOW_VLM_MODEL", "Qwen/Qwen3.5-9B"),
+            vlm_model=env.get("RAG_FLOW_VLM_MODEL", "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"),
             vlm_model_revision=env.get("RAG_FLOW_VLM_MODEL_REVISION", ""),
-            trusted_remote_code_models=env.csv("RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS", "Qwen/Qwen3.5-9B"),
+            trusted_remote_code_models=env.csv(
+                "RAG_FLOW_TRUSTED_REMOTE_CODE_MODELS",
+                "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4",
+            ),
+            vlm_base_url=env.get("RAG_FLOW_VLM_BASE_URL", env.get("RAG_FLOW_LLM_BASE_URL", "http://localhost:8080/v1")),
+            vlm_api_key=env.get("RAG_FLOW_VLM_API_KEY", env.get("RAG_FLOW_LLM_API_KEY", "EMPTY")),
             llm_base_url=env.get("RAG_FLOW_LLM_BASE_URL", "http://localhost:8080/v1"),
             llm_api_key=env.get("RAG_FLOW_LLM_API_KEY", "EMPTY"),
             llm_model=env.get("RAG_FLOW_LLM_MODEL", "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"),
@@ -402,6 +435,50 @@ class AppConfig:
             visual_dpi=env.int("RAG_FLOW_INDEX_VISUAL_DPI", 200),
         )
 
+        def server_config(prefix: str, *, default_profile: str, default_model_id: str, default_quantization: str) -> ModelServerConfig:
+            raw_model_path = env.get(f"RAG_FLOW_{prefix}_SGLANG_MODEL_PATH", "")
+            raw_log_path = env.get(f"RAG_FLOW_{prefix}_SERVER_LOG_PATH", "")
+            return ModelServerConfig(
+                auto_start=env.bool(f"RAG_FLOW_{prefix}_SERVER_AUTO_START", False),
+                stop_after=env.bool(f"RAG_FLOW_{prefix}_SERVER_STOP_AFTER", True),
+                command=env.get(f"RAG_FLOW_{prefix}_SERVER_COMMAND", ""),
+                log_path=env.path(f"RAG_FLOW_{prefix}_SERVER_LOG_PATH", raw_log_path) if raw_log_path else None,
+                startup_timeout=env.float(f"RAG_FLOW_{prefix}_SERVER_STARTUP_TIMEOUT", 900.0),
+                poll_interval=env.float(f"RAG_FLOW_{prefix}_SERVER_POLL_INTERVAL", 5.0),
+                sglang_model_profile=env.get(f"RAG_FLOW_{prefix}_SGLANG_MODEL_PROFILE", default_profile),
+                sglang_model_id=env.get(f"RAG_FLOW_{prefix}_SGLANG_MODEL_ID", default_model_id),
+                sglang_model_path=env.path(f"RAG_FLOW_{prefix}_SGLANG_MODEL_PATH", raw_model_path)
+                if raw_model_path
+                else None,
+                sglang_served_model_name=env.get(f"RAG_FLOW_{prefix}_SGLANG_SERVED_MODEL_NAME", default_model_id),
+                sglang_python=env.get(f"RAG_FLOW_{prefix}_SGLANG_PYTHON", ""),
+                sglang_local_model_root=env.path(
+                    f"RAG_FLOW_{prefix}_SGLANG_LOCAL_MODEL_ROOT",
+                    "/root/autodl-tmp/models",
+                ),
+                sglang_mem_fraction_static=env.get(f"RAG_FLOW_{prefix}_SGLANG_MEM_FRACTION_STATIC", ""),
+                sglang_context_length=env.get(f"RAG_FLOW_{prefix}_SGLANG_CONTEXT_LENGTH", ""),
+                sglang_tp_size=env.get(f"RAG_FLOW_{prefix}_SGLANG_TP_SIZE", ""),
+                sglang_quantization=env.get(f"RAG_FLOW_{prefix}_SGLANG_QUANTIZATION", default_quantization),
+                sglang_reasoning_parser=env.get(f"RAG_FLOW_{prefix}_SGLANG_REASONING_PARSER", ""),
+                sglang_attention_backend=env.get(f"RAG_FLOW_{prefix}_SGLANG_ATTENTION_BACKEND", ""),
+                sglang_kv_cache_dtype=env.get(f"RAG_FLOW_{prefix}_SGLANG_KV_CACHE_DTYPE", ""),
+                sglang_extra_args=env.get(f"RAG_FLOW_{prefix}_SGLANG_EXTRA_ARGS", ""),
+            )
+
+        vlm_server = server_config(
+            "VLM",
+            default_profile="qwen3.6-35b-a3b-gptq-int4",
+            default_model_id=models.vlm_model,
+            default_quantization="moe_wna16",
+        )
+        llm_server = server_config(
+            "LLM",
+            default_profile="qwen3.6-35b-a3b-gptq-int4",
+            default_model_id=models.llm_model,
+            default_quantization="moe_wna16",
+        )
+
         return cls(
             paths=paths,
             qdrant=qdrant,
@@ -413,4 +490,6 @@ class AppConfig:
             captioning=captioning,
             chunking=chunking,
             indexing=indexing,
+            vlm_server=vlm_server,
+            llm_server=llm_server,
         )

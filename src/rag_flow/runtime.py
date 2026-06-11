@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-DEFAULT_TRUSTED_REMOTE_CODE_MODELS = ("Qwen/Qwen3.5-9B",)
+DEFAULT_TRUSTED_REMOTE_CODE_MODELS = ("palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4",)
 
 
 def get_torch_device(

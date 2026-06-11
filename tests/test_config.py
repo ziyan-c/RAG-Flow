@@ -476,6 +476,84 @@ def test_colpali_local_model_paths_read_local_env(tmp_path, monkeypatch):
     assert config.models.colpali_local_model_root == tmp_path / "models"
 
 
+def test_vlm_endpoint_and_model_server_lifecycle_read_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text(
+        "\n".join(
+            [
+                "RAG_FLOW_LLM_BASE_URL=http://llm.local/v1",
+                "RAG_FLOW_LLM_API_KEY=llm-key",
+                "RAG_FLOW_LLM_MODEL=answer-model",
+                "RAG_FLOW_VLM_BASE_URL=http://vlm.local/v1",
+                "RAG_FLOW_VLM_API_KEY=vlm-key",
+                "RAG_FLOW_VLM_MODEL=vision-model",
+                "RAG_FLOW_VLM_SERVER_AUTO_START=1",
+                "RAG_FLOW_VLM_SERVER_STOP_AFTER=1",
+                "RAG_FLOW_VLM_SERVER_LOG_PATH=logs/vlm.log",
+                "RAG_FLOW_VLM_SGLANG_MODEL_PROFILE=custom",
+                "RAG_FLOW_VLM_SGLANG_MODEL_ID=vision-model",
+                "RAG_FLOW_VLM_SGLANG_SERVED_MODEL_NAME=vision-model",
+                "RAG_FLOW_VLM_SGLANG_LOCAL_MODEL_ROOT=models",
+                "RAG_FLOW_VLM_SGLANG_MEM_FRACTION_STATIC=0.5",
+                "RAG_FLOW_VLM_SGLANG_CONTEXT_LENGTH=32768",
+                "RAG_FLOW_VLM_SGLANG_QUANTIZATION=none",
+                "RAG_FLOW_LLM_SERVER_AUTO_START=1",
+                "RAG_FLOW_LLM_SGLANG_MODEL_PROFILE=qwen3.6-35b-a3b-gptq-int4",
+                "RAG_FLOW_LLM_SGLANG_MODEL_ID=answer-model",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.models.vlm_base_url == "http://vlm.local/v1"
+    assert config.models.vlm_api_key == "vlm-key"
+    assert config.models.llm_base_url == "http://llm.local/v1"
+    assert config.models.llm_api_key == "llm-key"
+    assert config.vlm_server.auto_start is True
+    assert config.vlm_server.stop_after is True
+    assert config.vlm_server.log_path == tmp_path / "logs" / "vlm.log"
+    assert config.vlm_server.sglang_model_profile == "custom"
+    assert config.vlm_server.sglang_model_id == "vision-model"
+    assert config.vlm_server.sglang_served_model_name == "vision-model"
+    assert config.vlm_server.sglang_local_model_root == tmp_path / "models"
+    assert config.vlm_server.sglang_mem_fraction_static == "0.5"
+    assert config.vlm_server.sglang_context_length == "32768"
+    assert config.vlm_server.sglang_quantization == "none"
+    assert config.llm_server.auto_start is True
+    assert config.llm_server.sglang_model_profile == "qwen3.6-35b-a3b-gptq-int4"
+    assert config.llm_server.sglang_model_id == "answer-model"
+
+
+def test_vlm_endpoint_defaults_to_llm_endpoint(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_LLM_BASE_URL=http://shared.local/v1\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.models.vlm_base_url == "http://shared.local/v1"
+
+
+def test_vlm_and_llm_default_to_same_35b_model(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    expected_model = "palmfuture/Qwen3.6-35B-A3B-GPTQ-Int4"
+    assert config.models.vlm_model == expected_model
+    assert config.models.llm_model == expected_model
+    assert config.vlm_server.sglang_model_id == expected_model
+    assert config.llm_server.sglang_model_id == expected_model
+
+
 def test_retrieval_reads_visual_mode_from_local_env(tmp_path, monkeypatch):
     env_file = tmp_path / ".local" / "rag-flow.env"
     env_file.parent.mkdir()

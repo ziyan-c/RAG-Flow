@@ -6,11 +6,13 @@ import json
 import math
 import re
 import time
+from contextlib import nullcontext
 from dataclasses import asdict, is_dataclass, replace
 from pathlib import Path
 from typing import Any, Sequence
 
 from rag_flow.config import AppConfig
+from rag_flow.model_server import managed_model_server
 from rag_flow.preprocessing.small_icons import strip_reasoning_text
 from rag_flow.retrieval import RetrievalEngine, RetrievalResult
 
@@ -321,156 +323,169 @@ def run_answering_benchmark(
 
     engine = RetrievalEngine(run_config)
     engine.load()
-    llm_client = None
-    if not skip_answering:
-        from openai import OpenAI
-
-        llm_client = OpenAI(api_key=llm_api_key, base_url=llm_base_url, timeout=request_timeout)
     rows: list[dict[str, Any]] = []
     errors = 0
-    for index, query in enumerate(queries, start=1):
-        query_id = str(query.get("query_id") or f"query-{index:04d}")
-        started = time.perf_counter()
-        retrieval_started = time.perf_counter()
-        result = engine.retrieve(str(query.get("query", "")))
-        retrieval_latency = time.perf_counter() - retrieval_started
-        page_scores = _page_scores(result)
-        final_output_content = _final_output_content(result)
-        final_output_images_used = tuple(result.final_output.images) if result.final_output else ()
-        messages = _answering_messages(
-            query=str(query.get("query", "")),
-            final_output_content=final_output_content,
-        )
-        answer = ""
-        reasoning = ""
-        usage: dict[str, Any] = {}
-        raw_response: dict[str, Any] = {}
-        llm_error = ""
-        answering_started = time.perf_counter()
-        if skip_answering:
-            llm_error = "answering_skipped"
-        else:
-            try:
-                answer, reasoning, usage, raw_response = _call_answering_llm(
-                    client=llm_client,
-                    model=llm_model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    enable_thinking=enable_thinking,
-                )
-            except Exception as exc:
-                errors += 1
-                llm_error = str(exc)
-        answering_latency = time.perf_counter() - answering_started
-        total_latency = time.perf_counter() - started
+    llm_context = (
+        managed_model_server(run_config, "llm", base_url=llm_base_url, api_key=llm_api_key, model=llm_model)
+        if not skip_answering and queries
+        else nullcontext()
+    )
+    with llm_context:
+        llm_client = None
+        if not skip_answering:
+            from openai import OpenAI
 
-        returned_chunks = _hit_chunk_ids(result)
-        returned_pages = _hit_page_indices(result)
-        gold_chunks = _gold_chunk_ids(query)
-        gold_pages = _gold_page_indices(query)
-        final_output_page_indices = [int(item.page_idx) for item in final_output_images_used]
-        thinking_leak = bool(THINKING_LEAK_RE.search(answer or ""))
-        estimated_text_tokens = _estimate_text_tokens(
-            result.context,
-            chars_per_token=run_config.retrieval.context_chars_per_token,
-        )
-        row = {
-            "query_id": query_id,
-            "run_id": run_id,
-            "query": query.get("query", ""),
-            "difficulty": query.get("difficulty", ""),
-            "query_type": query.get("query_type", ""),
-            "evidence_type": query.get("evidence_type", ""),
-            "requires_visual": int(bool(query.get("requires_visual", False))),
-            "requires_table": int(bool(query.get("requires_table", False))),
-            "context_cap": context_cap,
-            "retrieval_k": run_config.retrieval.retrieval_k,
-            "final_top_k": run_config.retrieval.final_top_k,
-            "rrf_k": run_config.retrieval.rrf_k,
-            "min_score_ratio": run_config.retrieval.min_score_ratio,
-            "final_output_images_enabled": int(final_output_images),
-            "enable_thinking": int(enable_thinking),
-            "route_mode": route_mode,
-            "visual_bonus": visual_bonus,
-            "visual_weight": visual_weight,
-            "retrieval_latency_seconds": round(retrieval_latency, 4),
-            "answering_latency_seconds": round(answering_latency, 4),
-            "total_latency_seconds": round(total_latency, 4),
-            "hit_count": len(result.all_hits),
-            "returned_chunk_ids": "|".join(returned_chunks),
-            "returned_page_indices": "|".join(str(page) for page in returned_pages),
-            "gold_chunk_ids": "|".join(sorted(gold_chunks)),
-            "gold_page_indices": "|".join(str(page) for page in sorted(gold_pages)),
-            "retrieval_gold_context_hit": int(bool(gold_chunks.intersection(returned_chunks))),
-            "retrieval_gold_page_hit": int(bool(gold_pages.intersection(returned_pages))),
-            "final_output_mode": result.final_output.mode if result.final_output else "context_only",
-            "final_output_image_count": len(final_output_images_used),
-            "final_output_image_url_count": _image_url_count(final_output_content),
-            "final_output_page_indices": "|".join(str(page) for page in final_output_page_indices),
-            "final_output_page_numbers": "|".join(str(page + 1) for page in final_output_page_indices),
-            "final_output_gold_page_hit": int(bool(gold_pages.intersection(final_output_page_indices))),
-            "final_output_image_paths": "|".join(image.image_path for image in final_output_images_used),
-            "final_output_image_policies": "|".join(image.image_answering_policy for image in final_output_images_used),
-            "estimated_text_tokens": estimated_text_tokens,
-            "usage_prompt_tokens": _usage_int(usage, "prompt_tokens"),
-            "usage_completion_tokens": _usage_int(usage, "completion_tokens"),
-            "usage_total_tokens": _usage_int(usage, "total_tokens"),
-            "usage_missing": int(not bool(usage)),
-            "reasoning_chars": len(reasoning or ""),
-            "thinking_leak": int(thinking_leak),
-            "answer_chars": len(answer or ""),
-            "llm_error": llm_error,
-            "answer_path": str(answers_dir / f"{query_id}.md"),
-            "context_path": str(contexts_dir / f"{query_id}.txt"),
-            "retrieval_path": str(retrieval_dir / f"{query_id}.json"),
-            "response_path": str(responses_dir / f"{query_id}.json"),
-            "answer_score": "",
-            "failure_type": "",
-            "review_notes": "",
-        }
-        rows.append(row)
+            llm_client = OpenAI(api_key=llm_api_key, base_url=llm_base_url, timeout=request_timeout)
 
-        (answers_dir / f"{query_id}.md").write_text(answer or "", encoding="utf-8")
-        (contexts_dir / f"{query_id}.txt").write_text(result.context, encoding="utf-8")
-        retrieval_payload = {
-            "hit_page": result.hit_page,
-            "context": result.context,
-            "all_hits": [_jsonable(hit) for hit in result.all_hits],
-            "page_scores": [{"page_idx": page, "page_number": page + 1, "score": score} for page, score in page_scores],
-            "final_output": {
-                "mode": result.final_output.mode if result.final_output else "context_only",
-                "context": result.final_output.context if result.final_output else result.context,
-                "content": _jsonable(final_output_content),
-                "images": [_jsonable(image) for image in final_output_images_used],
-            },
-        }
-        (retrieval_dir / f"{query_id}.json").write_text(
-            json.dumps(_jsonable(retrieval_payload), ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-        response_payload = {
-            "answer": answer,
-            "reasoning_content": reasoning,
-            "usage": usage,
-            "raw_response": raw_response,
-            "messages": [
-                {
-                    **message,
-                    "content": "[omitted multimodal payload]" if message.get("role") == "user" else message.get("content"),
-                }
-                for message in messages
-            ],
-            "errors": {"llm_error": llm_error},
-        }
-        (responses_dir / f"{query_id}.json").write_text(
-            json.dumps(response_payload, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-        print(
-            f"[{index}/{len(queries)}] {query_id}: total={total_latency:.2f}s "
-            f"retrieve={retrieval_latency:.2f}s answer={answering_latency:.2f}s "
-            f"usage={row['usage_total_tokens'] or 'missing'} images={row['final_output_image_count']}"
-        )
+        for index, query in enumerate(queries, start=1):
+            query_id = str(query.get("query_id") or f"query-{index:04d}")
+            started = time.perf_counter()
+            retrieval_started = time.perf_counter()
+            result = engine.retrieve(str(query.get("query", "")))
+            retrieval_latency = time.perf_counter() - retrieval_started
+            page_scores = _page_scores(result)
+            final_output_content = _final_output_content(result)
+            final_output_images_used = tuple(result.final_output.images) if result.final_output else ()
+            messages = _answering_messages(
+                query=str(query.get("query", "")),
+                final_output_content=final_output_content,
+            )
+            answer = ""
+            reasoning = ""
+            usage: dict[str, Any] = {}
+            raw_response: dict[str, Any] = {}
+            llm_error = ""
+            answering_started = time.perf_counter()
+            if skip_answering:
+                llm_error = "answering_skipped"
+            else:
+                try:
+                    answer, reasoning, usage, raw_response = _call_answering_llm(
+                        client=llm_client,
+                        model=llm_model,
+                        messages=messages,
+                        max_tokens=max_tokens,
+                        enable_thinking=enable_thinking,
+                    )
+                except Exception as exc:
+                    errors += 1
+                    llm_error = str(exc)
+            answering_latency = time.perf_counter() - answering_started
+            total_latency = time.perf_counter() - started
+
+            returned_chunks = _hit_chunk_ids(result)
+            returned_pages = _hit_page_indices(result)
+            gold_chunks = _gold_chunk_ids(query)
+            gold_pages = _gold_page_indices(query)
+            final_output_page_indices = [int(item.page_idx) for item in final_output_images_used]
+            thinking_leak = bool(THINKING_LEAK_RE.search(answer or ""))
+            estimated_text_tokens = _estimate_text_tokens(
+                result.context,
+                chars_per_token=run_config.retrieval.context_chars_per_token,
+            )
+            row = {
+                "query_id": query_id,
+                "run_id": run_id,
+                "query": query.get("query", ""),
+                "difficulty": query.get("difficulty", ""),
+                "query_type": query.get("query_type", ""),
+                "evidence_type": query.get("evidence_type", ""),
+                "requires_visual": int(bool(query.get("requires_visual", False))),
+                "requires_table": int(bool(query.get("requires_table", False))),
+                "context_cap": context_cap,
+                "retrieval_k": run_config.retrieval.retrieval_k,
+                "final_top_k": run_config.retrieval.final_top_k,
+                "rrf_k": run_config.retrieval.rrf_k,
+                "min_score_ratio": run_config.retrieval.min_score_ratio,
+                "final_output_images_enabled": int(final_output_images),
+                "enable_thinking": int(enable_thinking),
+                "route_mode": route_mode,
+                "visual_bonus": visual_bonus,
+                "visual_weight": visual_weight,
+                "retrieval_latency_seconds": round(retrieval_latency, 4),
+                "answering_latency_seconds": round(answering_latency, 4),
+                "total_latency_seconds": round(total_latency, 4),
+                "hit_count": len(result.all_hits),
+                "returned_chunk_ids": "|".join(returned_chunks),
+                "returned_page_indices": "|".join(str(page) for page in returned_pages),
+                "gold_chunk_ids": "|".join(sorted(gold_chunks)),
+                "gold_page_indices": "|".join(str(page) for page in sorted(gold_pages)),
+                "retrieval_gold_context_hit": int(bool(gold_chunks.intersection(returned_chunks))),
+                "retrieval_gold_page_hit": int(bool(gold_pages.intersection(returned_pages))),
+                "final_output_mode": result.final_output.mode if result.final_output else "context_only",
+                "final_output_image_count": len(final_output_images_used),
+                "final_output_image_url_count": _image_url_count(final_output_content),
+                "final_output_page_indices": "|".join(str(page) for page in final_output_page_indices),
+                "final_output_page_numbers": "|".join(str(page + 1) for page in final_output_page_indices),
+                "final_output_gold_page_hit": int(bool(gold_pages.intersection(final_output_page_indices))),
+                "final_output_image_paths": "|".join(image.image_path for image in final_output_images_used),
+                "final_output_image_policies": "|".join(
+                    image.image_answering_policy for image in final_output_images_used
+                ),
+                "estimated_text_tokens": estimated_text_tokens,
+                "usage_prompt_tokens": _usage_int(usage, "prompt_tokens"),
+                "usage_completion_tokens": _usage_int(usage, "completion_tokens"),
+                "usage_total_tokens": _usage_int(usage, "total_tokens"),
+                "usage_missing": int(not bool(usage)),
+                "reasoning_chars": len(reasoning or ""),
+                "thinking_leak": int(thinking_leak),
+                "answer_chars": len(answer or ""),
+                "llm_error": llm_error,
+                "answer_path": str(answers_dir / f"{query_id}.md"),
+                "context_path": str(contexts_dir / f"{query_id}.txt"),
+                "retrieval_path": str(retrieval_dir / f"{query_id}.json"),
+                "response_path": str(responses_dir / f"{query_id}.json"),
+                "answer_score": "",
+                "failure_type": "",
+                "review_notes": "",
+            }
+            rows.append(row)
+
+            (answers_dir / f"{query_id}.md").write_text(answer or "", encoding="utf-8")
+            (contexts_dir / f"{query_id}.txt").write_text(result.context, encoding="utf-8")
+            retrieval_payload = {
+                "hit_page": result.hit_page,
+                "context": result.context,
+                "all_hits": [_jsonable(hit) for hit in result.all_hits],
+                "page_scores": [
+                    {"page_idx": page, "page_number": page + 1, "score": score} for page, score in page_scores
+                ],
+                "final_output": {
+                    "mode": result.final_output.mode if result.final_output else "context_only",
+                    "context": result.final_output.context if result.final_output else result.context,
+                    "content": _jsonable(final_output_content),
+                    "images": [_jsonable(image) for image in final_output_images_used],
+                },
+            }
+            (retrieval_dir / f"{query_id}.json").write_text(
+                json.dumps(_jsonable(retrieval_payload), ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            response_payload = {
+                "answer": answer,
+                "reasoning_content": reasoning,
+                "usage": usage,
+                "raw_response": raw_response,
+                "messages": [
+                    {
+                        **message,
+                        "content": "[omitted multimodal payload]"
+                        if message.get("role") == "user"
+                        else message.get("content"),
+                    }
+                    for message in messages
+                ],
+                "errors": {"llm_error": llm_error},
+            }
+            (responses_dir / f"{query_id}.json").write_text(
+                json.dumps(response_payload, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            print(
+                f"[{index}/{len(queries)}] {query_id}: total={total_latency:.2f}s "
+                f"retrieve={retrieval_latency:.2f}s answer={answering_latency:.2f}s "
+                f"usage={row['usage_total_tokens'] or 'missing'} images={row['final_output_image_count']}"
+            )
 
     metrics_path = run_dir / "answering_metrics.csv"
     if rows:

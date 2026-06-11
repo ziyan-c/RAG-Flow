@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
 from dataclasses import replace
 from pathlib import Path
 
@@ -305,6 +306,67 @@ def test_run_ingest_sectioning_stage_recovers_pdf_outline(tmp_path):
     assert audit["stats"]["section_event_count"] == 1
 
 
+def test_run_ingest_default_runs_through_indexing(tmp_path, monkeypatch):
+    config = make_config(tmp_path)
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+    calls = []
+
+    @contextmanager
+    def fake_managed_model_server(config_arg, kind):
+        calls.append(("server-enter", kind))
+        yield
+        calls.append(("server-exit", kind))
+
+    class FakeSectioningResult:
+        stats = {"section_event_count": 0}
+
+    def fake_section(**kwargs):
+        calls.append(("sectioning", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+        Path(kwargs["audit_json"]).write_text("{}", encoding="utf-8")
+        return FakeSectioningResult()
+
+    def fake_patch(**kwargs):
+        calls.append(("patching", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_caption(**kwargs):
+        calls.append(("captioning", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_create_chunks(*args, **kwargs):
+        calls.append(("chunking",))
+        return [{"chunk_content": "hello", "metadata": {"source_relpath": "manual.pdf", "page_idx": 0}}]
+
+    def fake_write_chunks(chunks, output_path):
+        Path(output_path).write_text(json.dumps(chunks), encoding="utf-8")
+
+    def fake_index(config_arg, chunks_path, *, batch_size):
+        calls.append(("indexing", Path(chunks_path), batch_size))
+
+    monkeypatch.setattr("rag_flow.pipeline.managed_model_server", fake_managed_model_server)
+    monkeypatch.setattr("rag_flow.pipeline.write_sectioned_json", fake_section)
+    monkeypatch.setattr("rag_flow.pipeline.add_small_icon_text", fake_patch)
+    monkeypatch.setattr("rag_flow.pipeline.add_image_descriptions", fake_caption)
+    monkeypatch.setattr("rag_flow.pipeline.create_chunks", fake_create_chunks)
+    monkeypatch.setattr("rag_flow.pipeline.write_chunks", fake_write_chunks)
+    monkeypatch.setattr("rag_flow.pipeline.upsert_text_vectors", fake_index)
+
+    artifacts = run_ingest(config)
+
+    assert artifacts.chunks_json.exists()
+    assert [call[0] for call in calls] == [
+        "sectioning",
+        "server-enter",
+        "patching",
+        "captioning",
+        "server-exit",
+        "chunking",
+        "indexing",
+    ]
+
+
 def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
     config = make_config(tmp_path)
     source_pdf = tmp_path / "source" / "other.pdf"
@@ -415,6 +477,87 @@ def test_run_ingest_uses_manual_source_root_override(tmp_path):
     chunks = json.loads(artifacts.chunks_json.read_text(encoding="utf-8"))
     assert chunks[0]["metadata"]["source_relpath"] == "DSS/manual.pdf"
     assert chunks[0]["metadata"]["breadcrumb"] == "DSS > manual.pdf"
+
+
+def test_run_ingest_preprocessing_uses_vlm_model(tmp_path, monkeypatch):
+    config = make_config(tmp_path)
+    config = replace(
+        config,
+        models=replace(
+            config.models,
+            vlm_base_url="http://vlm.local/v1",
+            vlm_api_key="vlm-key",
+            llm_base_url="http://llm.local/v1",
+            llm_api_key="llm-key",
+        ),
+    )
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+
+    calls = []
+
+    def fake_patch(**kwargs):
+        calls.append(("patch", kwargs["llm_base_url"], kwargs["llm_api_key"], kwargs["llm_model"]))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_caption(**kwargs):
+        calls.append(("caption", kwargs["llm_base_url"], kwargs["llm_api_key"], kwargs["model_name"]))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    monkeypatch.setattr("rag_flow.pipeline.add_small_icon_text", fake_patch)
+    monkeypatch.setattr("rag_flow.pipeline.add_image_descriptions", fake_caption)
+
+    run_ingest(
+        config,
+        from_stage="patching",
+        to_stage="captioning",
+        skip_existing=False,
+    )
+
+    assert config.models.vlm_model != config.models.llm_model
+    assert calls == [
+        ("patch", "http://vlm.local/v1", "vlm-key", "vlm"),
+        ("caption", "http://vlm.local/v1", "vlm-key", "vlm"),
+    ]
+
+
+def test_run_ingest_starts_vlm_only_around_preprocessing(tmp_path, monkeypatch):
+    config = make_config(tmp_path)
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+    events = []
+
+    @contextmanager
+    def fake_managed_model_server(config_arg, kind):
+        events.append(("enter", kind, config_arg.models.vlm_model))
+        yield
+        events.append(("exit", kind, config_arg.models.vlm_model))
+
+    def fake_patch(**kwargs):
+        events.append(("patch", kwargs["llm_model"]))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_caption(**kwargs):
+        events.append(("caption", kwargs["model_name"]))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    monkeypatch.setattr("rag_flow.pipeline.managed_model_server", fake_managed_model_server)
+    monkeypatch.setattr("rag_flow.pipeline.add_small_icon_text", fake_patch)
+    monkeypatch.setattr("rag_flow.pipeline.add_image_descriptions", fake_caption)
+
+    run_ingest(
+        config,
+        from_stage="patching",
+        to_stage="captioning",
+        skip_existing=False,
+    )
+
+    assert events == [
+        ("enter", "vlm", "vlm"),
+        ("patch", "vlm"),
+        ("caption", "vlm"),
+        ("exit", "vlm", "vlm"),
+    ]
 
 
 def test_run_ingest_indexing_both_mode_passes_current_chunks_to_visual(tmp_path, monkeypatch):

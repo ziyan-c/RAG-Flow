@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -33,6 +34,7 @@ def _config(tmp_path: Path) -> AppConfig:
     )
     models = ModelConfig(
         dense_model="dense",
+        dense_vector_size=1024,
         sparse_model="sparse",
         colpali_model="colpali",
         vlm_model="vlm",
@@ -136,3 +138,109 @@ def test_answering_benchmark_dry_run_records_retrieval_parameters(tmp_path, monk
     assert '"rrf_k": 30' in output
     assert '"min_score_ratio": 0.4' in output
     assert '"final_output_images": true' in output
+
+
+def test_answering_benchmark_skip_answering_does_not_start_llm(tmp_path, monkeypatch):
+    query_set = tmp_path / "queries.jsonl"
+    query_set.write_text('{"query_id":"q1","query":"Question?"}\n', encoding="utf-8")
+    config = _config(tmp_path)
+    monkeypatch.setattr(answering.AppConfig, "from_env", classmethod(lambda cls: config))
+
+    class FakeEngine:
+        def __init__(self, config_arg):
+            self.config_arg = config_arg
+
+        def load(self):
+            return None
+
+        def retrieve(self, query):
+            return SimpleNamespace(hit_page=1, all_hits=[], context="retrieved context", final_output=None)
+
+    def fail_managed_model_server(*args, **kwargs):
+        raise AssertionError("LLM server should not start when answering is skipped")
+
+    monkeypatch.setattr(answering, "RetrievalEngine", FakeEngine)
+    monkeypatch.setattr(answering, "managed_model_server", fail_managed_model_server)
+
+    run_dir = answering.run_answering_benchmark(
+        query_set=query_set,
+        output_dir=tmp_path / "runs",
+        run_id="skip",
+        context_cap=10000,
+        retrieval_k=10,
+        final_top_k=3,
+        rrf_k=10,
+        min_score_ratio=1.0,
+        final_output_images=False,
+        enable_thinking=False,
+        route_mode="text",
+        visual_bonus="none",
+        visual_weight=1.0,
+        max_tokens=4000,
+        llm_base_url="http://localhost:8080/v1",
+        llm_model="qwen",
+        llm_api_key="EMPTY",
+        request_timeout=180,
+        limit=None,
+        dry_run=False,
+        skip_answering=True,
+    )
+
+    assert (run_dir / "summary.json").exists()
+
+
+def test_answering_benchmark_starts_llm_for_answers(tmp_path, monkeypatch):
+    query_set = tmp_path / "queries.jsonl"
+    query_set.write_text('{"query_id":"q1","query":"Question?"}\n', encoding="utf-8")
+    config = _config(tmp_path)
+    monkeypatch.setattr(answering.AppConfig, "from_env", classmethod(lambda cls: config))
+    events = []
+
+    class FakeEngine:
+        def __init__(self, config_arg):
+            self.config_arg = config_arg
+
+        def load(self):
+            return None
+
+        def retrieve(self, query):
+            return SimpleNamespace(hit_page=1, all_hits=[], context="retrieved context", final_output=None)
+
+    @contextmanager
+    def fake_managed_model_server(config_arg, kind, **kwargs):
+        events.append(("enter", kind, kwargs["model"]))
+        yield
+        events.append(("exit", kind, kwargs["model"]))
+
+    def fake_call_answering_llm(**kwargs):
+        return "answer", "", {"total_tokens": 12}, {"id": "response"}
+
+    monkeypatch.setattr(answering, "RetrievalEngine", FakeEngine)
+    monkeypatch.setattr(answering, "managed_model_server", fake_managed_model_server)
+    monkeypatch.setattr(answering, "_call_answering_llm", fake_call_answering_llm)
+
+    answering.run_answering_benchmark(
+        query_set=query_set,
+        output_dir=tmp_path / "runs",
+        run_id="answer",
+        context_cap=10000,
+        retrieval_k=10,
+        final_top_k=3,
+        rrf_k=10,
+        min_score_ratio=1.0,
+        final_output_images=False,
+        enable_thinking=False,
+        route_mode="text",
+        visual_bonus="none",
+        visual_weight=1.0,
+        max_tokens=4000,
+        llm_base_url="http://localhost:8080/v1",
+        llm_model="qwen",
+        llm_api_key="EMPTY",
+        request_timeout=180,
+        limit=None,
+        dry_run=False,
+        skip_answering=False,
+    )
+
+    assert events == [("enter", "llm", "qwen"), ("exit", "llm", "qwen")]
