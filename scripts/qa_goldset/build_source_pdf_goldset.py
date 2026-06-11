@@ -21,66 +21,69 @@ class PdfInfo:
     visual_priority: bool = False
 
 
+SOURCE_PDF_ROOT = Path(".local/CUSTOM_DATA/pdfs/source")
+
+
 PDFS: list[PdfInfo] = [
     PdfInfo(
         "dss_pc_manual",
-        Path("source-pdfs/DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf"),
+        SOURCE_PDF_ROOT / "DSS/Dahua_DSS_Ultimate_PC_Client_User_Manual_V8.8.0.pdf",
         "DSS",
         "pc_client_user_manual",
         58,
     ),
     PdfInfo(
         "dss_web_manual",
-        Path("source-pdfs/DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf"),
+        SOURCE_PDF_ROOT / "DSS/Dahua_DSS_Ultimate_Web_Client_User_Manual_V8.8.0.pdf",
         "DSS",
         "web_client_user_manual",
         48,
     ),
     PdfInfo(
         "dss_quick_deployment",
-        Path("source-pdfs/DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf"),
+        SOURCE_PDF_ROOT / "DSS/Dahua_DSS_Ultimate_Quick_Deployment_Manual_V8.8.0.pdf",
         "DSS",
         "quick_deployment_manual",
         15,
     ),
     PdfInfo(
         "hdcvi_camera_manual",
-        Path("source-pdfs/HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/HDCVI_Camera_User_Manual_V1.0.7.pdf",
         "HAC-HF3805G",
         "camera_user_manual",
         21,
     ),
     PdfInfo(
         "switch_user_manual",
-        Path("source-pdfs/S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf"),
+        SOURCE_PDF_ROOT / "S3006-4ET-60/Ethernet_Switch_(4_8-Port_Unmanaged_Desktop_Switch)_User_s_Manual_V1.0.1.pdf",
         "S3006-4ET-60",
         "switch_user_manual",
         13,
     ),
     PdfInfo(
         "s3006_datasheet",
-        Path("source-pdfs/S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf"),
+        SOURCE_PDF_ROOT / "S3006-4ET-60/S3006-4ET-60_datasheet_20251106.pdf",
         "S3006-4ET-60",
         "datasheet",
         8,
     ),
     PdfInfo(
         "hac_hf3805g_datasheet",
-        Path("source-pdfs/HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/DH-HAC-HF3805G-datasheet3.pdf",
         "HAC-HF3805G",
         "datasheet",
         8,
     ),
     PdfInfo(
         "hac_open_source_notice",
-        Path("source-pdfs/HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/DAHUA_HDCVI_CAMERA_OPEN_SOURCE_SOFTWARE_NOTICE__VERSION_A_V1.0.1-Eng.pdf",
         "HAC-HF3805G",
         "open_source_notice",
         4,
     ),
     PdfInfo(
         "hdcvi_box_install_guide",
-        Path("source-pdfs/HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/HDCVI_Box_Camera_Installation_Guide_V1.0.0-Eng.pdf",
         "HAC-HF3805G",
         "visual_installation_guide",
         5,
@@ -88,7 +91,7 @@ PDFS: list[PdfInfo] = [
     ),
     PdfInfo(
         "hac_hf3231e_installation",
-        Path("source-pdfs/HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/HAC-HF3231E_Installation_20171121.pdf",
         "HAC-HF3805G",
         "visual_mounting_compatibility",
         4,
@@ -96,7 +99,7 @@ PDFS: list[PdfInfo] = [
     ),
     PdfInfo(
         "hac_hf3805g_dimension",
-        Path("source-pdfs/HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf"),
+        SOURCE_PDF_ROOT / "HAC-HF3805G/HAC-HF3805G_Dimention_20171128.pdf",
         "HAC-HF3805G",
         "visual_dimension_drawing",
         4,
@@ -104,7 +107,7 @@ PDFS: list[PdfInfo] = [
     ),
     PdfInfo(
         "s3006_dimensions",
-        Path("source-pdfs/S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf"),
+        SOURCE_PDF_ROOT / "S3006-4ET-60/S3006-4ET-36_DIMENSIONS.pdf",
         "S3006-4ET-60",
         "visual_dimension_drawing",
         4,
@@ -112,7 +115,7 @@ PDFS: list[PdfInfo] = [
     ),
     PdfInfo(
         "s3006_installation_method",
-        Path("source-pdfs/S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf"),
+        SOURCE_PDF_ROOT / "S3006-4ET-60/S3006-4ET-36_INSTALLATION_METHOD_EN.pdf",
         "S3006-4ET-60",
         "visual_installation_method",
         4,
@@ -120,7 +123,7 @@ PDFS: list[PdfInfo] = [
     ),
     PdfInfo(
         "s3006_port_diagram",
-        Path("source-pdfs/S3006-4ET-60/S3006-4ET-36_PORT.pdf"),
+        SOURCE_PDF_ROOT / "S3006-4ET-60/S3006-4ET-36_PORT.pdf",
         "S3006-4ET-60",
         "visual_port_diagram",
         4,

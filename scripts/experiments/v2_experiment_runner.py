@@ -544,7 +544,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_parser = subparsers.add_parser("run-config")
     run_parser.add_argument("--work-root", type=Path, default=DEFAULT_WORK_ROOT)
-    run_parser.add_argument("--source-root", type=Path, default=Path("source-pdfs"))
+    run_parser.add_argument("--source-root", type=Path, default=Path(".local/CUSTOM_DATA/pdfs/source"))
     run_parser.add_argument("--output-root", type=Path, default=Path("output-pdfs"))
     run_parser.add_argument("--db-root", type=Path, default=Path("/root/autodl-tmp/rag-flow-v2-experiments/qdrant"))
     run_parser.add_argument("--collection", default="rag-flow-v2")
@@ -579,7 +579,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     index_parser = subparsers.add_parser("index-profile")
     index_parser.add_argument("--work-root", type=Path, default=DEFAULT_WORK_ROOT)
-    index_parser.add_argument("--source-root", type=Path, default=Path("source-pdfs"))
+    index_parser.add_argument("--source-root", type=Path, default=Path(".local/CUSTOM_DATA/pdfs/source"))
     index_parser.add_argument("--output-root", type=Path, default=Path("output-pdfs"))
     index_parser.add_argument("--db-root", type=Path, default=Path("/root/autodl-tmp/rag-flow-v2-experiments/qdrant"))
     index_parser.add_argument("--collection", default="rag-flow-v2")

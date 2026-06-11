@@ -1,0 +1,25 @@
+# Public local profile example.
+#
+# Copy this file to .local/rag-flow.env on the machine that runs the pipeline,
+# then replace the example PDF path with your private manual path. Keep real
+# PDFs, generated artifacts, model logs, API keys, and machine-specific secrets
+# out of Git. The repository convention is to keep private runtime data under
+# .local/CUSTOM_DATA/.
+
+RAG_FLOW_SOURCE_ROOT=.local/CUSTOM_DATA/pdfs/source
+RAG_FLOW_SOURCE_PDF=.local/CUSTOM_DATA/pdfs/source/example-product/example-technical-manual.pdf
+RAG_FLOW_SOURCE_NAME=example-product/example-technical-manual.pdf
+RAG_FLOW_MINERU_INPUT_PATH=.local/CUSTOM_DATA/pdfs/source/example-product/example-technical-manual.pdf
+RAG_FLOW_MINERU_OUTPUT_DIR=.local/CUSTOM_DATA/pdfs/output
+
+RAG_FLOW_BASE_DIR=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto
+RAG_FLOW_CONTENT_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list.json
+RAG_FLOW_SECTIONED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED.json
+RAG_FLOW_PATCHED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json
+RAG_FLOW_CAPTIONED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED.json
+RAG_FLOW_CHUNKS_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json
+
+RAG_FLOW_DB_PATH=.local/CUSTOM_DATA/qdrant-db
+RAG_FLOW_COLLECTION=technical-manuals
+
+# The full configuration surface is documented in .env.example.

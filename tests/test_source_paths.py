@@ -6,7 +6,7 @@ from rag_flow.source_paths import source_breadcrumb, source_name_for_pdf, source
 
 
 def test_source_name_uses_configured_source_root(tmp_path):
-    source_root = tmp_path / "source-pdfs"
+    source_root = tmp_path / ".local/CUSTOM_DATA" / "pdfs" / "source"
     pdf = source_root / "DSS" / "DHI-DSS Pro-User's Manual.pdf"
 
     assert source_name_for_pdf(pdf, source_root=source_root) == "DSS/DHI-DSS Pro-User's Manual.pdf"
@@ -54,5 +54,5 @@ def test_source_breadcrumb_joins_source_relpath_and_section_path():
 
 
 def test_source_root_from_input_path_ignores_single_pdf():
-    assert source_root_from_input_path("source-pdfs") == Path("source-pdfs")
-    assert source_root_from_input_path("source-pdfs/manual.pdf") is None
+    assert source_root_from_input_path(".local/CUSTOM_DATA/pdfs/source") == Path(".local/CUSTOM_DATA/pdfs/source")
+    assert source_root_from_input_path(".local/CUSTOM_DATA/pdfs/source/manual.pdf") is None

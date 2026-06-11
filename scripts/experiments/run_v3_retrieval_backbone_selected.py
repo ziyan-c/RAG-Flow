@@ -245,7 +245,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--selected-rrf-k", type=int, default=10)
     parser.add_argument("--rrf-values", type=int, nargs="+", default=[5, 10, 20, 60])
     parser.add_argument("--work-root", type=Path, default=Path("thesis-v3/experiments/retrieval-backbone-v3"))
-    parser.add_argument("--source-root", type=Path, default=Path("source-pdfs"))
+    parser.add_argument("--source-root", type=Path, default=Path(".local/CUSTOM_DATA/pdfs/source"))
     parser.add_argument("--output-root", type=Path, default=Path("output-pdfs"))
     parser.add_argument("--db-root", type=Path, default=Path("/root/autodl-tmp/rag-flow-v3-experiments/qdrant"))
     parser.add_argument("--text-batch-size", type=int, default=256)

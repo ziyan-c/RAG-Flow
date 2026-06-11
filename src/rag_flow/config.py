@@ -9,10 +9,10 @@ from .presets import get_preset
 
 
 DEFAULT_SOURCE_NAME = "example-technical-manual.pdf"
-DEFAULT_SOURCE_ROOT = Path("pdfs/source")
-DEFAULT_OUTPUT_ROOT = Path("pdfs/output")
+DEFAULT_SOURCE_ROOT = Path(".local/CUSTOM_DATA/pdfs/source")
+DEFAULT_OUTPUT_ROOT = Path(".local/CUSTOM_DATA/pdfs/output")
 DEFAULT_BASE_DIR = DEFAULT_OUTPUT_ROOT / Path(DEFAULT_SOURCE_NAME).stem / "auto"
-DEFAULT_DB_PATH = Path("qdrant-db")
+DEFAULT_DB_PATH = Path(".local/CUSTOM_DATA/qdrant-db")
 DEFAULT_LOCAL_ENV_FILE = Path(".local/rag-flow.env")
 DEFAULT_RUNTIME_ENV_FILE = Path("autodl-tmp/.local/rag-flow.env")
 DEFAULT_CONFIG_PRESET = "low"

@@ -8,18 +8,9 @@ __pycache__/
 
 # Local data and model caches
 /data/
-CUSTOM_DATA/*
-!CUSTOM_DATA/pdfs/
-CUSTOM_DATA/pdfs/*
-!CUSTOM_DATA/pdfs/source/
-CUSTOM_DATA/pdfs/source/*
-!CUSTOM_DATA/pdfs/source/.gitkeep
-!CUSTOM_DATA/pdfs/output/
-CUSTOM_DATA/pdfs/output/*
-!CUSTOM_DATA/pdfs/output/.gitkeep
-!CUSTOM_DATA/qdrant-db/
-CUSTOM_DATA/qdrant-db/*
-!CUSTOM_DATA/qdrant-db/.gitkeep
+/legacy/
+/LEGACY/
+/CUSTOM_DATA/
 /pdfs/source/
 /pdfs/output/
 /source-pdfs/

@@ -101,6 +101,7 @@ unless noted otherwise. The built-in runtime default is `low`.
 
 | Preset | Route | Main settings | Mean score | Avg retrieved context | Use when |
 | --- | --- | --- | ---: | ---: | --- |
+| `extra-low` | text-only | `k=150`, `top_k=10`, ratio `0.2`, 10k cap | not separately run on 200Q | lower than `low` expected | Noisy retrieval where stricter evidence pruning is preferred. |
 | `low` | text-only | `k=150`, `top_k=10`, ratio `0.4`, 10k cap | 2.3833 | ~4,156 tokens | Low-token use, batch previews, and high-volume support drafting. |
 | `medium` | text-only | `k=80`, `top_k=20`, 10k cap | 2.3383 | ~10,072 tokens | Normal online QA with stable latency and simple deployment. |
 | `high` | text-only | `k=150`, `top_k=80`, 16k cap | 2.4133 | ~16,585 tokens | Hard questions, manual review, or maximum evidence coverage. |
@@ -125,7 +126,7 @@ Important negative findings:
 cd RAG-Flow
 
 mkdir -p .local
-cp .env.example .local/rag-flow.env
+cp .local.example .local/rag-flow.env
 
 pip install -e ".[text-retrieval]"
 ```
@@ -149,17 +150,18 @@ settings there.
 Common local layout:
 
 ```text
-pdfs/source/   input PDF root
-pdfs/output/   MinerU and preprocessing artifacts, preserving source subfolders
-qdrant-db/     local Qdrant vector database
-.local/        private env file, secrets, local-only state
+.local/CUSTOM_DATA/pdfs/source/   input PDF root
+.local/CUSTOM_DATA/pdfs/output/   MinerU and preprocessing artifacts, preserving source subfolders
+.local/CUSTOM_DATA/qdrant-db/     local Qdrant vector database
+.local/CUSTOM_DATA/logs/          local model-server logs
+.local/                    private env file, secrets, local-only state
 ```
 
 ### 3. Run the offline pipeline
 
 ```bash
 rag-flow mineru doctor
-rag-flow mineru run --input pdfs/source --output-dir pdfs/output
+rag-flow mineru run --input .local/CUSTOM_DATA/pdfs/source --output-dir .local/CUSTOM_DATA/pdfs/output
 rag-flow ingest
 ```
 
@@ -295,8 +297,8 @@ scripts/
   remote/                   Remote-machine helper scripts
 
 qa-goldset/                 Gold questions, evidence cards, review helpers
-pdfs/source/                Local source PDF tree
-pdfs/output/                Generated parse/enrichment artifacts
+.local/CUSTOM_DATA/pdfs/source/    Local source PDF tree
+.local/CUSTOM_DATA/pdfs/output/    Generated parse/enrichment artifacts
 docs/                       Architecture notes and operational docs
 tests/                      Unit and regression tests
 ```

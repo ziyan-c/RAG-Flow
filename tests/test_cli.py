@@ -388,6 +388,7 @@ def test_preset_list_prints_available_presets(capsys):
     cli.main(["preset", "list"])
 
     output = capsys.readouterr().out
+    assert "extra-low: Extra-low-token text-only preset" in output
     assert "low: Low-token text-only preset" in output
     assert "medium: Conservative text baseline" in output
     assert "high: High-recall text preset" in output

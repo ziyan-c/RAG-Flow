@@ -7,6 +7,7 @@ source "${RAG_FLOW_ENV_FILE:-.local/rag-flow.env}"
 set +a
 
 WORK_ROOT="${RAG_FLOW_EXPERIMENT_WORK_ROOT:-thesis-v2/experiments/v2-final}"
+SOURCE_ROOT="${RAG_FLOW_EXPERIMENT_SOURCE_ROOT:-.local/CUSTOM_DATA/pdfs/source}"
 DB_ROOT="${RAG_FLOW_EXPERIMENT_DB_ROOT:-/root/autodl-tmp/rag-flow-v2-experiments/qdrant}"
 PYTHON_BIN="${RAG_FLOW_PIPELINE_PYTHON_BIN:-/root/autodl-tmp/envs/rag-flow-pipeline/bin/python}"
 mkdir -p "$WORK_ROOT/logs"
@@ -35,7 +36,7 @@ for profile in "${profiles[@]}"; do
   started_at="$(date +%s)"
   "$PYTHON_BIN" scripts/experiments/v2_experiment_runner.py run-config \
     --work-root "$WORK_ROOT" \
-    --source-root source-pdfs \
+    --source-root "$SOURCE_ROOT" \
     --output-root output-pdfs \
     --db-root "$DB_ROOT" \
     --collection rag-flow-v2 \

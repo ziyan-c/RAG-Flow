@@ -173,7 +173,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run v3 phase-1 dense-only and sparse-only retrieval-backbone tests.")
     parser.add_argument("--stage", choices=("prepare", "retrieve", "answer", "all"), required=True)
     parser.add_argument("--work-root", type=Path, default=Path("thesis-v3/experiments/retrieval-backbone-v3"))
-    parser.add_argument("--source-root", type=Path, default=Path("source-pdfs"))
+    parser.add_argument("--source-root", type=Path, default=Path(".local/CUSTOM_DATA/pdfs/source"))
     parser.add_argument("--output-root", type=Path, default=Path("output-pdfs"))
     parser.add_argument("--db-root", type=Path, default=Path("/root/autodl-tmp/rag-flow-v3-experiments/qdrant"))
     parser.add_argument("--families", choices=("all", "dense", "sparse"), default="all")

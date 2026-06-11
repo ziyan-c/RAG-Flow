@@ -78,9 +78,9 @@ def test_relative_paths_in_symlinked_local_env_resolve_from_visible_repo_root(tm
     env_file.write_text(
         "\n".join(
             [
-                "RAG_FLOW_SOURCE_PDF=pdfs/source/manual.pdf",
-                "RAG_FLOW_SOURCE_ROOT=pdfs/source",
-                "RAG_FLOW_BASE_DIR=pdfs/output/manual/auto",
+                "RAG_FLOW_SOURCE_PDF=.local/CUSTOM_DATA/pdfs/source/manual.pdf",
+                "RAG_FLOW_SOURCE_ROOT=.local/CUSTOM_DATA/pdfs/source",
+                "RAG_FLOW_BASE_DIR=.local/CUSTOM_DATA/pdfs/output/manual/auto",
             ]
         ),
         encoding="utf-8",
@@ -92,9 +92,9 @@ def test_relative_paths_in_symlinked_local_env_resolve_from_visible_repo_root(tm
 
     config = AppConfig.from_env()
 
-    assert config.paths.source_pdf == repo_root / "pdfs" / "source" / "manual.pdf"
-    assert config.paths.source_root == repo_root / "pdfs" / "source"
-    assert config.paths.base_dir == repo_root / "pdfs" / "output" / "manual" / "auto"
+    assert config.paths.source_pdf == repo_root / ".local/CUSTOM_DATA" / "pdfs" / "source" / "manual.pdf"
+    assert config.paths.source_root == repo_root / ".local/CUSTOM_DATA" / "pdfs" / "source"
+    assert config.paths.base_dir == repo_root / ".local/CUSTOM_DATA" / "pdfs" / "output" / "manual" / "auto"
 
 
 def test_relative_paths_imported_from_env_file_still_resolve_from_repo_root(tmp_path, monkeypatch):
@@ -159,12 +159,12 @@ def test_default_workspace_paths_are_local_project_dirs(tmp_path, monkeypatch):
 
     config = AppConfig.from_env()
 
-    assert config.paths.source_root == Path("pdfs/source")
-    assert config.paths.source_pdf == Path("pdfs/source/example-technical-manual.pdf")
-    assert config.paths.base_dir == Path("pdfs/output/example-technical-manual/auto")
-    assert config.mineru.input_path == Path("pdfs/source/example-technical-manual.pdf")
-    assert config.mineru.output_dir == Path("pdfs/output")
-    assert config.paths.db_path == Path("qdrant-db")
+    assert config.paths.source_root == Path(".local/CUSTOM_DATA/pdfs/source")
+    assert config.paths.source_pdf == Path(".local/CUSTOM_DATA/pdfs/source/example-technical-manual.pdf")
+    assert config.paths.base_dir == Path(".local/CUSTOM_DATA/pdfs/output/example-technical-manual/auto")
+    assert config.mineru.input_path == Path(".local/CUSTOM_DATA/pdfs/source/example-technical-manual.pdf")
+    assert config.mineru.output_dir == Path(".local/CUSTOM_DATA/pdfs/output")
+    assert config.paths.db_path == Path(".local/CUSTOM_DATA/qdrant-db")
 
 
 def test_patch_max_new_tokens_defaults_to_8000(tmp_path, monkeypatch):
@@ -387,6 +387,25 @@ def test_low_preset_uses_score_pruned_context(tmp_path, monkeypatch):
     assert config.retrieval.final_top_k == 10
     assert config.retrieval.max_context_tokens == 10000
     assert config.retrieval.min_score_ratio == 0.4
+
+
+def test_extra_low_preset_uses_stricter_score_pruned_context(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_PRESET=extra-low\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+    monkeypatch.delenv("RAG_FLOW_PRESET", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.retrieval.route_mode == "text"
+    assert config.retrieval.visual_bonus == "none"
+    assert config.retrieval.retrieval_k == 150
+    assert config.retrieval.final_top_k == 10
+    assert config.retrieval.max_context_tokens == 10000
+    assert config.retrieval.min_score_ratio == 0.2
 
 
 def test_medium_with_image_input_preset_enables_answering_images(tmp_path, monkeypatch):

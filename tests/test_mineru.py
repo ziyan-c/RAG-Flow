@@ -404,7 +404,7 @@ def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
 
 
 def test_run_ingest_uses_source_root_relative_chunk_source(tmp_path):
-    docs = tmp_path / "source-pdfs"
+    docs = tmp_path / ".local/CUSTOM_DATA" / "pdfs" / "source"
     config = make_config(tmp_path, input_path=docs)
     source_pdf = docs / "DSS" / "manual.pdf"
     content_json = tmp_path / "mineru-output" / "DSS" / "manual" / "auto" / "manual_content_list.json"

@@ -27,6 +27,21 @@ _TEXT_COMMON: dict[str, str] = {
 
 
 CONFIG_PRESETS: dict[str, ConfigPreset] = {
+    "extra-low": ConfigPreset(
+        name="extra-low",
+        summary="Extra-low-token text-only preset: k150/top10, ratio 0.2, 10k soft cap.",
+        env={
+            **_TEXT_COMMON,
+            "RAG_FLOW_RETRIEVAL_K": "150",
+            "RAG_FLOW_FINAL_TOP_K": "10",
+            "RAG_FLOW_RETRIEVAL_MAX_CONTEXT_TOKENS": "10000",
+            "RAG_FLOW_RETRIEVAL_MIN_SCORE_RATIO": "0.2",
+        },
+        notes=(
+            "Matches low except for stricter score-ratio pruning: candidates must score at least 80% of the best hit.",
+            "Useful when retrieved context is noisy and a smaller, sharper evidence set is preferred.",
+        ),
+    ),
     "low": ConfigPreset(
         name="low",
         summary="Low-token text-only preset: k150/top10, ratio 0.4, 10k soft cap.",
