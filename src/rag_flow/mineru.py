@@ -42,6 +42,7 @@ class MinerUArtifacts:
     patched_json: Path
     captioned_json: Path
     chunks_json: Path
+    tagged_json: Path
 
 
 @dataclass(frozen=True)
@@ -481,12 +482,14 @@ def infer_artifacts(
             patched_json=config.paths.patched_json,
             captioned_json=config.paths.captioned_json,
             chunks_json=config.paths.chunks_json,
+            tagged_json=config.paths.tagged_json,
         )
 
     sectioned_json = _sectioned_json_path_for(resolved_content)
     patched_json = _append_stage_suffix(sectioned_json, "PATCHED")
     captioned_json = _append_stage_suffix(patched_json, "CAPTIONED")
     chunks_json = _append_stage_suffix(captioned_json, "CHUNKED")
+    tagged_json = _append_stage_suffix(chunks_json, "TAGGED")
 
     return MinerUArtifacts(
         base_dir=resolved_content.parent,
@@ -496,6 +499,7 @@ def infer_artifacts(
         patched_json=patched_json,
         captioned_json=captioned_json,
         chunks_json=chunks_json,
+        tagged_json=tagged_json,
     )
 
 
@@ -551,6 +555,7 @@ def main(argv: list[str] | None = None) -> None:
         print(f"patched_json={artifacts.patched_json}")
         print(f"captioned_json={artifacts.captioned_json}")
         print(f"chunks_json={artifacts.chunks_json}")
+        print(f"tagged_json={artifacts.tagged_json}")
 
 
 if __name__ == "__main__":

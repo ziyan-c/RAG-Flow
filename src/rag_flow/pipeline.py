@@ -23,8 +23,9 @@ from .preprocessing.image_descriptions import add_image_descriptions
 from .preprocessing.small_icons import add_small_icon_text
 from .sectioning import write_sectioned_json
 from .source_paths import source_name_for_pdf, source_root_from_input_path
+from .tagging import write_tagged_chunks
 
-INGEST_STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "indexing")
+INGEST_STAGES = ("parsing", "sectioning", "patching", "captioning", "chunking", "tagging", "indexing")
 ONLINE_QA_STAGES = ("retrieval", "answering")
 STAGES = INGEST_STAGES
 VLM_STAGES = {"patching", "captioning"}
@@ -47,6 +48,15 @@ def _stage_slice(from_stage: str, to_stage: str) -> tuple[str, ...]:
     if start > end:
         raise ValueError("--from-stage cannot come after --to-stage")
     return STAGES[start : end + 1]
+
+
+def _configured_stage_slice(config: AppConfig, from_stage: str, to_stage: str) -> tuple[str, ...]:
+    selected = _stage_slice(from_stage, to_stage)
+    if config.tagging.enabled:
+        return selected
+    if from_stage == "tagging" or to_stage == "tagging":
+        raise ValueError("The tagging stage is disabled. Set RAG_FLOW_TAGGING_ENABLED=1 to run it.")
+    return tuple(stage for stage in selected if stage != "tagging")
 
 
 def _print_stage(stage_name: str, output_path: Path | None, *, dry_run: bool, skipped: bool) -> None:
@@ -80,7 +90,7 @@ def run_ingest(
     patch_concurrency: int | None = None,
     patch_checkpoint_interval: int | None = None,
 ) -> MinerUArtifacts:
-    selected_stages = _stage_slice(from_stage, to_stage)
+    selected_stages = _configured_stage_slice(config, from_stage, to_stage)
     source_pdf = Path(pdf_path or config.mineru.input_path)
     source_name = source_name_for_pdf(
         source_pdf,
@@ -187,12 +197,13 @@ def run_ingest(
 
     def index_vectors() -> None:
         mode = config.indexing.mode.strip().lower()
+        chunks_for_indexing = artifacts.tagged_json if config.tagging.enabled else artifacts.chunks_json
         if mode not in {"text", "both"}:
             raise ValueError("RAG_FLOW_INDEX_MODE must be one of: text, both")
         if mode in {"text", "both"}:
             upsert_text_vectors(
                 config,
-                artifacts.chunks_json,
+                chunks_for_indexing,
                 batch_size=config.indexing.text_batch_size,
             )
         if mode == "both":
@@ -200,16 +211,30 @@ def run_ingest(
                 config,
                 pdf_path=source_pdf,
                 source_name=source_name,
-                chunks_path=artifacts.chunks_json,
+                chunks_path=chunks_for_indexing,
                 batch_size=config.indexing.visual_batch_size,
                 dpi=config.indexing.visual_dpi,
             )
+
+    def tag_pages() -> None:
+        stats = write_tagged_chunks(
+            chunks_json=artifacts.chunks_json,
+            output_json=artifacts.tagged_json,
+            source_pdf=source_pdf,
+            source_name=source_name,
+            source_root=source_root or config.paths.source_root or source_root_from_input_path(config.mineru.input_path),
+            require_metadata=True,
+        )
+        print(f"Tagged {stats.tagged_count}/{stats.chunk_count} chunks at {artifacts.tagged_json}")
+        if stats.missing_metadata_count:
+            print(f"  chunks without document metadata: {stats.missing_metadata_count}")
 
     stages = {
         "sectioning": Stage("sectioning", artifacts.sectioned_json, recover_sections),
         "patching": Stage("patching", artifacts.patched_json, patch_icons),
         "captioning": Stage("captioning", artifacts.captioned_json, caption_images),
         "chunking": Stage("chunking", artifacts.chunks_json, chunk_pages),
+        "tagging": Stage("tagging", artifacts.tagged_json, tag_pages),
         "indexing": Stage("indexing", None, index_vectors),
     }
 

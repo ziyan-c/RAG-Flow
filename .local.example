@@ -18,6 +18,9 @@ RAG_FLOW_SECTIONED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-t
 RAG_FLOW_PATCHED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED.json
 RAG_FLOW_CAPTIONED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED.json
 RAG_FLOW_CHUNKS_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json
+RAG_FLOW_TAGGED_JSON=.local/CUSTOM_DATA/pdfs/output/example-product/example-technical-manual/auto/example-technical-manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED_TAGGED.json
+
+RAG_FLOW_TAGGING_ENABLED=0
 
 RAG_FLOW_DB_PATH=.local/CUSTOM_DATA/qdrant-db
 RAG_FLOW_COLLECTION=technical-manuals

@@ -38,6 +38,14 @@ PAYLOAD_INDEX_SPECS = (
     ("page_indices", "integer"),
     ("chunk_id", "keyword"),
     ("section_title", "keyword"),
+    ("filename", "keyword"),
+    ("product_families", "keyword"),
+    ("product_subfamilies", "keyword"),
+    ("doc_type", "keyword"),
+    ("version", "keyword"),
+    ("models", "keyword"),
+    ("language", "keyword"),
+    ("topic_tags", "keyword"),
 )
 
 
@@ -219,6 +227,10 @@ def load_chunks(path: str | Path) -> list[dict[str, Any]]:
         return json.load(f)
 
 
+def default_chunks_path(config: AppConfig) -> Path:
+    return config.paths.tagged_json if config.tagging.enabled else config.paths.chunks_json
+
+
 def upsert_text_vectors(
     config: AppConfig,
     chunks_path: str | Path | None = None,
@@ -231,7 +243,7 @@ def upsert_text_vectors(
         raise ValueError("batch_size must be positive")
 
     ensure_collection(config)
-    chunks = load_chunks(chunks_path or config.paths.chunks_json)
+    chunks = load_chunks(chunks_path or default_chunks_path(config))
     documents = [chunk["chunk_content"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
 
@@ -428,7 +440,7 @@ def upsert_colpali_vectors(
         page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
         try:
             page_payloads = _page_payloads_from_chunks(
-                load_chunks(chunks_path or config.paths.chunks_json),
+                load_chunks(chunks_path or default_chunks_path(config)),
                 source_name=resolved_source_name,
             )
         except (FileNotFoundError, json.JSONDecodeError):
@@ -531,14 +543,15 @@ def main(argv: list[str] | None = None) -> None:
     config = AppConfig.from_env()
     parser = argparse.ArgumentParser(description="Build or inspect the Qdrant manual index.")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    default_chunks = default_chunks_path(config)
 
     text_parser = subparsers.add_parser("text", help="Upsert dense and sparse text vectors.")
-    text_parser.add_argument("--chunks", default=str(config.paths.chunks_json))
+    text_parser.add_argument("--chunks", default=str(default_chunks))
     text_parser.add_argument("--batch-size", type=int, default=config.indexing.text_batch_size)
 
     visual_parser = subparsers.add_parser("visual", help="Upsert ColPali visual vectors.")
     visual_parser.add_argument("--pdf", default=str(config.paths.source_pdf))
-    visual_parser.add_argument("--chunks", default=str(config.paths.chunks_json))
+    visual_parser.add_argument("--chunks", default=str(default_chunks))
     visual_parser.add_argument("--source-name", help="Source PDF name stored in visual payloads.")
     visual_parser.add_argument(
         "--source-root",

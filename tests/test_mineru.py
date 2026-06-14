@@ -4,6 +4,7 @@ import json
 from contextlib import contextmanager
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 from rag_flow.config import (
     AppConfig,
@@ -13,6 +14,7 @@ from rag_flow.config import (
     PatchingConfig,
     ChunkingConfig,
     IndexingConfig,
+    TaggingConfig,
     PathsConfig,
     RetrievalConfig,
     ServerConfig,
@@ -44,6 +46,7 @@ def make_config(tmp_path: Path, *, command: str = "mineru", input_path: Path | N
             patched_json=base_dir / "manual_content_list_SECTIONED_PATCHED.json",
             captioned_json=base_dir / "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json",
             chunks_json=base_dir / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
+            tagged_json=base_dir / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED_TAGGED.json",
             db_path=tmp_path / "qdrant",
             collection_name="manuals",
         ),
@@ -245,6 +248,9 @@ def test_infer_artifacts_from_discovered_content_list(tmp_path):
     assert artifacts.chunks_json == (
         content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"
     )
+    assert artifacts.tagged_json == (
+        content_json.parent / "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED_TAGGED.json"
+    )
 
 
 def test_find_content_json_ignores_other_pdf_outputs(tmp_path):
@@ -306,7 +312,7 @@ def test_run_ingest_sectioning_stage_recovers_pdf_outline(tmp_path):
     assert audit["stats"]["section_event_count"] == 1
 
 
-def test_run_ingest_default_runs_through_indexing(tmp_path, monkeypatch):
+def test_run_ingest_default_runs_through_indexing_without_tagging(tmp_path, monkeypatch):
     config = make_config(tmp_path)
     config.paths.base_dir.mkdir(parents=True)
     config.paths.content_json.write_text("[]", encoding="utf-8")
@@ -342,6 +348,11 @@ def test_run_ingest_default_runs_through_indexing(tmp_path, monkeypatch):
     def fake_write_chunks(chunks, output_path):
         Path(output_path).write_text(json.dumps(chunks), encoding="utf-8")
 
+    def fake_tag(**kwargs):
+        calls.append(("tagging", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text(Path(kwargs["chunks_json"]).read_text(encoding="utf-8"), encoding="utf-8")
+        return SimpleNamespace(metadata_yaml=None, chunk_count=1, tagged_count=0, missing_metadata_count=0)
+
     def fake_index(config_arg, chunks_path, *, batch_size):
         calls.append(("indexing", Path(chunks_path), batch_size))
 
@@ -351,11 +362,13 @@ def test_run_ingest_default_runs_through_indexing(tmp_path, monkeypatch):
     monkeypatch.setattr("rag_flow.pipeline.add_image_descriptions", fake_caption)
     monkeypatch.setattr("rag_flow.pipeline.create_chunks", fake_create_chunks)
     monkeypatch.setattr("rag_flow.pipeline.write_chunks", fake_write_chunks)
+    monkeypatch.setattr("rag_flow.pipeline.write_tagged_chunks", fake_tag)
     monkeypatch.setattr("rag_flow.pipeline.upsert_text_vectors", fake_index)
 
     artifacts = run_ingest(config)
 
     assert artifacts.chunks_json.exists()
+    assert not artifacts.tagged_json.exists()
     assert [call[0] for call in calls] == [
         "sectioning",
         "server-enter",
@@ -365,6 +378,96 @@ def test_run_ingest_default_runs_through_indexing(tmp_path, monkeypatch):
         "chunking",
         "indexing",
     ]
+    assert calls[-1] == ("indexing", artifacts.chunks_json, config.indexing.text_batch_size)
+
+
+def test_run_ingest_enabled_tagging_runs_before_indexing(tmp_path, monkeypatch):
+    config = replace(make_config(tmp_path), tagging=TaggingConfig(enabled=True))
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+    calls = []
+
+    @contextmanager
+    def fake_managed_model_server(config_arg, kind):
+        calls.append(("server-enter", kind))
+        yield
+        calls.append(("server-exit", kind))
+
+    class FakeSectioningResult:
+        stats = {"section_event_count": 0}
+
+    def fake_section(**kwargs):
+        calls.append(("sectioning", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+        Path(kwargs["audit_json"]).write_text("{}", encoding="utf-8")
+        return FakeSectioningResult()
+
+    def fake_patch(**kwargs):
+        calls.append(("patching", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_caption(**kwargs):
+        calls.append(("captioning", Path(kwargs["output_json"])))
+        Path(kwargs["output_json"]).write_text("[]", encoding="utf-8")
+
+    def fake_create_chunks(*args, **kwargs):
+        calls.append(("chunking",))
+        return [{"chunk_content": "hello", "metadata": {"source_relpath": "manual.pdf", "page_idx": 0}}]
+
+    def fake_write_chunks(chunks, output_path):
+        Path(output_path).write_text(json.dumps(chunks), encoding="utf-8")
+
+    def fake_tag(**kwargs):
+        calls.append(("tagging", Path(kwargs["output_json"]), kwargs["require_metadata"]))
+        Path(kwargs["output_json"]).write_text(Path(kwargs["chunks_json"]).read_text(encoding="utf-8"), encoding="utf-8")
+        return SimpleNamespace(metadata_yaml=tmp_path / "source" / "metadata.yml", chunk_count=1, tagged_count=1, missing_metadata_count=0)
+
+    def fake_index(config_arg, chunks_path, *, batch_size):
+        calls.append(("indexing", Path(chunks_path), batch_size))
+
+    monkeypatch.setattr("rag_flow.pipeline.managed_model_server", fake_managed_model_server)
+    monkeypatch.setattr("rag_flow.pipeline.write_sectioned_json", fake_section)
+    monkeypatch.setattr("rag_flow.pipeline.add_small_icon_text", fake_patch)
+    monkeypatch.setattr("rag_flow.pipeline.add_image_descriptions", fake_caption)
+    monkeypatch.setattr("rag_flow.pipeline.create_chunks", fake_create_chunks)
+    monkeypatch.setattr("rag_flow.pipeline.write_chunks", fake_write_chunks)
+    monkeypatch.setattr("rag_flow.pipeline.write_tagged_chunks", fake_tag)
+    monkeypatch.setattr("rag_flow.pipeline.upsert_text_vectors", fake_index)
+
+    artifacts = run_ingest(config)
+
+    assert artifacts.chunks_json.exists()
+    assert artifacts.tagged_json.exists()
+    assert [call[0] for call in calls] == [
+        "sectioning",
+        "server-enter",
+        "patching",
+        "captioning",
+        "server-exit",
+        "chunking",
+        "tagging",
+        "indexing",
+    ]
+    assert calls[-2] == ("tagging", artifacts.tagged_json, True)
+    assert calls[-1] == ("indexing", artifacts.tagged_json, config.indexing.text_batch_size)
+
+
+def test_run_ingest_rejects_explicit_tagging_when_disabled(tmp_path):
+    config = make_config(tmp_path)
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+
+    try:
+        run_ingest(
+            config,
+            from_stage="tagging",
+            to_stage="tagging",
+            skip_existing=False,
+        )
+    except ValueError as exc:
+        assert "RAG_FLOW_TAGGING_ENABLED=1" in str(exc)
+    else:
+        raise AssertionError("Expected disabled explicit tagging stage to fail")
 
 
 def test_run_ingest_uses_pdf_override_for_chunk_source(tmp_path):
@@ -589,6 +692,39 @@ def test_run_ingest_indexing_both_mode_passes_current_chunks_to_visual(tmp_path,
     assert calls == [
         ("text", artifacts.chunks_json, 11),
         ("visual", artifacts.chunks_json, 12, 220),
+    ]
+
+
+def test_run_ingest_enabled_tagging_indexing_both_uses_tagged_chunks(tmp_path, monkeypatch):
+    config = replace(
+        make_config(tmp_path),
+        indexing=IndexingConfig(mode="both", text_batch_size=11, visual_batch_size=12, visual_dpi=220),
+        tagging=TaggingConfig(enabled=True),
+    )
+    config.paths.base_dir.mkdir(parents=True)
+    config.paths.content_json.write_text("[]", encoding="utf-8")
+
+    calls = []
+
+    def fake_text(config_arg, chunks_path, *, batch_size):
+        calls.append(("text", Path(chunks_path), batch_size))
+
+    def fake_visual(config_arg, **kwargs):
+        calls.append(("visual", Path(kwargs["chunks_path"]), kwargs["batch_size"], kwargs["dpi"]))
+
+    monkeypatch.setattr("rag_flow.pipeline.upsert_text_vectors", fake_text)
+    monkeypatch.setattr("rag_flow.pipeline.upsert_colpali_vectors", fake_visual)
+
+    artifacts = run_ingest(
+        config,
+        from_stage="indexing",
+        to_stage="indexing",
+        skip_existing=False,
+    )
+
+    assert calls == [
+        ("text", artifacts.tagged_json, 11),
+        ("visual", artifacts.tagged_json, 12, 220),
     ]
 
 

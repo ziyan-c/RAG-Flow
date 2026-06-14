@@ -40,6 +40,7 @@ def make_config(
             patched_json=tmp_path / "patched.json",
             captioned_json=tmp_path / "captioned.json",
             chunks_json=tmp_path / "chunks.json",
+            tagged_json=tmp_path / "tagged.json",
             db_path=tmp_path / "qdrant",
             collection_name="manuals",
         ),

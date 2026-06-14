@@ -145,6 +145,21 @@ def test_default_stage_paths_follow_source_name(tmp_path, monkeypatch):
     assert config.paths.patched_json.name == "manual_content_list_SECTIONED_PATCHED.json"
     assert config.paths.captioned_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED.json"
     assert config.paths.chunks_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"
+    assert config.paths.tagged_json.name == "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED_TAGGED.json"
+    assert config.tagging.enabled is False
+
+
+def test_tagging_enabled_reads_local_env(tmp_path, monkeypatch):
+    env_file = tmp_path / ".local" / "rag-flow.env"
+    env_file.parent.mkdir()
+    env_file.write_text("RAG_FLOW_TAGGING_ENABLED=1\n", encoding="utf-8")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("RAG_FLOW_ENV_FILE", raising=False)
+
+    config = AppConfig.from_env()
+
+    assert config.tagging.enabled is True
 
 
 def test_default_workspace_paths_are_local_project_dirs(tmp_path, monkeypatch):

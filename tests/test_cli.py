@@ -240,6 +240,19 @@ def test_chunk_view_command_delegates_to_chunking_view_main(monkeypatch):
     ]
 
 
+def test_tag_command_delegates_to_tagging_main(monkeypatch):
+    calls: list[list[str]] = []
+
+    import rag_flow.tagging
+
+    monkeypatch.setenv("RAG_FLOW_DISABLE_ENV_REEXEC", "1")
+    monkeypatch.setattr(rag_flow.tagging, "main", lambda argv: calls.append(argv))
+
+    cli.main(["tag", "--chunks", "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"])
+
+    assert calls == [["--chunks", "manual_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json"]]
+
+
 def test_module_help_is_forwarded(monkeypatch):
     calls: list[list[str]] = []
 

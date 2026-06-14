@@ -8,7 +8,9 @@ flowchart LR
   MinerU --> Icons["small_icons.py"]
   Icons --> Captions["image_descriptions.py"]
   Captions --> Chunks["chunking.py"]
-  Chunks --> TextIndex["Dense + sparse vectors"]
+  Chunks --> Tags["tagging.py optional"]
+  Tags --> TextIndex["Dense + sparse vectors"]
+  Chunks --> TextIndex
   PDF --> VisualIndex["ColPali page vectors"]
   TextIndex --> Qdrant["Qdrant collection"]
   VisualIndex --> Qdrant

@@ -129,6 +129,7 @@ class PathsConfig:
     patched_json: Path
     captioned_json: Path
     chunks_json: Path
+    tagged_json: Path
     db_path: Path
     collection_name: str
     source_root: Path | None = None
@@ -236,6 +237,11 @@ class ChunkingConfig:
 
 
 @dataclass(frozen=True)
+class TaggingConfig:
+    enabled: bool = False
+
+
+@dataclass(frozen=True)
 class IndexingConfig:
     mode: str = "text"
     text_batch_size: int = 256
@@ -279,6 +285,7 @@ class AppConfig:
     chunking: ChunkingConfig
     qdrant: QdrantConfig = field(default_factory=QdrantConfig)
     indexing: IndexingConfig = field(default_factory=IndexingConfig)
+    tagging: TaggingConfig = field(default_factory=TaggingConfig)
     vlm_server: ModelServerConfig = field(default_factory=ModelServerConfig)
     llm_server: ModelServerConfig = field(default_factory=ModelServerConfig)
 
@@ -325,6 +332,10 @@ class AppConfig:
             chunks_json=env.path(
                 "RAG_FLOW_CHUNKS_JSON",
                 base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED.json",
+            ),
+            tagged_json=env.path(
+                "RAG_FLOW_TAGGED_JSON",
+                base_dir / f"{source_stem}_content_list_SECTIONED_PATCHED_CAPTIONED_CHUNKED_TAGGED.json",
             ),
             db_path=env.path("RAG_FLOW_DB_PATH", DEFAULT_DB_PATH),
             collection_name=env.get("RAG_FLOW_COLLECTION", "technical-manuals"),
@@ -428,6 +439,10 @@ class AppConfig:
             min_tokens=env.int("RAG_FLOW_CHUNK_MIN_TOKENS", 150),
         )
 
+        tagging = TaggingConfig(
+            enabled=env.bool("RAG_FLOW_TAGGING_ENABLED", False),
+        )
+
         indexing = IndexingConfig(
             mode=env.get("RAG_FLOW_INDEX_MODE", "text").strip().lower(),
             text_batch_size=env.int("RAG_FLOW_INDEX_TEXT_BATCH_SIZE", 256),
@@ -489,6 +504,7 @@ class AppConfig:
             patching=patching,
             captioning=captioning,
             chunking=chunking,
+            tagging=tagging,
             indexing=indexing,
             vlm_server=vlm_server,
             llm_server=llm_server,
