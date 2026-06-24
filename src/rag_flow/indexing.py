@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import uuid
 from collections import defaultdict
 from pathlib import Path
@@ -45,8 +46,23 @@ PAYLOAD_INDEX_SPECS = (
     ("version", "keyword"),
     ("models", "keyword"),
     ("language", "keyword"),
+    ("lifecycle_status", "keyword"),
     ("topic_tags", "keyword"),
 )
+
+
+def _env_truthy(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer, got {raw!r}") from exc
 
 
 def point_id(source_name: str, page_idx: int, chunk_id: str | int | None = None) -> str:
@@ -237,39 +253,71 @@ def upsert_text_vectors(
     *,
     batch_size: int = TEXT_INDEX_BATCH_SIZE,
 ) -> None:
-    from qdrant_client import models
-
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
 
+    resolved_chunks_path = chunks_path or default_chunks_path(config)
+    print(f"Loading chunks from {resolved_chunks_path}", flush=True)
+    chunks = load_chunks(resolved_chunks_path)
+    print(f"Loaded {len(chunks)} chunks", flush=True)
+    if not chunks:
+        print(f"Skipping text indexing because chunk JSON is empty: {resolved_chunks_path}", flush=True)
+        return
+
+    from qdrant_client import models
+
     ensure_collection(config)
-    chunks = load_chunks(chunks_path or default_chunks_path(config))
     documents = [chunk["chunk_content"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
 
+    print(f"Initializing dense embedding model: {config.models.dense_model}", flush=True)
     dense_model = create_dense_embedding(config.models.dense_model, vector_size=config.models.dense_vector_size)
+    print(f"Initializing sparse embedding model: {config.models.sparse_model}", flush=True)
     sparse_model = create_sparse_embedding(config.models.sparse_model)
+    print("Embedding models initialized", flush=True)
+    if documents and _env_truthy("RAG_FLOW_INDEX_WARMUP_DENSE"):
+        print("Warming up dense embedding model with one chunk", flush=True)
+        _ = list(dense_model.embed(documents[:1]))
+        print("Dense embedding warm-up complete", flush=True)
     client = create_qdrant_client(config)
     try:
-        source_names = {
-            cleanup_name
-            for meta in metadatas
-            if _payload_source_relpath(meta)
-            for cleanup_name in _source_cleanup_names(_payload_source_relpath(meta))
-        }
-        _delete_existing_points_for_sources(
-            client,
-            config.paths.collection_name,
-            models,
-            source_names=source_names,
-            visual=False,
-        )
+        if _env_truthy("RAG_FLOW_INDEX_SKIP_SOURCE_CLEANUP"):
+            print("Skipped source cleanup before text indexing", flush=True)
+        else:
+            source_names = {
+                cleanup_name
+                for meta in metadatas
+                if _payload_source_relpath(meta)
+                for cleanup_name in _source_cleanup_names(_payload_source_relpath(meta))
+            }
+            _delete_existing_points_for_sources(
+                client,
+                config.paths.collection_name,
+                models,
+                source_names=source_names,
+                visual=False,
+            )
         upserted_chunks = 0
+        progress_every = max(1, _env_int("RAG_FLOW_INDEX_PROGRESS_EVERY", 25))
+        upsert_wait = not os.environ.get("RAG_FLOW_QDRANT_UPSERT_WAIT") or _env_truthy("RAG_FLOW_QDRANT_UPSERT_WAIT")
+        print(f"Qdrant upsert wait={upsert_wait}", flush=True)
+        total_batches = (len(documents) + batch_size - 1) // batch_size
         for start in range(0, len(documents), batch_size):
+            batch_number = start // batch_size + 1
             batch_documents = documents[start : start + batch_size]
             batch_metadatas = metadatas[start : start + batch_size]
+            if batch_number == 1 or batch_number % progress_every == 0:
+                print(
+                    f"Embedding batch {batch_number}/{total_batches} "
+                    f"({len(batch_documents)} chunks)",
+                    flush=True,
+                )
             dense_embeddings = list(dense_model.embed(batch_documents))
+            if batch_number == 1 or batch_number % progress_every == 0:
+                print(f"Dense embeddings ready for batch {batch_number}/{total_batches}", flush=True)
             sparse_embeddings = list(sparse_model.embed(batch_documents))
+            if batch_number == 1 or batch_number % progress_every == 0:
+                print(f"Sparse embeddings ready for batch {batch_number}/{total_batches}", flush=True)
 
             points = []
             for doc, meta, dense_vec, sparse_vec in zip(
@@ -300,8 +348,14 @@ def upsert_text_vectors(
                     )
                 )
 
-            client.upsert(collection_name=config.paths.collection_name, points=points)
+            client.upsert(collection_name=config.paths.collection_name, points=points, wait=upsert_wait)
             upserted_chunks += len(points)
+            if batch_number == 1 or batch_number % progress_every == 0 or upserted_chunks == len(documents):
+                print(
+                    f"Upserted {upserted_chunks}/{len(documents)} text points "
+                    f"(batch {batch_number}/{total_batches})",
+                    flush=True,
+                )
 
         print(f"Upserted {upserted_chunks} text points into {config.paths.collection_name}")
     finally:
@@ -405,6 +459,16 @@ def upsert_colpali_vectors(
     batch_size: int = VISUAL_INDEX_BATCH_SIZE,
     dpi: int = VISUAL_INDEX_DPI,
 ) -> None:
+    resolved_chunks_path = chunks_path or default_chunks_path(config)
+    try:
+        chunks_for_payloads = load_chunks(resolved_chunks_path)
+    except (FileNotFoundError, json.JSONDecodeError):
+        chunks_for_payloads = None
+    else:
+        if not chunks_for_payloads:
+            print(f"Skipping visual indexing because chunk JSON is empty: {resolved_chunks_path}", flush=True)
+            return
+
     import torch
     from colpali_engine.models import ColPali, ColPaliProcessor
     from pdf2image import convert_from_path, pdfinfo_from_path
@@ -438,13 +502,13 @@ def upsert_colpali_vectors(
 
     try:
         page_count = int(pdfinfo_from_path(str(resolved_pdf_path))["Pages"])
-        try:
+        if chunks_for_payloads is None:
+            page_payloads = {}
+        else:
             page_payloads = _page_payloads_from_chunks(
-                load_chunks(chunks_path or default_chunks_path(config)),
+                chunks_for_payloads,
                 source_name=resolved_source_name,
             )
-        except (FileNotFoundError, json.JSONDecodeError):
-            page_payloads = {}
         _delete_existing_points_for_sources(
             client,
             config.paths.collection_name,

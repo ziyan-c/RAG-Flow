@@ -32,6 +32,32 @@ def _env_int(name: str, default: int) -> int:
     return value
 
 
+def _env_optional_int(name: str) -> int | None:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return None
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer, got {raw!r}") from exc
+    return value
+
+
+def _fastembed_runtime_kwargs() -> dict[str, Any]:
+    kwargs: dict[str, Any] = {}
+    threads = _env_optional_int("RAG_FLOW_FASTEMBED_THREADS")
+    if threads is not None:
+        kwargs["threads"] = threads
+    providers = tuple(
+        provider.strip()
+        for provider in os.environ.get("RAG_FLOW_FASTEMBED_PROVIDERS", "").split(",")
+        if provider.strip()
+    )
+    if providers:
+        kwargs["providers"] = providers
+    return kwargs
+
+
 def _batched(items: Sequence[str], batch_size: int) -> Iterator[list[str]]:
     for start in range(0, len(items), batch_size):
         yield list(items[start : start + batch_size])
@@ -51,7 +77,7 @@ class FastEmbedDenseEmbedding:
     def __init__(self, model_name: str):
         from fastembed import TextEmbedding
 
-        self.model = TextEmbedding(model_name)
+        self.model = TextEmbedding(model_name, **_fastembed_runtime_kwargs())
 
     def embed(self, documents: Iterable[str]) -> Iterable[Any]:
         return self.model.embed(documents)
@@ -64,7 +90,7 @@ class FastEmbedSparseEmbedding:
     def __init__(self, model_name: str):
         from fastembed import SparseTextEmbedding
 
-        self.model = SparseTextEmbedding(model_name)
+        self.model = SparseTextEmbedding(model_name, **_fastembed_runtime_kwargs())
 
     def embed(self, documents: Iterable[str]) -> Iterable[Any]:
         return self.model.embed(documents)

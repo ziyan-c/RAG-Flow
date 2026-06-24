@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 from contextlib import ExitStack
 from dataclasses import dataclass
 from pathlib import Path
@@ -71,6 +72,15 @@ def _has_later_vlm_stage(selected_stages: tuple[str, ...], index: int) -> bool:
     return any(stage in VLM_STAGES for stage in selected_stages[index + 1 :])
 
 
+def _is_vlm_context_overflow(exc: BaseException) -> bool:
+    message = str(exc).lower()
+    return "context length" in message and (
+        "longer than" in message
+        or "exceeds" in message
+        or "requested token count" in message
+    )
+
+
 def run_ingest(
     config: AppConfig,
     *,
@@ -132,27 +142,37 @@ def run_ingest(
         )
 
     def patch_icons() -> None:
-        add_small_icon_text(
-            input_json=artifacts.sectioned_json,
-            output_json=artifacts.patched_json,
-            pdf_path=source_pdf,
-            llm_base_url=config.models.vlm_base_url,
-            llm_api_key=config.models.vlm_api_key,
-            llm_model=config.models.vlm_model,
-            dpi=config.patching.dpi,
-            batch_size=config.patching.batch_size if patch_batch_size is None else patch_batch_size,
-            concurrency=config.patching.concurrency if patch_concurrency is None else patch_concurrency,
-            max_new_tokens=config.patching.max_new_tokens if patch_max_new_tokens is None else patch_max_new_tokens,
-            llm_timeout=config.patching.llm_timeout,
-            page_window_size=config.patching.page_window_size,
-            checkpoint_interval=(
-                config.patching.checkpoint_interval
-                if patch_checkpoint_interval is None
-                else patch_checkpoint_interval
-            ),
-            write_patching_view=write_patching_view,
-            patching_view_pdf=patching_view_pdf,
-        )
+        try:
+            add_small_icon_text(
+                input_json=artifacts.sectioned_json,
+                output_json=artifacts.patched_json,
+                pdf_path=source_pdf,
+                llm_base_url=config.models.vlm_base_url,
+                llm_api_key=config.models.vlm_api_key,
+                llm_model=config.models.vlm_model,
+                dpi=config.patching.dpi,
+                batch_size=config.patching.batch_size if patch_batch_size is None else patch_batch_size,
+                concurrency=config.patching.concurrency if patch_concurrency is None else patch_concurrency,
+                max_new_tokens=config.patching.max_new_tokens if patch_max_new_tokens is None else patch_max_new_tokens,
+                llm_timeout=config.patching.llm_timeout,
+                page_window_size=config.patching.page_window_size,
+                checkpoint_interval=(
+                    config.patching.checkpoint_interval
+                    if patch_checkpoint_interval is None
+                    else patch_checkpoint_interval
+                ),
+                write_patching_view=write_patching_view,
+                patching_view_pdf=patching_view_pdf,
+            )
+        except RuntimeError as exc:
+            if not _is_vlm_context_overflow(exc):
+                raise
+            artifacts.patched_json.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(artifacts.sectioned_json, artifacts.patched_json)
+            print(
+                "Skipping small-icon patching because the VLM request exceeded "
+                f"the context length; copied sectioned JSON to {artifacts.patched_json}"
+            )
 
     def caption_images() -> None:
         add_image_descriptions(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -12,6 +13,8 @@ from rag_flow.indexing import (
     _source_cleanup_names,
     _visual_page_payload,
     point_id,
+    upsert_colpali_vectors,
+    upsert_text_vectors,
     uses_idf_modifier,
     visual_point_id,
 )
@@ -184,3 +187,38 @@ def test_delete_existing_points_for_sources_separates_text_and_visual(tmp_path):
     )
     records, _ = client.scroll(collection_name="c", limit=10, with_payload=True)
     assert records == []
+
+
+def test_text_indexing_skips_empty_chunk_json_before_qdrant_or_models(tmp_path, monkeypatch, capsys):
+    chunks_path = tmp_path / "empty_TAGGED.json"
+    chunks_path.write_text("[]", encoding="utf-8")
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("empty chunks should skip indexing before setup")
+
+    monkeypatch.setattr("rag_flow.indexing.ensure_collection", fail_if_called)
+    monkeypatch.setattr("rag_flow.indexing.create_dense_embedding", fail_if_called)
+    monkeypatch.setattr("rag_flow.indexing.create_sparse_embedding", fail_if_called)
+    monkeypatch.setattr("rag_flow.indexing.create_qdrant_client", fail_if_called)
+
+    upsert_text_vectors(SimpleNamespace(), chunks_path, batch_size=8)
+
+    captured = capsys.readouterr()
+    assert "Loaded 0 chunks" in captured.out
+    assert "Skipping text indexing because chunk JSON is empty" in captured.out
+
+
+def test_visual_indexing_skips_empty_chunk_json_before_qdrant_or_colpali(tmp_path, monkeypatch, capsys):
+    chunks_path = tmp_path / "empty_TAGGED.json"
+    chunks_path.write_text(json.dumps([]), encoding="utf-8")
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("empty chunks should skip visual indexing before setup")
+
+    monkeypatch.setattr("rag_flow.indexing.ensure_collection", fail_if_called)
+    monkeypatch.setattr("rag_flow.indexing.create_qdrant_client", fail_if_called)
+
+    upsert_colpali_vectors(SimpleNamespace(), pdf_path=tmp_path / "manual.pdf", chunks_path=chunks_path)
+
+    captured = capsys.readouterr()
+    assert "Skipping visual indexing because chunk JSON is empty" in captured.out

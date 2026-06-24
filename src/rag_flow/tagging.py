@@ -10,6 +10,7 @@ from .config import AppConfig
 from .source_paths import normalize_source_name, source_name_for_pdf, source_root_from_input_path
 
 METADATA_FILENAME = "metadata.yml"
+METADATA_SIDECAR_SUFFIX = "_metadata.yml"
 DOCUMENT_METADATA_FIELDS = (
     "filename",
     "product_families",
@@ -18,6 +19,7 @@ DOCUMENT_METADATA_FIELDS = (
     "version",
     "models",
     "language",
+    "lifecycle_status",
     "topic_tags",
 )
 
@@ -142,8 +144,55 @@ def _parse_document_metadata_yaml(path: str | Path) -> dict[str, dict[str, Any]]
     return documents
 
 
+def _parse_sidecar_metadata_yaml(path: str | Path) -> tuple[str, dict[str, Any]]:
+    metadata_path = Path(path)
+    metadata: dict[str, Any] = {}
+    current_field: str | None = None
+
+    for line_number, raw_line in enumerate(metadata_path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw_line.rstrip()
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+
+        if not line.startswith(" "):
+            if ":" not in line:
+                raise ValueError(f"{metadata_path}:{line_number}: expected field mapping")
+            field, raw_value = line.split(":", 1)
+            field = field.strip()
+            value_text = raw_value.strip()
+            if value_text:
+                metadata[field] = _parse_scalar(value_text)
+                current_field = None
+            else:
+                metadata[field] = []
+                current_field = field
+            continue
+
+        if line.startswith("  - "):
+            if current_field is None:
+                raise ValueError(f"{metadata_path}:{line_number}: list item appears outside a list field")
+            current_value = metadata.setdefault(current_field, [])
+            if not isinstance(current_value, list):
+                raise ValueError(f"{metadata_path}:{line_number}: field {current_field!r} is not a list")
+            current_value.append(_parse_scalar(line.strip()[2:].strip()))
+            continue
+
+        raise ValueError(f"{metadata_path}:{line_number}: unsupported sidecar metadata YAML shape")
+
+    source_relpath = metadata.get("source_relpath")
+    if not isinstance(source_relpath, str) or not source_relpath.strip():
+        raise ValueError(f"{metadata_path}: missing required source_relpath")
+    return normalize_source_name(source_relpath), metadata
+
+
 def load_document_metadata(path: str | Path) -> dict[str, dict[str, Any]]:
-    documents = _parse_document_metadata_yaml(path)
+    metadata_path = Path(path)
+    text = metadata_path.read_text(encoding="utf-8")
+    if any(line.rstrip() == "documents:" for line in text.splitlines()):
+        documents = _parse_document_metadata_yaml(metadata_path)
+    else:
+        source_relpath, metadata = _parse_sidecar_metadata_yaml(metadata_path)
+        documents = {source_relpath: metadata}
     normalized: dict[str, dict[str, Any]] = {}
     for source_relpath, metadata in documents.items():
         normalized[source_relpath] = {field: metadata.get(field) for field in DOCUMENT_METADATA_FIELDS}
@@ -159,23 +208,11 @@ def metadata_yaml_for_source(
 ) -> Path | None:
     if metadata_yaml:
         return Path(metadata_yaml)
-    if source_root:
-        return Path(source_root) / METADATA_FILENAME
     if not source_pdf:
         return None
 
     pdf_path = Path(source_pdf).expanduser()
-    relpath = normalize_source_name(source_name or pdf_path.name)
-    for parent in pdf_path.parents:
-        candidate = parent / relpath
-        try:
-            if candidate == pdf_path or candidate.resolve() == pdf_path.resolve():
-                return parent / METADATA_FILENAME
-        except OSError:
-            if candidate == pdf_path:
-                return parent / METADATA_FILENAME
-
-    return pdf_path.parent / METADATA_FILENAME
+    return pdf_path.with_name(f"{pdf_path.stem}{METADATA_SIDECAR_SUFFIX}")
 
 
 def tag_chunks(

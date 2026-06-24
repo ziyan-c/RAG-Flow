@@ -77,15 +77,17 @@ heavier multimodal modes only when their cost is justified.
 | `patching` | Sectioned JSON + source PDF | `*_SECTIONED_PATCHED.json`, patching view PDF | Repair small inline icons and missing visual symbols. |
 | `captioning` | Sectioned patched JSON | `*_SECTIONED_PATCHED_CAPTIONED.json`, captioning view PDF | Describe real image blocks and record whether images may be needed during answering. |
 | `chunking` | Captioned JSON | `*_CHUNKED.json`, chunking view PDF | Build source-aware, section-aware retrieval units. |
-| `tagging` | Chunked JSON + source `metadata.yml` | `*_CHUNKED_TAGGED.json` | Optional stage controlled by `RAG_FLOW_TAGGING_ENABLED`; add document-level product, model, version, language, and topic tags to chunk payloads. |
+| `tagging` | Chunked JSON + adjacent `*_metadata.yml` sidecar | `*_CHUNKED_TAGGED.json` | Optional stage controlled by `RAG_FLOW_TAGGING_ENABLED`; add human-curated document-level product, model, version, language, and topic tags to chunk payloads. |
 | `indexing` | Chunked or tagged JSON + PDF pages | Qdrant text and optional visual points | Store dense text, sparse text, and optional ColPali page vectors. Uses tagged JSON only when tagging is enabled. |
 | `retrieval` | Qdrant collection + query | Ranked chunks, context text, optional image URLs | Build the final answer payload under explicit top-k and token rules. |
 | `answering` | Retrieval final output | LLM answer, usage, latency, review inputs | Generate source-grounded answers without silently choosing extra evidence. |
 
 `tagging` is disabled by default. When `RAG_FLOW_TAGGING_ENABLED=0`, indexing
-uses `*_CHUNKED.json` directly and the source root does not need `metadata.yml`.
-When `RAG_FLOW_TAGGING_ENABLED=1`, the pipeline requires `metadata.yml` in the
-source root and indexes `*_CHUNKED_TAGGED.json`.
+uses `*_CHUNKED.json` directly and the source tree does not need sidecar
+metadata. When `RAG_FLOW_TAGGING_ENABLED=1`, the pipeline requires a
+`<pdf-stem>_metadata.yml` file next to each source PDF and indexes
+`*_CHUNKED_TAGGED.json`. The root `metadata.yml` is reserved for schema and
+controlled-vocabulary notes, not per-document tagging.
 
 ## Evaluation Snapshot
 
@@ -290,7 +292,7 @@ src/rag_flow/
   sectioning.py             PDF-outline section annotation
   preprocessing/            Small-icon patching, image captioning, view PDFs
   chunking.py               Section-aware and token-window chunking
-  tagging.py                Source metadata.yml tagging for chunk payloads
+  tagging.py                Adjacent sidecar metadata tagging for chunk payloads
   indexing.py               Qdrant text and visual indexing
   retrieval.py              Hybrid retrieval and context assembly
   api.py                    FastAPI retrieval service

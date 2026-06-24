@@ -815,6 +815,45 @@ def image_description_response_format() -> dict[str, Any]:
     }
 
 
+def repair_image_description_json(
+    *,
+    client: Any,
+    model: str,
+    raw_content: str,
+    max_tokens: int,
+) -> ImageDescriptionLLMOutput:
+    raw_excerpt = raw_content
+    if len(raw_excerpt) > 12000:
+        raw_excerpt = raw_excerpt[:10000].rstrip() + "\n...[middle truncated]...\n" + raw_excerpt[-1500:].lstrip()
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Repair this invalid JSON from a technical image-captioning model. "
+                    "Return only a valid JSON object matching the required response schema. "
+                    "Condense image_description_vlm to at most 1200 characters. "
+                    "If a required field is missing, infer a conservative value from the text. "
+                    "Do not add Markdown or explanations.\n\n"
+                    f"Invalid JSON/text:\n{raw_excerpt}"
+                ),
+            }
+        ],
+        max_tokens=max(800, min(max_tokens, 2000)),
+        temperature=0,
+        response_format=image_description_response_format(),
+        extra_body={
+            "chat_template_kwargs": {"enable_thinking": False},
+            "separate_reasoning": True,
+        },
+    )
+    repaired_content = response.choices[0].message.content
+    if not repaired_content:
+        raise RuntimeError("Captioning JSON repair returned an empty response.")
+    return ImageDescriptionLLMOutput.model_validate_json(repaired_content)
+
+
 def request_image_description_from_llm(
     *,
     client: Any,
@@ -862,7 +901,15 @@ def request_image_description_from_llm(
     content = response.choices[0].message.content
     if not content:
         raise RuntimeError("Captioning LLM returned an empty response.")
-    return ImageDescriptionLLMOutput.model_validate_json(content)
+    try:
+        return ImageDescriptionLLMOutput.model_validate_json(content)
+    except Exception:
+        return repair_image_description_json(
+            client=client,
+            model=model,
+            raw_content=content,
+            max_tokens=max_tokens,
+        )
 
 
 def _caption_request_metric_base(req: dict[str, Any], *, batch_id: int) -> dict[str, Any]:
@@ -1141,8 +1188,8 @@ def add_image_descriptions(
                 "technical terms, feature names, and purpose. Do not repeat unrelated context or "
                 "invent details that are not visible. Explain what the interface, diagram, chart, "
                 "or screenshot shows, the visible labels or states that matter, and why it appears "
-                "in the manual. Keep the description concise when the image is simple, but be "
-                "complete for dense technical diagrams or UI screenshots.\n\n"
+                "in the manual. Keep image_description_vlm concise: at most 1200 characters, "
+                "usually 2-5 sentences. Prefer compact, factual wording over exhaustive OCR.\n\n"
                 "Also judge whether the generated text description is enough for a future answering "
                 "LLM, or whether the original image should be supplied alongside the description. "
                 "Use `caption_only` when the text description should be enough, `image_optional` "

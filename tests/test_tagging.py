@@ -13,25 +13,26 @@ def test_tagged_json_path_appends_tagged_suffix(tmp_path):
 
 def test_write_tagged_chunks_adds_document_metadata(tmp_path):
     source_root = tmp_path / "source"
-    source_root.mkdir()
-    metadata_yaml = source_root / "metadata.yml"
+    source_pdf = source_root / "DSS" / "manual.pdf"
+    source_pdf.parent.mkdir(parents=True)
+    source_pdf.write_bytes(b"%PDF-1.4\n")
+    metadata_yaml = source_pdf.with_name("manual_metadata.yml")
     metadata_yaml.write_text(
         """
 metadata_schema_version: 1
-documents:
-  "DSS/manual.pdf":
-    filename: "manual.pdf"
-    product_families:
-      - dss
-    product_subfamilies:
-      - dss_professional
-    doc_type: user_manual
-    version: "8.7.0"
-    models: []
-    language: en
-    topic_tags:
-      - add_device
-      - onvif
+source_relpath: "DSS/manual.pdf"
+filename: "manual.pdf"
+product_families:
+  - dss
+product_subfamilies:
+  - dss_professional
+doc_type: user_manual
+version: "8.7.0"
+models: []
+language: en
+topic_tags:
+  - add_device
+  - onvif
 """.lstrip(),
         encoding="utf-8",
     )
@@ -56,7 +57,7 @@ documents:
     stats = write_tagged_chunks(
         chunks_json=chunks_json,
         output_json=output_json,
-        source_pdf=source_root / "DSS" / "manual.pdf",
+        source_pdf=source_pdf,
         source_name="DSS/manual.pdf",
     )
 
@@ -103,12 +104,38 @@ def test_write_tagged_chunks_requires_metadata_when_enabled(tmp_path):
             require_metadata=True,
         )
     except FileNotFoundError as exc:
-        assert "metadata.yml" in str(exc)
+        assert "manual_metadata.yml" in str(exc)
     else:
         raise AssertionError("Expected missing metadata.yml to fail when metadata is required")
 
 
-def test_load_document_metadata_reads_curated_shape(tmp_path):
+def test_load_document_metadata_reads_sidecar_shape(tmp_path):
+    metadata_yaml = tmp_path / "manual_metadata.yml"
+    metadata_yaml.write_text(
+        """
+metadata_schema_version: 1
+source_relpath: "manual.pdf"
+filename: "manual.pdf"
+product_families: []
+product_subfamilies: []
+doc_type: datasheet
+version: null
+models:
+  - IPC-HDBW3849R1-ZAS-PV-PRO
+language: en
+topic_tags:
+  - installation
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    documents = load_document_metadata(metadata_yaml)
+
+    assert documents["manual.pdf"]["version"] is None
+    assert documents["manual.pdf"]["models"] == ["IPC-HDBW3849R1-ZAS-PV-PRO"]
+
+
+def test_load_document_metadata_still_reads_legacy_documents_shape(tmp_path):
     metadata_yaml = tmp_path / "metadata.yml"
     metadata_yaml.write_text(
         """
@@ -120,16 +147,13 @@ documents:
     product_subfamilies: []
     doc_type: datasheet
     version: null
-    models:
-      - IPC-HDBW3849R1-ZAS-PV-PRO
+    models: []
     language: en
-    topic_tags:
-      - installation
+    topic_tags: []
 """.lstrip(),
         encoding="utf-8",
     )
 
     documents = load_document_metadata(metadata_yaml)
 
-    assert documents["manual.pdf"]["version"] is None
-    assert documents["manual.pdf"]["models"] == ["IPC-HDBW3849R1-ZAS-PV-PRO"]
+    assert documents["manual.pdf"]["doc_type"] == "datasheet"
